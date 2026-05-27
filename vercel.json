@@ -1,5 +1,16 @@
 {
   "rewrites": [
-    { "source": "/api/nhl", "destination": "/api/nhl.js" }
+    {
+      "source": "/api/nhl",
+      "destination": "/api/nhl.js"
+    },
+    {
+      "source": "/api/lottery",
+      "destination": "/api/lottery.js"
+    },
+    {
+      "source": "/api/draft",
+      "destination": "/api/draft.js"
+    }
   ]
 }

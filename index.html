@@ -147,7 +147,7 @@
               <option value="name">Sort by Name</option>
             </select>
           </div>
-          <div class="hint">Each player now has one Draft button. It sends the player straight to the team selected above.</div>
+          <div class="hint">Official draft room: select your team, wait for your snake-draft turn, then Sign Player.</div>
           <div id="draftBoardTable" class="table-wrap draft-board-wrap"></div>
         </article>
       </div>
@@ -269,7 +269,7 @@
         <div>
           <p class="eyebrow">Enter Draft Room</p>
           <h2 id="oldManTitle">Which old man are you?</h2>
-          <p class="muted">Pick your name. Every Draft button will send players straight to that roster. You can still switch teams inside the room for texted picks.</p>
+          <p class="muted">Pick your name. Every Sign Player button will send players straight to that roster. You can still switch teams inside the room for texted picks.</p>
         </div>
         <button id="closeOldManModal" class="small-btn">Close</button>
       </div>
@@ -669,6 +669,507 @@
     })();
   </script>
 
+
+
+  <script>
+    (function () {
+      "use strict";
+
+      var KEY = "custom-hockey-pool-v38-official-snake";
+      var OWNERS = [
+        { id: "nick", name: "Nick", teamName: "Nick" },
+        { id: "chris", name: "Chris", teamName: "Chris" },
+        { id: "andrew", name: "Andrew", teamName: "Andrew" },
+        { id: "tyler", name: "Tyler", teamName: "Tyler" },
+        { id: "scott", name: "Scott", teamName: "Scott" }
+      ];
+      var activeOwnerId = localStorage.getItem("custom-hockey-pool-active-owner") || "";
+      var players = [];
+      var playersLoaded = false;
+      var playersLoading = false;
+      var draftState = null;
+      var pollTimer = null;
+      var sortKey = "fantasyPoints";
+      var sortDirection = "desc";
+      var adminMode = true; // You wanted to be able to switch teams and pick for people if needed.
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+          return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+        });
+      }
+      function toast(message) {
+        var t = document.getElementById("toast");
+        if (!t) return;
+        t.textContent = message;
+        t.classList.add("show");
+        setTimeout(function () { t.classList.remove("show"); }, 2600);
+      }
+      function currentSeasonId() {
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = now.getMonth() + 1;
+        var start = month >= 7 ? year : year - 1;
+        return String(start) + String(start + 1);
+      }
+      function defaultState() {
+        return {
+          owners: OWNERS.slice(),
+          draftOrder: null,
+          picks: [],
+          updatedAt: new Date().toISOString()
+        };
+      }
+      function getLocalState() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.owners) && Array.isArray(parsed.picks)) return parsed;
+          }
+        } catch (e) {}
+        return defaultState();
+      }
+      function saveLocalState(state) {
+        draftState = state;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      }
+      function ownerById(id) {
+        return (draftState && draftState.owners || OWNERS).find(function (o) { return String(o.id) === String(id); }) || null;
+      }
+      function lotteryOrderFromPageOrStorage() {
+        // Prefer the current inline lottery script storage if present.
+        var possibleKeys = [
+          "custom-hockey-pool-v30-popout-emergency",
+          "custom-hockey-pool-v29-inline-emergency",
+          "custom-hockey-pool-v28-hard-bypass-fallback"
+        ];
+        for (var k = 0; k < possibleKeys.length; k++) {
+          try {
+            var raw = localStorage.getItem(possibleKeys[k]);
+            if (!raw) continue;
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length === OWNERS.length) {
+              return parsed.lotteryOrder.slice();
+            }
+          } catch (e) {}
+        }
+        var rows = Array.from(document.querySelectorAll("#lotteryResults .mini-item strong, #lotteryResults .inline-lottery-summary div b"));
+        if (rows.length === OWNERS.length) {
+          var names = rows.map(function (el) { return el.textContent.trim().toLowerCase(); });
+          var mapped = names.map(function (name) {
+            var owner = OWNERS.find(function (o) { return o.id === name || o.teamName.toLowerCase() === name; });
+            return owner && owner.id;
+          }).filter(Boolean);
+          if (mapped.length === OWNERS.length) return mapped;
+        }
+        return null;
+      }
+      function officialOrder() {
+        if (!draftState) draftState = getLocalState();
+        if (Array.isArray(draftState.draftOrder) && draftState.draftOrder.length === draftState.owners.length) {
+          return draftState.draftOrder.slice();
+        }
+        var lottery = lotteryOrderFromPageOrStorage();
+        if (lottery && lottery.length === OWNERS.length) {
+          draftState.draftOrder = lottery.slice();
+          saveLocalState(draftState);
+          saveDraftShared();
+          return lottery.slice();
+        }
+        return null;
+      }
+      function rosterLimit() {
+        var input = document.getElementById("totalRosterSize");
+        var n = Number(input && input.value || 15);
+        return Number.isFinite(n) && n > 0 ? n : 15;
+      }
+      function totalPickLimit() {
+        return (draftState?.owners?.length || OWNERS.length) * rosterLimit();
+      }
+      function snakeOwnerForPickNumber(pickNumber) {
+        var order = officialOrder();
+        if (!order || !order.length) return null;
+        var teamCount = order.length;
+        var roundIndex = Math.floor((pickNumber - 1) / teamCount);
+        var slotIndex = (pickNumber - 1) % teamCount;
+        var ownerIndex = roundIndex % 2 === 0 ? slotIndex : teamCount - 1 - slotIndex;
+        return {
+          ownerId: order[ownerIndex],
+          round: roundIndex + 1,
+          slot: slotIndex + 1,
+          ownerIndex: ownerIndex
+        };
+      }
+      function currentPickInfo() {
+        if (!draftState) draftState = getLocalState();
+        var pickNumber = (draftState.picks || []).length + 1;
+        var info = snakeOwnerForPickNumber(pickNumber);
+        if (!info) return null;
+        return Object.assign({ pickNumber: pickNumber }, info);
+      }
+      function draftedIds() {
+        return new Set((draftState?.picks || []).map(function (p) { return String(p.player.id); }));
+      }
+      function fantasyPoints(p) {
+        // Read scoring from editable rules where possible.
+        var g = Number(document.getElementById("goalPoints")?.value || 3);
+        var a = Number(document.getElementById("assistPoints")?.value || 2);
+        var win = Number(document.getElementById("goalieWinPoints")?.value || 4);
+        var so = Number(document.getElementById("goalieShutoutPoints")?.value || 3);
+        if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * win) + (Number(p.goalieShutouts || 0) * so));
+        return Math.round((Number(p.goals || 0) * g) + (Number(p.assists || 0) * a));
+      }
+      function normalizeSkater(row) {
+        var first = row.firstName || row.firstNameDefault || "";
+        var last = row.lastName || row.lastNameDefault || "";
+        var name = row.skaterFullName || row.playerFullName || row.fullName || (first + " " + last).trim();
+        return {
+          id: String(row.playerId || row.skaterId || row.id || name),
+          name: name,
+          position: row.positionCode || row.position || "F",
+          nhlTeam: row.teamAbbrevs || row.teamAbbrev || row.team || "",
+          gamesPlayed: Number(row.gamesPlayed || 0),
+          goals: Number(row.goals || 0),
+          assists: Number(row.assists || 0),
+          points: Number(row.points || 0),
+          goalieWins: 0,
+          goalieShutouts: 0
+        };
+      }
+      function normalizeGoalie(row) {
+        var first = row.firstName || row.firstNameDefault || "";
+        var last = row.lastName || row.lastNameDefault || "";
+        var name = row.goalieFullName || row.playerFullName || row.fullName || (first + " " + last).trim();
+        return {
+          id: String(row.playerId || row.goalieId || row.id || name) + "-G",
+          name: name,
+          position: "G",
+          nhlTeam: row.teamAbbrevs || row.teamAbbrev || row.team || "",
+          gamesPlayed: Number(row.gamesPlayed || 0),
+          goals: 0,
+          assists: 0,
+          points: 0,
+          goalieWins: Number(row.wins || 0),
+          goalieShutouts: Number(row.shutouts || 0)
+        };
+      }
+      async function fetchRealNhlPlayers() {
+        if (playersLoading) return;
+        if (playersLoaded && players.length) return;
+        playersLoading = true;
+        paintPlayersLoading();
+        try {
+          var season = currentSeasonId();
+          var payload;
+          try {
+            var res = await fetch("/api/nhl?season=" + encodeURIComponent(season) + "&gameType=2&limit=1000", { cache: "no-store" });
+            if (!res.ok) throw new Error("API HTTP " + res.status);
+            payload = await res.json();
+          } catch (proxyError) {
+            // Direct NHL fallback for local testing.
+            var skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "points", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
+            var goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "wins", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
+            var skaters = await fetch("https://api.nhle.com/stats/rest/en/skater/summary?" + skaterParams.toString()).then(function (r) { return r.json(); });
+            var goalies = await fetch("https://api.nhle.com/stats/rest/en/goalie/summary?" + goalieParams.toString()).then(function (r) { return r.json(); });
+            payload = { skaters: skaters.data || [], goalies: goalies.data || [] };
+          }
+          var map = new Map();
+          (payload.skaters || []).map(normalizeSkater).filter(function (p) { return p.name; }).forEach(function (p) { map.set(p.id + "-" + p.position, p); });
+          (payload.goalies || []).map(normalizeGoalie).filter(function (p) { return p.name; }).forEach(function (p) { map.set(p.id, p); });
+          players = Array.from(map.values()).map(function (p) {
+            p.fantasyPoints = fantasyPoints(p);
+            return p;
+          });
+          playersLoaded = true;
+          toast("Loaded " + players.length + " real NHL players.");
+          renderOfficialDraftRoom();
+        } catch (error) {
+          console.error(error);
+          paintPlayersError();
+          toast("NHL API pull failed. Real players could not load.");
+        } finally {
+          playersLoading = false;
+        }
+      }
+      function availablePlayers() {
+        var taken = draftedIds();
+        var posFilter = document.getElementById("draftPositionFilter")?.value || "all";
+        var list = players.filter(function (p) { return !taken.has(String(p.id)); });
+        if (posFilter === "F") list = list.filter(function (p) { return ["C","L","R","LW","RW","F"].includes(p.position); });
+        else if (posFilter !== "all") list = list.filter(function (p) { return p.position === posFilter; });
+        return list.sort(function (a, b) {
+          var av = sortKey === "name" ? String(a.name).toLowerCase() : Number(sortKey === "fantasyPoints" ? fantasyPoints(a) : a[sortKey] || 0);
+          var bv = sortKey === "name" ? String(b.name).toLowerCase() : Number(sortKey === "fantasyPoints" ? fantasyPoints(b) : b[sortKey] || 0);
+          var dir = sortDirection === "asc" ? 1 : -1;
+          if (typeof av === "string") return av.localeCompare(String(bv)) * dir;
+          return (av - bv) * dir || a.name.localeCompare(b.name);
+        }).slice(0, 150);
+      }
+      async function loadDraftShared() {
+        try {
+          var res = await fetch("/api/draft", { cache: "no-store" });
+          if (!res.ok) throw new Error("draft API HTTP " + res.status);
+          var data = await res.json();
+          if (data.draft && Array.isArray(data.draft.picks)) {
+            draftState = Object.assign(defaultState(), data.draft);
+            saveLocalState(draftState);
+            return true;
+          }
+        } catch (e) {}
+        draftState = getLocalState();
+        return false;
+      }
+      async function saveDraftShared() {
+        if (!draftState) draftState = getLocalState();
+        draftState.updatedAt = new Date().toISOString();
+        saveLocalState(draftState);
+        try {
+          await fetch("/api/draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draftState)
+          });
+        } catch (e) {}
+      }
+      function showDraftChooser() {
+        var panel = document.getElementById("draftBoardPanel");
+        if (!panel) return;
+        panel.classList.add("active");
+        var board = document.getElementById("draftBoardTable");
+        if (!board) return;
+        board.innerHTML =
+          '<div class="official-draft-entry">' +
+            '<h3>Which team are you drafting for?</h3>' +
+            '<p>Select your team to enter the live snake draft room. You can switch teams if someone needs help.</p>' +
+            '<div class="official-owner-grid">' + OWNERS.map(function (o) {
+              return '<button type="button" class="official-owner-btn" data-official-owner="' + esc(o.id) + '">' + esc(o.teamName) + '</button>';
+            }).join("") + '</div>' +
+          '</div>';
+      }
+      function enterAsOwner(ownerId) {
+        activeOwnerId = ownerId;
+        localStorage.setItem("custom-hockey-pool-active-owner", ownerId);
+        toast("Entered Draft Room as " + (ownerById(ownerId)?.teamName || ownerId) + ".");
+        renderOfficialDraftRoom();
+        fetchRealNhlPlayers();
+      }
+      function paintPlayersLoading() {
+        var board = document.getElementById("draftBoardTable");
+        if (!board) return;
+        board.innerHTML =
+          '<div class="official-draft-loading">' +
+            '<strong>Pulling real NHL players…</strong>' +
+            '<span>Loading Goals, Assists, Points, Fantasy Points, and sorting controls.</span>' +
+          '</div>';
+      }
+      function paintPlayersError() {
+        var board = document.getElementById("draftBoardTable");
+        if (!board) return;
+        board.innerHTML =
+          '<div class="official-draft-loading error">' +
+            '<strong>Real NHL API pull failed.</strong>' +
+            '<span>No demo players are being shown. Click below to retry the real NHL API.</span>' +
+            '<button type="button" class="primary" id="officialRetryPlayers">Retry Real NHL Pull</button>' +
+          '</div>';
+      }
+      function renderOfficialDraftRoom() {
+        if (!draftState) draftState = getLocalState();
+        var info = document.getElementById("draftInfoRoom");
+        var boardPanel = document.getElementById("draftBoardPanel");
+        if (info) info.classList.remove("active");
+        if (boardPanel) boardPanel.classList.add("active");
+        document.querySelectorAll("[data-draft-room]").forEach(function (btn) {
+          btn.classList.toggle("active", btn.dataset.draftRoom === "board");
+        });
+        if (!activeOwnerId) {
+          showDraftChooser();
+          return;
+        }
+        if (!officialOrder()) {
+          var boardNoLottery = document.getElementById("draftBoardTable");
+          if (boardNoLottery) {
+            boardNoLottery.innerHTML =
+              '<div class="official-draft-loading error">' +
+                '<strong>Lottery required before drafting.</strong>' +
+                '<span>Run the Draft Lottery first. The lottery locks the draft order, then the snake draft room opens.</span>' +
+              '</div>';
+          }
+          return;
+        }
+        if (!playersLoaded) {
+          paintPlayersLoading();
+          fetchRealNhlPlayers();
+          return;
+        }
+        var board = document.getElementById("draftBoardTable");
+        if (!board) return;
+        var pick = currentPickInfo();
+        var activeOwner = ownerById(activeOwnerId);
+        var currentOwner = pick ? ownerById(pick.ownerId) : null;
+        var canPick = Boolean(pick && activeOwner && activeOwner.id === pick.ownerId);
+        var maxReached = (draftState.picks || []).length >= totalPickLimit();
+        var order = officialOrder() || [];
+        var sequencePreview = [];
+        for (var i = 0; i < Math.min(15, totalPickLimit()); i++) {
+          var info = snakeOwnerForPickNumber(i + 1);
+          var o = info && ownerById(info.ownerId);
+          if (o) sequencePreview.push('<span class="' + (i + 1 === (draftState.picks.length + 1) ? 'current' : '') + '">' + (i + 1) + '. ' + esc(o.teamName) + '</span>');
+        }
+        var rows = availablePlayers().map(function (p, index) {
+          var fp = fantasyPoints(p);
+          var disabled = !canPick || maxReached;
+          var title = maxReached ? "Draft complete" : (!canPick ? "Not your pick" : "Sign Player");
+          return '<tr>' +
+            '<td class="rank-cell">' + (index + 1) + '</td>' +
+            '<td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>' + esc(p.name) + '</strong><div class="meta">' + esc(p.position) + ' • ' + esc(p.nhlTeam) + ' • Real NHL API</div></div>' +
+            '<button type="button" class="draft-player-btn single-draft-btn contract-draft-btn official-sign-btn" data-sign-player="' + esc(p.id) + '" ' + (disabled ? 'disabled' : '') + ' title="' + esc(title) + '"><span class="contract-icon" aria-hidden="true"><i></i></span><span>Sign Player</span></button></div></td>' +
+            '<td>' + (p.gamesPlayed || 0) + '</td>' +
+            '<td>' + (p.goals || 0) + '</td>' +
+            '<td>' + (p.assists || 0) + '</td>' +
+            '<td>' + (p.points || 0) + '</td>' +
+            '<td><strong>' + fp + '</strong></td>' +
+          '</tr>';
+        }).join("");
+        board.innerHTML =
+          '<div class="official-draft-top">' +
+            '<div><span class="eyebrow">Official Snake Draft</span><h3>' + (maxReached ? 'Draft Complete' : ('Pick ' + pick.pickNumber + ' • Round ' + pick.round)) + '</h3><p>Current pick: <strong>' + esc(currentOwner ? currentOwner.teamName : '—') + '</strong></p></div>' +
+            '<div class="official-active-box"><label>Drafting as</label><select id="officialActiveOwnerSelect">' + (draftState.owners || OWNERS).map(function (o) { return '<option value="' + esc(o.id) + '" ' + (o.id === activeOwnerId ? 'selected' : '') + '>' + esc(o.teamName) + '</option>'; }).join("") + '</select><small>' + (canPick ? 'You are on the clock.' : (adminMode ? 'Admin switch enabled. Change team to pick for someone.' : 'Watch mode until your pick.')) + '</small></div>' +
+          '</div>' +
+          '<div class="official-order-strip">' + sequencePreview.join("") + '</div>' +
+          '<div class="official-draft-controls">' +
+            '<select id="officialPositionFilter"><option value="all">All positions</option><option value="F">Forwards</option><option value="C">C</option><option value="L">L/LW</option><option value="R">R/RW</option><option value="D">D</option><option value="G">G</option></select>' +
+            '<select id="officialSortSelect"><option value="fantasyPoints">Sort by Fantasy Pts</option><option value="points">Sort by NHL Pts</option><option value="goals">Sort by Goals</option><option value="assists">Sort by Assists</option><option value="gamesPlayed">Sort by GP</option><option value="name">Sort by Name</option></select>' +
+            '<button type="button" id="officialRefreshPlayers">Refresh Real NHL Players</button>' +
+          '</div>' +
+          '<table class="draft-table official-player-table"><thead><tr><th>#</th><th>Player</th><th>GP</th><th>Goals</th><th>Assists</th><th>Pts</th><th>Fantasy Pts</th></tr></thead><tbody>' + (rows || '<tr><td colspan="7">No available players left.</td></tr>') + '</tbody></table>' +
+          '<div class="official-pick-history"><h4>Signed Players</h4>' + ((draftState.picks || []).slice().reverse().map(function (p) { return '<div><span>' + p.pickNumber + '</span><strong>' + esc(p.player.name) + '</strong><em>' + esc(p.ownerName) + '</em></div>'; }).join("") || '<p>No players signed yet.</p>') + '</div>';
+        var officialPosition = document.getElementById("officialPositionFilter");
+        if (officialPosition) {
+          officialPosition.value = document.getElementById("draftPositionFilter")?.value || "all";
+          officialPosition.addEventListener("change", function () {
+            var old = document.getElementById("draftPositionFilter");
+            if (old) old.value = officialPosition.value;
+            renderOfficialDraftRoom();
+          });
+        }
+        var officialSort = document.getElementById("officialSortSelect");
+        if (officialSort) {
+          officialSort.value = sortKey;
+          officialSort.addEventListener("change", function () {
+            sortKey = officialSort.value;
+            sortDirection = sortKey === "name" ? "asc" : "desc";
+            renderOfficialDraftRoom();
+          });
+        }
+        var ownerSelect = document.getElementById("officialActiveOwnerSelect");
+        if (ownerSelect) ownerSelect.addEventListener("change", function () { enterAsOwner(ownerSelect.value); });
+        var refresh = document.getElementById("officialRefreshPlayers");
+        if (refresh) refresh.addEventListener("click", function () { playersLoaded = false; players = []; fetchRealNhlPlayers(); });
+      }
+      async function signPlayer(playerId) {
+        if (!draftState) draftState = getLocalState();
+        var pick = currentPickInfo();
+        if (!pick) return toast("Run the lottery first to lock the draft order.");
+        if (activeOwnerId !== pick.ownerId) {
+          var current = ownerById(pick.ownerId);
+          return toast("It is " + (current?.teamName || "another team") + "'s pick. Switch teams if you are helping them.");
+        }
+        var player = players.find(function (p) { return String(p.id) === String(playerId); });
+        if (!player) return toast("That player is not available.");
+        if (draftedIds().has(String(player.id))) return toast("That player has already been signed.");
+        var owner = ownerById(pick.ownerId);
+        var signed = {
+          pickNumber: pick.pickNumber,
+          round: pick.round,
+          slot: pick.slot,
+          ownerId: pick.ownerId,
+          ownerName: owner ? owner.teamName : pick.ownerId,
+          timestamp: new Date().toISOString(),
+          player: {
+            id: String(player.id),
+            name: player.name,
+            position: player.position,
+            nhlTeam: player.nhlTeam,
+            gamesPlayed: player.gamesPlayed || 0,
+            goals: player.goals || 0,
+            assists: player.assists || 0,
+            points: player.points || 0,
+            fantasyPoints: fantasyPoints(player)
+          }
+        };
+        draftState.picks.push(signed);
+        saveLocalState(draftState);
+        await saveDraftShared();
+        toast("Signed " + player.name + " to " + signed.ownerName + ".");
+        renderOfficialDraftRoom();
+      }
+      async function resetOfficialDraft() {
+        draftState = getLocalState();
+        draftState.picks = [];
+        draftState.draftOrder = lotteryOrderFromPageOrStorage() || null;
+        saveLocalState(draftState);
+        try { await fetch("/api/draft", { method: "DELETE" }); } catch (e) {}
+        renderOfficialDraftRoom();
+        toast("Official draft reset.");
+      }
+      function startPolling() {
+        clearInterval(pollTimer);
+        pollTimer = setInterval(async function () {
+          if (!document.getElementById("draftBoardPanel")?.classList.contains("active")) return;
+          var before = JSON.stringify((draftState && draftState.picks || []).map(function (p) { return p.player.id; }));
+          await loadDraftShared();
+          var after = JSON.stringify((draftState && draftState.picks || []).map(function (p) { return p.player.id; }));
+          if (before !== after) renderOfficialDraftRoom();
+        }, 4500);
+      }
+      document.addEventListener("click", async function (event) {
+        var enter = event.target.closest && event.target.closest('[data-draft-room="board"]');
+        if (enter) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          await loadDraftShared();
+          if (!activeOwnerId) showDraftChooser();
+          else renderOfficialDraftRoom();
+          startPolling();
+          return;
+        }
+        var ownerBtn = event.target.closest && event.target.closest("[data-official-owner]");
+        if (ownerBtn) {
+          event.preventDefault();
+          enterAsOwner(ownerBtn.dataset.officialOwner);
+          return;
+        }
+        var sign = event.target.closest && event.target.closest("[data-sign-player]");
+        if (sign) {
+          event.preventDefault();
+          signPlayer(sign.dataset.signPlayer);
+          return;
+        }
+        var retry = event.target.closest && event.target.closest("#officialRetryPlayers");
+        if (retry) {
+          event.preventDefault();
+          fetchRealNhlPlayers();
+          return;
+        }
+        var reset = event.target.closest && event.target.closest("#resetDraftBtn");
+        if (reset) {
+          // Let old reset do its lottery/local work, then clear official shared draft too.
+          setTimeout(resetOfficialDraft, 250);
+        }
+      }, true);
+      window.addEventListener("load", function () {
+        draftState = getLocalState();
+        paintOfficialSmallStatus();
+      });
+      function paintOfficialSmallStatus() {
+        var results = document.getElementById("lotteryResults");
+        if (!results) return;
+        // Leave existing lottery display alone; this function is intentionally light.
+      }
+    })();
+  </script>
 
   <script type="module" src="assets/js/app.js"></script>
 </body>
