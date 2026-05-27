@@ -59,12 +59,21 @@ async function requestJson(url) {
 async function directStats(kind, seasonId, gameTypeId = 2) {
   const report = kind === 'goalies' ? 'goalie/summary' : 'skater/summary';
   const exp = encodeURIComponent(`seasonId=${seasonId} and gameTypeId=${gameTypeId}`);
-  const url = `https://api.nhle.com/stats/rest/en/${report}?limit=1000&sort=${kind === 'goalies' ? 'wins' : 'points'}&cayenneExp=${exp}`;
+  const params = new URLSearchParams({
+    isAggregate: 'false',
+    isGame: 'false',
+    start: '0',
+    limit: '1000',
+    sort: kind === 'goalies' ? 'wins' : 'points',
+    dir: 'desc',
+    cayenneExp: `seasonId=${seasonId} and gameTypeId=${gameTypeId}`
+  });
+  const url = `https://api.nhle.com/stats/rest/en/${report}?${params.toString()}`;
   return requestJson(url);
 }
 
 export async function fetchNhlStats(seasonId, gameTypeId = 2) {
-  const proxyUrl = `/api/nhl?season=${encodeURIComponent(seasonId)}&gameType=${encodeURIComponent(gameTypeId)}`;
+  const proxyUrl = `/api/nhl?season=${encodeURIComponent(seasonId)}&gameType=${encodeURIComponent(gameTypeId)}&limit=1000`;
   let payload;
   try {
     payload = await requestJson(proxyUrl);
@@ -83,7 +92,7 @@ export async function fetchNhlStats(seasonId, gameTypeId = 2) {
   for (const player of players) deduped.set(`${player.id}-${player.position}`, player);
   return {
     source: payload.source || 'nhl-api',
-    fetchedAt: new Date().toISOString(),
+    fetchedAt: payload.fetchedAt || new Date().toISOString(),
     seasonId,
     gameTypeId,
     players: [...deduped.values()].sort((a, b) => a.name.localeCompare(b.name))

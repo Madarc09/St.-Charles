@@ -44,6 +44,9 @@ async function init() {
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
   bindEvents();
   renderAll();
+  if (!state.stats?.players?.length) {
+    setTimeout(() => refreshStats(), 350);
+  }
 }
 
 function deepMerge(target, source) {
@@ -104,10 +107,11 @@ async function refreshStats() {
     state.settings.lastUpdated = data.fetchedAt;
     save();
     renderAll();
-    toast(`Loaded ${data.players.length} NHL players.`);
+    showTab('draft');
+    toast(`Loaded ${data.players.length} NHL players. Draft board is ready.`);
   } catch (error) {
     console.error(error);
-    toast('NHL stats pull failed. You can still draft manual players.');
+    toast('NHL API pull failed. Try again after deploy or use manual players.');
   } finally {
     setRefreshDisabled(false);
   }
