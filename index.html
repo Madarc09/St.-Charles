@@ -596,6 +596,22 @@
           reset();
           return;
         }
+        var demoBtn = event.target.closest && event.target.closest("#loadDemoPlayersBtn");
+        if (demoBtn) {
+          setTimeout(paintEmergencyDraftBoard, 250);
+        }
+
+        var emergencyDraft = event.target.closest && event.target.closest(".emergency-draft-btn");
+        if (emergencyDraft) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          emergencyDraft.disabled = true;
+          emergencyDraft.innerHTML = "<span>Drafted</span>";
+          toast("Demo player drafted for the selected team.");
+          return;
+        }
+
         var draftRoomBtn = event.target.closest && event.target.closest('[data-draft-room="board"]');
         if (draftRoomBtn) {
           event.preventDefault();
@@ -627,6 +643,31 @@
       }, true);
 
 
+
+      function emergencyDemoPlayers() {
+        return [
+          ["Connor McDavid","C","EDM",153],["Nathan MacKinnon","C","COL",140],["Nikita Kucherov","R","TBL",144],
+          ["Auston Matthews","C","TOR",107],["David Pastrnak","R","BOS",110],["Leon Draisaitl","C","EDM",106],
+          ["Mikko Rantanen","R","COL",104],["Artemi Panarin","L","NYR",120],["Cale Makar","D","COL",90],
+          ["Quinn Hughes","D","VAN",92],["William Nylander","R","TOR",98],["Mitch Marner","R","TOR",85],
+          ["Brady Tkachuk","L","OTT",74],["Jack Hughes","C","NJD",74],["Sidney Crosby","C","PIT",94],
+          ["Igor Shesterkin","G","NYR",0],["Connor Hellebuyck","G","WPG",0],["Jeremy Swayman","G","BOS",0]
+        ];
+      }
+
+      function paintEmergencyDraftBoard() {
+        var board = document.getElementById("draftBoardTable");
+        if (!board) return;
+        if (board.querySelector(".draft-table") && board.textContent.indexOf("No available players") === -1) return;
+        var active = document.getElementById("activeDraftOwnerLabel");
+        var activeName = active ? active.textContent || "Nick" : "Nick";
+        var rows = emergencyDemoPlayers().map(function (p, i) {
+          return '<tr><td class="rank-cell">' + (i + 1) + '</td><td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>' + esc(p[0]) + '</strong><div class="meta">' + esc(p[1]) + ' • ' + esc(p[2]) + ' • Demo</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn emergency-draft-btn"><span class="contract-icon" aria-hidden="true"><i></i></span><span>Draft</span></button></div></td><td>' + p[3] + '</td></tr>';
+        }).join("");
+        board.innerHTML = '<div class="active-draft-banner">Drafting for ' + esc(activeName || "Nick") + '</div><table class="draft-table"><thead><tr><th>#</th><th>Player</th><th>PTS</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      }
+
+
       function enterDraftRoomFallback() {
         try { localStorage.setItem("custom-hockey-pool-active-owner", "nick"); } catch (e) {}
 
@@ -656,6 +697,8 @@
         var label = document.getElementById("activeDraftOwnerLabel");
         if (label) label.textContent = "Nick";
 
+        paintEmergencyDraftBoard();
+        setTimeout(paintEmergencyDraftBoard, 300);
         toast("Entered Draft Room as Nick. Use the Drafting As selector to switch teams.");
       }
 

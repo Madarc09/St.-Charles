@@ -3951,3 +3951,18 @@ body.lottery-running { overflow: hidden; }
   background:rgba(0,0,0,.24);
   font-weight:900;
 }
+
+
+/* v36 player board restore */
+#draftBoardTable{
+  min-height:180px;
+}
+#draftBoardTable .draft-table{
+  width:100%;
+}
+#draftBoardTable .draft-player-btn{
+  white-space:nowrap;
+}
+#draftBoardTable .active-draft-banner{
+  margin-bottom:10px;
+}
