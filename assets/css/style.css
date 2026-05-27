@@ -5749,3 +5749,18 @@ body.lottery-running { overflow: hidden; }
     content:"";
   }
 }
+
+
+/* V58 auto-enter Draft Room: removes 1-2-3 instruction gate */
+.auto-enter-fallback{
+  min-height:220px!important;
+  display:grid!important;
+  place-items:center!important;
+}
+.auto-enter-fallback .clean-loading-card{
+  width:min(520px,92vw);
+  text-align:center;
+}
+.auto-enter-fallback .v46-build-marker{
+  display:none;
+}

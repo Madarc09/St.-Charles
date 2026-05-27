@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V57 GOALIE BOARD LABELS -->
+  <!-- V58 AUTO ENTER DRAFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -41,47 +41,12 @@
 
     
     <section id="draft" class="panel clean-live-draft-shell">
-      <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V57 GOALIE BOARD LABELS</div>
-        <div class="clean-entry-stack clean-entry-stack-v51">
-          <div class="draft-step-card enter-step-card">
-            <div class="step-number">1</div>
-            <div>
-              <strong>Select Enter the Draft</strong>
-              <span>Start here. Press the big button below.</span>
-            </div>
-            <div class="arrow-hint arrow-left">➜</div>
-            <div class="arrow-hint arrow-right">⬅</div>
-          </div>
-          <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn enter-draft-main-btn" type="button">ENTER THE DRAFT</button>
-          <div class="draft-step-grid">
-            <div class="draft-step-card">
-              <div class="step-number">2</div>
-              <div>
-                <strong>Select team name</strong>
-                <span>Choose who you are drafting as.</span>
-              </div>
-            </div>
-            <div class="draft-step-card">
-              <div class="step-number">3</div>
-              <div>
-                <strong>Generate Players</strong>
-                <span>Press PULL NHL PLAYERS inside the draft room.</span>
-              </div>
-            </div>
-          </div>
-          <div id="compactLotterySummary" class="compact-lottery-summary">
-            <strong>Draft Lottery</strong>
-            <span id="compactLotteryStatus">LOTTERY NOT COMPLETED YET</span>
-            <div class="compact-lottery-actions">
-              <button class="primary" id="runLotteryBtn" type="button">RUN LOTTERY</button>
-              <button id="replayLotteryBtn" type="button" style="display:none">Watch Lottery Again</button>
-            </div>
-            <div id="lotteryStatus" class="visually-hidden">LOTTERY NOT COMPLETED YET</div>
-            <div id="lotteryResults" class="compact-lottery-results">
-              <div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>
-            </div>
-          </div>
+      <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
+        <div class="v46-build-marker">V58 AUTO ENTER DRAFT</div>
+        <div class="clean-loading-card">
+          <strong>Opening Draft Room…</strong>
+          <span>If this does not open automatically, press below.</span>
+          <button id="cleanEnterDraftBtn" class="primary" type="button">ENTER THE DRAFT</button>
         </div>
       </div>
 
@@ -477,6 +442,9 @@
       document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
       document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('active', p.id === tab); });
       document.body.dataset.activeTab = tab;
+      if (tab === 'draft') {
+        window.dispatchEvent(new CustomEvent('draft-tab-opened'));
+      }
     });
   </script>
 
@@ -2034,6 +2002,14 @@ const OWNERS = [
         renderRoom();
         startPolling();
       }
+      async function autoEnterDraftRoom() {
+        const draftPanel = document.getElementById("draft");
+        const room = document.getElementById("cleanDraftRoom");
+        if (!draftPanel || !draftPanel.classList.contains("active")) return;
+        if (room && !room.hidden) return;
+        await startRoom();
+      }
+
       async function refreshRoom() {
         await loadSharedDraft();
         renderRoom();
@@ -2107,7 +2083,14 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
           return;
         }
 }, true);
+      window.addEventListener("draft-tab-opened", () => {
+        setTimeout(autoEnterDraftRoom, 25);
+      });
+
       window.addEventListener("load", () => {
+        if (document.getElementById("draft")?.classList.contains("active")) {
+          setTimeout(autoEnterDraftRoom, 50);
+        }
         const pos = $("#cleanPositionFilter");
         const sort = $("#cleanSortSelect");
         function setSortOptionsForPosition() {
