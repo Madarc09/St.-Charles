@@ -4430,3 +4430,115 @@ body.lottery-running { overflow: hidden; }
     display:none;
   }
 }
+
+
+/* v41 roster limits + restored lottery page */
+.clean-entry-stack{
+  width:min(760px,94vw);
+  display:grid;
+  gap:18px;
+}
+.clean-entry-stack .clean-enter-draft-btn{
+  width:100%;
+}
+.lottery-entry-btn{
+  min-height:110px;
+  font-size:clamp(34px,6vw,76px);
+  color:#ffffff;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,.18),transparent 35%),
+    linear-gradient(135deg,#7d1f2d,#311015 60%,#020711);
+}
+.clean-lottery-room{
+  display:grid;
+  gap:16px;
+}
+.clean-lottery-card{
+  max-width:900px;
+  margin-inline:auto;
+  width:100%;
+}
+.roster-needs-topbar{
+  align-items:stretch;
+}
+.clean-roster-needs-panel{
+  flex:1;
+  width:100%;
+}
+.needs-placeholder{
+  display:grid;
+  gap:4px;
+  min-height:82px;
+  align-content:center;
+}
+.needs-placeholder strong{
+  color:#f5c35b;
+  font-size:1.25rem;
+}
+.needs-placeholder span{
+  color:#cbd7ea;
+}
+.needs-title{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.needs-title strong{
+  font-family:Impact,Haettenschweiler,"Arial Narrow Bold";
+  font-size:clamp(24px,3vw,42px);
+  letter-spacing:.05em;
+}
+.needs-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.needs-grid div{
+  border:1px solid rgba(245,195,91,.35);
+  border-radius:16px;
+  padding:12px;
+  background:rgba(0,0,0,.24);
+  display:grid;
+  gap:4px;
+}
+.needs-grid div.filled{
+  border-color:rgba(90,220,135,.5);
+  background:rgba(25,120,70,.20);
+}
+.needs-grid span{
+  color:#cbd7ea;
+  font-size:.82rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:900;
+}
+.needs-grid strong{
+  color:#f5c35b;
+  font-family:Impact,Haettenschweiler,"Arial Narrow Bold";
+  font-size:clamp(34px,5vw,64px);
+  line-height:.95;
+}
+.needs-grid div.filled strong{
+  color:#62e58f;
+}
+.needs-grid em{
+  font-style:normal;
+  color:#cbd7ea;
+  font-size:.82rem;
+}
+.clean-sign-btn:disabled span:last-child{
+  font-size:.78rem;
+}
+@media(max-width:820px){
+  .needs-grid{
+    grid-template-columns:1fr;
+  }
+  .clean-entry-stack{
+    gap:12px;
+  }
+  .lottery-entry-btn{
+    min-height:90px;
+  }
+}

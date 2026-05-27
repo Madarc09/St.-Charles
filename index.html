@@ -41,15 +41,54 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
+        <div class="clean-entry-stack">
+          <button id="cleanLotteryBtn" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
+          <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
+        </div>
+      </div>
+
+      <div id="cleanLotteryRoom" class="clean-lottery-room" hidden>
+        <div class="clean-draft-topbar">
+          <div>
+            <p class="eyebrow">Draft Lottery</p>
+            <h2>Set the official draft order</h2>
+            <p class="muted">Run the lottery first. Once the order is locked, the draft room uses it for the snake draft.</p>
+          </div>
+          <button id="cleanLotteryBackBtn" type="button">Back</button>
+        </div>
+
+        <article class="card clean-lottery-card">
+          <div class="lottery-machine">
+            <p class="eyebrow">Draft Lottery</p>
+            <h3>Basement Spy Lottery</h3>
+            <p class="muted">Equal-weight lottery. First run locks the order. After that, the button replays the same result until Reset Lottery is used.</p>
+            <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
+              <div class="lottery-puck spy-disc">64</div>
+              <div>
+                <span class="label">Mission Status</span>
+                <strong id="lotteryStatus">LOTTERY NOT COMPLETED YET</strong>
+              </div>
+            </div>
+            <div class="actions stack-sm lottery-actions">
+              <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
+              <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
+              <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
+              <button class="danger" id="cleanResetLotteryBtn" type="button">Reset Lottery</button>
+            </div>
+            <div id="lotteryResults" class="mini-list lottery-results">
+              <div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>
+            </div>
+          </div>
+        </article>
       </div>
 
       <div id="cleanDraftRoom" class="clean-draft-room" hidden>
-        <div class="clean-draft-topbar">
-          <div>
-            <p class="eyebrow">Official Live Snake Draft</p>
-            <h2>Draft Room</h2>
-            <p class="muted">Pick your team below. The board refreshes from shared draft state and removes signed players.</p>
+        <div class="clean-draft-topbar roster-needs-topbar">
+          <div id="cleanRosterNeedsPanel" class="clean-roster-needs-panel">
+            <div class="needs-placeholder">
+              <strong>Select a team to see roster needs.</strong>
+              <span>Limits: 6 forwards, 4 defense, 2 goalies</span>
+            </div>
           </div>
           <button id="cleanExitDraftBtn" type="button">Back</button>
         </div>
@@ -1172,6 +1211,54 @@
         if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
         return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
       }
+      const ROSTER_LIMITS = { F: 6, D: 4, G: 2 };
+      function positionBucket(position) {
+        if (position === "G") return "G";
+        if (position === "D") return "D";
+        return "F";
+      }
+      function ownerRosterCounts(ownerId) {
+        const counts = { F: 0, D: 0, G: 0 };
+        (draft?.picks || []).forEach(p => {
+          if (p.ownerId !== ownerId) return;
+          const bucket = positionBucket(p.player?.position || "");
+          counts[bucket] = (counts[bucket] || 0) + 1;
+        });
+        return counts;
+      }
+      function ownerRemaining(ownerId) {
+        const counts = ownerRosterCounts(ownerId);
+        return {
+          F: Math.max(0, ROSTER_LIMITS.F - counts.F),
+          D: Math.max(0, ROSTER_LIMITS.D - counts.D),
+          G: Math.max(0, ROSTER_LIMITS.G - counts.G),
+          counts
+        };
+      }
+      function canOwnerDraftPosition(ownerId, position) {
+        const bucket = positionBucket(position);
+        return ownerRemaining(ownerId)[bucket] > 0;
+      }
+      function renderRosterNeeds() {
+        const panel = $("#cleanRosterNeedsPanel");
+        if (!panel) return;
+        if (!activeOwnerId) {
+          panel.innerHTML = `<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 6 forwards, 4 defense, 2 goalies</span></div>`;
+          return;
+        }
+        const active = owner(activeOwnerId);
+        const rem = ownerRemaining(activeOwnerId);
+        panel.innerHTML = `
+          <div class="needs-title">
+            <span class="eyebrow">Roster Needs</span>
+            <strong>${esc(active?.teamName || activeOwnerId)}</strong>
+          </div>
+          <div class="needs-grid">
+            <div class="${rem.F === 0 ? "filled" : ""}"><span>Forwards needed</span><strong>${rem.F}</strong><em>${rem.counts.F}/6 drafted</em></div>
+            <div class="${rem.D === 0 ? "filled" : ""}"><span>Defense needed</span><strong>${rem.D}</strong><em>${rem.counts.D}/4 drafted</em></div>
+            <div class="${rem.G === 0 ? "filled" : ""}"><span>Goalies needed</span><strong>${rem.G}</strong><em>${rem.counts.G}/2 drafted</em></div>
+          </div>`;
+      }
 
       function normalizeSkater(row) {
         var first = row.firstName || row.firstNameDefault || "";
@@ -1508,7 +1595,7 @@
         const time = $("#cleanLastRefresh");
         if (time) time.textContent = "Last refresh: " + new Date().toLocaleTimeString();
       }
-      function rosterLimit() { return 15; }
+      function rosterLimit() { return ROSTER_LIMITS.F + ROSTER_LIMITS.D + ROSTER_LIMITS.G; }
       function pickLimit() { return OWNERS.length * rosterLimit(); }
       function snakePick(pickNumber) {
         const order = Array.isArray(draft?.draftOrder) && draft.draftOrder.length === 5 ? draft.draftOrder : OWNERS.map(o => o.id);
@@ -1675,6 +1762,7 @@
       }
       function renderRoom() {
         updateCurrentPickUI();
+        renderRosterNeeds();
         renderOrderStrip();
         const board = $("#cleanDraftBoard");
         if (!board) return;
@@ -1689,8 +1777,9 @@
         const pick = currentPick();
         const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
         const rows = availablePlayers().map((p, i) => {
-          const disabled = canPick ? "" : "disabled";
-          const buttonText = canPick ? "Sign Player" : `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}`;
+          const positionAllowed = activeOwnerId ? canOwnerDraftPosition(activeOwnerId, p.position) : false;
+          const disabled = (canPick && positionAllowed) ? "" : "disabled";
+          const buttonText = !canPick ? `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}` : (!positionAllowed ? `${positionBucket(p.position)} limit reached` : "Sign Player");
           return `<tr>
             <td class="rank-cell">${i + 1}</td>
             <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(p.position)} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
@@ -1707,6 +1796,11 @@
         const player = players.find(p => String(p.id) === String(playerId));
         if (!player) return toast("Player not found.");
         if (draftedIds().has(String(player.id))) return toast("That player is already signed.");
+        const bucket = positionBucket(player.position);
+        if (!canOwnerDraftPosition(activeOwnerId, player.position)) {
+          const label = bucket === "F" ? "forwards" : bucket === "D" ? "defensemen" : "goalies";
+          return toast(`You already have the maximum number of ${label}.`);
+        }
         const o = owner(activeOwnerId);
         draft.picks.push({
           pickNumber: pick.pickNumber,
@@ -1762,6 +1856,43 @@
         toast("Live draft reset.");
       }
       document.addEventListener("click", async (event) => {
+        const lotto = event.target.closest && event.target.closest("#cleanLotteryBtn");
+        if (lotto) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          $("#cleanDraftEntry").hidden = true;
+          $("#cleanLotteryRoom").hidden = false;
+          return;
+        }
+        const lottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtn");
+        if (lottoBack) {
+          event.preventDefault();
+          $("#cleanLotteryRoom").hidden = true;
+          $("#cleanDraftEntry").hidden = false;
+          return;
+        }
+        const resetLotto = event.target.closest && event.target.closest("#cleanResetLotteryBtn");
+        if (resetLotto) {
+          event.preventDefault();
+          try {
+            ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"].forEach(k => localStorage.removeItem(k));
+          } catch (e) {}
+          const status = $("#lotteryStatus");
+          const results = $("#lotteryResults");
+          const run = $("#runLotteryBtn");
+          const replay = $("#replayLotteryBtn");
+          if (status) status.textContent = "LOTTERY NOT COMPLETED YET";
+          if (results) results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
+          if (run) run.textContent = "RUN LOTTERY";
+          if (replay) replay.style.display = "none";
+          draft = defaultDraft();
+          draft.draftOrder = OWNERS.map(o => o.id);
+          saveSharedDraft();
+          toast("Lottery reset.");
+          return;
+        }
+
         const enter = event.target.closest && event.target.closest("#cleanEnterDraftBtn");
         if (enter) {
           event.preventDefault();
