@@ -2081,3 +2081,368 @@ body.lottery-running { overflow: hidden; }
   .scene-stick-target[style*="--tx:21%"] { left: 25% !important; }
   .contract-draft-btn { min-width: 96px; }
 }
+
+/* v17: full cartoon basement puck-lottery cutscene */
+.spy-screen {
+  width: min(1220px, 98vw);
+}
+.scope-view {
+  min-height: clamp(420px, 48vw, 650px);
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255,244,203,.12), transparent 17%),
+    linear-gradient(90deg, rgba(8, 14, 9, .58), rgba(30, 19, 10, .42)),
+    url('../images/header-1998-basement-hangout.jpg') center / cover no-repeat;
+}
+.scope-view::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 220, 145, .18), transparent 18%),
+    linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.38));
+  z-index: 1;
+}
+.cartoon-basement-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+.cartoon-owner {
+  position: absolute;
+  left: var(--tx);
+  top: var(--ty);
+  width: 128px;
+  height: 210px;
+  translate: -50% -50%;
+  z-index: 5;
+  transform-origin: 50% 93%;
+  filter: drop-shadow(0 18px 16px rgba(0,0,0,.65));
+  transition: left .48s ease, top .48s ease, transform .34s ease, opacity .34s ease, filter .34s ease;
+}
+.cartoon-owner.camera-focus,
+.cartoon-owner.active-target {
+  z-index: 8;
+  transform: scale(1.14) translateY(-7px);
+  filter: drop-shadow(0 0 22px rgba(255,232,129,.34)) drop-shadow(0 22px 18px rgba(0,0,0,.72));
+}
+.cartoon-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 92px;
+  height: 18px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,.48);
+  filter: blur(2px);
+}
+.cartoon-body {
+  position: absolute;
+  inset: 0;
+  animation: cartoonIdle 2.8s ease-in-out infinite;
+}
+.cartoon-owner.pose-gaming .cartoon-body { animation-duration: 1.4s; }
+.cartoon-owner.pose-book .cartoon-body { animation-duration: 3.4s; }
+.cartoon-owner.pose-pizza .cartoon-body { animation-duration: 2.4s; }
+.cartoon-owner.pose-cards .cartoon-body { animation-duration: 2.1s; }
+.cartoon-owner.pose-vhs .cartoon-body { animation-duration: 3.1s; }
+@keyframes cartoonIdle {
+  0%,100% { transform: translateY(0) rotate(-.6deg); }
+  50% { transform: translateY(-4px) rotate(.6deg); }
+}
+.cartoon-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 54px;
+  height: 58px;
+  translate: -50% 0;
+  border-radius: 46% 46% 44% 44%;
+  background: linear-gradient(135deg, #f5d0a1, #d99862);
+  border: 4px solid #15100c;
+  box-shadow: inset -7px -5px 0 rgba(91,52,25,.18);
+  z-index: 5;
+}
+.cartoon-hair {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: -6px;
+  height: 22px;
+  border-radius: 26px 26px 10px 10px;
+  background: #2b1a10;
+  border: 3px solid #15100c;
+}
+.cartoon-face::before,
+.cartoon-face::after {
+  content: "";
+  position: absolute;
+  top: 27px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1b100b;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.14);
+}
+.cartoon-face::before { left: 14px; }
+.cartoon-face::after { right: 14px; }
+.cartoon-face {
+  position: absolute;
+  inset: 0;
+}
+.cartoon-face {
+  background: radial-gradient(ellipse at 50% 72%, #5a2f1c 0 5%, transparent 6%);
+}
+.cartoon-jersey {
+  position: absolute;
+  left: 50%;
+  top: 55px;
+  width: 92px;
+  height: 86px;
+  translate: -50% 0;
+  border-radius: 22px 22px 13px 13px;
+  border: 5px solid #111;
+  background: linear-gradient(180deg, #0d54a7 0 23%, #fff 23% 31%, #0d54a7 31% 72%, #fff 72% 80%, #083b78 80% 100%);
+  color: white;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), inset 0 -22px 0 rgba(0,0,0,.14);
+  z-index: 4;
+}
+.cartoon-jersey::before,
+.cartoon-jersey::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  width: 20px;
+  height: 50px;
+  border: 4px solid #111;
+  background: inherit;
+  border-radius: 13px;
+  z-index: -1;
+}
+.cartoon-jersey::before { left: -23px; rotate: 18deg; }
+.cartoon-jersey::after { right: -23px; rotate: -18deg; }
+.cartoon-jersey strong {
+  position: relative;
+  z-index: 2;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 2rem;
+  letter-spacing: .03em;
+  line-height: .9;
+  -webkit-text-stroke: 1.3px rgba(0,0,0,.7);
+  text-shadow: 2px 2px 0 rgba(0,0,0,.55);
+}
+.cartoon-jersey em {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 5px;
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: .55rem;
+  letter-spacing: .08em;
+  font-style: normal;
+  text-shadow: 1px 1px 0 #000;
+}
+.jersey-badge {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 28px;
+  height: 28px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.94);
+  border: 3px solid currentColor;
+}
+.jersey-badge::after {
+  content: "TML";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #0d54a7;
+  font-size: .42rem;
+  font-family: 'Arial Black', sans-serif;
+}
+.cartoon-arm,
+.cartoon-leg {
+  position: absolute;
+  background: #191919;
+  border: 4px solid #111;
+  border-radius: 999px;
+  transform-origin: 50% 0;
+  z-index: 3;
+}
+.cartoon-arm { top: 75px; width: 17px; height: 72px; }
+.cartoon-arm.left { left: 17px; rotate: 37deg; }
+.cartoon-arm.right { right: 17px; rotate: -37deg; }
+.cartoon-leg { top: 134px; width: 17px; height: 78px; }
+.cartoon-leg.left { left: 45px; rotate: 10deg; }
+.cartoon-leg.right { right: 45px; rotate: -10deg; }
+.cartoon-owner.owner-andrew .cartoon-jersey {
+  background: linear-gradient(180deg, #f47a21 0 20%, #fff 20% 29%, #111 29% 72%, #fff 72% 81%, #f47a21 81% 100%);
+}
+.cartoon-owner.owner-andrew .jersey-badge::after { content: "PHI"; color: #111; }
+.cartoon-owner.owner-andrew .cartoon-arm { background: #111; box-shadow: inset 0 17px 0 #f47a21, inset 0 -17px 0 #fff; }
+.cartoon-owner.owner-nick .cartoon-jersey { filter: brightness(1.08); }
+.cartoon-owner.owner-chris .cartoon-jersey { filter: hue-rotate(-5deg) saturate(.9); }
+.cartoon-owner.owner-tyler .cartoon-jersey { filter: hue-rotate(5deg) saturate(1.06); }
+.cartoon-owner.owner-scott .cartoon-jersey { filter: brightness(.94) saturate(1.1); }
+.activity-prop {
+  position: absolute;
+  z-index: 9;
+  filter: drop-shadow(0 8px 8px rgba(0,0,0,.5));
+}
+.prop-controller { left: 44px; top: 118px; width: 45px; height: 22px; border-radius: 10px; background: #2b2b2f; border: 3px solid #111; }
+.prop-controller::before { content:""; position:absolute; left:8px; top:7px; width:8px; height:8px; border-radius:50%; background:#777; box-shadow:20px 0 0 #111, 28px 0 0 #d33; }
+.prop-pizza { left: 30px; top: 122px; width: 56px; height: 36px; clip-path: polygon(50% 100%, 0 0, 100% 0); background: #e7bf66; border: 2px solid #7b3a15; }
+.prop-poolbook { left: 24px; top: 122px; width: 72px; height: 42px; border-radius: 4px; background: linear-gradient(90deg,#f4d574 50%,#efc763 50%); border: 3px solid #3c220b; }
+.prop-poolbook::after { content:"POOL"; position:absolute; left:10px; top:12px; color:#2d1806; font-family:Impact,sans-serif; font-size:.68rem; }
+.prop-cards { left: 28px; top: 124px; width: 58px; height: 42px; background: repeating-linear-gradient(90deg,#fff 0 14px,#dedede 14px 16px); border:3px solid #111; rotate:-5deg; }
+.prop-vhs { left: 26px; top: 128px; width: 72px; height: 28px; border-radius: 3px; background:#151515; border:3px solid #050505; }
+.prop-vhs::after { content:"VHS"; position:absolute; inset:0; display:grid; place-items:center; color:#f0d07a; font-family:'Arial Black',sans-serif; font-size:.72rem; }
+.target-nameplate {
+  position: absolute;
+  left: 50%;
+  top: 190px;
+  width: max-content;
+  max-width: 170px;
+  translate: -50% 0;
+  padding: .36rem .5rem;
+  border-radius: 9px;
+  background: rgba(6, 4, 3, .78);
+  border: 1px solid rgba(255,216,157,.25);
+  color: #fff1bf;
+  text-align: center;
+  line-height: 1.05;
+  opacity: .72;
+}
+.target-nameplate strong { display:block; font-size:.72rem; text-transform:uppercase; }
+.target-nameplate small { display:block; font-size:.55rem; color:rgba(255,244,210,.68); margin-top:.15rem; }
+.hit-stamp {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  translate: -50% 0;
+  opacity: 0;
+  padding: .22rem .48rem;
+  border-radius: 7px;
+  background: rgba(255, 75, 51, .92);
+  color: white;
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: .63rem;
+  letter-spacing: .09em;
+  box-shadow: 0 0 18px rgba(255,75,51,.38);
+  rotate: -8deg;
+  z-index: 12;
+}
+.cartoon-owner.puck-hit {
+  animation: cartoonPuckHit .9s cubic-bezier(.25,.95,.2,1) forwards;
+}
+.cartoon-owner.puck-hit .hit-stamp { opacity: 1; }
+.cartoon-owner.winner-target {
+  animation: winnerBounce 1.1s ease-in-out infinite;
+  z-index: 12;
+}
+.cartoon-owner.winner-target::after {
+  content: "1ST OVERALL";
+  position: absolute;
+  left: 50%;
+  top: -36px;
+  translate: -50% 0;
+  width: max-content;
+  padding: .35rem .65rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg,#fff0b8,#d3973a);
+  color:#1b0d04;
+  border: 2px solid rgba(255,255,255,.5);
+  font-family:'Arial Black',Impact,sans-serif;
+  font-size:.8rem;
+  box-shadow: 0 0 24px rgba(255,224,99,.34);
+}
+@keyframes cartoonPuckHit {
+  0% { transform: translate(0,0) rotate(0deg) scale(1.14); opacity: 1; }
+  35% { transform: translate(22px,-18px) rotate(14deg) scale(1.1); opacity: 1; }
+  100% { transform: translate(70px,72px) rotate(82deg) scale(.92); opacity: .62; }
+}
+@keyframes winnerBounce {
+  0%,100% { transform: scale(1.15) translateY(-8px) rotate(-1deg); }
+  50% { transform: scale(1.2) translateY(-15px) rotate(1deg); }
+}
+.flying-puck {
+  --puck-end-x: 50%;
+  --puck-end-y: 50%;
+  position: absolute;
+  left: 8%;
+  top: 88%;
+  width: 46px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 35% 30%, #484848, #050505 66%);
+  border: 2px solid #111;
+  z-index: 15;
+  opacity: 0;
+  box-shadow: 0 0 20px rgba(255,255,255,.18);
+}
+.flying-puck.launch {
+  animation: puckLaunch .56s cubic-bezier(.08,.76,.1,1) forwards;
+}
+@keyframes puckLaunch {
+  0% { opacity: 1; left: 8%; top: 88%; transform: scale(.8) rotate(0deg); }
+  70% { opacity: 1; left: var(--puck-end-x); top: var(--puck-end-y); transform: scale(1.22) rotate(720deg); }
+  100% { opacity: 0; left: var(--puck-end-x); top: var(--puck-end-y); transform: scale(.5) rotate(900deg); }
+}
+.lottery-end-screen {
+  display: none;
+  max-width: min(610px, 94%);
+  margin-top: -8px;
+  transform: rotate(-1.2deg);
+}
+.lottery-end-screen.show {
+  display: block;
+  animation: finalFolderPop .7s cubic-bezier(.18,.9,.2,1.18) both;
+}
+@keyframes finalFolderPop {
+  from { opacity: 0; transform: translateY(24px) scale(.92) rotate(-4deg); }
+  to { opacity: 1; transform: translateY(0) scale(1) rotate(-1.2deg); }
+}
+.spy-results-list li.winner-file {
+  background: linear-gradient(90deg, rgba(158,255,202,.35), rgba(255,255,255,.22));
+  border-color: rgba(33,80,47,.5);
+}
+.pick-bubble {
+  position:absolute;
+  right: 8px;
+  top: 8px;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#fff0b8;
+  color:#1b0d04;
+  font-weight:950;
+  border:2px solid rgba(0,0,0,.5);
+  z-index: 13;
+}
+@media (max-width: 760px) {
+  .scope-view { min-height: 520px; }
+  .cartoon-owner { width: 94px; height: 160px; }
+  .cartoon-head { width: 40px; height: 44px; border-width: 3px; }
+  .cartoon-jersey { top: 42px; width: 68px; height: 64px; border-width: 4px; }
+  .cartoon-jersey strong { font-size: 1.45rem; }
+  .cartoon-jersey em { font-size: .42rem; }
+  .jersey-badge { width: 21px; height: 21px; top: 7px; }
+  .cartoon-arm { top: 57px; height: 52px; width: 13px; }
+  .cartoon-leg { top: 101px; height: 56px; width: 13px; }
+  .cartoon-leg.left { left: 34px; }
+  .cartoon-leg.right { right: 34px; }
+  .target-nameplate { display: none; }
+  .activity-prop { transform: scale(.76); transform-origin: center; }
+  .cartoon-owner[style*="--tx:84%"] { left: 78% !important; }
+  .cartoon-owner[style*="--tx:21%"] { left: 25% !important; }
+  .lottery-end-screen { max-height: 38vh; overflow: auto; }
+}

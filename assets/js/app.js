@@ -702,17 +702,27 @@ function renderBasementTargets(orderIds = []) {
   layer.innerHTML = state.owners.map(owner => {
     const label = ownerLotteryLabel(owner);
     const layout = lotteryTargetLayout(owner.id);
-    return `<div class="scene-stick-target ${label.jerseyClass || ''} pose-${layout.pose}" data-scene-owner="${escapeHtml(owner.id)}" style="--tx:${layout.x}%;--ty:${layout.y}%">
+    return `<div class="cartoon-owner ${label.jerseyClass || ''} pose-${layout.pose}" data-scene-owner="${escapeHtml(owner.id)}" style="--tx:${layout.x}%;--ty:${layout.y}%">
       <div class="activity-prop prop-${layout.prop}" aria-hidden="true"><span></span></div>
-      <div class="stick-head"></div>
-      <div class="stick-body"><span class="jersey-number">${escapeHtml(label.number)}</span><span class="jersey-name">${escapeHtml(label.jerseyName)}</span></div>
-      <div class="stick-arm left"></div><div class="stick-arm right"></div>
-      <div class="stick-leg left"></div><div class="stick-leg right"></div>
+      <div class="cartoon-shadow"></div>
+      <div class="cartoon-body">
+        <div class="cartoon-head"><span class="cartoon-hair"></span><span class="cartoon-face"></span></div>
+        <div class="cartoon-arm left"></div><div class="cartoon-arm right"></div>
+        <div class="cartoon-jersey"><span class="jersey-badge"></span><strong>${escapeHtml(label.number)}</strong><em>${escapeHtml(label.jerseyName)}</em></div>
+        <div class="cartoon-leg left"></div><div class="cartoon-leg right"></div>
+      </div>
       <div class="target-nameplate"><strong>${escapeHtml(owner.teamName)}</strong><small>${escapeHtml(layout.activity)}</small></div>
-      <div class="hit-stamp">LOCKED</div>
+      <div class="hit-stamp">PUCKED</div>
       ${orderIndex.has(String(owner.id)) ? `<div class="pick-bubble">${orderIndex.get(String(owner.id))}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+function markEliminatedOnFolder(owner, pick, subtitle) {
+  const list = $('#spyResultsList');
+  if (!list || !owner) return;
+  const label = ownerLotteryLabel(owner);
+  list.insertAdjacentHTML('afterbegin', `<li><span>${pick}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(subtitle || label.secondary)}</small></li>`);
 }
 
 async function playSpyLottery(orderIds) {
@@ -722,44 +732,95 @@ async function playSpyLottery(orderIds) {
   const list = $('#spyResultsList');
   const flash = $('#scopeFlash');
   const scope = $('#scopeView');
+  const folder = $('#classifiedFolder');
+  const puck = $('#flyingPuck');
   if (!modal || !target || !list || !scope) return;
 
+  const ownerCount = orderIds.length;
+  const eliminationIds = [...orderIds].slice(1).reverse(); // 5th, 4th, 3rd, 2nd. Pick 1 never gets hit.
+  const winnerId = orderIds[0];
+
   list.innerHTML = '';
+  folder?.classList.remove('show');
   renderBasementTargets(orderIds);
-  $$('.scene-stick-target').forEach(el => el.classList.remove('active-target', 'tagged-target'));
+  $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus'));
+  puck?.classList.remove('launch');
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
   target.textContent = 'Basement sweep loading...';
-  if (meta) meta.textContent = 'Equal odds • every old man visible in the room';
-  await sleep(700);
+  if (meta) meta.textContent = 'Equal odds • cartoon puck elimination cutscene';
+  await sleep(900);
 
-  for (let i = 0; i < orderIds.length; i++) {
-    const owner = state.owners.find(o => String(o.id) === String(orderIds[i]));
+  // Establishing shots: visit every old man in the room before the puck chaos starts.
+  for (const id of orderIds) {
+    const owner = state.owners.find(o => String(o.id) === String(id));
     const label = ownerLotteryLabel(owner);
-    const layout = lotteryTargetLayout(orderIds[i]);
-    const el = $$('.scene-stick-target').find(node => String(node.dataset.sceneOwner) === String(orderIds[i]));
+    const layout = lotteryTargetLayout(id);
+    const el = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(id));
     target.textContent = label.primary;
-    if (meta) meta.textContent = `Pick ${i + 1} • ${label.secondary} • ${layout.activity}`;
+    if (meta) meta.textContent = `${label.secondary} • ${layout.activity}`;
     scope.style.setProperty('--scope-x', `${layout.x}%`);
     scope.style.setProperty('--scope-y', `${layout.y}%`);
-    $$('.scene-stick-target').forEach(t => t.classList.remove('active-target'));
+    $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
+    el?.classList.add('active-target', 'camera-focus');
+    scope.classList.remove('scope-hit');
+    scope.classList.add('scope-locking');
+    await sleep(1500);
+  }
+
+  // Reverse reveal: lowest lottery result gets hit first, winner is left standing.
+  for (const id of eliminationIds) {
+    const pickNumber = orderIds.indexOf(id) + 1;
+    const owner = state.owners.find(o => String(o.id) === String(id));
+    const label = ownerLotteryLabel(owner);
+    const layout = lotteryTargetLayout(id);
+    const el = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(id));
+    target.textContent = `${pickNumber}TH PICK`; 
+    if (pickNumber === 2) target.textContent = '2ND PICK';
+    if (pickNumber === 3) target.textContent = '3RD PICK';
+    if (meta) meta.textContent = `${label.primary} gets knocked out by a basement puck.`;
+    scope.style.setProperty('--scope-x', `${layout.x}%`);
+    scope.style.setProperty('--scope-y', `${layout.y}%`);
+    $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
     el?.classList.add('active-target');
     scope.classList.remove('scope-hit');
     scope.classList.add('scope-locking');
-    await sleep(900);
+    await sleep(850);
+
     scope.classList.remove('scope-locking');
     scope.classList.add('scope-hit');
-    el?.classList.add('tagged-target');
+    if (puck) {
+      puck.style.setProperty('--puck-end-x', `${layout.x}%`);
+      puck.style.setProperty('--puck-end-y', `${layout.y}%`);
+      puck.classList.remove('launch');
+      void puck.offsetWidth;
+      puck.classList.add('launch');
+    }
     flash?.classList.remove('pulse');
     void flash?.offsetWidth;
     flash?.classList.add('pulse');
-    list.insertAdjacentHTML('beforeend', `<li><span>${i + 1}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(label.secondary)} • ${escapeHtml(layout.activity)}</small></li>`);
-    await sleep(760);
+    await sleep(360);
+    el?.classList.add('puck-hit', 'tagged-target');
+    markEliminatedOnFolder(owner, pickNumber, `Knocked out by puck • awarded pick ${pickNumber}`);
+    await sleep(1400);
   }
 
+  const winner = state.owners.find(o => String(o.id) === String(winnerId));
+  const winnerLabel = ownerLotteryLabel(winner);
+  const winnerLayout = lotteryTargetLayout(winnerId);
+  const winnerEl = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(winnerId));
+  scope.style.setProperty('--scope-x', `${winnerLayout.x}%`);
+  scope.style.setProperty('--scope-y', `${winnerLayout.y}%`);
+  $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
+  winnerEl?.classList.add('active-target', 'winner-target');
+  target.textContent = 'FIRST OVERALL';
+  if (meta) meta.textContent = `${winnerLabel.primary} survives the puck barrage and wins the lottery.`;
+  await sleep(1700);
+  list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the room • awarded first overall</small></li>`);
+  folder?.classList.add('show');
   target.textContent = 'ORDER CONFIRMED';
-  if (meta) meta.textContent = 'Classified draft folder printed';
+  if (meta) meta.textContent = 'Final file printed inside the cutscene';
   scope.classList.remove('scope-hit', 'scope-locking');
 }
 
