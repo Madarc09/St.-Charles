@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V49 ROSTER NEEDS GLOBAL -->
+  <!-- V50 CAN PICK GLOBAL -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V49 ROSTER NEEDS GLOBAL</div>
+        <div class="v46-build-marker">V50 CAN PICK GLOBAL</div>
         <div class="clean-entry-stack">
           <button id="cleanLotteryBtnV46" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
           <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
@@ -346,6 +346,22 @@
       if (position === "G") return "G";
       if (position === "D") return "D";
       return "F";
+    };
+
+    window.canOwnerDraftPosition = function(draft, ownerId, position) {
+      var counts = { F: 0, D: 0, G: 0 };
+      try {
+        var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
+        picks.forEach(function(p) {
+          if (String(p.ownerId) !== String(ownerId)) return;
+          var bucket = window.__draftBucket(p.player && p.player.position);
+          counts[bucket] = (counts[bucket] || 0) + 1;
+        });
+      } catch (e) {}
+
+      var bucket = window.__draftBucket(position);
+      var limits = window.__draftRosterLimits || { F: 6, D: 4, G: 2 };
+      return Math.max(0, (limits[bucket] || 0) - (counts[bucket] || 0)) > 0;
     };
 
     window.renderRosterNeeds = function(draft, ownerId, ownerName) {
@@ -1261,7 +1277,7 @@ function positionBucket(position) {
         const counts = { F: 0, D: 0, G: 0 };
         (draft?.picks || []).forEach(p => {
           if (p.ownerId !== ownerId) return;
-          const bucket = positionBucket(p.player?.position || "");
+          const bucket = window.__draftBucket(p.player?.position || "");
           counts[bucket] = (counts[bucket] || 0) + 1;
         });
         return counts;
@@ -1276,7 +1292,7 @@ function positionBucket(position) {
         };
       }
       function canOwnerDraftPosition(ownerId, position) {
-        return ownerRemaining(ownerId)[positionBucket(position)] > 0;
+        return ownerRemaining(ownerId)[window.__draftBucket(position)] > 0;
       }
       function renderRosterNeeds() {
         const panel = $("#cleanRosterNeedsPanel");
@@ -1812,9 +1828,9 @@ const OWNERS = [
         const pick = currentPick();
         const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
         const rows = availablePlayers().map((p, i) => {
-          const positionAllowed = activeOwnerId ? canOwnerDraftPosition(activeOwnerId, p.position) : false;
+          const positionAllowed = activeOwnerId ? window.canOwnerDraftPosition(draft, activeOwnerId, p.position) : false;
           const disabled = (canPick && positionAllowed) ? "" : "disabled";
-          const buttonText = !canPick ? `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}` : (!positionAllowed ? `${positionBucket(p.position)} limit reached` : "Sign Player");
+          const buttonText = !canPick ? `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}` : (!positionAllowed ? `${window.__draftBucket(p.position)} limit reached` : "Sign Player");
           return `<tr>
             <td class="rank-cell">${i + 1}</td>
             <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(p.position)} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
@@ -1831,8 +1847,8 @@ const OWNERS = [
         const player = players.find(p => String(p.id) === String(playerId));
         if (!player) return toast("Player not found.");
         if (draftedIds().has(String(player.id))) return toast("That player is already signed.");
-        const bucket = positionBucket(player.position);
-        if (!canOwnerDraftPosition(activeOwnerId, player.position)) {
+        const bucket = window.__draftBucket(player.position);
+        if (!window.canOwnerDraftPosition(draft, activeOwnerId, player.position)) {
           const label = bucket === "F" ? "forwards" : bucket === "D" ? "defensemen" : "goalies";
           return toast(`You already have the maximum number of ${label}.`);
         }
