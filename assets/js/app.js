@@ -805,53 +805,226 @@ async function playSpyLottery(orderIds) {
   const scope = $('#scopeView');
   const folder = $('#classifiedFolder');
   const cutscene = $('#storyboardCutscene');
+  const puck = $('#flyingPuck');
   if (!modal || !target || !list || !scope) return;
 
-  const winnerId = orderIds[0];
-  const scenes = storyboardSceneList(orderIds);
+  const winnerId = String(orderIds[0]);
+  const eliminationIds = [...orderIds].slice(1).reverse().map(String);
+  const ownersById = new Map(state.owners.map(o => [String(o.id), o]));
+  const winner = ownersById.get(winnerId);
+  const winnerLabel = ownerLotteryLabel(winner);
 
   list.innerHTML = '';
-  folder?.classList.remove('show');
+  folder?.classList.remove('show', 'in-scene-folder');
   renderBasementTargets(orderIds);
-  $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus'));
+  $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus', 'hero-winner', 'cutscene-enter', 'ducking'));
+
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  scope.classList.add('storyboard-mode');
-  cutscene?.classList.add('show');
-  target.textContent = 'CUTSCENE LOADING...';
-  if (meta) meta.textContent = 'Full cartoon storyboard cutscene • reverse-order puck eliminations';
+  scope.classList.remove('storyboard-mode', 'scope-hit', 'scope-locking');
+  scope.classList.add('motion-mode');
+  cutscene?.classList.remove('show');
+  ensureMotionCutsceneElements(scope);
+  folder?.classList.add('in-scene-folder');
+  resetMotionCamera(scope);
+  target.textContent = 'MOTION COMIC CUTSCENE LOADING...';
+  if (meta) meta.textContent = '1998 basement lottery action sequence • reverse-order puck eliminations';
 
-  for (let i = 0; i < scenes.length; i++) {
-    const scene = scenes[i];
-    setStoryboardPanel(scene, i, scenes.length);
-    target.textContent = scene.title;
-    if (meta) meta.textContent = scene.sub;
-    await sleep(i < 3 ? 950 : i < 8 ? 1050 : i < 13 ? 900 : 820);
+  const winnerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(winnerId)}"]`);
+  if (winnerEl) {
+    winnerEl.classList.add('hero-winner', 'cutscene-enter');
   }
 
-  const eliminationIds = [...orderIds].slice(1).reverse();
+  setMotionCaption('0:00', `${ownerShortName(winner).toUpperCase()} COMES DOWN THE STAIRS`, 'The first-overall winner enters the 1998 basement draft room.');
+  setMotionCamera(scope, '-10%', '4%', 1.34, '15% 28%');
+  await sleep(2100);
+
+  setMotionCaption('0:03', 'BASEMENT DRAFT OPS: ALL TARGETS PRESENT', 'N64 on the CRT, pizza on the floor, pool books open, and five old men waiting for fate.');
+  resetMotionCamera(scope);
+  $$('.cartoon-owner').forEach(el => el.classList.add('ducking'));
+  await sleep(2100);
+  $$('.cartoon-owner').forEach(el => el.classList.remove('ducking'));
+
+  setMotionCaption('0:06', 'THE LOTTERY PUCK IS LIVE', 'The draft winner grabs a stick. The room realizes the standings are about to get physical.');
+  flashSpeedLines();
+  await sleep(1500);
+
   for (const id of eliminationIds) {
-    const pickNumber = orderIds.indexOf(id) + 1;
-    const owner = state.owners.find(o => String(o.id) === String(id));
-    markEliminatedOnFolder(owner, pickNumber, `Puck elimination • awarded pick ${pickNumber}`);
+    const owner = ownersById.get(id);
+    if (!owner) continue;
+    const pickNumber = orderIds.map(String).indexOf(id) + 1;
+    const label = ownerLotteryLabel(owner);
+    const ownerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(id)}"]`);
+    if (!ownerEl) continue;
+    const layout = lotteryTargetLayout(id);
+    const pan = panForTarget(layout.x, layout.y);
+    setMotionCamera(scope, pan.x, pan.y, 1.48, `${layout.x}% ${layout.y}%`);
+    ownerEl.classList.add('active-target', 'camera-focus');
+    setMotionCaption(`0:${String(8 + (5-pickNumber)*4).padStart(2, '0')}`, `${label.primary.toUpperCase()} — ${ordinalLabel(pickNumber)} PICK`, `${ownerShortName(winner)} lines up a basement ricochet. Hockey pucks only. No bullets. No mercy.`);
+    showMotionPickLabel(`${ordinalLabel(pickNumber)} PICK`);
+    await sleep(1050);
+    await launchCinematicPuck(scope, winnerEl, ownerEl);
+    ownerEl.classList.remove('active-target', 'camera-focus');
+    ownerEl.classList.add('puck-hit');
+    markEliminatedOnFolder(owner, pickNumber, `Knocked out by puck • awarded pick ${pickNumber}`);
+    target.textContent = `${ordinalLabel(pickNumber)} PICK LOCKED`;
+    if (meta) meta.textContent = `${label.primary} has been eliminated from first-overall contention.`;
+    await sleep(1100);
   }
 
-  const winner = state.owners.find(o => String(o.id) === String(winnerId));
-  const winnerLabel = ownerLotteryLabel(winner);
+  resetMotionCamera(scope);
+  if (winnerEl) {
+    winnerEl.classList.remove('cutscene-enter');
+    winnerEl.classList.add('winner-target', 'hero-winner');
+  }
+  setMotionCaption('0:25', `ONE OLD MAN LEFT: ${ownerShortName(winner).toUpperCase()}`, `${winnerLabel.primary} survives the basement and claims the first overall pick.`);
+  showMotionPickLabel('1ST OVERALL');
+  await sleep(2200);
+
   list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the basement cutscene • awarded first overall</small></li>`);
-  folder?.classList.add('show');
+  setMotionCaption('0:28', 'CLASSIFIED FOLDER PRINTING', 'The final draft order is now locked and ready to replay.');
+  if (folder) {
+    folder.classList.add('show');
+    scope.appendChild(folder);
+  }
   target.textContent = 'ORDER CONFIRMED';
-  if (meta) meta.textContent = 'Final classified folder printed inside the cutscene.';
+  if (meta) meta.textContent = 'Final classified folder printed inside the animated cutscene.';
+}
+
+function ensureMotionCutsceneElements(scope) {
+  if (!scope) return;
+  if (!scope.querySelector('.motion-basement')) {
+    const basement = document.createElement('div');
+    basement.className = 'motion-basement';
+    basement.innerHTML = `
+      <div class="motion-item motion-stairs"></div>
+      <div class="motion-item motion-tv"></div>
+      <div class="motion-item motion-n64"></div>
+      <div class="motion-item motion-couch"></div>
+      <div class="motion-item motion-table"></div>
+      <div class="motion-item motion-pizza"></div>
+      <div class="motion-item motion-posters"></div>
+      <div class="motion-item motion-hockey-sticks"><span></span></div>
+    `;
+    scope.insertBefore(basement, scope.firstChild);
+  }
+  if (!scope.querySelector('.motion-caption')) {
+    const caption = document.createElement('div');
+    caption.className = 'motion-caption';
+    caption.innerHTML = '<span id="motionTimecode">0:00</span><strong id="motionTitle">CUTSCENE LOADING</strong><small id="motionSub">Basement draft ops coming online.</small>';
+    scope.appendChild(caption);
+  }
+  if (!scope.querySelector('.motion-impact-flash')) {
+    const flash = document.createElement('div');
+    flash.className = 'motion-impact-flash';
+    scope.appendChild(flash);
+  }
+  if (!scope.querySelector('.motion-speed-lines')) {
+    const speed = document.createElement('div');
+    speed.className = 'motion-speed-lines';
+    scope.appendChild(speed);
+  }
+  if (!scope.querySelector('.motion-pick-label')) {
+    const pick = document.createElement('div');
+    pick.className = 'motion-pick-label';
+    pick.id = 'motionPickLabel';
+    pick.textContent = 'LOTTERY';
+    scope.appendChild(pick);
+  }
+}
+
+function setMotionCaption(time, title, sub) {
+  const t = $('#motionTimecode');
+  const h = $('#motionTitle');
+  const s = $('#motionSub');
+  if (t) t.textContent = time;
+  if (h) h.textContent = title;
+  if (s) s.textContent = sub;
+}
+
+function setMotionCamera(scope, panX, panY, zoom, origin) {
+  scope.style.setProperty('--motion-pan-x', panX);
+  scope.style.setProperty('--motion-pan-y', panY);
+  scope.style.setProperty('--motion-zoom', zoom);
+  scope.style.setProperty('--motion-origin', origin || '50% 50%');
+}
+
+function resetMotionCamera(scope) {
+  setMotionCamera(scope, '0', '0', 1, '50% 50%');
+}
+
+function panForTarget(x, y) {
+  const px = Math.max(-28, Math.min(22, 50 - Number(x))) * 0.55;
+  const py = Math.max(-18, Math.min(18, 52 - Number(y))) * 0.38;
+  return { x: `${px}%`, y: `${py}%` };
+}
+
+function elementCenterPercent(container, element) {
+  const c = container.getBoundingClientRect();
+  const r = element.getBoundingClientRect();
+  return {
+    x: `${((r.left + r.width / 2 - c.left) / c.width) * 100}%`,
+    y: `${((r.top + r.height / 2 - c.top) / c.height) * 100}%`
+  };
+}
+
+async function launchCinematicPuck(scope, winnerEl, targetEl) {
+  const puck = $('#flyingPuck');
+  const flash = scope.querySelector('.motion-impact-flash');
+  if (!puck || !targetEl) return;
+  const start = winnerEl ? elementCenterPercent(scope, winnerEl) : { x: '12%', y: '78%' };
+  const end = elementCenterPercent(scope, targetEl);
+  puck.style.setProperty('--puck-start-x', start.x);
+  puck.style.setProperty('--puck-start-y', start.y);
+  puck.style.setProperty('--puck-end-x', end.x);
+  puck.style.setProperty('--puck-end-y', end.y);
+  flash?.style.setProperty('--hit-x', end.x);
+  flash?.style.setProperty('--hit-y', end.y);
+  puck.classList.remove('launch');
+  void puck.offsetWidth;
+  flashSpeedLines();
+  puck.classList.add('launch');
+  await sleep(560);
+  scope.classList.add('scope-shake');
+  flash?.classList.remove('flash');
+  void flash?.offsetWidth;
+  flash?.classList.add('flash');
+  await sleep(520);
+  scope.classList.remove('scope-shake');
+}
+
+function showMotionPickLabel(text) {
+  const el = $('#motionPickLabel');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+function flashSpeedLines() {
+  const el = document.querySelector('.motion-speed-lines');
+  if (!el) return;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
 }
 
 function closeSpyLottery() {
   const modal = $('#spyLotteryModal');
+  const scope = $('#scopeView');
+  const screen = document.querySelector('.spy-screen');
+  const folder = $('#classifiedFolder');
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-  $('#scopeView')?.classList.remove('storyboard-mode', 'scope-hit', 'scope-locking');
+  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake');
   $('#storyboardCutscene')?.classList.remove('show');
+  if (folder && screen && folder.parentElement !== screen) {
+    screen.appendChild(folder);
+  }
+  folder?.classList.remove('in-scene-folder');
 }
 
 

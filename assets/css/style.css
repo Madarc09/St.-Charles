@@ -2598,3 +2598,202 @@ body.lottery-running { overflow: hidden; }
   .storyboard-overlay-copy small { grid-column: 1; }
   .scope-view.storyboard-mode .target-card { top: 12%; }
 }
+
+/* v19 — cinematic motion-comic lottery cutscene */
+.scope-view.motion-mode {
+  min-height: clamp(430px, 52vw, 690px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 237, 173, .22), transparent 18%),
+    radial-gradient(circle at 84% 16%, rgba(84, 146, 255, .12), transparent 20%),
+    linear-gradient(180deg, #201106 0%, #3b2110 42%, #120b08 100%);
+}
+.scope-view.motion-mode::after {
+  z-index: 2;
+  background:
+    radial-gradient(circle at 70% 35%, rgba(66, 119, 255, .15), transparent 18%),
+    radial-gradient(circle at 25% 24%, rgba(255, 222, 127, .18), transparent 22%),
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.42));
+}
+.scope-view.motion-mode .storyboard-cutscene { display: none !important; }
+.scope-view.motion-mode .scope-vignette,
+.scope-view.motion-mode .scope-ring,
+.scope-view.motion-mode .scope-cross,
+.scope-view.motion-mode .scope-sweep { opacity: .22; }
+.scope-view.motion-mode .scope-ring { border-style: dashed; }
+.motion-basement {
+  position: absolute;
+  inset: -4% -5%;
+  z-index: 1;
+  transform-origin: var(--motion-origin, 50% 50%);
+  transform: translate3d(var(--motion-pan-x, 0), var(--motion-pan-y, 0), 0) scale(var(--motion-zoom, 1));
+  transition: transform 1.15s cubic-bezier(.18,.8,.22,1), filter .65s ease;
+  filter: saturate(1.08) contrast(1.03);
+}
+.motion-basement::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(65,37,18,.58) 0 2px, transparent 2px 74px),
+    linear-gradient(180deg, rgba(0,0,0,0) 0 58%, rgba(49,28,16,.96) 58% 100%),
+    repeating-linear-gradient(90deg, #3b2112 0 36px, #462918 36px 72px);
+}
+.motion-basement::after {
+  content: "";
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:42%;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.06), transparent 28%),
+    repeating-linear-gradient(90deg, rgba(120,74,34,.34) 0 50px, rgba(80,47,26,.34) 50px 100px),
+    linear-gradient(180deg, #4b2d18, #27150c);
+  border-top: 5px solid rgba(10,6,3,.8);
+  transform: perspective(600px) rotateX(18deg);
+  transform-origin: bottom;
+}
+.motion-item { position:absolute; z-index: 2; filter: drop-shadow(0 12px 12px rgba(0,0,0,.45)); }
+.motion-stairs {
+  left: -3%; top: -3%; width: 26%; height: 72%;
+  background: linear-gradient(130deg, rgba(22,14,8,.97), rgba(82,49,26,.92));
+  clip-path: polygon(0 0, 88% 0, 62% 100%, 0 100%);
+  border-right: 6px solid rgba(8,5,3,.9);
+}
+.motion-stairs::after {
+  content:""; position:absolute; inset: 8% 8% 12% 3%;
+  background: repeating-linear-gradient(180deg, rgba(255,224,160,.08) 0 10px, rgba(0,0,0,.42) 10px 28px);
+  transform: skewX(-8deg);
+}
+.motion-tv {
+  right: 7%; top: 18%; width: 22%; height: 22%; border-radius: 14px;
+  background: linear-gradient(180deg,#2f3031,#0b0b0c); border: 8px solid #090909;
+}
+.motion-tv::before {
+  content:"GOLDEN PUCK 64"; position:absolute; inset:9px 12px 22px 12px; display:grid; place-items:center;
+  border-radius: 8px; background: radial-gradient(circle, #61ff78, #113620 65%, #010201); color:#caffd3;
+  font: 900 clamp(.5rem,1.5vw,.9rem)/1 'Courier New', monospace; text-shadow:0 0 8px #63ff8a;
+}
+.motion-tv::after { content:""; position:absolute; left:34%; bottom:-18px; width:34%; height:16px; background:#111; border-radius: 0 0 8px 8px; }
+.motion-couch { left: 31%; top: 51%; width: 31%; height: 16%; border-radius: 22px 22px 12px 12px; background: linear-gradient(180deg,#6f4828,#3a2113); border: 4px solid #1a0e08; }
+.motion-couch::before { content:""; position:absolute; left:8%; top:-30%; width:84%; height:56%; border-radius: 18px 18px 0 0; background:#5b371d; border:4px solid #1a0e08; }
+.motion-table { left: 35%; top: 68%; width: 27%; height: 8%; border-radius:50%; background: linear-gradient(180deg,#b78549,#583016); border:4px solid #1d1009; }
+.motion-table::after { content:"POOL BOOKS • CARDS • PIZZA"; position:absolute; left:8%; right:8%; top:30%; color:#241205; font:900 .55rem 'Courier New'; text-align:center; }
+.motion-pizza { left: 19%; top: 69%; width: 16%; height: 10%; background:#b66b2e; border:3px solid #512610; border-radius:8px; rotate:-6deg; }
+.motion-pizza::after { content:"PIZZA"; position:absolute; inset:0; display:grid; place-items:center; font:900 1rem Impact; color:#61220d; letter-spacing:.08em; }
+.motion-posters { left: 33%; top: 11%; width: 30%; height: 24%; background: linear-gradient(90deg,#102c69 0 32%,#eee 32% 39%,#a71923 39% 68%,#111 68%); opacity:.85; border:4px solid #140b06; }
+.motion-posters::before { content:"HOCKEY CARDS 1998"; position:absolute; inset:0; display:grid; place-items:center; color:#fff1be; font:900 clamp(.75rem,1.8vw,1.2rem) Impact; letter-spacing:.08em; text-shadow:2px 2px #000; }
+.motion-hockey-sticks { right: 2%; bottom: 12%; width: 20%; height: 28%; }
+.motion-hockey-sticks::before, .motion-hockey-sticks::after { content:""; position:absolute; bottom:0; width:8px; height:100%; background:#c89a5f; border:2px solid #1b0d04; transform-origin:bottom; }
+.motion-hockey-sticks::before { left:34%; rotate: -22deg; }
+.motion-hockey-sticks::after { right:34%; rotate: 19deg; }
+.motion-hockey-sticks span { position:absolute; bottom:0; left:24%; width:34%; height:9px; background:#111; rotate:-22deg; box-shadow: 58px 18px 0 #111; }
+.motion-n64 { right: 17%; top: 45%; width: 12%; height: 8%; border-radius: 20px 20px 10px 10px; background:#222; border:4px solid #090909; }
+.motion-n64::before { content:"64"; position:absolute; inset:0; display:grid; place-items:center; color:#e3d05a; font:900 1rem 'Arial Black'; }
+.scope-view.motion-mode .basement-target-layer {
+  z-index: 5;
+  transform-origin: var(--motion-origin, 50% 50%);
+  transform: translate3d(var(--motion-pan-x, 0), var(--motion-pan-y, 0), 0) scale(var(--motion-zoom, 1));
+  transition: transform 1.15s cubic-bezier(.18,.8,.22,1), opacity .5s ease;
+}
+.scope-view.motion-mode .cartoon-owner { z-index: 8; }
+.scope-view.motion-mode .cartoon-owner.cutscene-enter {
+  left: 12% !important; top: 28% !important; transform: scale(.82) translateY(-6px); opacity: .98;
+  animation: stairHeroDrop 1.4s cubic-bezier(.18,.88,.2,1.1) both;
+}
+@keyframes stairHeroDrop {
+  0% { transform: translate(-34px,-80px) scale(.54) rotate(-8deg); opacity:0; }
+  52% { transform: translate(30px, 50px) scale(1.06) rotate(4deg); opacity:1; }
+  100% { transform: translate(0,0) scale(.92) rotate(0); opacity:1; }
+}
+.scope-view.motion-mode .cartoon-owner.hero-winner {
+  z-index: 17;
+  filter: drop-shadow(0 0 22px rgba(255,224,96,.56)) drop-shadow(0 22px 22px rgba(0,0,0,.78));
+}
+.scope-view.motion-mode .cartoon-owner.hero-winner .cartoon-body {
+  animation: heroReady 1.2s ease-in-out infinite;
+}
+@keyframes heroReady { 0%,100% { transform: translateY(-2px) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+.scope-view.motion-mode .cartoon-owner.ducking { animation: duckingPanic .68s ease-in-out 2; }
+@keyframes duckingPanic { 0%,100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.08) translateY(-16px) rotate(-4deg); } }
+.motion-caption {
+  position:absolute; left: clamp(12px, 3vw, 28px); bottom: clamp(12px, 3vw, 26px); z-index: 21;
+  width: min(730px, calc(100% - 36px));
+  padding: .8rem 1rem; border-radius: 14px;
+  border: 1px solid rgba(255,239,184,.38);
+  background: linear-gradient(90deg, rgba(0,0,0,.82), rgba(32,20,8,.62));
+  color:#fff0b8; text-shadow: 0 2px 0 #000;
+  box-shadow: 0 18px 46px rgba(0,0,0,.45), inset 0 0 25px rgba(255,224,128,.06);
+}
+.motion-caption span { display:block; color:#a9ffbb; font:900 .8rem 'Courier New'; letter-spacing:.12em; text-transform:uppercase; }
+.motion-caption strong { display:block; margin-top:.16rem; font:900 clamp(1.15rem, 3.2vw, 2.2rem)/.95 Impact, sans-serif; letter-spacing:.06em; text-transform:uppercase; }
+.motion-caption small { display:block; margin-top:.3rem; color:rgba(255,242,200,.78); font:800 .82rem 'Courier New'; }
+.motion-impact-flash {
+  position:absolute; inset:0; z-index:19; pointer-events:none; opacity:0;
+  background: radial-gradient(circle at var(--hit-x, 50%) var(--hit-y, 50%), rgba(255,255,255,.9), rgba(255,205,68,.34) 8%, rgba(255,58,40,.18) 14%, transparent 24%);
+}
+.motion-impact-flash.flash { animation: motionImpactFlash .42s ease-out both; }
+@keyframes motionImpactFlash { 0%{opacity:0} 18%{opacity:1} 100%{opacity:0} }
+.motion-speed-lines {
+  position:absolute; inset:0; z-index:18; pointer-events:none; opacity:0;
+  background: repeating-linear-gradient(105deg, transparent 0 24px, rgba(255,255,255,.24) 24px 28px, transparent 28px 46px);
+  mix-blend-mode: screen;
+}
+.motion-speed-lines.show { animation: speedLines .65s ease-out both; }
+@keyframes speedLines { 0%{opacity:0; transform:translateX(-8%)} 25%{opacity:.8} 100%{opacity:0; transform:translateX(8%)} }
+.scope-view.motion-mode.scope-shake { animation: motionShake .45s linear both; }
+@keyframes motionShake {
+  0%,100%{transform:translate(0,0)} 15%{transform:translate(-5px,3px)} 35%{transform:translate(6px,-4px)} 55%{transform:translate(-4px,-3px)} 75%{transform:translate(3px,5px)}
+}
+.scope-view.motion-mode .flying-puck {
+  left: var(--puck-start-x, 10%);
+  top: var(--puck-start-y, 82%);
+  width: clamp(34px, 5vw, 58px);
+  height: clamp(15px, 2vw, 24px);
+  z-index: 20;
+}
+.scope-view.motion-mode .flying-puck.launch {
+  animation: motionPuckLaunch .72s cubic-bezier(.05,.84,.08,1) forwards;
+}
+@keyframes motionPuckLaunch {
+  0% { opacity: 1; left: var(--puck-start-x); top: var(--puck-start-y); transform: scale(.7) rotate(0deg); filter: blur(0); }
+  62% { opacity: 1; left: var(--puck-end-x); top: var(--puck-end-y); transform: scale(1.45) rotate(900deg); filter: blur(.2px); }
+  100% { opacity: 0; left: var(--puck-end-x); top: var(--puck-end-y); transform: scale(.45) rotate(1120deg); filter: blur(3px); }
+}
+.motion-pick-label {
+  position:absolute; right: clamp(12px, 3vw, 30px); top: clamp(60px, 9vw, 92px); z-index: 22;
+  padding:.55rem .75rem; border-radius: 12px;
+  background: linear-gradient(180deg, #fff0b8, #c98932);
+  color:#1b0d04; border:2px solid rgba(255,255,255,.55);
+  font:900 clamp(1.1rem, 3vw, 2.1rem)/1 Impact, sans-serif;
+  letter-spacing:.08em; box-shadow:0 14px 34px rgba(0,0,0,.42);
+  opacity:0; transform: translateY(-10px) rotate(3deg);
+}
+.motion-pick-label.show { animation: pickLabelPop .7s cubic-bezier(.18,.9,.18,1.24) both; }
+@keyframes pickLabelPop { 0%{opacity:0; transform:translateY(-20px) scale(.78) rotate(-8deg)} 60%{opacity:1} 100%{opacity:1; transform:translateY(0) scale(1) rotate(3deg)} }
+.scope-view.motion-mode .cartoon-owner.puck-hit { animation: cinematicPuckHit 1.05s cubic-bezier(.15,.84,.14,1) forwards; }
+@keyframes cinematicPuckHit {
+  0% { transform: scale(1.15) rotate(0); opacity: 1; }
+  35% { transform: translate(30px,-26px) scale(1.2) rotate(16deg); opacity: 1; }
+  100% { transform: translate(98px,92px) scale(.86) rotate(88deg); opacity: .52; filter: grayscale(.15) brightness(.8) drop-shadow(0 20px 18px rgba(0,0,0,.6)); }
+}
+.scope-view.motion-mode .classified-folder.in-scene-folder {
+  position:absolute; z-index: 30; left:50%; top:50%; translate:-50% -50%; display:block;
+  width:min(620px, 90vw); max-height: 78%; overflow:auto;
+  opacity:0; pointer-events:none; transform: scale(.82) rotate(-4deg);
+}
+.scope-view.motion-mode .classified-folder.in-scene-folder.show {
+  opacity:1; pointer-events:auto; animation: sceneFolderReveal .9s cubic-bezier(.18,.9,.2,1.12) both;
+}
+@keyframes sceneFolderReveal {
+  from { opacity:0; transform: translateY(34px) scale(.78) rotate(-7deg); }
+  to { opacity:1; transform: translateY(0) scale(1) rotate(-1deg); }
+}
+@media (max-width: 760px) {
+  .scope-view.motion-mode { min-height: 560px; }
+  .motion-basement { inset: -6% -26%; }
+  .motion-caption { bottom: 8px; font-size:.82rem; }
+  .motion-caption small { display:none; }
+  .motion-tv { right: 15%; width: 24%; }
+  .motion-stairs { width: 34%; }
+  .motion-pick-label { top: 56px; right: 10px; }
+}
