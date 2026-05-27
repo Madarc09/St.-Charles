@@ -1,6 +1,12 @@
-# Custom Hockey Pool — v13 Locked Lottery Fix
+# Custom Hockey Pool — v14 Global Lottery + Better Jerseys
 
-This version fixes the tab/navigation freeze and updates the draft lottery flow.
+## What changed
+- Upgraded the lottery stick-men so the jerseys look much more like hockey jerseys.
+- Nick: Leafs-style `13 SUNDIN` jersey.
+- Andrew: Flyers-style `88 LINDROS` jersey.
+- Chris, Tyler, and Scott: Leafs-style throwback jerseys with different numbers/names.
+- Made the classified folder result page smaller.
+- Added optional global lottery storage through `/api/lottery`.
 
 ## Lottery behavior
 - Before running: `LOTTERY NOT COMPLETED YET`.
@@ -9,7 +15,20 @@ This version fixes the tab/navigation freeze and updates the draft lottery flow.
 - After locking, the main lottery button changes to `REPLAY LOCKED LOTTERY`.
 - Replay shows the exact same animation and order.
 - `Reset Draft` clears rosters, picks, and the locked lottery result, then returns the lottery to a fresh first run.
-- A `Copy Locked Replay Link` button appears after the lottery is locked. That link includes the locked order in the URL so others can open it and replay the exact same result on their device.
 
-## Notes
-This remains a static Vercel/GitHub project. Browser local storage saves the locked result on the current device. To share the exact result with other people, use the copied locked replay link or export/import the pool backup.
+## Important: making everyone see the same saved lottery
+Browser local storage only saves on one device. To make the result appear for everyone who opens the normal site URL, connect persistent storage on Vercel.
+
+This build includes `/api/lottery`, which supports Vercel Redis / Upstash-style REST environment variables:
+
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+
+It also supports:
+
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+Once those are set in Vercel, the first lottery run saves globally. Other devices will load that same locked result automatically from `/api/lottery`.
+
+Without those environment variables, the site still works, but the locked lottery only saves in that device/browser unless you use the copied replay link.

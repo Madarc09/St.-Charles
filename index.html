@@ -38,12 +38,12 @@
       </article>
     </section>
 
-    <section id="draft" class="panel">
+    <section id="draft" class="panel draft-room-shell">
       <div class="section-head">
         <div>
           <p class="eyebrow">Draft Room</p>
-          <h2>Available player draft board</h2>
-          <p class="muted">Pull NHL stats, sort the top available players, then add any player to the roster you choose.</p>
+          <h2>Basement draft headquarters</h2>
+          <p class="muted">Start in Draft Info for the lottery and order. Enter the Actual Draft Room by choosing the team you are drafting for.</p>
         </div>
         <div class="actions">
           <button class="primary" id="refreshStatsBtnDraft">Pull NHL Stats</button>
@@ -53,8 +53,69 @@
         </div>
       </div>
 
-      <div class="grid two wide-left">
-        <article class="card">
+      <div class="draft-room-switcher" role="tablist" aria-label="Draft room sections">
+        <button class="draft-room-tab active" type="button" data-draft-room="info">Draft Info Room</button>
+        <button class="draft-room-tab" type="button" data-draft-room="board">Actual Draft Room</button>
+      </div>
+
+      <div id="draftInfoRoom" class="draft-room-section active">
+        <div class="grid two wide-left">
+          <article class="card draft-hq-card">
+            <p class="eyebrow">Enter the Room</p>
+            <h3>Choose who you are drafting for</h3>
+            <p class="muted">No logins. Tap your team name, then every Draft button places the player directly on that team. If someone texts a pick, just enter as their team and make the pick for them.</p>
+            <div id="draftEntryCards" class="draft-entry-grid"></div>
+          </article>
+
+          <article class="card">
+            <div class="lottery-machine">
+              <p class="eyebrow">Draft Lottery</p>
+              <h3>Basement Spy Lottery</h3>
+              <p class="muted">Equal-weight lottery. First run locks the order. After that, the button replays the same result until Reset Draft is used.</p>
+              <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
+                <div class="lottery-puck spy-disc">64</div>
+                <div>
+                  <span class="label">Mission Status</span>
+                  <strong id="lotteryStatus">Standing by in the basement.</strong>
+                </div>
+              </div>
+              <div class="actions stack-sm lottery-actions">
+                <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
+                <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
+                <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
+              </div>
+              <div id="lotteryResults" class="mini-list lottery-results"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid two">
+          <article class="card">
+            <h3>Draft Order</h3>
+            <p class="muted">Once the lottery has run, this becomes the official draft order. Until then, it stays in the default owner order.</p>
+            <div id="draftOrderEditor"></div>
+          </article>
+          <article class="card">
+            <h3>Pick History</h3>
+            <div id="pickHistory" class="table-wrap"></div>
+          </article>
+        </div>
+      </div>
+
+      <div id="draftBoardPanel" class="draft-room-section">
+        <article class="card actual-draft-card">
+          <div class="actual-draft-header">
+            <div>
+              <p class="eyebrow">Actual Draft Room</p>
+              <h3>Now drafting for: <span id="activeDraftOwnerLabel">Choose team</span></h3>
+              <p class="muted">Switch the team here if you need to enter a pick someone texted you.</p>
+            </div>
+            <div class="active-owner-picker">
+              <label for="activeDraftOwnerSelect">Drafting as</label>
+              <select id="activeDraftOwnerSelect"></select>
+            </div>
+          </div>
+
           <div class="draft-status draft-board-status">
             <div>
               <span class="label">Drafted Players</span>
@@ -81,38 +142,10 @@
               <option value="name">Sort by Name</option>
             </select>
           </div>
-          <div class="hint">Click a stat header to sort. Drafted players disappear from this board and move to their selected roster.</div>
+          <div class="hint">Each player now has one Draft button. It sends the player straight to the team selected above.</div>
           <div id="draftBoardTable" class="table-wrap draft-board-wrap"></div>
         </article>
-        <article class="card">
-          <div class="lottery-machine">
-            <p class="eyebrow">Draft Lottery</p>
-            <h3>Basement Spy Lottery</h3>
-            <p class="muted">Run an equal-weight draft lottery with a late-90s basement spy-game animation. Once it runs, the order locks and stays saved until Reset Draft is used.</p>
-            <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
-              <div class="lottery-puck spy-disc">64</div>
-              <div>
-                <span class="label">Mission Status</span>
-                <strong id="lotteryStatus">Standing by in the basement.</strong>
-              </div>
-            </div>
-            <div class="actions stack-sm lottery-actions">
-              <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
-              <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
-              <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
-            </div>
-            <div id="lotteryResults" class="mini-list lottery-results"></div>
-          </div>
-          <hr />
-          <h3>Draft Order</h3>
-          <p class="muted">This is kept for reference, but the new draft board lets you assign a selected player to any roster.</p>
-          <div id="draftOrderEditor"></div>
-        </article>
       </div>
-      <article class="card">
-        <h3>Pick History</h3>
-        <div id="pickHistory" class="table-wrap"></div>
-      </article>
     </section>
 
 

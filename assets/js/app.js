@@ -1,7 +1,8 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v13-locked-lottery-replay';
+const STORAGE_KEY = 'custom-hockey-pool-v15-draft-rooms';
+let globalLotteryStorageConfigured = false;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -9,6 +10,8 @@ let defaults = {};
 let state = null;
 let draftSort = { key: 'fantasyPoints', direction: 'desc' };
 let pendingAssignPlayerId = null;
+let activeDraftOwnerId = localStorage.getItem('custom-hockey-pool-active-owner') || '';
+let draftRoomView = 'info';
 
 const FINAL_OWNERS = [
   { id: 'nick', name: 'Nick', teamName: 'Nick' },
@@ -51,6 +54,7 @@ async function init() {
   state = saved ? deepMerge(structuredClone(defaults), JSON.parse(saved)) : structuredClone(defaults);
   normalizeStateForDraftTesting();
   applyLotteryFromUrl();
+  await loadGlobalLottery();
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
   bindEvents();
   renderAll();
@@ -107,6 +111,8 @@ function bindEvents() {
   ['#refreshStatsBtn', '#refreshStatsBtn2', '#refreshStatsBtn3', '#refreshStatsBtnDraft'].forEach(sel => $(sel)?.addEventListener('click', refreshStats));
   $('#draftPositionFilter')?.addEventListener('change', renderDraftBoard);
   $('#draftSortSelect')?.addEventListener('change', () => { draftSort = { key: $('#draftSortSelect').value, direction: draftSort.direction || 'desc' }; renderDraftBoard(); });
+  $$('[data-draft-room]').forEach(btn => btn.addEventListener('click', () => setDraftRoomView(btn.dataset.draftRoom)));
+  $('#activeDraftOwnerSelect')?.addEventListener('change', (e) => setActiveDraftOwner(e.target.value));
   $('#closeAssignModal')?.addEventListener('click', closeAssignModal);
   $('#assignModal')?.addEventListener('click', (e) => { if (e.target.id === 'assignModal') closeAssignModal(); });
   $('#statsSearch')?.addEventListener('input', renderPlayersTable);
@@ -130,6 +136,63 @@ function bindEvents() {
   $('#importFile')?.addEventListener('change', importPool);
   $('#clearStatsBtn')?.addEventListener('click', () => { state.stats = { fetchedAt: null, players: [] }; save(); renderAll(); toast('Stats cache cleared.'); });
   $('#factoryResetBtn')?.addEventListener('click', factoryReset);
+}
+
+
+function setDraftRoomView(view) {
+  draftRoomView = view === 'board' ? 'board' : 'info';
+  renderDraftRooms();
+  if (draftRoomView === 'board') setTimeout(() => $('#draftBoardPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+function setActiveDraftOwner(ownerId) {
+  const owner = state?.owners?.find(o => String(o.id) === String(ownerId));
+  if (!owner) return toast('Choose one of the five teams first.');
+  activeDraftOwnerId = String(owner.id);
+  localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
+  draftRoomView = 'board';
+  renderDraftRooms();
+  renderDraftBoard();
+  toast(`Entered the draft room as ${owner.teamName}.`);
+}
+
+function activeDraftOwner() {
+  if (!state?.owners?.some(o => String(o.id) === String(activeDraftOwnerId))) {
+    activeDraftOwnerId = state?.owners?.[0]?.id || '';
+    if (activeDraftOwnerId) localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
+  }
+  return state?.owners?.find(o => String(o.id) === String(activeDraftOwnerId)) || null;
+}
+
+function renderDraftRooms() {
+  $$('[data-draft-room]').forEach(btn => btn.classList.toggle('active', btn.dataset.draftRoom === draftRoomView));
+  $('#draftInfoRoom')?.classList.toggle('active', draftRoomView === 'info');
+  $('#draftBoardPanel')?.classList.toggle('active', draftRoomView === 'board');
+  renderDraftEntryCards();
+}
+
+function renderDraftEntryCards() {
+  const wrap = $('#draftEntryCards');
+  if (!wrap) return;
+  const current = activeDraftOwner();
+  wrap.innerHTML = state.owners.map(owner => {
+    const count = (state.rosters[owner.id] || []).length;
+    const active = current && String(current.id) === String(owner.id);
+    return `<button type="button" class="draft-entry-card ${active ? 'active' : ''}" data-enter-owner="${escapeHtml(owner.id)}">
+      <span class="mini-tv-light"></span>
+      <strong>${escapeHtml(owner.teamName)}</strong>
+      <small>${count} drafted</small>
+      <em>${active ? 'Currently inside' : 'Enter room'}</em>
+    </button>`;
+  }).join('');
+  $$('[data-enter-owner]').forEach(btn => btn.addEventListener('click', () => setActiveDraftOwner(btn.dataset.enterOwner)));
+  const select = $('#activeDraftOwnerSelect');
+  if (select) {
+    select.innerHTML = state.owners.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.teamName)}</option>`).join('');
+    if (current) select.value = current.id;
+  }
+  const label = $('#activeDraftOwnerLabel');
+  if (label) label.textContent = current ? current.teamName : 'Choose team';
 }
 
 function showTab(tab) {
@@ -208,6 +271,7 @@ function currentOwnerId() {
 
 function renderDraft() {
   $('#draftedCount').textContent = state.draftBoard.picks.length;
+  renderDraftRooms();
   renderDraftBoard();
   renderDraftOrderEditor();
   renderDraftLottery();
@@ -252,14 +316,15 @@ function availableDraftBoardPlayers() {
 
 function renderDraftBoard() {
   const list = availableDraftBoardPlayers();
+  const current = activeDraftOwner();
   const sortArrow = (key) => draftSort.key === key ? (draftSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
   const header = (label, key) => `<button class="sort-head" data-draft-sort="${key}">${label}${sortArrow(key)}</button>`;
-  const draftButton = (p) => `<button type="button" class="draft-player-btn" data-open-assign="${escapeHtml(String(p.id))}">Draft</button>`;
+  const draftButton = (p) => `<button type="button" class="draft-player-btn single-draft-btn" data-draft-player="${escapeHtml(String(p.id))}" ${current ? '' : 'disabled'}>Draft</button>`;
   const rows = list.map((p, index) => `
     <tr>
       <td class="rank-cell">${index + 1}</td>
       <td class="player-draft-cell">
-        <div class="player-draft-line">
+        <div class="player-draft-line compact-player-line">
           <div>
             <strong>${escapeHtml(p.name)}</strong>
             <div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} ${p.manual ? '• Manual' : ''}</div>
@@ -267,7 +332,6 @@ function renderDraftBoard() {
           ${draftButton(p)}
         </div>
       </td>
-      <td class="draft-action-cell">${draftButton(p)}</td>
       <td>${p.gamesPlayed || 0}</td>
       <td>${p.goals ?? 0}</td>
       <td>${p.assists ?? 0}</td>
@@ -275,9 +339,12 @@ function renderDraftBoard() {
       <td>${p.goalieWins ?? ''}</td>
       <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
     </tr>`).join('');
-  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')} / Draft</th><th>Draft</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or load demo players.</td></tr>'}</tbody></table>`;
+  const chosenText = current ? `Drafting for ${escapeHtml(current.teamName)}` : 'Choose a team to enter the room';
+  $('#draftBoardTable').innerHTML = `
+    <div class="active-draft-banner">${chosenText}</div>
+    <table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')}</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No available players yet. Pull NHL stats or load demo players.</td></tr>'}</tbody></table>`;
   $$('[data-draft-sort]').forEach(btn => btn.addEventListener('click', () => changeDraftSort(btn.dataset.draftSort)));
-  $$('[data-open-assign]').forEach(btn => btn.addEventListener('click', () => openAssignModal(btn.dataset.openAssign)));
+  $$('[data-draft-player]').forEach(btn => btn.addEventListener('click', () => draftPlayerForActiveOwner(btn.dataset.draftPlayer)));
 }
 
 function changeDraftSort(key) {
@@ -286,6 +353,15 @@ function changeDraftSort(key) {
   const select = $('#draftSortSelect');
   if (select) select.value = key;
   renderDraftBoard();
+}
+
+
+function draftPlayerForActiveOwner(playerId) {
+  const owner = activeDraftOwner();
+  if (!owner) return toast('Select your team name to enter the Draft Room first.');
+  const player = playerPool().find(p => String(p.id) === String(playerId) && !p.drafted);
+  if (!player) return toast('That player is no longer available.');
+  return assignPlayerToOwner(owner.id, playerId);
 }
 
 function openAssignModal(playerId) {
@@ -321,10 +397,11 @@ function closeAssignModal() {
   $('#assignModal')?.setAttribute('aria-hidden', 'true');
 }
 
-function assignPlayerToOwner(ownerId) {
+function assignPlayerToOwner(ownerId, directPlayerId = null) {
   if (!ownerId) return toast('Choose a roster first.');
-  if (!pendingAssignPlayerId) return closeAssignModal();
-  const player = playerPool().find(p => String(p.id) === String(pendingAssignPlayerId) && !p.drafted);
+  const targetPlayerId = directPlayerId || pendingAssignPlayerId;
+  if (!targetPlayerId) return closeAssignModal();
+  const player = playerPool().find(p => String(p.id) === String(targetPlayerId) && !p.drafted);
   const owner = state.owners.find(o => String(o.id) === String(ownerId));
   if (!player || !owner) return toast('Player or owner not found.');
   const rosterLimit = Number(state.settings.rosterRules?.totalRosterSize || 99);
@@ -350,8 +427,9 @@ function undoPick() {
   save(); renderAll(); toast(`Undid ${last.player.name}.`);
 }
 
-function resetDraft() {
+async function resetDraft() {
   if (!confirm('Reset the entire draft, clear all rosters, and clear the locked lottery results?')) return;
+  await clearGlobalLottery();
   state.draftBoard.picks = [];
   state.rosters = {};
   state.owners.forEach(o => { state.rosters[o.id] = []; });
@@ -401,6 +479,60 @@ function validLotteryOrder(ids) {
   const ownerIds = new Set(state.owners.map(o => String(o.id)));
   const seen = new Set(ids.map(String));
   return seen.size === ids.length && ids.every(id => ownerIds.has(String(id)));
+}
+
+
+async function loadGlobalLottery() {
+  try {
+    const response = await fetch('/api/lottery', { cache: 'no-store' });
+    if (!response.ok) return;
+    const data = await response.json();
+    globalLotteryStorageConfigured = Boolean(data.configured);
+    if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
+      const ids = data.lottery.orderIds.map(String);
+      state.draftBoard.draftOrder = ids;
+      state.draftBoard.lotteryResult = ids.map((id, index) => ({
+        id,
+        pick: index + 1,
+        timestamp: data.lottery.timestamp || 'global-lock',
+        odds: 'equal',
+        source: 'global'
+      }));
+      state.draftBoard.lotteryRunNumber = 1;
+      save();
+    }
+  } catch (err) {
+    globalLotteryStorageConfigured = false;
+    console.warn('Global lottery storage not available yet', err);
+  }
+}
+
+async function saveGlobalLottery(orderIds) {
+  try {
+    const response = await fetch('/api/lottery', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderIds })
+    });
+    const data = await response.json().catch(() => ({}));
+    globalLotteryStorageConfigured = Boolean(data.configured);
+    if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
+      return data.lottery.orderIds.map(String);
+    }
+  } catch (err) {
+    console.warn('Could not save global lottery', err);
+  }
+  return orderIds;
+}
+
+async function clearGlobalLottery() {
+  try {
+    const response = await fetch('/api/lottery', { method: 'DELETE' });
+    const data = await response.json().catch(() => ({}));
+    globalLotteryStorageConfigured = Boolean(data.configured);
+  } catch (err) {
+    console.warn('Could not clear global lottery', err);
+  }
 }
 
 function applyLotteryFromUrl() {
@@ -466,7 +598,7 @@ function renderDraftLottery() {
   if (copyBtn) copyBtn.style.display = hasResult ? '' : 'none';
   status.textContent = hasResult ? 'Mission complete. Draft order locked until Reset Draft.' : 'LOTTERY NOT COMPLETED YET';
   if (!hasResult) {
-    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div><p class="muted compact-note">All five owners have equal odds. The first run locks the order. After that, the button becomes a replay button.</p>';
+    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div><p class="muted compact-note">All five owners have equal odds. The first run locks the order. After that, the button becomes a replay button. For all devices to see the same result from the normal URL, connect Vercel Redis storage.</p>';
     return;
   }
   results.innerHTML = lockedOrder.map((id, index) => {
@@ -476,7 +608,7 @@ function renderDraftLottery() {
   }).join('');
 }
 
-function runDraftLottery() {
+async function runDraftLottery() {
   ensureOwnersExist();
   if (!state.owners.length) return toast('Add teams before running the lottery.');
   const lockedOrder = lockedLotteryOrderIds();
@@ -485,16 +617,17 @@ function runDraftLottery() {
     return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
   }
   if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
-  const result = equalShuffleOwners(state.owners).map(owner => owner.id);
+  let result = equalShuffleOwners(state.owners).map(owner => owner.id);
+  result = await saveGlobalLottery(result);
   state.draftBoard.draftOrder = result;
-  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal' }));
+  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
   state.draftBoard.lotteryRunNumber = 1;
   updateLotteryShareUrl(result);
   save();
   renderAll();
   playSpyLottery(result);
   const first = state.owners.find(o => o.id === result[0]);
-  toast(`Lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.`);
+  toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
 }
 
 function replayLockedLottery() {
@@ -513,9 +646,9 @@ function ownerLotteryLabel(owner) {
   const lower = String(owner.id || owner.name || '').toLowerCase();
   if (lower.includes('nick')) return { primary, secondary: 'Nick • Sundin Leafs jersey', jerseyClass: 'owner-nick', number: '13', jerseyName: 'SUNDIN' };
   if (lower.includes('andrew')) return { primary, secondary: 'Andrew • Lindros Flyers jersey', jerseyClass: 'owner-andrew', number: '88', jerseyName: 'LINDROS' };
-  if (lower.includes('chris')) return { primary, secondary: 'Chris • basement squad target', jerseyClass: 'owner-chris', number: '97', jerseyName: 'CHRIS' };
-  if (lower.includes('tyler')) return { primary, secondary: 'Tyler • basement squad target', jerseyClass: 'owner-tyler', number: '64', jerseyName: 'TYLER' };
-  if (lower.includes('scott')) return { primary, secondary: 'Scott • basement squad target', jerseyClass: 'owner-scott', number: '98', jerseyName: 'SCOTT' };
+  if (lower.includes('chris')) return { primary, secondary: 'Chris • Gilmour Leafs jersey', jerseyClass: 'owner-chris', number: '93', jerseyName: 'GILMOUR' };
+  if (lower.includes('tyler')) return { primary, secondary: 'Tyler • Clark Leafs jersey', jerseyClass: 'owner-tyler', number: '17', jerseyName: 'CLARK' };
+  if (lower.includes('scott')) return { primary, secondary: 'Scott • Joseph Leafs jersey', jerseyClass: 'owner-scott', number: '31', jerseyName: 'JOSEPH' };
   return { primary, secondary: `${owner.name || 'Owner'} • draft lottery target`, jerseyClass: '', number: '00', jerseyName: 'POOL' };
 }
 
