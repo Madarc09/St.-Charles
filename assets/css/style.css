@@ -2799,7 +2799,7 @@ body.lottery-running { overflow: hidden; }
 }
 
 
-/* v20 embedded broadcast lottery clip */
+/* v21 broadcast lottery iframe mode */
 .spy-screen.broadcast-lottery-mode {
   padding: 0;
   background: #000;
@@ -2834,12 +2834,4 @@ body.lottery-running { overflow: hidden; }
   border: 0;
   background: #000;
   display: block;
-}
-@media (max-width: 760px) {
-  .spy-screen.broadcast-lottery-mode .spy-close {
-    top: 8px;
-    right: 8px;
-    transform: scale(.9);
-    transform-origin: top right;
-  }
 }
