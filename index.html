@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Custom Hockey Pool</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__glass">
+      <p class="eyebrow">Friends Pool • Draft • Stats • Rules</p>
+      <h1 id="poolTitle">Custom Hockey Pool</h1>
+      <p class="sub">Run your own draft, edit scoring every season, pull free NHL stats, and export backups.</p>
+      <div class="hero-actions">
+        <button class="primary" data-tab-jump="draft">Open Draft Room</button>
+        <button data-tab-jump="rules">Edit Rules</button>
+        <button data-tab-jump="admin">Import / Export</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Main navigation">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="draft">Draft Room</button>
+    <button class="tab" data-tab="rosters">Rosters</button>
+    <button class="tab" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab" data-tab="players">Player Stats</button>
+    <button class="tab" data-tab="rules">Rules Editor</button>
+    <button class="tab" data-tab="admin">Admin</button>
+  </nav>
+
+  <main class="shell">
+    <section id="dashboard" class="panel active">
+      <div class="grid two">
+        <article class="card score-card">
+          <div>
+            <span class="label">Current season</span>
+            <h2 id="seasonDisplay">—</h2>
+          </div>
+          <div>
+            <span class="label">Last stats refresh</span>
+            <h2 id="lastUpdatedDisplay">Never</h2>
+          </div>
+          <button class="primary" id="refreshStatsBtn">Pull NHL Stats</button>
+        </article>
+        <article class="card">
+          <h2>How this works</h2>
+          <p>This version saves your pool in your browser, pulls free NHL stats, calculates points from your editable rules, and lets you export/import your pool file.</p>
+          <p class="muted">For GitHub/Vercel: upload this folder. The included Vercel API route helps avoid browser CORS issues.</p>
+        </article>
+      </div>
+      <div class="grid three" id="dashboardCards"></div>
+    </section>
+
+    <section id="draft" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Draft Room</p>
+          <h2>Build rosters pick by pick</h2>
+        </div>
+        <div class="actions">
+          <button id="undoPickBtn">Undo Last Pick</button>
+          <button class="danger" id="resetDraftBtn">Reset Draft</button>
+        </div>
+      </div>
+      <div class="grid two wide-left">
+        <article class="card">
+          <div class="draft-status">
+            <div>
+              <span class="label">On the clock</span>
+              <h3 id="onClock">—</h3>
+            </div>
+            <div>
+              <span class="label">Pick</span>
+              <h3 id="pickNumber">1</h3>
+            </div>
+          </div>
+          <div class="search-row">
+            <input id="playerSearch" placeholder="Search NHL player after stats load…" />
+            <select id="positionFilter">
+              <option value="all">All</option>
+              <option value="F">Forwards</option>
+              <option value="D">Defense</option>
+              <option value="G">Goalies</option>
+            </select>
+          </div>
+          <div class="hint">Tip: pull NHL stats first, then search and draft. You can also add a manual player.</div>
+          <div id="playerResults" class="list"></div>
+        </article>
+        <article class="card">
+          <h3>Add Manual Player</h3>
+          <p class="muted">Use this if a player does not appear in the free NHL feed yet.</p>
+          <div class="form-grid">
+            <input id="manualName" placeholder="Player name" />
+            <select id="manualPos">
+              <option value="F">Forward</option>
+              <option value="D">Defense</option>
+              <option value="G">Goalie</option>
+            </select>
+            <input id="manualTeam" placeholder="NHL team abbreviation" />
+            <button id="addManualPlayerBtn">Add to Available Players</button>
+          </div>
+          <hr />
+          <h3>Draft Order</h3>
+          <div id="draftOrderEditor"></div>
+        </article>
+      </div>
+      <article class="card">
+        <h3>Pick History</h3>
+        <div id="pickHistory" class="table-wrap"></div>
+      </article>
+    </section>
+
+    <section id="rosters" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Rosters</p>
+          <h2>Teams and drafted players</h2>
+        </div>
+        <button id="addOwnerBtn">Add Owner</button>
+      </div>
+      <div id="rosterCards" class="grid roster-grid"></div>
+    </section>
+
+    <section id="leaderboard" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Leaderboard</p>
+          <h2>Calculated from your editable rules</h2>
+        </div>
+        <button class="primary" id="refreshStatsBtn2">Pull NHL Stats</button>
+      </div>
+      <div id="leaderboardTable" class="table-wrap"></div>
+    </section>
+
+    <section id="players" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Player Stats</p>
+          <h2>NHL stats cache</h2>
+        </div>
+        <div class="actions">
+          <input id="statsSearch" placeholder="Filter players…" />
+          <button id="refreshStatsBtn3">Refresh</button>
+        </div>
+      </div>
+      <div id="playersTable" class="table-wrap"></div>
+    </section>
+
+    <section id="rules" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Rules Editor</p>
+          <h2>Change scoring and roster rules anytime</h2>
+        </div>
+        <div class="actions">
+          <button class="primary" id="saveRulesBtn">Save Rules</button>
+          <button id="resetRulesBtn">Reset to Defaults</button>
+        </div>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Pool Setup</h3>
+          <div id="poolSetupForm" class="form-grid"></div>
+        </article>
+        <article class="card">
+          <h3>Roster Rules</h3>
+          <div id="rosterRulesForm" class="form-grid"></div>
+        </article>
+      </div>
+      <article class="card">
+        <h3>Scoring Rules</h3>
+        <div id="scoringRulesForm" class="rule-grid"></div>
+      </article>
+    </section>
+
+    <section id="admin" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Admin</p>
+          <h2>Backup, restore, and data tools</h2>
+        </div>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Export / Import Pool File</h3>
+          <p class="muted">Export creates a JSON backup containing settings, owners, rosters, draft picks, manual players, and stat overrides.</p>
+          <div class="actions stack-sm">
+            <button class="primary" id="exportBtn">Export Pool Backup</button>
+            <label class="file-btn">Import Pool Backup<input type="file" id="importFile" accept="application/json" /></label>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Danger Zone</h3>
+          <p class="muted">These affect only your browser’s saved copy unless you export and commit updated data files.</p>
+          <div class="actions stack-sm">
+            <button id="clearStatsBtn">Clear NHL Stats Cache</button>
+            <button class="danger" id="factoryResetBtn">Factory Reset Browser Data</button>
+          </div>
+        </article>
+      </div>
+      <article class="card">
+        <h3>Raw Current Pool JSON</h3>
+        <textarea id="rawJson" spellcheck="false"></textarea>
+      </article>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

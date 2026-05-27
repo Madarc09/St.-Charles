@@ -1,0 +1,10 @@
+{
+  "name": "custom-hockey-pool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Vercel-ready custom NHL pool draft and stats tracker.",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}
