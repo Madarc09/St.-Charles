@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V46 STATIC PULL BUTTON BUILD -->
+  <!-- V47 ROSTER LIMITS FIXED -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V46 STATIC PULL BUTTON BUILD</div>
+        <div class="v46-build-marker">V47 ROSTER LIMITS FIXED</div>
         <div class="clean-entry-stack">
           <button id="cleanLotteryBtnV46" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
           <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
@@ -1207,7 +1207,9 @@
         if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
         return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
       }
-      const ROSTER_LIMITS = { F: 6, D: 4, G: 2 };
+      function rosterLimits() {
+        return { F: 6, D: 4, G: 2 };
+      }
       function positionBucket(position) {
         if (position === "G") return "G";
         if (position === "D") return "D";
@@ -1225,9 +1227,9 @@
       function ownerRemaining(ownerId) {
         const counts = ownerRosterCounts(ownerId);
         return {
-          F: Math.max(0, ROSTER_LIMITS.F - counts.F),
-          D: Math.max(0, ROSTER_LIMITS.D - counts.D),
-          G: Math.max(0, ROSTER_LIMITS.G - counts.G),
+          F: Math.max(0, rosterLimits().F - counts.F),
+          D: Math.max(0, rosterLimits().D - counts.D),
+          G: Math.max(0, rosterLimits().G - counts.G),
           counts
         };
       }
@@ -1477,6 +1479,8 @@
     (function () {
       "use strict";
 
+      window.ROSTER_LIMITS = window.ROSTER_LIMITS || { F: 6, D: 4, G: 2 };
+
       const OWNERS = [
         { id: "nick", name: "Nick", teamName: "Nick" },
         { id: "chris", name: "Chris", teamName: "Chris" },
@@ -1587,7 +1591,7 @@
         const time = $("#cleanLastRefresh");
         if (time) time.textContent = "Last refresh: " + new Date().toLocaleTimeString();
       }
-      function rosterLimit() { return ROSTER_LIMITS.F + ROSTER_LIMITS.D + ROSTER_LIMITS.G; }
+      function rosterLimit() { return rosterLimits().F + rosterLimits().D + rosterLimits().G; }
       function pickLimit() { return OWNERS.length * rosterLimit(); }
       function snakePick(pickNumber) {
         const order = Array.isArray(draft?.draftOrder) && draft.draftOrder.length === 5 ? draft.draftOrder : OWNERS.map(o => o.id);
