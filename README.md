@@ -1,41 +1,11 @@
-# Hockey Pool
+# Hockey Pool — 1998 Basement Draft Room
 
-Vercel/GitHub-ready custom NHL pool app with:
+V12 changes:
+- Final owners set to Nick, Chris, Andrew, Tyler, and Scott.
+- Roster/team management moved out of the Draft Room into its own Teams tab.
+- Draft lottery is now equal-weighted and locked after the first run.
+- Lottery results show LOTTERY NOT COMPLETED YET until the first run.
+- Reset Draft clears rosters, picks, and the locked lottery result.
+- Lottery animation now uses cartoon stick-player targets, with Nick in a Sundin Leafs-style jersey and Andrew in a Lindros Flyers-style jersey.
 
-- Draft Room with sortable Top 75 available player board
-- Add-to-roster popup
-- Editable scoring rules
-- Editable roster sizes
-- Rosters and leaderboard
-- Player stats cache
-- Admin import/export backup
-- Free NHL stat pull through a Vercel API route
-
-## How to deploy
-
-1. Upload the contents of this folder to a new GitHub repo.
-2. Connect the repo to Vercel.
-3. Deploy.
-4. Open the site. It will automatically try to load NHL players.
-5. You can also manually click **Pull NHL Stats**.
-
-## API endpoints included
-
-The main API route is:
-
-```txt
-/api/nhl?season=20252026&gameType=2
-```
-
-It pulls skater and goalie summary data from:
-
-```txt
-https://api.nhle.com/stats/rest/en/skater/summary
-https://api.nhle.com/stats/rest/en/goalie/summary
-```
-
-No API key is required for this version.
-
-## Important
-
-The pool data is stored in browser localStorage. Use **Admin → Export Pool Backup** after making picks or changing rules.
+Deploy by uploading these files to GitHub and connecting the repo to Vercel.

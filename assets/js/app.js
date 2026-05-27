@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v11-spy-lottery-theme';
+const STORAGE_KEY = 'custom-hockey-pool-v12-final-owners-equal-lottery';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -9,6 +9,14 @@ let defaults = {};
 let state = null;
 let draftSort = { key: 'fantasyPoints', direction: 'desc' };
 let pendingAssignPlayerId = null;
+
+const FINAL_OWNERS = [
+  { id: 'nick', name: 'Nick', teamName: 'Nick' },
+  { id: 'chris', name: 'Chris', teamName: 'Chris' },
+  { id: 'andrew', name: 'Andrew', teamName: 'Andrew' },
+  { id: 'tyler', name: 'Tyler', teamName: 'Tyler' },
+  { id: 'scott', name: 'Scott', teamName: 'Scott' }
+];
 
 async function loadJson(path, fallback) {
   try {
@@ -85,12 +93,13 @@ function bindEvents() {
   $('#resetRulesBtn').addEventListener('click', () => { state.settings = structuredClone(defaults.settings); save(); renderAll(); toast('Rules reset to defaults.'); });
   $('#undoPickBtn').addEventListener('click', undoPick);
   $('#resetDraftBtn').addEventListener('click', resetDraft);
-  $('#addOwnerBtn').addEventListener('click', addOwner);
+  $('#addOwnerBtn')?.addEventListener('click', addOwner);
   $('#addOwnerBtnDraft')?.addEventListener('click', addOwner);
   $('#loadSampleOwnersBtn')?.addEventListener('click', loadSampleOwners);
+  $('#restoreFinalOwnersBtn')?.addEventListener('click', restoreFinalOwners);
   $('#removeOwnerBtnDraft')?.addEventListener('click', removeOwnerFromDraftRoom);
   $('#runLotteryBtn')?.addEventListener('click', runDraftLottery);
-  $('#resetOrderBtn')?.addEventListener('click', resetDraftOrderToTeamList);
+  $('#replayLotteryBtn')?.addEventListener('click', replayLockedLottery);
   $('#closeSpyLottery')?.addEventListener('click', closeSpyLottery);
   $('#spyLotteryModal')?.addEventListener('click', (e) => { if (e.target.id === 'spyLotteryModal') closeSpyLottery(); });
   $('#loadDemoPlayersBtn')?.addEventListener('click', loadDemoPlayers);
@@ -137,6 +146,7 @@ function renderAll() {
   renderDashboardCards();
   renderDraft();
   renderRosters();
+  renderTeamManager();
   renderLeaderboard();
   renderPlayersTable();
   renderRulesForms();
@@ -174,7 +184,6 @@ function currentOwnerId() {
 function renderDraft() {
   $('#draftedCount').textContent = state.draftBoard.picks.length;
   renderDraftBoard();
-  renderDraftOwnerList();
   renderDraftOrderEditor();
   renderDraftLottery();
   renderPickHistory();
@@ -317,10 +326,13 @@ function undoPick() {
 }
 
 function resetDraft() {
-  if (!confirm('Reset the entire draft and clear all rosters?')) return;
+  if (!confirm('Reset the entire draft, clear all rosters, and clear the locked lottery results?')) return;
   state.draftBoard.picks = [];
   state.rosters = {};
-  save(); renderAll(); toast('Draft reset.');
+  state.owners.forEach(o => { state.rosters[o.id] = []; });
+  state.draftBoard.lotteryResult = [];
+  state.draftBoard.draftOrder = state.owners.map(o => o.id);
+  save(); renderAll(); toast('Draft and lottery reset.');
 }
 
 function renderDraftOrderEditor() {
@@ -343,11 +355,18 @@ function moveOwner(id, delta) {
 }
 
 
-function lotteryWeightForOwner(owner, rankedOwners) {
-  const index = rankedOwners.findIndex(o => o.id === owner.id);
-  const base = Math.max(1, rankedOwners.length - index);
-  const rosterSize = (state.rosters[owner.id] || []).length;
-  return Math.max(1, base + Math.max(0, 3 - rosterSize));
+function equalShuffleOwners(owners) {
+  const arr = [...owners];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function lockedLotteryOrderIds() {
+  const result = Array.isArray(state.draftBoard.lotteryResult) ? state.draftBoard.lotteryResult : [];
+  return result.map(r => typeof r === 'string' ? r : r.id).filter(id => state.owners.some(o => String(o.id) === String(id)));
 }
 
 function renderDraftLottery() {
@@ -356,54 +375,46 @@ function renderDraftLottery() {
   if (!status || !results) return;
   if (!state.owners.length) {
     status.textContent = 'Add rosters first.';
-    results.innerHTML = '<p class="muted">No teams available for the lottery yet.</p>';
+    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
     return;
   }
-  const order = state.draftBoard.draftOrder?.length ? state.draftBoard.draftOrder : state.owners.map(o => o.id);
-  const ranked = state.owners
-    .map(o => ({ ...o, total: ownerTotal(o.id, state) }))
-    .sort((a, b) => a.total - b.total || String(a.teamName).localeCompare(String(b.teamName)));
-  const hasResult = Array.isArray(state.draftBoard.lotteryResult) && state.draftBoard.lotteryResult.length;
-  status.textContent = hasResult ? 'Mission complete. Draft order locked.' : 'Standing by in the basement.';
-  results.innerHTML = order.map((id, index) => {
-    const owner = state.owners.find(o => o.id === id);
-    if (!owner) return '';
-    const weight = lotteryWeightForOwner(owner, ranked);
-    return `<div class="mini-list-row lottery-row"><div><strong>${index + 1}. ${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${weight} secret dossier${weight === 1 ? '' : 's'}</div></div><span>${ownerTotal(owner.id, state)} pts</span></div>`;
-  }).join('');
-}
-
-function weightedDraw(pool, rankedOwners) {
-  const total = pool.reduce((sum, owner) => sum + lotteryWeightForOwner(owner, rankedOwners), 0);
-  let ticket = Math.random() * total;
-  for (const owner of pool) {
-    ticket -= lotteryWeightForOwner(owner, rankedOwners);
-    if (ticket <= 0) return owner;
+  const lockedOrder = lockedLotteryOrderIds();
+  const hasResult = lockedOrder.length === state.owners.length;
+  status.textContent = hasResult ? 'Mission complete. Draft order locked until Reset Draft.' : 'LOTTERY NOT COMPLETED YET';
+  if (!hasResult) {
+    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div><p class="muted compact-note">All five owners have equal odds. Run the lottery once to lock the order.</p>';
+    return;
   }
-  return pool[pool.length - 1];
+  results.innerHTML = lockedOrder.map((id, index) => {
+    const owner = state.owners.find(o => String(o.id) === String(id));
+    if (!owner) return '';
+    return `<div class="mini-list-row lottery-row locked"><div><strong>${index + 1}. ${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • locked equal-weight pick</div></div><span>LOCKED</span></div>`;
+  }).join('');
 }
 
 function runDraftLottery() {
   ensureOwnersExist();
   if (!state.owners.length) return toast('Add teams before running the lottery.');
-  if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
-  const rankedOwners = state.owners
-    .map(o => ({ ...o, total: ownerTotal(o.id, state) }))
-    .sort((a, b) => a.total - b.total || String(a.teamName).localeCompare(String(b.teamName)));
-  const remaining = [...state.owners];
-  const result = [];
-  while (remaining.length) {
-    const winner = weightedDraw(remaining, rankedOwners);
-    result.push(winner.id);
-    remaining.splice(remaining.findIndex(o => o.id === winner.id), 1);
+  const lockedOrder = lockedLotteryOrderIds();
+  if (lockedOrder.length === state.owners.length) {
+    playSpyLottery(lockedOrder);
+    return toast('Lottery already locked. Use Reset Draft to clear it.');
   }
+  if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
+  const result = equalShuffleOwners(state.owners).map(owner => owner.id);
   state.draftBoard.draftOrder = result;
-  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString() }));
+  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal' }));
   save();
   renderAll();
   playSpyLottery(result);
   const first = state.owners.find(o => o.id === result[0]);
-  toast(`Mission complete: ${first?.teamName || 'Team 1'} wins the draft lottery.`);
+  toast(`Lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.`);
+}
+
+function replayLockedLottery() {
+  const lockedOrder = lockedLotteryOrderIds();
+  if (lockedOrder.length !== state.owners.length) return toast('LOTTERY NOT COMPLETED YET. Run the lottery first.');
+  playSpyLottery(lockedOrder);
 }
 
 function sleep(ms) {
@@ -411,10 +422,15 @@ function sleep(ms) {
 }
 
 function ownerLotteryLabel(owner) {
-  if (!owner) return { primary: 'Unknown Team', secondary: 'No owner file' };
+  if (!owner) return { primary: 'Unknown Team', secondary: 'No owner file', jerseyClass: '', number: '00', jerseyName: 'POOL' };
   const primary = owner.teamName || owner.name || 'Unnamed Team';
-  const secondary = owner.name && owner.name !== owner.teamName ? owner.name : 'Draft lottery target';
-  return { primary, secondary };
+  const lower = String(owner.id || owner.name || '').toLowerCase();
+  if (lower.includes('nick')) return { primary, secondary: 'Nick • Sundin Leafs jersey', jerseyClass: 'owner-nick', number: '13', jerseyName: 'SUNDIN' };
+  if (lower.includes('andrew')) return { primary, secondary: 'Andrew • Lindros Flyers jersey', jerseyClass: 'owner-andrew', number: '88', jerseyName: 'LINDROS' };
+  if (lower.includes('chris')) return { primary, secondary: 'Chris • basement squad target', jerseyClass: 'owner-chris', number: '97', jerseyName: 'CHRIS' };
+  if (lower.includes('tyler')) return { primary, secondary: 'Tyler • basement squad target', jerseyClass: 'owner-tyler', number: '64', jerseyName: 'TYLER' };
+  if (lower.includes('scott')) return { primary, secondary: 'Scott • basement squad target', jerseyClass: 'owner-scott', number: '98', jerseyName: 'SCOTT' };
+  return { primary, secondary: `${owner.name || 'Owner'} • draft lottery target`, jerseyClass: '', number: '00', jerseyName: 'POOL' };
 }
 
 async function playSpyLottery(orderIds) {
@@ -424,6 +440,7 @@ async function playSpyLottery(orderIds) {
   const list = $('#spyResultsList');
   const flash = $('#scopeFlash');
   const scope = $('#scopeView');
+  const stick = $('#stickTarget');
   if (!modal || !target || !list || !scope) return;
 
   list.innerHTML = '';
@@ -431,26 +448,35 @@ async function playSpyLottery(orderIds) {
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
   target.textContent = 'Mission loading...';
-  if (meta) meta.textContent = 'Draft lottery sequence armed';
+  if (meta) meta.textContent = 'Equal odds armed • five basement targets';
+  stick?.classList.remove('shot', 'owner-nick', 'owner-andrew', 'owner-chris', 'owner-tyler', 'owner-scott');
   await sleep(550);
 
   for (let i = 0; i < orderIds.length; i++) {
-    const owner = state.owners.find(o => o.id === orderIds[i]);
+    const owner = state.owners.find(o => String(o.id) === String(orderIds[i]));
     const label = ownerLotteryLabel(owner);
     target.textContent = label.primary;
     if (meta) meta.textContent = `Pick ${i + 1} • ${label.secondary}`;
-    scope.style.setProperty('--scope-x', `${42 + Math.random() * 18}%`);
-    scope.style.setProperty('--scope-y', `${36 + Math.random() * 22}%`);
+    scope.style.setProperty('--scope-x', `${39 + Math.random() * 22}%`);
+    scope.style.setProperty('--scope-y', `${30 + Math.random() * 24}%`);
+    if (stick) {
+      stick.className = `stick-target ${label.jerseyClass || ''}`.trim();
+      const num = stick.querySelector('.jersey-number');
+      const name = stick.querySelector('.jersey-name');
+      if (num) num.textContent = label.number;
+      if (name) name.textContent = label.jerseyName;
+    }
     scope.classList.remove('scope-hit');
     scope.classList.add('scope-locking');
-    await sleep(760);
+    await sleep(820);
     scope.classList.remove('scope-locking');
     scope.classList.add('scope-hit');
+    stick?.classList.add('shot');
     flash?.classList.remove('pulse');
     void flash?.offsetWidth;
     flash?.classList.add('pulse');
     list.insertAdjacentHTML('beforeend', `<li><span>${i + 1}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(label.secondary)}</small></li>`);
-    await sleep(520);
+    await sleep(680);
   }
 
   target.textContent = 'ORDER CONFIRMED';
@@ -463,15 +489,6 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-}
-
-function resetDraftOrderToTeamList() {
-  ensureOwnersExist();
-  state.draftBoard.draftOrder = state.owners.map(o => o.id);
-  state.draftBoard.lotteryResult = [];
-  save();
-  renderAll();
-  toast('Draft order reset to the team list.');
 }
 
 function renderPickHistory() {
@@ -518,47 +535,52 @@ function addOwner(presetName = null, presetTeamName = null) {
 
 function ensureOwnersExist() {
   if (!Array.isArray(state.owners)) state.owners = [];
-  if (!state.owners.length) loadSampleOwners(false);
+  if (!state.owners.length) restoreFinalOwners(false);
   state.owners.forEach(o => { state.rosters[o.id] = state.rosters[o.id] || []; });
-  state.draftBoard.draftOrder = (state.draftBoard.draftOrder || []).filter(id => state.owners.some(o => o.id === id));
+  state.draftBoard.draftOrder = (state.draftBoard.draftOrder || []).filter(id => state.owners.some(o => String(o.id) === String(id)));
   state.owners.forEach(o => { if (!state.draftBoard.draftOrder.includes(o.id)) state.draftBoard.draftOrder.push(o.id); });
+  state.draftBoard.lotteryResult = (state.draftBoard.lotteryResult || []).filter(r => state.owners.some(o => String(o.id) === String(typeof r === 'string' ? r : r.id)));
+}
+
+function restoreFinalOwners(showToast = true) {
+  const oldRosters = state.rosters || {};
+  state.owners = structuredClone(FINAL_OWNERS);
+  state.rosters = Object.fromEntries(state.owners.map(o => [o.id, oldRosters[o.id] || []]));
+  state.draftBoard.draftOrder = state.owners.map(o => o.id);
+  state.draftBoard.lotteryResult = [];
+  save();
+  renderAll();
+  if (showToast) toast('Restored final five owners and cleared lottery results.');
 }
 
 function loadSampleOwners(showToast = true) {
-  const sample = [
-    ['nick', 'Nick', "Nick's Team"],
-    ['owner2', 'Owner 2', 'Owner 2'],
-    ['owner3', 'Owner 3', 'Owner 3'],
-    ['owner4', 'Owner 4', 'Owner 4'],
-    ['owner5', 'Owner 5', 'Owner 5'],
-    ['owner6', 'Owner 6', 'Owner 6'],
-    ['owner7', 'Owner 7', 'Owner 7'],
-    ['owner8', 'Owner 8', 'Owner 8']
-  ];
-  state.owners = sample.map(([id, name, teamName]) => ({ id, name, teamName }));
-  state.rosters = Object.fromEntries(state.owners.map(o => [o.id, state.rosters?.[o.id] || []]));
-  state.draftBoard.draftOrder = state.owners.map(o => o.id);
-  save();
-  renderAll();
-  if (showToast) toast('Loaded 8 sample rosters.');
+  restoreFinalOwners(false);
+  if (showToast) toast('Final five rosters loaded.');
 }
 
-function normalizeStateForDraftTesting() {
-  state.settings = state.settings || structuredClone(defaults.settings || {});
-  state.settings.scoring = state.settings.scoring || {};
-  state.settings.rosterRules = state.settings.rosterRules || { totalRosterSize: 18 };
-  state.settings.draftRules = state.settings.draftRules || { type: 'snake', rounds: 18 };
-  state.owners = Array.isArray(state.owners) ? state.owners : [];
-  state.rosters = state.rosters && typeof state.rosters === 'object' ? state.rosters : {};
-  state.draftBoard = state.draftBoard || { currentPick: 1, draftOrder: [], picks: [] };
-  state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
-  state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) ? state.draftBoard.draftOrder : [];
-  state.manualPlayers = Array.isArray(state.manualPlayers) ? state.manualPlayers : [];
-  state.stats = state.stats || { fetchedAt: null, players: [] };
-  state.stats.players = Array.isArray(state.stats.players) ? state.stats.players : [];
-  ensureOwnersExist();
+function renderTeamManager() {
+  const el = $('#teamManagerList');
+  if (!el) return;
+  const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
+  const removeSelect = $('#removeOwnerSelect');
+  if (removeSelect) {
+    removeSelect.innerHTML = state.owners.map(owner => {
+      const count = (state.rosters[owner.id] || []).length;
+      return `<option value="${escapeHtml(owner.id)}">${escapeHtml(owner.teamName)} — ${count} players</option>`;
+    }).join('') || '<option value="">No teams available</option>';
+    removeSelect.disabled = !state.owners.length;
+  }
+  const removeBtn = $('#removeOwnerBtnDraft');
+  if (removeBtn) removeBtn.disabled = !state.owners.length;
+  el.innerHTML = state.owners.map(owner => {
+    const count = (state.rosters[owner.id] || []).length;
+    const label = ownerLotteryLabel(owner);
+    return `<div class="mini-list-row roster-manager-row team-manager-row ${escapeHtml(label.jerseyClass)}">
+      <div><strong>${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${count}/${limit} players • ${escapeHtml(label.jerseyName)} ${escapeHtml(label.number)}</div></div>
+      <span class="badge">FINAL OWNER</span>
+    </div>`;
+  }).join('') || '<p class="muted">No rosters yet.</p>';
 }
-
 
 function loadDemoPlayers() {
   const demo = [
@@ -595,31 +617,6 @@ function loadDemoPlayers() {
   save();
   renderAll();
   toast('Demo player board loaded. You can test Add to Roster now.');
-}
-
-function renderDraftOwnerList() {
-  const el = $('#draftOwnerList');
-  if (!el) return;
-  const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
-  const removeSelect = $('#removeOwnerSelect');
-  if (removeSelect) {
-    removeSelect.innerHTML = state.owners.map(owner => {
-      const count = (state.rosters[owner.id] || []).length;
-      return `<option value="${escapeHtml(owner.id)}">${escapeHtml(owner.teamName)} — ${count} players</option>`;
-    }).join('') || '<option value="">No teams available</option>';
-    removeSelect.disabled = !state.owners.length;
-  }
-  const removeBtn = $('#removeOwnerBtnDraft');
-  if (removeBtn) removeBtn.disabled = !state.owners.length;
-
-  el.innerHTML = state.owners.map(owner => {
-    const count = (state.rosters[owner.id] || []).length;
-    return `<div class="mini-list-row roster-manager-row">
-      <div><strong>${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${count}/${limit} players</div></div>
-      <button class="small-btn danger" data-remove-owner-inline="${escapeHtml(owner.id)}">Remove</button>
-    </div>`;
-  }).join('') || '<p class="muted">No rosters yet.</p>';
-  $$('[data-remove-owner-inline]').forEach(btn => btn.addEventListener('click', () => removeOwner(btn.dataset.removeOwnerInline)));
 }
 
 function removeOwnerFromDraftRoom() {

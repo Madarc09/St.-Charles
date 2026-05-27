@@ -18,6 +18,7 @@
     <button class="tab active" data-tab="dashboard">Home</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
+    <button class="tab" data-tab="teams">Teams</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
     <button class="tab" data-tab="admin">Admin</button>
   </nav>
@@ -87,7 +88,7 @@
           <div class="lottery-machine">
             <p class="eyebrow">Draft Lottery</p>
             <h3>Basement Spy Lottery</h3>
-            <p class="muted">Run the draft lottery like an old late-90s spy-game mission. The scope locks onto each team in order, then the final order lands on a classified folder page.</p>
+            <p class="muted">Run an equal-weight draft lottery with a late-90s basement spy-game animation. Once it runs, the order locks and stays saved until Reset Draft is used.</p>
             <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
               <div class="lottery-puck spy-disc">64</div>
               <div>
@@ -97,25 +98,10 @@
             </div>
             <div class="actions stack-sm lottery-actions">
               <button class="primary" id="runLotteryBtn">Run Spy Lottery</button>
-              <button id="resetOrderBtn">Reset Order to Team List</button>
+              <button id="replayLotteryBtn">Replay Locked Results</button>
             </div>
             <div id="lotteryResults" class="mini-list lottery-results"></div>
           </div>
-          <hr />
-          <h3>Manage Rosters</h3>
-          <p class="muted">Create, test, or remove teams directly from the Draft Room.</p>
-          <div class="actions stack-sm roster-tools">
-            <button id="addOwnerBtnDraft">Add Owner / Roster</button>
-            <button id="loadSampleOwnersBtn">Load 8 Sample Rosters</button>
-            <div class="remove-team-box">
-              <label for="removeOwnerSelect">Remove team</label>
-              <div class="remove-team-row">
-                <select id="removeOwnerSelect"></select>
-                <button class="danger" id="removeOwnerBtnDraft">Remove Team</button>
-              </div>
-            </div>
-          </div>
-          <div id="draftOwnerList" class="mini-list roster-manager-list"></div>
           <hr />
           <h3>Draft Order</h3>
           <p class="muted">This is kept for reference, but the new draft board lets you assign a selected player to any roster.</p>
@@ -135,9 +121,38 @@
           <p class="eyebrow">Rosters</p>
           <h2>Teams and drafted players</h2>
         </div>
-        <button id="addOwnerBtn">Add Owner</button>
       </div>
       <div id="rosterCards" class="grid roster-grid"></div>
+    </section>
+
+
+
+    <section id="teams" class="panel">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Team Management</p>
+          <h2>Final owners and roster controls</h2>
+          <p class="muted">Current official owners: Nick, Chris, Andrew, Tyler, and Scott. This page holds roster/team controls so the Draft Room stays clean.</p>
+        </div>
+        <button id="restoreFinalOwnersBtn" class="primary">Restore Final 5 Owners</button>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Final Team List</h3>
+          <div id="teamManagerList" class="mini-list roster-manager-list"></div>
+        </article>
+        <article class="card">
+          <h3>Remove Team</h3>
+          <p class="muted">Use this only for testing. Removing a team releases its drafted players back to the board and removes that team from the draft order.</p>
+          <div class="remove-team-box">
+            <label for="removeOwnerSelect">Remove team</label>
+            <div class="remove-team-row">
+              <select id="removeOwnerSelect"></select>
+              <button class="danger" id="removeOwnerBtnDraft">Remove Team</button>
+            </div>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section id="rules" class="panel">
@@ -234,6 +249,12 @@
         <div class="scope-cross vertical"></div>
         <div class="scope-sweep"></div>
         <div class="scope-flash" id="scopeFlash"></div>
+        <div class="stick-target" id="stickTarget" aria-hidden="true">
+          <div class="stick-head"></div>
+          <div class="stick-body"><span class="jersey-number">00</span><span class="jersey-name">POOL</span></div>
+          <div class="stick-arm left"></div><div class="stick-arm right"></div>
+          <div class="stick-leg left"></div><div class="stick-leg right"></div>
+        </div>
         <div class="target-card" id="targetCard">
           <span class="target-label">TARGET LOCK</span>
           <strong id="scopeTargetName">Awaiting teams</strong>

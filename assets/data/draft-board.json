@@ -1,5 +1,12 @@
 {
   "currentPick": 1,
-  "draftOrder": ["nick", "owner2", "owner3", "owner4"],
-  "picks": []
+  "draftOrder": [
+    "nick",
+    "chris",
+    "andrew",
+    "tyler",
+    "scott"
+  ],
+  "picks": [],
+  "lotteryResult": []
 }

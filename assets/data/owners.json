@@ -1,6 +1,27 @@
 [
-  { "id": "nick", "name": "Nick", "teamName": "Nick's Team" },
-  { "id": "owner2", "name": "Owner 2", "teamName": "Owner 2" },
-  { "id": "owner3", "name": "Owner 3", "teamName": "Owner 3" },
-  { "id": "owner4", "name": "Owner 4", "teamName": "Owner 4" }
+  {
+    "id": "nick",
+    "name": "Nick",
+    "teamName": "Nick"
+  },
+  {
+    "id": "chris",
+    "name": "Chris",
+    "teamName": "Chris"
+  },
+  {
+    "id": "andrew",
+    "name": "Andrew",
+    "teamName": "Andrew"
+  },
+  {
+    "id": "tyler",
+    "name": "Tyler",
+    "teamName": "Tyler"
+  },
+  {
+    "id": "scott",
+    "name": "Scott",
+    "teamName": "Scott"
+  }
 ]

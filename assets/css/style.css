@@ -1297,3 +1297,160 @@ body.lottery-running { overflow: hidden; }
   .scope-cross.vertical { top: calc(var(--scope-y) - 42vw); height: 84vw; }
   .target-card { top: calc(var(--scope-y) + 34vw); min-width: min(310px, 82vw); }
 }
+
+/* v12: final owners, Teams tab, and cartoon basement-spy lottery */
+.lottery-not-complete {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: 1rem;
+  border: 2px dashed rgba(255, 240, 184, .45);
+  border-radius: 16px;
+  background:
+    repeating-linear-gradient(135deg, rgba(0,0,0,.14) 0 8px, rgba(255,255,255,.04) 8px 16px),
+    rgba(12, 9, 6, .54);
+  color: #fff0b8;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: .08em;
+  font-size: clamp(1.15rem, 3vw, 2rem);
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0,0,0,.72), 0 0 18px rgba(255, 216, 91, .2);
+}
+.lottery-row.locked {
+  border-color: rgba(158, 255, 202, .32);
+  background: linear-gradient(90deg, rgba(158,255,202,.11), rgba(255,240,184,.08));
+}
+.team-manager-row.owner-nick { box-shadow: inset 4px 0 0 rgba(65, 126, 210, .95); }
+.team-manager-row.owner-andrew { box-shadow: inset 4px 0 0 rgba(255, 128, 42, .95); }
+.team-manager-row.owner-chris { box-shadow: inset 4px 0 0 rgba(126, 255, 202, .8); }
+.team-manager-row.owner-tyler { box-shadow: inset 4px 0 0 rgba(192, 160, 255, .8); }
+.team-manager-row.owner-scott { box-shadow: inset 4px 0 0 rgba(255, 216, 91, .8); }
+.stick-target {
+  position: absolute;
+  left: var(--scope-x);
+  top: calc(var(--scope-y) + 2px);
+  width: 84px;
+  height: 150px;
+  translate: -50% -50%;
+  transform-origin: 50% 95%;
+  z-index: 2;
+  filter: drop-shadow(0 14px 14px rgba(0,0,0,.62));
+  transition: left .48s ease, top .48s ease, transform .28s ease, opacity .28s ease;
+}
+.stick-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 34px;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: #f3d0a0;
+  border: 3px solid #171717;
+  box-shadow: inset -4px -3px 0 rgba(99,59,31,.2);
+}
+.stick-body {
+  position: absolute;
+  left: 50%;
+  top: 38px;
+  width: 58px;
+  height: 58px;
+  translate: -50% 0;
+  border-radius: 9px 9px 6px 6px;
+  background: linear-gradient(180deg, #424242, #1b1b1b);
+  border: 3px solid #151515;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 950;
+  text-align: center;
+  overflow: hidden;
+}
+.stick-body::before, .stick-body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: rgba(255,255,255,.74);
+}
+.stick-body::before { top: 8px; }
+.stick-body::after { bottom: 8px; }
+.jersey-number {
+  position: relative;
+  z-index: 2;
+  font-size: 1.18rem;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #000;
+}
+.jersey-name {
+  position: absolute;
+  z-index: 2;
+  bottom: 2px;
+  left: 2px;
+  right: 2px;
+  font-size: .43rem;
+  letter-spacing: .05em;
+  color: rgba(255,255,255,.86);
+}
+.stick-arm, .stick-leg {
+  position: absolute;
+  background: #111;
+  border-radius: 999px;
+  transform-origin: 50% 0;
+}
+.stick-arm { top: 49px; width: 7px; height: 54px; }
+.stick-arm.left { left: 9px; rotate: 35deg; }
+.stick-arm.right { right: 9px; rotate: -35deg; }
+.stick-leg { top: 91px; width: 8px; height: 62px; }
+.stick-leg.left { left: 31px; rotate: 16deg; }
+.stick-leg.right { right: 31px; rotate: -16deg; }
+.stick-target.owner-nick .stick-body {
+  background: linear-gradient(180deg, #1f5da9 0 58%, #12386d 58% 100%);
+  color: #fff;
+}
+.stick-target.owner-nick .stick-body::before,
+.stick-target.owner-nick .stick-body::after { background: #fff; }
+.stick-target.owner-andrew .stick-body {
+  background: linear-gradient(180deg, #f47a21 0 58%, #111 58% 100%);
+  color: #fff;
+}
+.stick-target.owner-andrew .stick-body::before,
+.stick-target.owner-andrew .stick-body::after { background: #fff; }
+.stick-target.owner-chris .stick-body { background: linear-gradient(180deg, #085c3b, #0b2118); }
+.stick-target.owner-tyler .stick-body { background: linear-gradient(180deg, #442b7e, #160b2e); }
+.stick-target.owner-scott .stick-body { background: linear-gradient(180deg, #b18a21, #2e2308); }
+.scope-view.scope-locking .stick-target {
+  transform: scale(1.08) translateY(-4px);
+}
+.stick-target.shot {
+  animation: stickTargetHit .58s cubic-bezier(.22,.86,.25,1) forwards;
+}
+@keyframes stickTargetHit {
+  0% { transform: scale(1.04) rotate(0deg); opacity: 1; }
+  38% { transform: translate(18px, -10px) scale(1.02) rotate(22deg); opacity: 1; }
+  100% { transform: translate(48px, 58px) scale(.92) rotate(84deg); opacity: .72; }
+}
+.scope-view.scope-hit .stick-target::after {
+  content: "LOCKED";
+  position: absolute;
+  left: 50%;
+  top: -26px;
+  translate: -50% 0;
+  padding: .22rem .45rem;
+  border-radius: 6px;
+  background: rgba(255, 76, 51, .86);
+  color: #fff;
+  font-size: .58rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  letter-spacing: .12em;
+  box-shadow: 0 0 18px rgba(255,76,51,.35);
+}
+@media (max-width: 720px) {
+  .stick-target { width: 68px; height: 122px; }
+  .stick-head { width: 28px; }
+  .stick-body { top: 32px; width: 48px; height: 50px; }
+  .stick-arm { top: 42px; height: 44px; }
+  .stick-leg { top: 78px; height: 50px; }
+}
