@@ -640,26 +640,38 @@ function renderDraftLottery() {
 }
 
 async function runDraftLottery() {
-  ensureOwnersExist();
-  if (!state.owners.length) return toast('Add teams before running the lottery.');
-  const lockedOrder = lockedLotteryOrderIds();
-  if (lockedOrder.length === state.owners.length) {
-    playSpyLottery(lockedOrder);
-    return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
+  try {
+    ensureOwnersExist();
+    if (!state.owners.length) return toast('Add teams before running the lottery.');
+    const lockedOrder = lockedLotteryOrderIds();
+    if (lockedOrder.length === state.owners.length) {
+      playSpyLottery(lockedOrder);
+      return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
+    }
+    if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
+    let result = equalShuffleOwners(state.owners).map(owner => owner.id);
+    try {
+      result = await saveGlobalLottery(result);
+    } catch (err) {
+      console.warn('Global lottery save failed; continuing with browser lock.', err);
+    }
+    state.draftBoard.draftOrder = result;
+    state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
+    state.draftBoard.lotteryRunNumber = 1;
+    updateLotteryShareUrl(result);
+    save();
+    renderAll();
+    playSpyLottery(result);
+    const first = state.owners.find(o => o.id === result[0]);
+    toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
+  } catch (err) {
+    console.error('Lottery run failed', err);
+    toast('Lottery had an error, opening fallback broadcast.');
+    const result = (state.owners?.length ? equalShuffleOwners(state.owners).map(owner => owner.id) : ['nick','chris','andrew','tyler','scott']);
+    try { playSpyLottery(result); } catch (inner) { console.error(inner); }
   }
-  if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
-  let result = equalShuffleOwners(state.owners).map(owner => owner.id);
-  result = await saveGlobalLottery(result);
-  state.draftBoard.draftOrder = result;
-  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
-  state.draftBoard.lotteryRunNumber = 1;
-  updateLotteryShareUrl(result);
-  save();
-  renderAll();
-  playSpyLottery(result);
-  const first = state.owners.find(o => o.id === result[0]);
-  toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
 }
+
 
 function replayLockedLottery() {
   const lockedOrder = lockedLotteryOrderIds();

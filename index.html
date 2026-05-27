@@ -345,6 +345,114 @@
       document.body.dataset.activeTab = tab;
     });
   </script>
+
+  <script>
+    // Emergency lottery fallback: guarantees the lottery button opens the broadcast clip
+    // even if the main module fails before binding its own click handler.
+    (function () {
+      var FALLBACK_OWNER_ORDER = ['Nick', 'Chris', 'Andrew', 'Tyler', 'Scott'];
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
+      function showToast(msg) {
+        var t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 2600);
+      }
+      function openBroadcast(orderNames) {
+        var modal = document.getElementById('spyLotteryModal');
+        var screen = modal && modal.querySelector('.spy-screen');
+        var scope = document.getElementById('scopeView');
+        if (!modal || !screen || !scope) return false;
+        screen.classList.add('broadcast-lottery-mode');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('lottery-running');
+        scope.innerHTML = '';
+        var frame = document.createElement('iframe');
+        frame.id = 'broadcastLotteryFrame';
+        frame.className = 'broadcast-lottery-frame';
+        frame.title = 'Hockey Pool Draft Lottery Broadcast';
+        frame.loading = 'eager';
+        frame.setAttribute('allow', 'autoplay');
+        frame.src = 'assets/lottery-broadcast.html?order=' + encodeURIComponent(orderNames.join('|'));
+        scope.appendChild(frame);
+        return true;
+      }
+      function closeBroadcast() {
+        var modal = document.getElementById('spyLotteryModal');
+        var screen = modal && modal.querySelector('.spy-screen');
+        var frame = document.getElementById('broadcastLotteryFrame');
+        if (frame) frame.remove();
+        if (screen) screen.classList.remove('broadcast-lottery-mode');
+        if (modal) {
+          modal.classList.remove('show');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+        document.body.classList.remove('lottery-running');
+      }
+      function getLockedOrder() {
+        try {
+          var saved = JSON.parse(localStorage.getItem('custom-hockey-pool-fallback-lottery') || 'null');
+          if (saved && Array.isArray(saved.order) && saved.order.length === 5) return saved.order;
+        } catch (e) {}
+        return null;
+      }
+      function setLockedOrder(order) {
+        try {
+          localStorage.setItem('custom-hockey-pool-fallback-lottery', JSON.stringify({ order: order, savedAt: new Date().toISOString() }));
+        } catch (e) {}
+      }
+      function updateFallbackResults(order) {
+        var results = document.getElementById('lotteryResults');
+        var status = document.getElementById('lotteryStatus');
+        var run = document.getElementById('runLotteryBtn');
+        if (status) status.textContent = 'Mission complete. Draft order locked until Reset Draft.';
+        if (run) run.textContent = 'REPLAY LOCKED LOTTERY';
+        if (results) {
+          results.innerHTML = order.map(function (name, i) {
+            return '<div class="mini-item"><span>' + (i + 1) + '</span><strong>' + String(name).replace(/[&<>"]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}) + '</strong></div>';
+          }).join('');
+        }
+      }
+      document.addEventListener('click', function (event) {
+        var close = event.target.closest && event.target.closest('#closeSpyLottery');
+        if (close) closeBroadcast();
+
+        var btn = event.target.closest && event.target.closest('#runLotteryBtn, #replayLotteryBtn');
+        if (!btn) return;
+
+        // Let the main app try first; then guarantee a working fallback if no modal opened.
+        setTimeout(function () {
+          var modal = document.getElementById('spyLotteryModal');
+          if (modal && modal.classList.contains('show')) return;
+          var order = getLockedOrder();
+          if (!order) {
+            order = shuffle(FALLBACK_OWNER_ORDER);
+            setLockedOrder(order);
+          }
+          updateFallbackResults(order);
+          if (openBroadcast(order)) showToast('Lottery clip opened using fallback player.');
+        }, 250);
+      }, true);
+
+      document.addEventListener('click', function (event) {
+        var reset = event.target.closest && event.target.closest('#resetDraftBtn');
+        if (!reset) return;
+        setTimeout(function () {
+          try { localStorage.removeItem('custom-hockey-pool-fallback-lottery'); } catch(e) {}
+        }, 250);
+      }, true);
+    })();
+  </script>
+
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
