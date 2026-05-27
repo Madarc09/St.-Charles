@@ -48,12 +48,7 @@
       </div>
 
       <div id="cleanLotteryRoom" class="clean-lottery-room" hidden>
-        <div class="clean-draft-topbar">
-          <div>
-            <p class="eyebrow">Draft Lottery</p>
-            <h2>Set the official draft order</h2>
-            <p class="muted">Run the lottery first. Once the order is locked, the draft room uses it for the snake draft.</p>
-          </div>
+        <div class="clean-lottery-simple-back">
           <button id="cleanLotteryBackBtn" type="button">Back</button>
         </div>
 
@@ -1771,11 +1766,16 @@
           return;
         }
         if (!playersLoaded) {
-          pullPlayers();
+          showBoardLoading("Loading real NHL player board…");
+          if (!loadingPlayers) setTimeout(() => pullPlayers(), 50);
           return;
         }
         const pick = currentPick();
         const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
+        if (!players.length) {
+          forceFreshPlayerLoad("Re-loading real NHL player board after draft sync…");
+          return;
+        }
         const rows = availablePlayers().map((p, i) => {
           const positionAllowed = activeOwnerId ? canOwnerDraftPosition(activeOwnerId, p.position) : false;
           const disabled = (canPick && positionAllowed) ? "" : "disabled";
@@ -1815,6 +1815,14 @@
         toast(`Signed ${player.name} to ${o?.teamName || activeOwnerId}.`);
         renderRoom();
       }
+      function forceFreshPlayerLoad(reason = "") {
+        playersLoaded = false;
+        loadingPlayers = false;
+        players = [];
+        showBoardLoading(reason || "Loading real NHL player board…");
+        setTimeout(() => pullPlayers(), 50);
+      }
+
       async function startRoom() {
         $("#cleanDraftEntry").hidden = true;
         $("#cleanDraftRoom").hidden = false;
@@ -1830,13 +1838,18 @@
           select.onchange = () => {
             activeOwnerId = select.value;
             localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
+            renderRosterNeeds();
             renderRoom();
-            pullPlayers();
+            if (!playersLoaded || !players.length) {
+              forceFreshPlayerLoad("Loading real NHL player board for " + (owner(activeOwnerId)?.teamName || activeOwnerId) + "…");
+            }
           };
         }
         if (activeOwnerId && select) select.value = activeOwnerId;
         renderRoom();
-        pullPlayers();
+        if (activeOwnerId) {
+          forceFreshPlayerLoad("Loading real NHL player board…");
+        }
         startPolling();
       }
       async function refreshRoom() {

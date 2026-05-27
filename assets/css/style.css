@@ -4542,3 +4542,26 @@ body.lottery-running { overflow: hidden; }
     min-height:90px;
   }
 }
+
+
+/* v42 lottery cleanup + player loading repair */
+.clean-lottery-simple-back{
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom:4px;
+}
+.clean-lottery-simple-back button{
+  border-radius:12px;
+  padding:10px 14px;
+}
+.clean-lottery-room .clean-draft-topbar{
+  display:none!important;
+}
+.clean-draft-board{
+  display:block!important;
+  visibility:visible!important;
+}
+.clean-loading-card{
+  min-height:150px;
+  align-content:center;
+}
