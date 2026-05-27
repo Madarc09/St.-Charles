@@ -945,3 +945,40 @@ textarea#rawJson {
   .tabs { gap: .42rem; }
   .tab { padding: .62rem .82rem; font-size: .86rem; }
 }
+
+/* v10 cleanup: shorter cinematic header and simplified Home page */
+.hero-retro {
+  padding: clamp(6px, 1.2vw, 14px) max(8px, calc((100vw - 1420px) / 2));
+}
+.hero-picture-wrap {
+  border-radius: 18px;
+  padding: clamp(4px, .7vw, 7px);
+}
+.hero-picture-wrap::before {
+  inset: 6px;
+  border-radius: 14px;
+}
+.hero-picture {
+  aspect-ratio: 1600 / 410;
+  max-height: 355px;
+  border-radius: 14px;
+  object-fit: cover;
+  object-position: center 48%;
+}
+.home-panel {
+  padding-top: 0;
+}
+.home-leaderboard-card {
+  margin-top: 0;
+}
+@media (max-width: 700px) {
+  .hero-retro { padding: 6px 8px; }
+  .hero-picture-wrap { border-radius: 14px; padding: 4px; }
+  .hero-picture {
+    aspect-ratio: 16 / 5;
+    min-height: 0;
+    max-height: 170px;
+    border-radius: 11px;
+    object-position: center;
+  }
+}

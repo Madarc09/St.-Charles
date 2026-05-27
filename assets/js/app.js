@@ -130,8 +130,8 @@ function setRefreshDisabled(disabled) {
 
 function renderAll() {
   $('#poolTitle').textContent = state.settings.poolName || 'Custom Hockey Pool';
-  $('#seasonDisplay').textContent = formatSeason(state.settings.seasonId);
-  $('#lastUpdatedDisplay').textContent = state.stats.fetchedAt ? new Date(state.stats.fetchedAt).toLocaleString() : 'Never';
+  if ($('#seasonDisplay')) $('#seasonDisplay').textContent = formatSeason(state.settings.seasonId);
+  if ($('#lastUpdatedDisplay')) $('#lastUpdatedDisplay').textContent = state.stats.fetchedAt ? new Date(state.stats.fetchedAt).toLocaleString() : 'Never';
   renderDashboardCards();
   renderDraft();
   renderRosters();
@@ -152,7 +152,9 @@ function renderDashboardCards() {
     ['Drafted Players', state.draftBoard.picks.length],
     ['NHL Players Cached', state.stats.players.length]
   ];
-  $('#dashboardCards').innerHTML = cards.map(([label, val]) => `<article class="card"><span class="label">${label}</span><h2>${val}</h2></article>`).join('');
+  const wrap = $('#dashboardCards');
+  if (!wrap) return;
+  wrap.innerHTML = cards.map(([label, val]) => `<article class="card"><span class="label">${label}</span><h2>${val}</h2></article>`).join('');
 }
 
 function currentOwnerId() {

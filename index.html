@@ -15,7 +15,7 @@
   </header>
 
   <nav class="tabs" aria-label="Main navigation">
-    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab active" data-tab="dashboard">Home</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
@@ -23,26 +23,7 @@
   </nav>
 
   <main class="shell">
-    <section id="dashboard" class="panel active">
-      <div class="grid two">
-        <article class="card score-card">
-          <div>
-            <span class="label">Current season</span>
-            <h2 id="seasonDisplay">—</h2>
-          </div>
-          <div>
-            <span class="label">Last stats refresh</span>
-            <h2 id="lastUpdatedDisplay">Never</h2>
-          </div>
-          <button class="primary" id="refreshStatsBtn">Pull NHL Stats</button>
-        </article>
-        <article class="card">
-          <h2>How this works</h2>
-          <p>This version saves your pool in your browser, pulls free NHL stats, calculates points from your editable rules, and lets you export/import your pool file.</p>
-          <p class="muted">For GitHub/Vercel: upload this folder. The included Vercel API route helps avoid browser CORS issues.</p>
-        </article>
-      </div>
-      <div class="grid three" id="dashboardCards"></div>
+    <section id="dashboard" class="panel active home-panel">
       <article class="card home-leaderboard-card">
         <div class="section-head compact-head">
           <div>
