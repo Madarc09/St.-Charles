@@ -3520,3 +3520,239 @@ body.lottery-running { overflow: hidden; }
   .pop-seats .manager-seat .manager-jersey:after{top:19px!important;font-size:10px!important;width:18px;height:14px}
   .pop-seats .manager-seat b{bottom:78px!important}
 }
+
+
+/* v33 polish: normal announcer nose + clearer manager jerseys */
+.pop-host.detailed-bettman .bettman-long-nose{
+  left:51px!important;
+  top:67px!important;
+  width:15px!important;
+  height:20px!important;
+  background:linear-gradient(90deg,#c9875e 0%, #f1c49c 62%, #9d5d3d 100%)!important;
+  clip-path:none!important;
+  border-radius:55% 45% 50% 50%!important;
+  box-shadow:1px 1px 0 rgba(60,25,10,.28)!important;
+  transform:rotate(4deg)!important;
+}
+.pop-host.detailed-bettman .bettman-long-nose:after{
+  content:"";
+  position:absolute;
+  right:2px;
+  bottom:2px;
+  width:4px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(70,25,10,.38);
+}
+
+/* Bigger clearer bodies in the manager seats */
+.pop-seats .manager-seat .manager-head{
+  width:32px!important;
+  height:32px!important;
+  margin-bottom:-2px;
+}
+.pop-seats .manager-seat .manager-jersey{
+  width:56px!important;
+  height:66px!important;
+  border-radius:10px 10px 6px 6px!important;
+  overflow:visible!important;
+}
+.pop-seats .manager-seat .manager-jersey:before{
+  content:"";
+  position:absolute;
+  left:-12px!important;
+  right:-12px!important;
+  top:13px!important;
+  height:16px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-top:6px solid #fff;
+  border-bottom:6px solid #fff;
+  z-index:3;
+}
+.pop-seats .manager-seat .manager-jersey .unused{
+  display:none;
+}
+
+/* Toronto-style jerseys: very obvious blue / white striping */
+.pop-seats .manager-nick .manager-jersey,
+.pop-seats .manager-chris .manager-jersey,
+.pop-seats .manager-tyler .manager-jersey,
+.pop-seats .manager-scott .manager-jersey{
+  background:
+    linear-gradient(90deg, #fff 0 10%, transparent 10% 90%, #fff 90% 100%),
+    linear-gradient(180deg, #0a3d91 0 18%, #fff 18% 25%, #0a3d91 25% 64%, #fff 64% 72%, #0a3d91 72% 100%)!important;
+  border:3px solid #06285f!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,255,255,.18),
+    0 8px 14px rgba(0,0,0,.45)!important;
+}
+.pop-seats .manager-nick .manager-jersey:after,
+.pop-seats .manager-chris .manager-jersey:after,
+.pop-seats .manager-tyler .manager-jersey:after,
+.pop-seats .manager-scott .manager-jersey:after{
+  top:24px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:34px!important;
+  height:26px!important;
+  border-radius:5px!important;
+  clip-path:none!important;
+  background:#fff!important;
+  color:#0a3d91!important;
+  border:2px solid #0a3d91!important;
+  display:grid!important;
+  place-items:center!important;
+  font-family:Impact, Haettenschweiler, "Arial Narrow Bold"!important;
+  font-size:17px!important;
+  line-height:1!important;
+  text-shadow:none!important;
+  z-index:5!important;
+}
+.pop-seats .manager-nick .manager-jersey::after{content:"13"!important}
+.pop-seats .manager-chris .manager-jersey::after{content:"16"!important}
+.pop-seats .manager-tyler .manager-jersey::after{content:"34"!important}
+.pop-seats .manager-scott .manager-jersey::after{content:"93"!important}
+
+/* Add a visible mini "leaf" patch using a separate pseudo layer on the manager seat */
+.pop-seats .manager-nick::before,
+.pop-seats .manager-chris::before,
+.pop-seats .manager-tyler::before,
+.pop-seats .manager-scott::before{
+  content:"LEAFS";
+  position:absolute;
+  top:42px;
+  left:50%;
+  transform:translateX(-50%);
+  width:42px;
+  height:25px;
+  background:#fff;
+  color:#0a3d91;
+  border:2px solid #0a3d91;
+  clip-path:polygon(50% 0,61% 17%,79% 7%,75% 29%,96% 31%,78% 45%,90% 65%,66% 60%,50% 100%,34% 60%,10% 65%,22% 45%,4% 31%,25% 29%,21% 7%,39% 17%);
+  display:grid;
+  place-items:center;
+  font-family:Impact, Haettenschweiler, "Arial Narrow Bold";
+  font-size:7px;
+  z-index:8;
+  pointer-events:none;
+}
+
+/* Flyers-style Andrew jersey: unmistakable orange / black / white */
+.pop-seats .manager-andrew .manager-jersey{
+  background:
+    linear-gradient(90deg, #111 0 12%, transparent 12% 88%, #111 88% 100%),
+    linear-gradient(180deg, #f26b21 0 18%, #fff 18% 25%, #111 25% 36%, #f26b21 36% 66%, #111 66% 76%, #fff 76% 83%, #f26b21 83% 100%)!important;
+  border:3px solid #111!important;
+  box-shadow:
+    inset 0 0 0 3px rgba(255,255,255,.18),
+    0 8px 14px rgba(0,0,0,.45)!important;
+}
+.pop-seats .manager-andrew .manager-jersey:before{
+  border-top:6px solid #111!important;
+  border-bottom:6px solid #fff!important;
+}
+.pop-seats .manager-andrew .manager-jersey:after{
+  content:"88"!important;
+  top:24px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:36px!important;
+  height:28px!important;
+  clip-path:none!important;
+  border-radius:5px!important;
+  background:#fff!important;
+  color:#111!important;
+  border:2px solid #111!important;
+  display:grid!important;
+  place-items:center!important;
+  font-family:Impact, Haettenschweiler, "Arial Narrow Bold"!important;
+  font-size:18px!important;
+  z-index:6!important;
+}
+.pop-seats .manager-andrew::before{
+  content:"PHI";
+  position:absolute;
+  top:42px;
+  left:50%;
+  transform:translateX(-50%);
+  width:40px;
+  height:24px;
+  border-radius:50% 45% 45% 50%;
+  background:#fff;
+  color:#f26b21;
+  border:3px solid #111;
+  display:grid;
+  place-items:center;
+  font-family:Impact, Haettenschweiler, "Arial Narrow Bold";
+  font-size:11px;
+  z-index:8;
+  pointer-events:none;
+}
+.pop-seats .manager-andrew span::after{
+  content:"";
+}
+
+/* Better chair separation so jerseys stand out */
+.pop-seats .manager-seat .manager-chair{
+  width:58px!important;
+  height:34px!important;
+  margin-top:-2px;
+  background:linear-gradient(#8a3438,#311015)!important;
+  border:2px solid rgba(255,255,255,.25)!important;
+}
+.pop-seats .manager-seat span{
+  margin-top:1px;
+  padding:1px 3px;
+  border-radius:5px;
+  background:rgba(0,0,0,.45);
+}
+
+@media(max-width:760px){
+  .pop-host.detailed-bettman .bettman-long-nose{
+    left:35px!important;
+    top:48px!important;
+    width:11px!important;
+    height:15px!important;
+  }
+  .pop-seats .manager-seat .manager-head{width:22px!important;height:22px!important}
+  .pop-seats .manager-seat .manager-jersey{width:36px!important;height:44px!important}
+  .pop-seats .manager-seat .manager-jersey:before{
+    left:-7px!important;
+    right:-7px!important;
+    top:8px!important;
+    height:11px!important;
+    border-top-width:4px;
+    border-bottom-width:4px;
+  }
+  .pop-seats .manager-nick::before,
+  .pop-seats .manager-chris::before,
+  .pop-seats .manager-tyler::before,
+  .pop-seats .manager-scott::before{
+    top:30px;
+    width:28px;
+    height:18px;
+    font-size:5px;
+  }
+  .pop-seats .manager-andrew::before{
+    top:30px;
+    width:28px;
+    height:18px;
+    font-size:8px;
+    border-width:2px;
+  }
+  .pop-seats .manager-nick .manager-jersey:after,
+  .pop-seats .manager-chris .manager-jersey:after,
+  .pop-seats .manager-tyler .manager-jersey:after,
+  .pop-seats .manager-scott .manager-jersey:after,
+  .pop-seats .manager-andrew .manager-jersey:after{
+    top:19px!important;
+    width:24px!important;
+    height:17px!important;
+    font-size:11px!important;
+  }
+  .pop-seats .manager-seat .manager-chair{
+    width:38px!important;
+    height:22px!important;
+  }
+}
