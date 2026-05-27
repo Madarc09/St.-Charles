@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v9-1998-basement-theme';
+const STORAGE_KEY = 'custom-hockey-pool-v11-spy-lottery-theme';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -91,6 +91,8 @@ function bindEvents() {
   $('#removeOwnerBtnDraft')?.addEventListener('click', removeOwnerFromDraftRoom);
   $('#runLotteryBtn')?.addEventListener('click', runDraftLottery);
   $('#resetOrderBtn')?.addEventListener('click', resetDraftOrderToTeamList);
+  $('#closeSpyLottery')?.addEventListener('click', closeSpyLottery);
+  $('#spyLotteryModal')?.addEventListener('click', (e) => { if (e.target.id === 'spyLotteryModal') closeSpyLottery(); });
   $('#loadDemoPlayersBtn')?.addEventListener('click', loadDemoPlayers);
   $('#confirmAssignBtn')?.addEventListener('click', () => assignPlayerToOwner($('#assignOwnerSelect')?.value));
   $('#exportBtn').addEventListener('click', exportPool);
@@ -362,12 +364,12 @@ function renderDraftLottery() {
     .map(o => ({ ...o, total: ownerTotal(o.id, state) }))
     .sort((a, b) => a.total - b.total || String(a.teamName).localeCompare(String(b.teamName)));
   const hasResult = Array.isArray(state.draftBoard.lotteryResult) && state.draftBoard.lotteryResult.length;
-  status.textContent = hasResult ? 'Lottery order locked in.' : 'Ready for the commissioner.';
+  status.textContent = hasResult ? 'Mission complete. Draft order locked.' : 'Standing by in the basement.';
   results.innerHTML = order.map((id, index) => {
     const owner = state.owners.find(o => o.id === id);
     if (!owner) return '';
     const weight = lotteryWeightForOwner(owner, ranked);
-    return `<div class="mini-list-row lottery-row"><div><strong>${index + 1}. ${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${weight} frozen envelope${weight === 1 ? '' : 's'}</div></div><span>${ownerTotal(owner.id, state)} pts</span></div>`;
+    return `<div class="mini-list-row lottery-row"><div><strong>${index + 1}. ${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${weight} secret dossier${weight === 1 ? '' : 's'}</div></div><span>${ownerTotal(owner.id, state)} pts</span></div>`;
   }).join('');
 }
 
@@ -399,8 +401,68 @@ function runDraftLottery() {
   state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString() }));
   save();
   renderAll();
+  playSpyLottery(result);
   const first = state.owners.find(o => o.id === result[0]);
-  toast(`The frozen envelope opens: ${first?.teamName || 'Team 1'} wins the lottery.`);
+  toast(`Mission complete: ${first?.teamName || 'Team 1'} wins the draft lottery.`);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function ownerLotteryLabel(owner) {
+  if (!owner) return { primary: 'Unknown Team', secondary: 'No owner file' };
+  const primary = owner.teamName || owner.name || 'Unnamed Team';
+  const secondary = owner.name && owner.name !== owner.teamName ? owner.name : 'Draft lottery target';
+  return { primary, secondary };
+}
+
+async function playSpyLottery(orderIds) {
+  const modal = $('#spyLotteryModal');
+  const target = $('#scopeTargetName');
+  const meta = $('#scopeTargetMeta');
+  const list = $('#spyResultsList');
+  const flash = $('#scopeFlash');
+  const scope = $('#scopeView');
+  if (!modal || !target || !list || !scope) return;
+
+  list.innerHTML = '';
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lottery-running');
+  target.textContent = 'Mission loading...';
+  if (meta) meta.textContent = 'Draft lottery sequence armed';
+  await sleep(550);
+
+  for (let i = 0; i < orderIds.length; i++) {
+    const owner = state.owners.find(o => o.id === orderIds[i]);
+    const label = ownerLotteryLabel(owner);
+    target.textContent = label.primary;
+    if (meta) meta.textContent = `Pick ${i + 1} • ${label.secondary}`;
+    scope.style.setProperty('--scope-x', `${42 + Math.random() * 18}%`);
+    scope.style.setProperty('--scope-y', `${36 + Math.random() * 22}%`);
+    scope.classList.remove('scope-hit');
+    scope.classList.add('scope-locking');
+    await sleep(760);
+    scope.classList.remove('scope-locking');
+    scope.classList.add('scope-hit');
+    flash?.classList.remove('pulse');
+    void flash?.offsetWidth;
+    flash?.classList.add('pulse');
+    list.insertAdjacentHTML('beforeend', `<li><span>${i + 1}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(label.secondary)}</small></li>`);
+    await sleep(520);
+  }
+
+  target.textContent = 'ORDER CONFIRMED';
+  if (meta) meta.textContent = 'Classified draft folder printed';
+  scope.classList.remove('scope-hit', 'scope-locking');
+}
+
+function closeSpyLottery() {
+  const modal = $('#spyLotteryModal');
+  modal?.classList.remove('show');
+  modal?.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('lottery-running');
 }
 
 function resetDraftOrderToTeamList() {

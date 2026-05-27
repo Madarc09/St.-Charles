@@ -982,3 +982,318 @@ textarea#rawJson {
     object-position: center;
   }
 }
+
+/* v11: retro spy-game draft lottery animation */
+.spy-lottery-stage {
+  position: relative;
+  overflow: hidden;
+}
+.spy-lottery-stage::after {
+  content: "CLASSIFIED LOTTERY OPS";
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: .62rem;
+  letter-spacing: .16em;
+  color: rgba(158,255,202,.36);
+}
+.spy-disc {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: -.04em;
+  color: #111 !important;
+  background:
+    radial-gradient(circle at 38% 32%, rgba(255,255,255,.75), transparent 16%),
+    radial-gradient(circle, #b9b9ad 0 24%, #585a56 25% 42%, #151515 43% 100%) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.spy-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 28px);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(38, 69, 49, .35), transparent 28%),
+    rgba(3, 5, 4, .88);
+  backdrop-filter: blur(7px);
+}
+.spy-modal.show { display: flex; }
+body.lottery-running { overflow: hidden; }
+.spy-screen {
+  position: relative;
+  width: min(1120px, 96vw);
+  max-height: 94vh;
+  overflow: hidden auto;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 216, 157, .34);
+  background:
+    linear-gradient(135deg, rgba(21, 28, 22, .96), rgba(8, 7, 5, .98) 45%, rgba(40, 26, 13, .96)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 9px);
+  box-shadow:
+    0 26px 90px rgba(0,0,0,.68),
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    inset 0 0 60px rgba(121,255,200,.08);
+  padding: clamp(14px, 2vw, 24px);
+}
+.spy-crt-lines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen;
+  opacity: .34;
+}
+.spy-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  background: linear-gradient(180deg, #fff0b8, #d3973a);
+  color: #170d04;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 999px;
+  padding: .55rem .9rem;
+  font-weight: 900;
+}
+.spy-mission-top {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 12px;
+  padding-right: 90px;
+  color: #9effca;
+  font-family: 'Courier New', monospace;
+  font-size: .78rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(121,255,200,.25);
+}
+.scope-view {
+  --scope-x: 50%;
+  --scope-y: 46%;
+  position: relative;
+  min-height: clamp(310px, 45vw, 540px);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(121,255,200,.28);
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255,244,203,.12), transparent 17%),
+    linear-gradient(90deg, rgba(16,28,20,.92), rgba(26,20,13,.78)),
+    url('../images/header-1998-basement-hangout.jpg') center / cover no-repeat;
+  box-shadow: inset 0 0 80px rgba(0,0,0,.7), 0 16px 44px rgba(0,0,0,.38);
+}
+.scope-view::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at var(--scope-x) var(--scope-y), rgba(121,255,200,.18), rgba(121,255,200,.06) 11%, transparent 22%),
+    linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.36));
+  transition: background-position .45s ease;
+}
+.scope-vignette {
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at 50% 50%, transparent 0 37%, rgba(0,0,0,.72) 55%, rgba(0,0,0,.95) 76%);
+  pointer-events: none;
+}
+.scope-ring {
+  position: absolute;
+  left: var(--scope-x);
+  top: var(--scope-y);
+  width: min(54vw, 430px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 3px solid rgba(255, 234, 142, .78);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px rgba(0,0,0,.6),
+    0 0 26px rgba(255, 227, 120, .20),
+    inset 0 0 40px rgba(0,0,0,.38);
+  transition: left .48s ease, top .48s ease, transform .22s ease;
+}
+.scope-cross {
+  position: absolute;
+  background: rgba(255, 234, 142, .86);
+  box-shadow: 0 0 10px rgba(255, 227, 120, .24);
+  pointer-events: none;
+  transition: left .48s ease, top .48s ease;
+}
+.scope-cross.horizontal {
+  left: calc(var(--scope-x) - 24vw);
+  top: var(--scope-y);
+  width: 48vw;
+  height: 2px;
+}
+.scope-cross.vertical {
+  left: var(--scope-x);
+  top: calc(var(--scope-y) - 24vw);
+  width: 2px;
+  height: 48vw;
+}
+.scope-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 0 42%, rgba(121,255,200,.12) 48%, transparent 54% 100%);
+  transform: translateX(-120%);
+  animation: scopeSweep 2.1s linear infinite;
+  opacity: .8;
+}
+@keyframes scopeSweep { to { transform: translateX(120%); } }
+.target-card {
+  position: absolute;
+  left: var(--scope-x);
+  top: calc(var(--scope-y) + min(26vw, 220px));
+  translate: -50% -50%;
+  min-width: min(410px, 82vw);
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(158,255,202,.52);
+  border-radius: 14px;
+  background: rgba(4, 14, 9, .76);
+  color: #eaffd9;
+  text-align: center;
+  box-shadow: 0 0 34px rgba(121,255,200,.20), inset 0 0 22px rgba(0,0,0,.45);
+  transition: left .48s ease, top .48s ease, transform .22s ease;
+}
+.target-card .target-label {
+  display: block;
+  color: #9effca;
+  font-size: .68rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  margin-bottom: .22rem;
+}
+.target-card strong {
+  display: block;
+  font-size: clamp(1.45rem, 4vw, 3.2rem);
+  line-height: 1;
+  text-transform: uppercase;
+  color: #fff0b8;
+  text-shadow: 0 0 20px rgba(255, 212, 90, .22), 2px 2px 0 rgba(0,0,0,.55);
+}
+.target-card small {
+  display: block;
+  margin-top: .35rem;
+  color: rgba(234,255,217,.72);
+  font-family: 'Courier New', monospace;
+}
+.scope-view.scope-locking .scope-ring {
+  transform: scale(.92);
+  border-color: rgba(158,255,202,.95);
+}
+.scope-view.scope-locking .target-card {
+  transform: scale(1.04);
+}
+.scope-view.scope-hit .scope-ring {
+  transform: scale(.84);
+  border-color: rgba(255, 76, 51, .95);
+  box-shadow: 0 0 45px rgba(255,76,51,.55), inset 0 0 50px rgba(255,76,51,.12);
+}
+.scope-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--scope-x) var(--scope-y), rgba(255,255,255,.88), rgba(255,226,113,.24) 12%, rgba(255,73,51,.14) 24%, transparent 45%);
+  opacity: 0;
+  pointer-events: none;
+}
+.scope-flash.pulse { animation: scopeFlash .34s ease-out; }
+@keyframes scopeFlash {
+  0% { opacity: 0; }
+  16% { opacity: .95; }
+  100% { opacity: 0; }
+}
+.classified-folder {
+  position: relative;
+  z-index: 4;
+  margin-top: 18px;
+  border-radius: 0 16px 16px 16px;
+  border: 1px solid rgba(111, 77, 31, .7);
+  background:
+    linear-gradient(180deg, rgba(247,218,149,.97), rgba(188,130,55,.97)),
+    repeating-linear-gradient(0deg, rgba(75,41,15,.07) 0 2px, transparent 2px 16px);
+  color: #2a1608;
+  padding: clamp(16px, 2.5vw, 28px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 18px 44px rgba(0,0,0,.32);
+}
+.folder-tab {
+  position: absolute;
+  left: -1px;
+  top: -28px;
+  height: 28px;
+  min-width: 172px;
+  padding: 7px 18px 0;
+  border-radius: 12px 12px 0 0;
+  background: #d7a657;
+  border: 1px solid rgba(111, 77, 31, .7);
+  border-bottom: none;
+  font-weight: 900;
+  letter-spacing: .12em;
+  font-size: .7rem;
+}
+.classified-folder h2 {
+  margin: 0 0 .35rem;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: .04em;
+  font-size: clamp(1.8rem, 4vw, 3.5rem);
+}
+.folder-note {
+  margin-top: 0;
+  color: rgba(42,22,8,.72);
+}
+.spy-results-list {
+  display: grid;
+  gap: .6rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: spy;
+}
+.spy-results-list li {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: .75rem;
+  align-items: center;
+  padding: .72rem .85rem;
+  border: 1px solid rgba(86,49,18,.32);
+  border-radius: 12px;
+  background: rgba(255,255,255,.22);
+  animation: folderStamp .32s ease-out both;
+}
+.spy-results-list li span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #2a1608;
+  color: #f7da95;
+  font-weight: 950;
+}
+.spy-results-list li strong {
+  display: block;
+  text-transform: uppercase;
+  font-size: 1.06rem;
+}
+.spy-results-list li small {
+  display: block;
+  color: rgba(42,22,8,.67);
+  margin-top: .15rem;
+}
+@keyframes folderStamp {
+  from { opacity: 0; transform: translateY(10px) rotate(-.8deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
+}
+@media (max-width: 720px) {
+  .spy-screen { padding: 12px; border-radius: 16px; }
+  .spy-mission-top { font-size: .62rem; padding-right: 76px; }
+  .scope-view { min-height: 390px; }
+  .scope-ring { width: 80vw; }
+  .scope-cross.horizontal { left: calc(var(--scope-x) - 42vw); width: 84vw; }
+  .scope-cross.vertical { top: calc(var(--scope-y) - 42vw); height: 84vw; }
+  .target-card { top: calc(var(--scope-y) + 34vw); min-width: min(310px, 82vw); }
+}

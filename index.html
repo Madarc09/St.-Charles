@@ -86,17 +86,17 @@
         <article class="card">
           <div class="lottery-machine">
             <p class="eyebrow">Draft Lottery</p>
-            <h3>The Frozen Envelope</h3>
-            <p class="muted">Spin the frozen lottery drum to create a draft order. Lower current leaderboard teams get a little extra luck, but chaos can still win.</p>
-            <div class="lottery-stage" id="lotteryStage">
-              <div class="lottery-puck">?</div>
+            <h3>Basement Spy Lottery</h3>
+            <p class="muted">Run the draft lottery like an old late-90s spy-game mission. The scope locks onto each team in order, then the final order lands on a classified folder page.</p>
+            <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
+              <div class="lottery-puck spy-disc">64</div>
               <div>
-                <span class="label">Lottery Status</span>
-                <strong id="lotteryStatus">Ready for the commissioner.</strong>
+                <span class="label">Mission Status</span>
+                <strong id="lotteryStatus">Standing by in the basement.</strong>
               </div>
             </div>
             <div class="actions stack-sm lottery-actions">
-              <button class="primary" id="runLotteryBtn">Run Draft Lottery</button>
+              <button class="primary" id="runLotteryBtn">Run Spy Lottery</button>
               <button id="resetOrderBtn">Reset Order to Team List</button>
             </div>
             <div id="lotteryResults" class="mini-list lottery-results"></div>
@@ -216,6 +216,36 @@
       </div>
       <p class="muted compact-note">You can also tap one of the roster cards below.</p>
       <div id="assignRosterOptions" class="assign-options"></div>
+    </div>
+  </div>
+
+  <div id="spyLotteryModal" class="spy-modal" aria-hidden="true">
+    <div class="spy-screen" role="dialog" aria-modal="true" aria-labelledby="spyLotteryTitle">
+      <div class="spy-crt-lines"></div>
+      <button id="closeSpyLottery" class="spy-close" type="button">Close</button>
+      <div class="spy-mission-top">
+        <span>MI6 BASEMENT DRAFT OPS</span>
+        <span id="spyMissionClock">1998</span>
+      </div>
+      <div class="scope-view" id="scopeView">
+        <div class="scope-vignette"></div>
+        <div class="scope-ring"></div>
+        <div class="scope-cross horizontal"></div>
+        <div class="scope-cross vertical"></div>
+        <div class="scope-sweep"></div>
+        <div class="scope-flash" id="scopeFlash"></div>
+        <div class="target-card" id="targetCard">
+          <span class="target-label">TARGET LOCK</span>
+          <strong id="scopeTargetName">Awaiting teams</strong>
+          <small id="scopeTargetMeta">Draft lottery sequence</small>
+        </div>
+      </div>
+      <div class="classified-folder" id="classifiedFolder">
+        <div class="folder-tab">CONFIDENTIAL</div>
+        <h2 id="spyLotteryTitle">DRAFT LOTTERY RESULTS</h2>
+        <p class="folder-note">Basement mission complete. Draft order authorized by pizza box, CRT glow, and commissioner chaos.</p>
+        <ol id="spyResultsList" class="spy-results-list"></ol>
+      </div>
     </div>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
