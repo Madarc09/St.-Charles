@@ -244,3 +244,37 @@ hr { border:0; border-top:1px solid var(--line); margin:18px 0; }
 @media (max-width: 700px) {
   .assign-select-row { grid-template-columns: 1fr; }
 }
+
+/* Draft button visibility fix v5 */
+.draft-table th:nth-child(2),
+.draft-table td:nth-child(2) {
+  min-width: 260px;
+}
+.player-draft-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.draft-player-btn {
+  flex: 0 0 auto;
+  padding: .55rem .8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(111,231,255,.55);
+  background: linear-gradient(135deg, rgba(111,231,255,.95), rgba(137,255,183,.88));
+  color: #071018;
+  font-weight: 950;
+  letter-spacing: .03em;
+  box-shadow: 0 10px 22px rgba(0,0,0,.2);
+}
+.draft-player-btn:hover { transform: translateY(-1px); }
+.draft-action-cell { white-space: nowrap; }
+@media (min-width: 701px) {
+  .player-draft-line .draft-player-btn { display: none; }
+}
+@media (max-width: 700px) {
+  .draft-board-wrap table { min-width: 720px; }
+  .draft-action-cell,
+  .draft-table th:nth-child(3) { display: none; }
+  .player-draft-line .draft-player-btn { display: inline-flex; }
+}

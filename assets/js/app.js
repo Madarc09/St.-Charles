@@ -213,19 +213,28 @@ function renderDraftBoard() {
   const list = availableDraftBoardPlayers();
   const sortArrow = (key) => draftSort.key === key ? (draftSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
   const header = (label, key) => `<button class="sort-head" data-draft-sort="${key}">${label}${sortArrow(key)}</button>`;
+  const draftButton = (p) => `<button type="button" class="draft-player-btn" data-open-assign="${escapeHtml(String(p.id))}">Draft</button>`;
   const rows = list.map((p, index) => `
     <tr>
-      <td>${index + 1}</td>
-      <td><strong>${escapeHtml(p.name)}</strong><div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} ${p.manual ? '• Manual' : ''}</div></td>
+      <td class="rank-cell">${index + 1}</td>
+      <td class="player-draft-cell">
+        <div class="player-draft-line">
+          <div>
+            <strong>${escapeHtml(p.name)}</strong>
+            <div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} ${p.manual ? '• Manual' : ''}</div>
+          </div>
+          ${draftButton(p)}
+        </div>
+      </td>
+      <td class="draft-action-cell">${draftButton(p)}</td>
       <td>${p.gamesPlayed || 0}</td>
       <td>${p.goals ?? 0}</td>
       <td>${p.assists ?? 0}</td>
       <td>${p.points ?? 0}</td>
       <td>${p.goalieWins ?? ''}</td>
       <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
-      <td><button class="small-btn primary" data-open-assign="${escapeHtml(String(p.id))}">Add to Roster</button></td>
     </tr>`).join('');
-  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')}</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th><th>Draft</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or add a manual player.</td></tr>'}</tbody></table>`;
+  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')} / Draft</th><th>Draft</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or add a manual player.</td></tr>'}</tbody></table>`;
   $$('[data-draft-sort]').forEach(btn => btn.addEventListener('click', () => changeDraftSort(btn.dataset.draftSort)));
   $$('[data-open-assign]').forEach(btn => btn.addEventListener('click', () => openAssignModal(btn.dataset.openAssign)));
 }
