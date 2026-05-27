@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- V45 LIVE DRAFT BUILD: visible verification marker -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -41,15 +42,16 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
+        <div class="v45-build-marker">V45 LIVE DRAFT BUILD</div>
         <div class="clean-entry-stack">
-          <button id="cleanLotteryBtn" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
+          <button id="cleanLotteryBtnV45" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
           <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
         </div>
       </div>
 
-      <div id="cleanLotteryRoom" class="clean-lottery-room" hidden>
+      <div id="cleanLotteryRoomV45" class="clean-lottery-room" hidden>
         <div class="clean-lottery-simple-back">
-          <button id="cleanLotteryBackBtn" type="button">Back</button>
+          <button id="cleanLotteryBackBtnV45" type="button">Back</button>
         </div>
         <article class="card clean-lottery-card">
           <div class="lottery-machine">
@@ -1228,8 +1230,7 @@
         };
       }
       function canOwnerDraftPosition(ownerId, position) {
-        const bucket = positionBucket(position);
-        return ownerRemaining(ownerId)[bucket] > 0;
+        return ownerRemaining(ownerId)[positionBucket(position)] > 0;
       }
       function renderRosterNeeds() {
         const panel = $("#cleanRosterNeedsPanel");
@@ -1241,10 +1242,7 @@
         const active = owner(activeOwnerId);
         const rem = ownerRemaining(activeOwnerId);
         panel.innerHTML = `
-          <div class="needs-title">
-            <span class="eyebrow">Roster Needs</span>
-            <strong>${esc(active?.teamName || activeOwnerId)}</strong>
-          </div>
+          <div class="needs-title"><span class="eyebrow">Roster Needs</span><strong>${esc(active?.teamName || activeOwnerId)}</strong></div>
           <div class="needs-grid">
             <div class="${rem.F === 0 ? "filled" : ""}"><span>Forwards needed</span><strong>${rem.F}</strong><em>${rem.counts.F}/6 drafted</em></div>
             <div class="${rem.D === 0 ? "filled" : ""}"><span>Defense needed</span><strong>${rem.D}</strong><em>${rem.counts.D}/4 drafted</em></div>
@@ -1752,14 +1750,6 @@
         }
         strip.innerHTML = preview.join("");
       }
-      function forcePlayerPoolLoad(message = "Loading real NHL player board…") {
-        playersLoaded = false;
-        loadingPlayers = false;
-        players = [];
-        showBoardLoading(message);
-        setTimeout(() => pullPlayers(), 25);
-      }
-
       function renderRoom() {
         updateCurrentPickUI();
         renderRosterNeeds();
@@ -1767,11 +1757,11 @@
         const board = $("#cleanDraftBoard");
         if (!board) return;
         if (!activeOwnerId) {
-          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>Choose your team to load the room.</strong><span>Select your team above, then press the button below.</span><button id="cleanStartDraftPoolBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
+          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>Choose your team to load the room.</strong><span>Select your team above first.</span><button id="v45PullNhlPlayersBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
           return;
         }
         if (!playersLoaded) {
-          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>${esc(owner(activeOwnerId)?.teamName || activeOwnerId)} selected.</strong><span>Press the button below to load the real NHL player pool.</span><button id="cleanStartDraftPoolBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
+          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>${esc(owner(activeOwnerId)?.teamName || activeOwnerId)} selected.</strong><span>Press below to load the real NHL player pool.</span><button id="v45PullNhlPlayersBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
           return;
         }
         const pick = currentPick();
@@ -1830,14 +1820,13 @@
           select.onchange = () => {
             activeOwnerId = select.value;
             localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
-            playersLoaded = false;
-            loadingPlayers = false;
-            players = [];
             renderRoom();
+            pullPlayers();
           };
         }
         if (activeOwnerId && select) select.value = activeOwnerId;
         renderRoom();
+        pullPlayers();
         startPolling();
       }
       async function refreshRoom() {
@@ -1857,25 +1846,27 @@
         toast("Live draft reset.");
       }
       document.addEventListener("click", async (event) => {
-        const lotto = event.target.closest && event.target.closest("#cleanLotteryBtn");
-        if (lotto) {
+        const v45Lotto = event.target.closest && event.target.closest("#cleanLotteryBtnV45");
+        if (v45Lotto) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
           $("#cleanDraftEntry").hidden = true;
-          $("#cleanLotteryRoom").hidden = false;
+          $("#cleanLotteryRoomV45").hidden = false;
           return;
         }
-        const lottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtn");
-        if (lottoBack) {
+        const v45LottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtnV45");
+        if (v45LottoBack) {
           event.preventDefault();
-          $("#cleanLotteryRoom").hidden = true;
+          $("#cleanLotteryRoomV45").hidden = true;
           $("#cleanDraftEntry").hidden = false;
           return;
         }
-        const poolBtn = event.target.closest && event.target.closest("#cleanStartDraftPoolBtn");
-        if (poolBtn) {
+        const v45Pull = event.target.closest && event.target.closest("#v45PullNhlPlayersBtn");
+        if (v45Pull) {
           event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
           if (!activeOwnerId) {
             const select = $("#cleanDraftAsSelect");
             if (select && select.value) {
@@ -1887,7 +1878,11 @@
             toast("Select your team first.");
             return;
           }
-          forcePlayerPoolLoad("Pulling real NHL player board…");
+          playersLoaded = false;
+          loadingPlayers = false;
+          players = [];
+          showBoardLoading("Pulling real NHL player board…");
+          setTimeout(() => pullPlayers(), 25);
           return;
         }
 

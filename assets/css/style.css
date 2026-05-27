@@ -4432,7 +4432,21 @@ body.lottery-running { overflow: hidden; }
 }
 
 
-/* v44: v40 working base restored + roster needs + explicit NHL player-pool button */
+/* V45 visible verified build */
+.v45-build-marker{
+  position:absolute;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:5;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#f5c35b;
+  color:#160d04;
+  font-weight:1000;
+  letter-spacing:.08em;
+  box-shadow:0 12px 25px rgba(0,0,0,.35);
+}
 .clean-entry-stack{
   width:min(760px,94vw);
   display:grid;
