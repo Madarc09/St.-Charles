@@ -4735,3 +4735,130 @@ body.lottery-running { overflow: hidden; }
     grid-template-columns:1fr;
   }
 }
+
+
+/* V52 live rosters + lottery cleanup */
+.clean-entry-stack-v51{
+  gap:18px;
+}
+.arrow-left{
+  left:-62px;
+  top:calc(50% + 92px)!important;
+}
+.arrow-right{
+  right:-62px;
+  top:calc(50% + 92px)!important;
+}
+.compact-lottery-summary{
+  grid-template-columns:auto 1fr auto!important;
+}
+.compact-lottery-actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+.compact-lottery-results{
+  grid-column:1/-1;
+  display:block;
+}
+.compact-lottery-results .lottery-not-complete{
+  display:none;
+}
+.compact-lottery-summary.completed .compact-lottery-results{
+  display:none;
+}
+.visually-hidden{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+.needs-grid-with-players{
+  align-items:stretch;
+}
+.needs-player-list{
+  list-style:none;
+  padding:0;
+  margin:8px 0 0;
+  display:grid;
+  gap:5px;
+}
+.needs-player-list li{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:5px 7px;
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+}
+.needs-player-list b{
+  color:#fff;
+  font-size:.82rem;
+}
+.needs-player-list span,
+.needs-empty{
+  color:#cbd7ea;
+  font-size:.76rem;
+}
+.live-roster-card{
+  display:grid;
+  gap:12px;
+}
+.roster-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  padding-bottom:8px;
+}
+.roster-card-head h3{
+  margin:0;
+  color:#f5c35b;
+}
+.roster-card-head span{
+  border-radius:999px;
+  padding:5px 9px;
+  background:rgba(245,195,91,.16);
+  border:1px solid rgba(245,195,91,.35);
+  color:#f5c35b;
+  font-weight:1000;
+}
+.roster-pos-section{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:10px;
+  background:rgba(0,0,0,.18);
+}
+.roster-pos-section h4{
+  margin:0 0 8px;
+  display:flex;
+  justify-content:space-between;
+  color:#fff;
+}
+.roster-pos-section h4 span{
+  color:#f5c35b;
+}
+.roster-pos-section ol{
+  margin:0;
+  padding-left:22px;
+  display:grid;
+  gap:7px;
+}
+.roster-pos-section li strong{
+  display:block;
+}
+.roster-pos-section li small{
+  color:#cbd7ea;
+}
+@media(max-width:820px){
+  .compact-lottery-summary{
+    grid-template-columns:1fr!important;
+  }
+}

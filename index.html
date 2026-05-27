@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V51 CLEAN DRAFT FLOW -->
+  <!-- V52 LIVE ROSTERS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V51 CLEAN DRAFT FLOW</div>
+        <div class="v46-build-marker">V52 LIVE ROSTERS</div>
         <div class="clean-entry-stack clean-entry-stack-v51">
           <div class="draft-step-card enter-step-card">
             <div class="step-number">1</div>
@@ -73,36 +73,16 @@
           <div id="compactLotterySummary" class="compact-lottery-summary">
             <strong>Draft Lottery</strong>
             <span id="compactLotteryStatus">LOTTERY NOT COMPLETED YET</span>
-            <button id="cleanLotteryBtnV46" type="button">Open Lottery</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="cleanLotteryRoomV46" class="clean-lottery-room" hidden>
-        <div class="clean-lottery-simple-back">
-          <button id="cleanLotteryBackBtnV46" type="button">Back</button>
-        </div>
-        <article class="card clean-lottery-card">
-          <div class="lottery-machine">
-            <p class="eyebrow">Draft Lottery</p>
-            <h3>Basement Spy Lottery</h3>
-            <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
-              <div class="lottery-puck spy-disc">64</div>
-              <div>
-                <span class="label">Mission Status</span>
-                <strong id="lotteryStatus">LOTTERY NOT COMPLETED YET</strong>
-              </div>
+            <div class="compact-lottery-actions">
+              <button class="primary" id="runLotteryBtn" type="button">RUN LOTTERY</button>
+              <button id="replayLotteryBtn" type="button" style="display:none">Watch Lottery Again</button>
             </div>
-            <div class="actions stack-sm lottery-actions">
-              <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
-              <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
-              <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
-            </div>
-            <div id="lotteryResults" class="mini-list lottery-results">
+            <div id="lotteryStatus" class="visually-hidden">LOTTERY NOT COMPLETED YET</div>
+            <div id="lotteryResults" class="compact-lottery-results">
               <div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>
             </div>
           </div>
-        </article>
+        </div>
       </div>
 
       <div id="cleanDraftRoom" class="clean-draft-room" hidden>
@@ -1643,6 +1623,7 @@ const OWNERS = [
           if (data?.draft && Array.isArray(data.draft.picks)) {
             draft = data.draft;
             saveLocal();
+            window.renderDraftRosters(draft);
             setSyncStatus(data.configured ? "Shared sync connected" : "Temporary server sync");
             return;
           }
@@ -1657,6 +1638,7 @@ const OWNERS = [
         if (!draft) draft = defaultDraft();
         draft.updatedAt = new Date().toISOString();
         saveLocal();
+        window.renderDraftRosters(draft);
         try {
           const res = await fetch("/api/draft", {
             method: "POST",
@@ -1937,23 +1919,7 @@ const OWNERS = [
         toast("Live draft reset.");
       }
       document.addEventListener("click", async (event) => {
-        const lotto = event.target.closest && event.target.closest("#cleanLotteryBtnV46");
-        if (lotto) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          $("#cleanDraftEntry").hidden = true;
-          $("#cleanLotteryRoomV46").hidden = false;
-          return;
-        }
-        const lottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtnV46");
-        if (lottoBack) {
-          event.preventDefault();
-          $("#cleanLotteryRoomV46").hidden = true;
-          $("#cleanDraftEntry").hidden = false;
-          return;
-        }
-        const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn");
+const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn");
         if (pull) {
           event.preventDefault();
           event.stopPropagation();
@@ -2060,8 +2026,9 @@ const OWNERS = [
         if (!order || !order.length){
           box.classList.remove("completed");
           status.innerHTML = "LOTTERY NOT COMPLETED YET";
-          var btn = box.querySelector("button");
-          if (btn) btn.textContent = "Open Lottery";
+          var run = document.getElementById("runLotteryBtn"); var replay = document.getElementById("replayLotteryBtn");
+          if (run) { run.style.display = "inline-flex"; run.textContent = "RUN LOTTERY"; }
+          if (replay) replay.style.display = "none";
           return;
         }
         box.classList.add("completed");
@@ -2070,14 +2037,13 @@ const OWNERS = [
           return '<span><b>'+(i+1)+'</b> '+esc(owner.teamName)+'</span>';
         }).join("");
         status.innerHTML = '<div class="compact-order-list">'+rows+'</div>';
-        var btn = box.querySelector("button");
-        if (btn) btn.textContent = "Watch Lottery Again";
+        var run = document.getElementById("runLotteryBtn"); var replay = document.getElementById("replayLotteryBtn");
+        if (run) run.style.display = "none";
+        if (replay) replay.style.display = "inline-flex";
       }
       document.addEventListener("click", function(event){
         var run = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
         if (run) setTimeout(paintCompactLottery, 1800);
-        var back = event.target.closest && event.target.closest("#cleanLotteryBackBtnV46");
-        if (back) setTimeout(paintCompactLottery, 100);
       }, true);
       window.addEventListener("storage", paintCompactLottery);
       window.addEventListener("load", function(){
@@ -2085,6 +2051,102 @@ const OWNERS = [
         setInterval(paintCompactLottery, 2500);
       });
     })();
+  </script>
+
+
+  <script>
+    // V52: roster cards and roster-needs player names come directly from live draft picks.
+    window.__draftOwners = [
+      { id: "nick", teamName: "Nick" },
+      { id: "chris", teamName: "Chris" },
+      { id: "andrew", teamName: "Andrew" },
+      { id: "tyler", teamName: "Tyler" },
+      { id: "scott", teamName: "Scott" }
+    ];
+
+    window.__draftEsc = function(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+      });
+    };
+
+    window.__draftPicksByOwner = function(draft, ownerId) {
+      var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
+      return picks.filter(function(p) { return String(p.ownerId) === String(ownerId); });
+    };
+
+    window.__draftPositionList = function(picks, bucket) {
+      return picks.filter(function(p) {
+        return window.__draftBucket(p.player && p.player.position) === bucket;
+      });
+    };
+
+    window.renderRosterNeeds = function(draft, ownerId, ownerName) {
+      var panel = document.getElementById("cleanRosterNeedsPanel");
+      if (!panel) return;
+      if (!ownerId) {
+        panel.innerHTML = '<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 6 forwards, 4 defense, 2 goalies</span></div>';
+        return;
+      }
+
+      var picks = window.__draftPicksByOwner(draft, ownerId);
+      var f = window.__draftPositionList(picks, "F");
+      var d = window.__draftPositionList(picks, "D");
+      var g = window.__draftPositionList(picks, "G");
+      var remF = Math.max(0, 6 - f.length);
+      var remD = Math.max(0, 4 - d.length);
+      var remG = Math.max(0, 2 - g.length);
+
+      function playerList(list) {
+        if (!list.length) return '<small class="needs-empty">No players yet</small>';
+        return '<ul class="needs-player-list">' + list.map(function(p) {
+          return '<li><b>' + window.__draftEsc(p.player && p.player.name) + '</b><span>' + window.__draftEsc((p.player && p.player.nhlTeam) || "") + '</span></li>';
+        }).join("") + '</ul>';
+      }
+
+      panel.innerHTML =
+        '<div class="needs-title"><span class="eyebrow">Roster Needs</span><strong>' + window.__draftEsc(ownerName || ownerId) + '</strong></div>' +
+        '<div class="needs-grid needs-grid-with-players">' +
+          '<div class="' + (remF === 0 ? 'filled' : '') + '"><span>Forwards needed</span><strong>' + remF + '</strong><em>' + f.length + '/6 drafted</em>' + playerList(f) + '</div>' +
+          '<div class="' + (remD === 0 ? 'filled' : '') + '"><span>Defense needed</span><strong>' + remD + '</strong><em>' + d.length + '/4 drafted</em>' + playerList(d) + '</div>' +
+          '<div class="' + (remG === 0 ? 'filled' : '') + '"><span>Goalies needed</span><strong>' + remG + '</strong><em>' + g.length + '/2 drafted</em>' + playerList(g) + '</div>' +
+        '</div>';
+    };
+
+    window.renderDraftRosters = function(draft) {
+      var target = document.getElementById("rosterCards");
+      if (!target) return;
+      var owners = window.__draftOwners;
+      var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
+      target.innerHTML = owners.map(function(owner) {
+        var mine = picks.filter(function(p) { return String(p.ownerId) === owner.id; });
+        var f = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "F"; });
+        var d = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "D"; });
+        var g = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "G"; });
+
+        function section(title, list, max) {
+          return '<div class="roster-pos-section"><h4>' + title + ' <span>' + list.length + '/' + max + '</span></h4>' +
+            (list.length ? '<ol>' + list.map(function(p) {
+              return '<li><strong>' + window.__draftEsc(p.player && p.player.name) + '</strong><small>' + window.__draftEsc((p.player && p.player.position) || "") + ' • ' + window.__draftEsc((p.player && p.player.nhlTeam) || "") + ' • Pick ' + window.__draftEsc(p.pickNumber) + '</small></li>';
+            }).join("") + '</ol>' : '<p class="muted">No players yet.</p>') +
+          '</div>';
+        }
+
+        return '<article class="card roster-card live-roster-card">' +
+          '<div class="roster-card-head"><h3>' + window.__draftEsc(owner.teamName) + '</h3><span>' + mine.length + '/12</span></div>' +
+          section("Forwards", f, 6) +
+          section("Defense", d, 4) +
+          section("Goalies", g, 2) +
+        '</article>';
+      }).join("");
+    };
+
+    window.addEventListener("load", function() {
+      try {
+        var localDraft = JSON.parse(localStorage.getItem("custom-hockey-pool-v40-clean-live-draft") || "null");
+        if (localDraft) window.renderDraftRosters(localDraft);
+      } catch (e) {}
+    });
   </script>
 
   <script type="module" src="assets/js/app.js"></script>
