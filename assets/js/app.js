@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v7-home-leaderboard-lottery';
+const STORAGE_KEY = 'custom-hockey-pool-v9-1998-basement-theme';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -237,7 +237,7 @@ function renderDraftBoard() {
       <td>${p.goalieWins ?? ''}</td>
       <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
     </tr>`).join('');
-  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')} / Draft</th><th>Draft</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or add a manual player.</td></tr>'}</tbody></table>`;
+  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')} / Draft</th><th>Draft</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or load demo players.</td></tr>'}</tbody></table>`;
   $$('[data-draft-sort]').forEach(btn => btn.addEventListener('click', () => changeDraftSort(btn.dataset.draftSort)));
   $$('[data-open-assign]').forEach(btn => btn.addEventListener('click', () => openAssignModal(btn.dataset.openAssign)));
 }
