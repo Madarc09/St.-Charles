@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V50 CAN PICK GLOBAL -->
+  <!-- V51 CLEAN DRAFT FLOW -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,10 +42,39 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V50 CAN PICK GLOBAL</div>
-        <div class="clean-entry-stack">
-          <button id="cleanLotteryBtnV46" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
-          <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
+        <div class="v46-build-marker">V51 CLEAN DRAFT FLOW</div>
+        <div class="clean-entry-stack clean-entry-stack-v51">
+          <div class="draft-step-card enter-step-card">
+            <div class="step-number">1</div>
+            <div>
+              <strong>Select Enter the Draft</strong>
+              <span>Start here. Press the big button below.</span>
+            </div>
+            <div class="arrow-hint arrow-left">➜</div>
+            <div class="arrow-hint arrow-right">⬅</div>
+          </div>
+          <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn enter-draft-main-btn" type="button">ENTER THE DRAFT</button>
+          <div class="draft-step-grid">
+            <div class="draft-step-card">
+              <div class="step-number">2</div>
+              <div>
+                <strong>Select team name</strong>
+                <span>Choose who you are drafting as.</span>
+              </div>
+            </div>
+            <div class="draft-step-card">
+              <div class="step-number">3</div>
+              <div>
+                <strong>Generate Players</strong>
+                <span>Press PULL NHL PLAYERS inside the draft room.</span>
+              </div>
+            </div>
+          </div>
+          <div id="compactLotterySummary" class="compact-lottery-summary">
+            <strong>Draft Lottery</strong>
+            <span id="compactLotteryStatus">LOTTERY NOT COMPLETED YET</span>
+            <button id="cleanLotteryBtnV46" type="button">Open Lottery</button>
+          </div>
         </div>
       </div>
 
@@ -1991,6 +2020,69 @@ const OWNERS = [
         if (pos) pos.onchange = () => { positionFilter = pos.value; renderRoom(); };
         const sort = $("#cleanSortSelect");
         if (sort) sort.onchange = () => { sortKey = sort.value; renderRoom(); };
+      });
+    })();
+  </script>
+
+
+  <script>
+    (function(){
+      function esc(s){
+        return String(s == null ? "" : s).replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
+      }
+      function getOwners(){
+        return [
+          { id:"nick", teamName:"Nick" },
+          { id:"chris", teamName:"Chris" },
+          { id:"andrew", teamName:"Andrew" },
+          { id:"tyler", teamName:"Tyler" },
+          { id:"scott", teamName:"Scott" }
+        ];
+      }
+      function getLotteryOrder(){
+        var keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
+        for (var i=0;i<keys.length;i++){
+          try{
+            var parsed = JSON.parse(localStorage.getItem(keys[i]) || "null");
+            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length){
+              return parsed.lotteryOrder.slice();
+            }
+          }catch(e){}
+        }
+        return null;
+      }
+      function paintCompactLottery(){
+        var box = document.getElementById("compactLotterySummary");
+        var status = document.getElementById("compactLotteryStatus");
+        var order = getLotteryOrder();
+        var owners = getOwners();
+        if (!box || !status) return;
+        if (!order || !order.length){
+          box.classList.remove("completed");
+          status.innerHTML = "LOTTERY NOT COMPLETED YET";
+          var btn = box.querySelector("button");
+          if (btn) btn.textContent = "Open Lottery";
+          return;
+        }
+        box.classList.add("completed");
+        var rows = order.map(function(id, i){
+          var owner = owners.find(function(o){ return o.id === id; }) || {teamName:id};
+          return '<span><b>'+(i+1)+'</b> '+esc(owner.teamName)+'</span>';
+        }).join("");
+        status.innerHTML = '<div class="compact-order-list">'+rows+'</div>';
+        var btn = box.querySelector("button");
+        if (btn) btn.textContent = "Watch Lottery Again";
+      }
+      document.addEventListener("click", function(event){
+        var run = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
+        if (run) setTimeout(paintCompactLottery, 1800);
+        var back = event.target.closest && event.target.closest("#cleanLotteryBackBtnV46");
+        if (back) setTimeout(paintCompactLottery, 100);
+      }, true);
+      window.addEventListener("storage", paintCompactLottery);
+      window.addEventListener("load", function(){
+        setTimeout(paintCompactLottery, 250);
+        setInterval(paintCompactLottery, 2500);
       });
     })();
   </script>
