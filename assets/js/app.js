@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v15-draft-rooms';
+const STORAGE_KEY = 'custom-hockey-pool-v25-clean';
 let globalLotteryStorageConfigured = false;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -20,6 +20,26 @@ const FINAL_OWNERS = [
   { id: 'tyler', name: 'Tyler', teamName: 'Tyler' },
   { id: 'scott', name: 'Scott', teamName: 'Scott' }
 ];
+
+
+function forceRestoreFinalOwnersIfEmpty() {
+  if (!state) return;
+  if (!Array.isArray(state.owners) || state.owners.length === 0) {
+    state.owners = structuredClone(FINAL_OWNERS);
+  }
+  state.rosters = state.rosters || {};
+  state.owners.forEach(owner => {
+    state.rosters[owner.id] = Array.isArray(state.rosters[owner.id]) ? state.rosters[owner.id] : [];
+  });
+  state.draftBoard = state.draftBoard || {};
+  state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
+  state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) ? state.draftBoard.draftOrder : [];
+  state.owners.forEach(owner => {
+    if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) {
+      state.draftBoard.draftOrder.push(owner.id);
+    }
+  });
+}
 
 async function loadJson(path, fallback) {
   try {
@@ -51,8 +71,15 @@ async function init() {
     stats: { fetchedAt: null, players: [] }
   };
   const saved = localStorage.getItem(STORAGE_KEY);
-  state = saved ? deepMerge(structuredClone(defaults), JSON.parse(saved)) : structuredClone(defaults);
+  try {
+    state = saved ? deepMerge(structuredClone(defaults), JSON.parse(saved)) : structuredClone(defaults);
+  } catch (err) {
+    console.warn('Saved pool data was corrupted or incompatible. Starting clean.', err);
+    localStorage.removeItem(STORAGE_KEY);
+    state = structuredClone(defaults);
+  }
   normalizeStateForDraftTesting();
+  forceRestoreFinalOwnersIfEmpty();
   applyLotteryFromUrl();
   await loadGlobalLottery();
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
@@ -258,6 +285,7 @@ function setRefreshDisabled(disabled) {
 }
 
 function renderAll() {
+  forceRestoreFinalOwnersIfEmpty();
   const titleEl = $('#poolTitle');
   if (titleEl) titleEl.textContent = state.settings.poolName || 'Hockey Pool';
   if ($('#seasonDisplay')) $('#seasonDisplay').textContent = formatSeason(state.settings.seasonId);
@@ -458,7 +486,8 @@ function undoPick() {
   save(); renderAll(); toast(`Undid ${last.player.name}.`);
 }
 
-async function resetDraft() {
+async async function resetDraft() {
+  forceRestoreFinalOwnersIfEmpty();
   if (!confirm('Reset the entire draft, clear all rosters, and clear the locked lottery results?')) return;
   await clearGlobalLottery();
   state.draftBoard.picks = [];
@@ -515,9 +544,12 @@ function validLotteryOrder(ids) {
 
 async function loadGlobalLottery() {
   try {
-    const response = await fetch('/api/lottery', { cache: 'no-store' });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
+    const response = await fetch('/api/lottery', { cache: 'no-store', signal: controller.signal });
+    clearTimeout(timeout);
     if (!response.ok) return;
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     globalLotteryStorageConfigured = Boolean(data.configured);
     if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
       const ids = data.lottery.orderIds.map(String);
@@ -534,28 +566,31 @@ async function loadGlobalLottery() {
     }
   } catch (err) {
     globalLotteryStorageConfigured = false;
-    console.warn('Global lottery storage not available yet', err);
+    console.warn('Global lottery storage not available; continuing locally.', err);
   }
 }
-
 async function saveGlobalLottery(orderIds) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
     const response = await fetch('/api/lottery', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderIds })
+      body: JSON.stringify({ orderIds }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const data = await response.json().catch(() => ({}));
     globalLotteryStorageConfigured = Boolean(data.configured);
     if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
       return data.lottery.orderIds.map(String);
     }
   } catch (err) {
-    console.warn('Could not save global lottery', err);
+    globalLotteryStorageConfigured = false;
+    console.warn('Could not save global lottery; locking locally instead.', err);
   }
   return orderIds;
 }
-
 async function clearGlobalLottery() {
   try {
     const response = await fetch('/api/lottery', { method: 'DELETE' });
@@ -640,6 +675,7 @@ function renderDraftLottery() {
 }
 
 async function runDraftLottery() {
+  forceRestoreFinalOwnersIfEmpty();
   ensureOwnersExist();
   if (!state.owners.length) return toast('Add teams before running the lottery.');
   const lockedOrder = lockedLotteryOrderIds();
@@ -802,8 +838,6 @@ async function playSpyLottery(orderIds) {
   const modal = $('#spyLotteryModal');
   const scope = $('#scopeView');
   const screen = modal?.querySelector('.spy-screen');
-  const folder = $('#classifiedFolder');
-  const list = $('#spyResultsList');
   if (!modal || !scope || !screen) {
     toast('Lottery screen could not open.');
     return;
@@ -811,139 +845,51 @@ async function playSpyLottery(orderIds) {
 
   const ownersById = new Map(state.owners.map(o => [String(o.id), o]));
   const orderedOwners = orderIds.map(id => ownersById.get(String(id))).filter(Boolean);
-  if (!orderedOwners.length) {
-    toast('No lottery owners found.');
-    return;
-  }
+  if (!orderedOwners.length) return toast('No lottery owners found.');
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  screen.classList.add('simple-lottery-mode');
+  screen.classList.add('safe-lottery-mode');
 
-  scope.className = 'scope-view simple-lottery-stage';
-  scope.innerHTML = buildSimpleLotteryHtml(orderedOwners);
-  folder?.classList.remove('show', 'in-scene-folder');
-  if (list) list.innerHTML = '';
-
-  await runSimpleLotterySequence(orderedOwners);
-}
-
-function buildSimpleLotteryHtml(orderedOwners) {
-  const safe = orderedOwners.map(o => ({
-    id: escapeHtml(String(o.id)),
-    name: escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')
-  }));
-  return `
-    <div class="sl-stage">
-      <div class="sl-wall"></div>
-      <div class="sl-screen">
-        <span>2026</span>
-        <strong>HOCKEY POOL</strong>
-        <em>DRAFT LOTTERY</em>
+  scope.className = 'scope-view safe-lottery-stage';
+  scope.innerHTML = `
+    <div class="safe-stage">
+      <h2>HOCKEY POOL DRAFT LOTTERY</h2>
+      <div class="safe-host">
+        <div class="safe-bubble">I'M GARY BETTMAN</div>
+        <div class="safe-penguin"></div>
       </div>
-
-      <div class="sl-machine" id="slMachine">
-        <div class="sl-globe" id="slGlobe">
-          <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i>
-        </div>
-        <b>BINGO MACHINE</b>
-      </div>
-
-      <div class="sl-host" id="slHost">
-        <div class="sl-bubble" id="slBubble">I'M GARY BETTMAN</div>
-        <div class="sl-head"><span></span></div>
-        <div class="sl-body"><i></i></div>
-        <div class="sl-flipper left"></div>
-        <div class="sl-flipper right"></div>
-      </div>
-
-      <div class="sl-managers">
-        ${safe.map(o => `
-          <div class="sl-manager" data-owner="${o.id}">
-            <div class="sl-swear">#@!*%</div>
-            <div class="sl-person"></div>
-            <small>${o.name}</small>
-          </div>
-        `).join('')}
-      </div>
-
-      <div class="sl-card" id="slCard">
-        <small id="slPick">5TH OVERALL</small>
-        <strong id="slName">---</strong>
-      </div>
-
-      <div class="sl-order" id="slOrder">
-        ${[1,2,3,4,5].map(n => `<div data-pick="${n}"><b>${n}</b><span>---</span></div>`).join('')}
-      </div>
-
-      <div class="sl-lower" id="slLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>
-
-      <div class="sl-final" id="slFinal">
-        <h2>DRAFT ORDER LOCKED IN</h2>
-        ${safe.map((o, i) => `<p><b>${i+1}</b><span>${o.name}</span></p>`).join('')}
-      </div>
+      <div class="safe-machine" id="safeMachine"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      <div class="safe-card" id="safeCard"><small>READY</small><strong>---</strong></div>
+      <div class="safe-seats">${orderedOwners.map(o => `<div data-owner="${escapeHtml(String(o.id))}"><b>#@!*%</b><span>${escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')}</span></div>`).join('')}</div>
+      <ol class="safe-results" id="safeResults"></ol>
     </div>
   `;
-}
 
-async function runSimpleLotterySequence(orderedOwners) {
-  const host = $('#slHost');
-  const bubble = $('#slBubble');
-  const globe = $('#slGlobe');
-  const lower = $('#slLower');
-  const card = $('#slCard');
-  const pick = $('#slPick');
-  const name = $('#slName');
-  const final = $('#slFinal');
-
-  const say = (text, hi = '') => {
-    if (lower) lower.innerHTML = hi ? `${escapeHtml(text)} <span>${escapeHtml(hi)}</span>` : escapeHtml(text);
-  };
-
-  host?.classList.add('talking');
-  bubble?.classList.add('show');
-  say('GOOD EVENING. TONIGHT WE DETERMINE THE FIRST FIVE SELECTIONS.');
-  await sleep(1600);
-
-  bubble?.classList.remove('show');
-  say('ALL FIVE OWNERS HAVE', 'EQUAL ODDS');
-  globe?.classList.add('spin');
-  await sleep(1300);
+  const machine = $('#safeMachine');
+  const card = $('#safeCard');
+  const results = $('#safeResults');
+  machine?.classList.add('spin');
 
   const revealOrder = [...orderedOwners].reverse();
   for (let i = 0; i < revealOrder.length; i++) {
     const owner = revealOrder[i];
     const pickNumber = orderedOwners.length - i;
-    const ownerName = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
-
-    say(`THE ${ordinalLabel(pickNumber)} PICK GOES TO`, String(ownerName).toUpperCase());
-    globe?.classList.add('spin');
+    const name = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
     await sleep(700);
-    globe?.classList.remove('spin');
-
-    if (pick) pick.textContent = `${ordinalLabel(pickNumber)} OVERALL`;
-    if (name) name.textContent = ownerName;
-    card?.classList.remove('show');
-    void card?.offsetWidth;
-    card?.classList.add('show');
-
-    const row = document.querySelector(`[data-pick="${pickNumber}"]`);
-    if (row) row.innerHTML = `<b>${pickNumber}</b><span>${escapeHtml(ownerName)}</span>`;
-
-    const manager = document.querySelector(`.sl-manager[data-owner="${CSS.escape(String(owner.id))}"]`);
-    if (manager) {
-      manager.classList.remove('mad');
-      void manager.offsetWidth;
-      manager.classList.add('mad');
+    if (card) card.innerHTML = `<small>${ordinalLabel(pickNumber)} OVERALL</small><strong>${escapeHtml(name)}</strong>`;
+    const seat = document.querySelector(`.safe-seats [data-owner="${CSS.escape(String(owner.id))}"]`);
+    if (seat) {
+      seat.classList.remove('mad');
+      void seat.offsetWidth;
+      seat.classList.add('mad');
     }
-
-    await sleep(1200);
+    if (results) results.insertAdjacentHTML('afterbegin', `<li><span>${pickNumber}</span><strong>${escapeHtml(name)}</strong></li>`);
+    await sleep(900);
   }
 
-  say('THAT CONCLUDES THE DRAFT LOTTERY.', 'ORDER LOCKED');
-  final?.classList.add('show');
-  host?.classList.remove('talking');
+  machine?.classList.remove('spin');
 }
 
 function ensureMotionCutsceneElements(scope) {
@@ -1073,8 +1019,8 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-  screen?.classList.remove('simple-lottery-mode');
-  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'simple-lottery-stage');
+  screen?.classList.remove('safe-lottery-mode');
+  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'safe-lottery-stage');
   $('#storyboardCutscene')?.classList.remove('show');
   if (folder && screen && folder.parentElement !== screen) {
     screen.appendChild(folder);
@@ -1328,53 +1274,5 @@ function labelize(key) {
 function escapeHtml(str) {
   return String(str).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
 }
-
-
-// Stability repair layer: direct fallback bindings for critical buttons.
-function bindCriticalFallbacks() {
-  document.addEventListener('click', async (event) => {
-    const run = event.target.closest?.('#runLotteryBtn');
-    if (run) {
-      event.preventDefault();
-      try {
-        await runDraftLottery();
-      } catch (err) {
-        console.error('Fallback lottery failed', err);
-        toast('Lottery error. Reset draft and try again.');
-      }
-      return;
-    }
-
-    const replay = event.target.closest?.('#replayLotteryBtn');
-    if (replay) {
-      event.preventDefault();
-      try { replayLockedLottery(); } catch (err) { console.error(err); }
-      return;
-    }
-
-    const reset = event.target.closest?.('#resetDraftBtn');
-    if (reset) {
-      event.preventDefault();
-      try { resetDraft(); } catch (err) { console.error(err); toast('Reset error.'); }
-      return;
-    }
-
-    const room = event.target.closest?.('[data-draft-room]');
-    if (room) {
-      event.preventDefault();
-      try { setDraftRoomView(room.dataset.draftRoom); } catch (err) { console.error(err); }
-      return;
-    }
-
-    const close = event.target.closest?.('#closeSpyLottery');
-    if (close) {
-      event.preventDefault();
-      try { closeSpyLottery(); } catch (err) { console.error(err); }
-      return;
-    }
-  }, true);
-}
-
-bindCriticalFallbacks();
 
 init();

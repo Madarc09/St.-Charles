@@ -345,6 +345,81 @@
       document.body.dataset.activeTab = tab;
     });
   </script>
+
+  <script>
+    // v25 non-module emergency controls. These work even if the module fails.
+    (function () {
+      var OLD_KEYS = [
+        'custom-hockey-pool-v15-draft-rooms',
+        'custom-hockey-pool-active-owner',
+        'custom-hockey-pool-fallback-lottery'
+      ];
+
+      function toast(msg) {
+        var el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(function(){ el.classList.remove('show'); }, 2600);
+      }
+
+      function basicLottery() {
+        var modal = document.getElementById('spyLotteryModal');
+        var scope = document.getElementById('scopeView');
+        var screen = modal && modal.querySelector('.spy-screen');
+        if (!modal || !scope || !screen) return;
+        var order = ['Nick','Chris','Andrew','Tyler','Scott'];
+        var saved = localStorage.getItem('custom-hockey-pool-v25-emergency-lottery');
+        if (saved) {
+          try { order = JSON.parse(saved); } catch(e) {}
+        } else {
+          for (var i = order.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = order[i]; order[i] = order[j]; order[j] = t;
+          }
+          localStorage.setItem('custom-hockey-pool-v25-emergency-lottery', JSON.stringify(order));
+        }
+        screen.classList.add('safe-lottery-mode');
+        scope.className = 'scope-view safe-lottery-stage';
+        scope.innerHTML = '<div class="safe-stage"><h2>HOCKEY POOL DRAFT LOTTERY</h2><div class="safe-host"><div class="safe-bubble">I\\'M GARY BETTMAN</div><div class="safe-penguin"></div></div><div class="safe-machine spin"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div><div class="safe-card"><small>ORDER LOCKED</small><strong>' + order[0] + '</strong></div><ol class="safe-results">' + order.map(function(n,i){ return '<li><span>' + (i+1) + '</span><strong>' + n + '</strong></li>'; }).join('') + '</ol></div>';
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden','false');
+        document.body.classList.add('lottery-running');
+        toast('Emergency lottery opened.');
+      }
+
+      document.addEventListener('click', function (e) {
+        var run = e.target.closest && e.target.closest('#runLotteryBtn, #replayLotteryBtn');
+        if (run) {
+          setTimeout(function () {
+            var modal = document.getElementById('spyLotteryModal');
+            if (!modal || !modal.classList.contains('show')) basicLottery();
+          }, 300);
+        }
+
+        var reset = e.target.closest && e.target.closest('#resetDraftBtn');
+        if (reset) {
+          OLD_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e) {} });
+          try { localStorage.removeItem('custom-hockey-pool-v25-clean'); } catch(e) {}
+          try { localStorage.removeItem('custom-hockey-pool-v25-emergency-lottery'); } catch(e) {}
+          toast('Emergency storage cleared. Refresh if the app still looks stuck.');
+        }
+
+        var close = e.target.closest && e.target.closest('#closeSpyLottery');
+        if (close) {
+          var m = document.getElementById('spyLotteryModal');
+          var s = m && m.querySelector('.spy-screen');
+          if (m) {
+            m.classList.remove('show');
+            m.setAttribute('aria-hidden','true');
+          }
+          if (s) s.classList.remove('safe-lottery-mode');
+          document.body.classList.remove('lottery-running');
+        }
+      }, true);
+    })();
+  </script>
+
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
