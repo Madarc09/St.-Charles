@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V54 MOBILE DRAFT BOARD -->
+  <!-- V55 TEAM GOALIES MOBILE CARDS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V54 MOBILE DRAFT BOARD</div>
+        <div class="v46-build-marker">V55 TEAM GOALIES MOBILE CARDS</div>
         <div class="clean-entry-stack clean-entry-stack-v51">
           <div class="draft-step-card enter-step-card">
             <div class="step-number">1</div>
@@ -136,7 +136,7 @@
             <option value="L">L/LW</option>
             <option value="R">R/RW</option>
             <option value="D">D</option>
-            <option value="G">G</option>
+            <option value="TG">Team Goalies</option>
           </select>
           <select id="cleanSortSelect">
             <option value="fantasyPoints">Sort by Fantasy Pts</option>
@@ -353,7 +353,7 @@
     window.__draftRosterLimits = { F: 6, D: 4, G: 2 };
 
     window.__draftBucket = function(position) {
-      if (position === "G") return "G";
+      if (position === "G" || position === "TG") return "G";
       if (position === "D") return "D";
       return "F";
     };
@@ -909,6 +909,11 @@
         var first = row.firstName || row.firstNameDefault || "";
         var last = row.lastName || row.lastNameDefault || "";
         var name = row.goalieFullName || row.playerFullName || row.fullName || (first + " " + last).trim();
+        var saves = Number(row.saves || row.saveShotsAgainst || row.shotsSaved || 0);
+        var shotsAgainst = Number(row.shotsAgainst || 0);
+        var goalsAgainst = Number(row.goalsAgainst || 0);
+        var savePct = Number(row.savePct || row.savePercentage || 0);
+        var gaa = Number(row.goalsAgainstAverage || row.gaa || 0);
         return {
           id: String(row.playerId || row.goalieId || row.id || name) + "-G",
           name: name,
@@ -919,8 +924,57 @@
           assists: 0,
           points: 0,
           goalieWins: Number(row.wins || 0),
-          goalieShutouts: Number(row.shutouts || 0)
+          goalieShutouts: Number(row.shutouts || 0),
+          saves: saves,
+          shotsAgainst: shotsAgainst,
+          goalsAgainst: goalsAgainst,
+          savePct: savePct,
+          goalsAgainstAverage: gaa
         };
+      }
+
+      function buildTeamGoalies(goalies) {
+        const byTeam = new Map();
+        goalies.forEach(g => {
+          const team = g.nhlTeam || "TEAM";
+          if (!byTeam.has(team)) {
+            byTeam.set(team, {
+              id: "TG-" + team,
+              name: team + " Team Goalies",
+              position: "TG",
+              nhlTeam: team,
+              gamesPlayed: 0,
+              goals: 0,
+              assists: 0,
+              points: 0,
+              goalieWins: 0,
+              goalieShutouts: 0,
+              saves: 0,
+              shotsAgainst: 0,
+              goalsAgainst: 0,
+              weightedGaa: 0,
+              weightedSavePct: 0,
+              type: "teamGoalie"
+            });
+          }
+          const t = byTeam.get(team);
+          const gp = Number(g.gamesPlayed || 0);
+          t.gamesPlayed += gp;
+          t.goalieWins += Number(g.goalieWins || 0);
+          t.goalieShutouts += Number(g.goalieShutouts || 0);
+          t.saves += Number(g.saves || 0);
+          t.shotsAgainst += Number(g.shotsAgainst || 0);
+          t.goalsAgainst += Number(g.goalsAgainst || 0);
+          t.weightedGaa += Number(g.goalsAgainstAverage || 0) * gp;
+          t.weightedSavePct += Number(g.savePct || 0) * gp;
+        });
+
+        return [...byTeam.values()].map(t => {
+          t.savePct = t.shotsAgainst > 0 ? Number((t.saves / t.shotsAgainst).toFixed(3)) : Number((t.weightedSavePct / Math.max(1, t.gamesPlayed)).toFixed(3));
+          t.goalsAgainstAverage = t.gamesPlayed > 0 ? Number((t.weightedGaa / t.gamesPlayed).toFixed(2)) : 0;
+          t.fantasyPoints = fp(t);
+          return t;
+        });
       }
       async function fetchRealNhlPlayers() {
         if (playersLoading) return;
@@ -1106,7 +1160,7 @@
           '</div>' +
           '<div class="official-order-strip">' + sequencePreview.join("") + '</div>' +
           '<div class="official-draft-controls">' +
-            '<select id="officialPositionFilter"><option value="all">All positions</option><option value="F">Forwards</option><option value="C">C</option><option value="L">L/LW</option><option value="R">R/RW</option><option value="D">D</option><option value="G">G</option></select>' +
+            '<select id="officialPositionFilter"><option value="all">All positions</option><option value="F">Forwards</option><option value="C">C</option><option value="L">L/LW</option><option value="R">R/RW</option><option value="D">D</option><option value="TG">Team Goalies</option></select>' +
             '<select id="officialSortSelect"><option value="fantasyPoints">Sort by Fantasy Pts</option><option value="points">Sort by NHL Pts</option><option value="goals">Sort by Goals</option><option value="assists">Sort by Assists</option><option value="gamesPlayed">Sort by GP</option><option value="name">Sort by Name</option></select>' +
             '<button type="button" id="officialRefreshPlayers">Refresh Real NHL Players</button>' +
           '</div>' +
@@ -1275,11 +1329,11 @@
       }
 
       function fp(p) {
-        if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
+        if (p.position === "G" || p.position === "TG") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
         return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
       }
 function positionBucket(position) {
-        if (position === "G") return "G";
+        if (position === "G" || position === "TG") return "G";
         if (position === "D") return "D";
         return "F";
       }
@@ -1677,7 +1731,7 @@ const OWNERS = [
         return new Set((draft?.picks || []).map(p => String(p.player.id)));
       }
       function fp(p) {
-        if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
+        if (p.position === "G" || p.position === "TG") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
         return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
       }
       function normalizeSkater(row) {
@@ -1738,7 +1792,8 @@ const OWNERS = [
           }
           const map = new Map();
           (payload.skaters || []).map(normalizeSkater).filter(p => p.name).forEach(p => { p.fantasyPoints = fp(p); map.set(`${p.id}-${p.position}`, p); });
-          (payload.goalies || []).map(normalizeGoalie).filter(p => p.name).forEach(p => { p.fantasyPoints = fp(p); map.set(p.id, p); });
+          const teamGoalies = buildTeamGoalies((payload.goalies || []).map(normalizeGoalie).filter(p => p.name));
+          teamGoalies.forEach(p => { p.fantasyPoints = fp(p); map.set(p.id, p); });
           players = [...map.values()];
           playersLoaded = players.length > 0;
           if (!playersLoaded) throw new Error("The NHL API responded but returned zero players.");
@@ -1753,12 +1808,14 @@ const OWNERS = [
         const taken = draftedIds();
         let list = players.filter(p => !taken.has(String(p.id)));
         if (positionFilter === "F") list = list.filter(p => ["C", "L", "R", "LW", "RW", "F"].includes(p.position));
+        else if (positionFilter === "TG") list = list.filter(p => p.position === "TG");
         else if (positionFilter !== "all") list = list.filter(p => p.position === positionFilter);
         list.forEach(p => p.fantasyPoints = fp(p));
         return list.sort((a, b) => {
           const av = sortKey === "name" ? String(a.name).toLowerCase() : Number(a[sortKey] || 0);
           const bv = sortKey === "name" ? String(b.name).toLowerCase() : Number(b[sortKey] || 0);
           if (typeof av === "string") return av.localeCompare(String(bv));
+          if (sortKey === "goalsAgainstAverage") return (av - bv) || a.name.localeCompare(b.name);
           return (bv - av) || a.name.localeCompare(b.name);
         }).slice(0, 200);
       }
@@ -1823,6 +1880,18 @@ const OWNERS = [
         }
         strip.innerHTML = preview.join("");
       }
+      function playerImageUrl(p) {
+        if (!p) return "";
+        if (p.position === "TG") return "https://assets.nhle.com/logos/nhl/svg/" + encodeURIComponent(p.nhlTeam || "NHL") + "_light.svg";
+        const rawId = String(p.id || "").replace(/\D/g, "");
+        if (!rawId || !p.nhlTeam) return "";
+        return "https://assets.nhle.com/mugs/nhl/latest/" + encodeURIComponent(p.nhlTeam) + "/" + rawId + ".png";
+      }
+
+      function playerDisplayPosition(p) {
+        return p.position === "TG" ? "Team Goalies" : p.position;
+      }
+
       function renderRoom() {
         updateCurrentPickUI();
         window.renderRosterNeeds(draft, activeOwnerId, owner(activeOwnerId)?.teamName || activeOwnerId);
@@ -1843,10 +1912,10 @@ const OWNERS = [
           const positionAllowed = activeOwnerId ? window.canOwnerDraftPosition(draft, activeOwnerId, p.position) : false;
           const disabled = (canPick && positionAllowed) ? "" : "disabled";
           const buttonText = !canPick ? `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}` : (!positionAllowed ? `${window.__draftBucket(p.position)} limit reached` : "Sign Player");
-          return `<tr>
-            <td class="rank-cell">${i + 1}</td>
-            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(p.position)} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
-            <td>${p.gamesPlayed || 0}</td><td>${p.goals || 0}</td><td>${p.assists || 0}</td><td>${p.points || 0}</td><td><strong>${fp(p)}</strong></td>
+          return `<tr class="${p.position === "TG" ? "team-goalie-row" : ""}">
+            <td class="rank-cell"><img class="player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"><span>${i + 1}</span></td>
+            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(playerDisplayPosition(p))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
+            <td>${p.gamesPlayed || 0}</td><td>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</td><td>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</td><td>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</td><td><strong>${fp(p)}</strong></td>
           </tr>`;
         }).join("");
         const signed = (draft.picks || []).slice(-8).reverse().map(p => `<div><span>${p.pickNumber}</span><strong>${esc(p.player.name)}</strong><em>${esc(p.ownerName)}</em></div>`).join("");
@@ -1978,9 +2047,35 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
 }, true);
       window.addEventListener("load", () => {
         const pos = $("#cleanPositionFilter");
-        if (pos) pos.onchange = () => { positionFilter = pos.value; renderRoom(); };
         const sort = $("#cleanSortSelect");
+        function setSortOptionsForPosition() {
+          if (!sort) return;
+          const goalieMode = pos && pos.value === "TG";
+          const current = sort.value;
+          if (goalieMode) {
+            sort.innerHTML = `
+              <option value="fantasyPoints">Sort by Fantasy Pts</option>
+              <option value="goalieWins">Sort by Wins</option>
+              <option value="savePct">Sort by Save %</option>
+              <option value="goalsAgainstAverage">Sort by GAA</option>
+              <option value="goalieShutouts">Sort by Shutouts</option>
+              <option value="gamesPlayed">Sort by GP</option>`;
+            if (!["fantasyPoints","goalieWins","savePct","goalsAgainstAverage","goalieShutouts","gamesPlayed"].includes(current)) sort.value = "fantasyPoints";
+          } else {
+            sort.innerHTML = `
+              <option value="fantasyPoints">Sort by Fantasy Pts</option>
+              <option value="points">Sort by NHL Pts</option>
+              <option value="goals">Sort by Goals</option>
+              <option value="assists">Sort by Assists</option>
+              <option value="gamesPlayed">Sort by GP</option>
+              <option value="name">Sort by Name</option>`;
+            if (!["fantasyPoints","points","goals","assists","gamesPlayed","name"].includes(current)) sort.value = "fantasyPoints";
+          }
+          sortKey = sort.value;
+        }
+        if (pos) pos.onchange = () => { positionFilter = pos.value; setSortOptionsForPosition(); renderRoom(); };
         if (sort) sort.onchange = () => { sortKey = sort.value; renderRoom(); };
+        setSortOptionsForPosition();
       });
     })();
   </script>
