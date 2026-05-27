@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v25-clean';
+const STORAGE_KEY = 'custom-hockey-pool-v28-hard-bypass';
 let globalLotteryStorageConfigured = false;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -22,48 +22,26 @@ const FINAL_OWNERS = [
 ];
 
 
-function forceRestoreFinalOwnersIfEmpty() {
+function forceFinalOwners() {
   if (!state) return;
-
-  const hasUsableOwners = Array.isArray(state.owners) && state.owners.length > 0;
-  if (!hasUsableOwners) {
-    state.owners = structuredClone(FINAL_OWNERS);
-  }
-
-  // Never allow the five official owners to disappear.
   state.owners = Array.isArray(state.owners) ? state.owners : [];
-  FINAL_OWNERS.forEach(finalOwner => {
-    if (!state.owners.some(o => String(o.id) === String(finalOwner.id))) {
-      state.owners.push(structuredClone(finalOwner));
+  FINAL_OWNERS.forEach(owner => {
+    if (!state.owners.some(o => String(o.id) === String(owner.id))) {
+      state.owners.push(structuredClone(owner));
     }
   });
-
+  if (!state.owners.length) state.owners = structuredClone(FINAL_OWNERS);
   state.rosters = state.rosters || {};
   state.owners.forEach(owner => {
     if (!Array.isArray(state.rosters[owner.id])) state.rosters[owner.id] = [];
   });
-
   state.draftBoard = state.draftBoard || {};
   state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
-  state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) ? state.draftBoard.draftOrder : [];
-
-  // If draft order is empty, start with the final five.
-  if (!state.draftBoard.draftOrder.length) {
-    state.draftBoard.draftOrder = FINAL_OWNERS.map(o => o.id);
-  }
-
-  // Ensure every owner is in the draft order at least once.
+  state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) && state.draftBoard.draftOrder.length
+    ? state.draftBoard.draftOrder
+    : FINAL_OWNERS.map(o => o.id);
   state.owners.forEach(owner => {
-    if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) {
-      state.draftBoard.draftOrder.push(owner.id);
-    }
-  });
-
-  // Remove lottery results that refer to vanished owners.
-  state.draftBoard.lotteryResult = Array.isArray(state.draftBoard.lotteryResult) ? state.draftBoard.lotteryResult : [];
-  state.draftBoard.lotteryResult = state.draftBoard.lotteryResult.filter(r => {
-    const id = typeof r === 'string' ? r : r.id;
-    return state.owners.some(o => String(o.id) === String(id));
+    if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) state.draftBoard.draftOrder.push(owner.id);
   });
 }
 
@@ -100,12 +78,12 @@ async function init() {
   try {
     state = saved ? deepMerge(structuredClone(defaults), JSON.parse(saved)) : structuredClone(defaults);
   } catch (err) {
-    console.warn('Saved pool data was corrupted or incompatible. Starting clean.', err);
+    console.warn('Saved state was incompatible. Starting clean.', err);
     localStorage.removeItem(STORAGE_KEY);
     state = structuredClone(defaults);
   }
   normalizeStateForDraftTesting();
-  forceRestoreFinalOwnersIfEmpty();
+  forceFinalOwners();
   applyLotteryFromUrl();
   await loadGlobalLottery();
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
@@ -311,7 +289,7 @@ function setRefreshDisabled(disabled) {
 }
 
 function renderAll() {
-  forceRestoreFinalOwnersIfEmpty();
+  forceFinalOwners();
   const titleEl = $('#poolTitle');
   if (titleEl) titleEl.textContent = state.settings.poolName || 'Hockey Pool';
   if ($('#seasonDisplay')) $('#seasonDisplay').textContent = formatSeason(state.settings.seasonId);
@@ -512,8 +490,7 @@ function undoPick() {
   save(); renderAll(); toast(`Undid ${last.player.name}.`);
 }
 
-async async function resetDraft() {
-  forceRestoreFinalOwnersIfEmpty();
+async function resetDraft() {
   if (!confirm('Reset the entire draft, clear all rosters, and clear the locked lottery results?')) return;
   await clearGlobalLottery();
   state.draftBoard.picks = [];
@@ -570,12 +547,9 @@ function validLotteryOrder(ids) {
 
 async function loadGlobalLottery() {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
-    const response = await fetch('/api/lottery', { cache: 'no-store', signal: controller.signal });
-    clearTimeout(timeout);
+    const response = await fetch('/api/lottery', { cache: 'no-store' });
     if (!response.ok) return;
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json();
     globalLotteryStorageConfigured = Boolean(data.configured);
     if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
       const ids = data.lottery.orderIds.map(String);
@@ -592,31 +566,28 @@ async function loadGlobalLottery() {
     }
   } catch (err) {
     globalLotteryStorageConfigured = false;
-    console.warn('Global lottery storage not available; continuing locally.', err);
+    console.warn('Global lottery storage not available yet', err);
   }
 }
+
 async function saveGlobalLottery(orderIds) {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
     const response = await fetch('/api/lottery', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderIds }),
-      signal: controller.signal
+      body: JSON.stringify({ orderIds })
     });
-    clearTimeout(timeout);
     const data = await response.json().catch(() => ({}));
     globalLotteryStorageConfigured = Boolean(data.configured);
     if (data?.lottery?.orderIds && validLotteryOrder(data.lottery.orderIds)) {
       return data.lottery.orderIds.map(String);
     }
   } catch (err) {
-    globalLotteryStorageConfigured = false;
-    console.warn('Could not save global lottery; locking locally instead.', err);
+    console.warn('Could not save global lottery', err);
   }
   return orderIds;
 }
+
 async function clearGlobalLottery() {
   try {
     const response = await fetch('/api/lottery', { method: 'DELETE' });
@@ -701,7 +672,7 @@ function renderDraftLottery() {
 }
 
 async function runDraftLottery() {
-  forceRestoreFinalOwnersIfEmpty();
+  forceFinalOwners();
   ensureOwnersExist();
   if (!state.owners.length) return toast('Add teams before running the lottery.');
   const lockedOrder = lockedLotteryOrderIds();
@@ -859,63 +830,99 @@ function setStoryboardPanel(scene, index, total) {
   if (progress) progress.style.width = `${Math.round(((index + 1) / total) * 100)}%`;
 }
 
-async 
 async function playSpyLottery(orderIds) {
   const modal = $('#spyLotteryModal');
+  const target = $('#scopeTargetName');
+  const meta = $('#scopeTargetMeta');
+  const list = $('#spyResultsList');
   const scope = $('#scopeView');
-  const screen = modal?.querySelector('.spy-screen');
-  if (!modal || !scope || !screen) {
-    toast('Lottery screen could not open.');
-    return;
-  }
+  const folder = $('#classifiedFolder');
+  const cutscene = $('#storyboardCutscene');
+  const puck = $('#flyingPuck');
+  if (!modal || !target || !list || !scope) return;
 
+  const winnerId = String(orderIds[0]);
+  const eliminationIds = [...orderIds].slice(1).reverse().map(String);
   const ownersById = new Map(state.owners.map(o => [String(o.id), o]));
-  const orderedOwners = orderIds.map(id => ownersById.get(String(id))).filter(Boolean);
-  if (!orderedOwners.length) return toast('No lottery owners found.');
+  const winner = ownersById.get(winnerId);
+  const winnerLabel = ownerLotteryLabel(winner);
+
+  list.innerHTML = '';
+  folder?.classList.remove('show', 'in-scene-folder');
+  renderBasementTargets(orderIds);
+  $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus', 'hero-winner', 'cutscene-enter', 'ducking'));
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  screen.classList.add('safe-lottery-mode');
+  scope.classList.remove('storyboard-mode', 'scope-hit', 'scope-locking');
+  scope.classList.add('motion-mode');
+  cutscene?.classList.remove('show');
+  ensureMotionCutsceneElements(scope);
+  folder?.classList.add('in-scene-folder');
+  resetMotionCamera(scope);
+  target.textContent = 'MOTION COMIC CUTSCENE LOADING...';
+  if (meta) meta.textContent = '1998 basement lottery action sequence • reverse-order puck eliminations';
 
-  scope.className = 'scope-view safe-lottery-stage';
-  scope.innerHTML = `
-    <div class="safe-stage">
-      <h2>HOCKEY POOL DRAFT LOTTERY</h2>
-      <div class="safe-host">
-        <div class="safe-bubble">I'M GARY BETTMAN</div>
-        <div class="safe-penguin"></div>
-      </div>
-      <div class="safe-machine" id="safeMachine"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
-      <div class="safe-card" id="safeCard"><small>READY</small><strong>---</strong></div>
-      <div class="safe-seats">${orderedOwners.map(o => `<div data-owner="${escapeHtml(String(o.id))}"><b>#@!*%</b><span>${escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')}</span></div>`).join('')}</div>
-      <ol class="safe-results" id="safeResults"></ol>
-    </div>
-  `;
-
-  const machine = $('#safeMachine');
-  const card = $('#safeCard');
-  const results = $('#safeResults');
-  machine?.classList.add('spin');
-
-  const revealOrder = [...orderedOwners].reverse();
-  for (let i = 0; i < revealOrder.length; i++) {
-    const owner = revealOrder[i];
-    const pickNumber = orderedOwners.length - i;
-    const name = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
-    await sleep(700);
-    if (card) card.innerHTML = `<small>${ordinalLabel(pickNumber)} OVERALL</small><strong>${escapeHtml(name)}</strong>`;
-    const seat = document.querySelector(`.safe-seats [data-owner="${CSS.escape(String(owner.id))}"]`);
-    if (seat) {
-      seat.classList.remove('mad');
-      void seat.offsetWidth;
-      seat.classList.add('mad');
-    }
-    if (results) results.insertAdjacentHTML('afterbegin', `<li><span>${pickNumber}</span><strong>${escapeHtml(name)}</strong></li>`);
-    await sleep(900);
+  const winnerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(winnerId)}"]`);
+  if (winnerEl) {
+    winnerEl.classList.add('hero-winner', 'cutscene-enter');
   }
 
-  machine?.classList.remove('spin');
+  setMotionCaption('0:00', `${ownerShortName(winner).toUpperCase()} COMES DOWN THE STAIRS`, 'The first-overall winner enters the 1998 basement draft room.');
+  setMotionCamera(scope, '-10%', '4%', 1.34, '15% 28%');
+  await sleep(2100);
+
+  setMotionCaption('0:03', 'BASEMENT DRAFT OPS: ALL TARGETS PRESENT', 'N64 on the CRT, pizza on the floor, pool books open, and five old men waiting for fate.');
+  resetMotionCamera(scope);
+  $$('.cartoon-owner').forEach(el => el.classList.add('ducking'));
+  await sleep(2100);
+  $$('.cartoon-owner').forEach(el => el.classList.remove('ducking'));
+
+  setMotionCaption('0:06', 'THE LOTTERY PUCK IS LIVE', 'The draft winner grabs a stick. The room realizes the standings are about to get physical.');
+  flashSpeedLines();
+  await sleep(1500);
+
+  for (const id of eliminationIds) {
+    const owner = ownersById.get(id);
+    if (!owner) continue;
+    const pickNumber = orderIds.map(String).indexOf(id) + 1;
+    const label = ownerLotteryLabel(owner);
+    const ownerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(id)}"]`);
+    if (!ownerEl) continue;
+    const layout = lotteryTargetLayout(id);
+    const pan = panForTarget(layout.x, layout.y);
+    setMotionCamera(scope, pan.x, pan.y, 1.48, `${layout.x}% ${layout.y}%`);
+    ownerEl.classList.add('active-target', 'camera-focus');
+    setMotionCaption(`0:${String(8 + (5-pickNumber)*4).padStart(2, '0')}`, `${label.primary.toUpperCase()} — ${ordinalLabel(pickNumber)} PICK`, `${ownerShortName(winner)} lines up a basement ricochet. Hockey pucks only. No bullets. No mercy.`);
+    showMotionPickLabel(`${ordinalLabel(pickNumber)} PICK`);
+    await sleep(1050);
+    await launchCinematicPuck(scope, winnerEl, ownerEl);
+    ownerEl.classList.remove('active-target', 'camera-focus');
+    ownerEl.classList.add('puck-hit');
+    markEliminatedOnFolder(owner, pickNumber, `Knocked out by puck • awarded pick ${pickNumber}`);
+    target.textContent = `${ordinalLabel(pickNumber)} PICK LOCKED`;
+    if (meta) meta.textContent = `${label.primary} has been eliminated from first-overall contention.`;
+    await sleep(1100);
+  }
+
+  resetMotionCamera(scope);
+  if (winnerEl) {
+    winnerEl.classList.remove('cutscene-enter');
+    winnerEl.classList.add('winner-target', 'hero-winner');
+  }
+  setMotionCaption('0:25', `ONE OLD MAN LEFT: ${ownerShortName(winner).toUpperCase()}`, `${winnerLabel.primary} survives the basement and claims the first overall pick.`);
+  showMotionPickLabel('1ST OVERALL');
+  await sleep(2200);
+
+  list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the basement cutscene • awarded first overall</small></li>`);
+  setMotionCaption('0:28', 'CLASSIFIED FOLDER PRINTING', 'The final draft order is now locked and ready to replay.');
+  if (folder) {
+    folder.classList.add('show');
+    scope.appendChild(folder);
+  }
+  target.textContent = 'ORDER CONFIRMED';
+  if (meta) meta.textContent = 'Final classified folder printed inside the animated cutscene.';
 }
 
 function ensureMotionCutsceneElements(scope) {
@@ -1045,8 +1052,7 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-  screen?.classList.remove('safe-lottery-mode');
-  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'safe-lottery-stage');
+  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake');
   $('#storyboardCutscene')?.classList.remove('show');
   if (folder && screen && folder.parentElement !== screen) {
     screen.appendChild(folder);
@@ -1125,7 +1131,6 @@ function loadSampleOwners(showToast = true) {
 }
 
 function renderTeamManager() {
-  forceRestoreFinalOwnersIfEmpty();
   const el = $('#teamManagerList');
   if (!el) return;
   const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
