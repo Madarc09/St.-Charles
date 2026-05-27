@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V45 LIVE DRAFT BUILD: visible verification marker -->
+  <!-- V46 STATIC PULL BUTTON BUILD -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,16 +42,16 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v45-build-marker">V45 LIVE DRAFT BUILD</div>
+        <div class="v46-build-marker">V46 STATIC PULL BUTTON BUILD</div>
         <div class="clean-entry-stack">
-          <button id="cleanLotteryBtnV45" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
+          <button id="cleanLotteryBtnV46" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
           <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
         </div>
       </div>
 
-      <div id="cleanLotteryRoomV45" class="clean-lottery-room" hidden>
+      <div id="cleanLotteryRoomV46" class="clean-lottery-room" hidden>
         <div class="clean-lottery-simple-back">
-          <button id="cleanLotteryBackBtnV45" type="button">Back</button>
+          <button id="cleanLotteryBackBtnV46" type="button">Back</button>
         </div>
         <article class="card clean-lottery-card">
           <div class="lottery-machine">
@@ -88,7 +88,7 @@
         </div>
 
         <div class="clean-draft-control-card">
-          <div class="clean-control">
+          <div class="clean-control clean-draft-as-control">
             <label for="cleanDraftAsSelect">You are drafting as</label>
             <select id="cleanDraftAsSelect">
               <option value="">Select your team…</option>
@@ -98,6 +98,8 @@
               <option value="tyler">Tyler</option>
               <option value="scott">Scott</option>
             </select>
+            <button id="v46PullNhlPlayersBtn" class="primary v46-pull-players-btn" type="button">PULL NHL PLAYERS</button>
+            <small id="v46PullHint">Select your team, then press this button.</small>
           </div>
 
           <div class="clean-current-pick" id="cleanCurrentPickBox">
@@ -1757,11 +1759,11 @@
         const board = $("#cleanDraftBoard");
         if (!board) return;
         if (!activeOwnerId) {
-          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>Choose your team to load the room.</strong><span>Select your team above first.</span><button id="v45PullNhlPlayersBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
+          board.innerHTML = `<div class="clean-loading-card"><strong>Select your team above.</strong><span>Then press PULL NHL PLAYERS. The button is above and will not disappear.</span></div>`;
           return;
         }
         if (!playersLoaded) {
-          board.innerHTML = `<div class="clean-loading-card start-draft-card"><strong>${esc(owner(activeOwnerId)?.teamName || activeOwnerId)} selected.</strong><span>Press below to load the real NHL player pool.</span><button id="v45PullNhlPlayersBtn" class="primary start-draft-pool-btn" type="button">PULL NHL PLAYERS</button></div>`;
+          board.innerHTML = `<div class="clean-loading-card"><strong>${esc(owner(activeOwnerId)?.teamName || activeOwnerId)} selected.</strong><span>Now press PULL NHL PLAYERS above to load the real NHL player pool.</span></div>`;
           return;
         }
         const pick = currentPick();
@@ -1820,13 +1822,14 @@
           select.onchange = () => {
             activeOwnerId = select.value;
             localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
+            playersLoaded = false;
+            loadingPlayers = false;
+            players = [];
             renderRoom();
-            pullPlayers();
           };
         }
         if (activeOwnerId && select) select.value = activeOwnerId;
         renderRoom();
-        pullPlayers();
         startPolling();
       }
       async function refreshRoom() {
@@ -1846,24 +1849,24 @@
         toast("Live draft reset.");
       }
       document.addEventListener("click", async (event) => {
-        const v45Lotto = event.target.closest && event.target.closest("#cleanLotteryBtnV45");
-        if (v45Lotto) {
+        const lotto = event.target.closest && event.target.closest("#cleanLotteryBtnV46");
+        if (lotto) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
           $("#cleanDraftEntry").hidden = true;
-          $("#cleanLotteryRoomV45").hidden = false;
+          $("#cleanLotteryRoomV46").hidden = false;
           return;
         }
-        const v45LottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtnV45");
-        if (v45LottoBack) {
+        const lottoBack = event.target.closest && event.target.closest("#cleanLotteryBackBtnV46");
+        if (lottoBack) {
           event.preventDefault();
-          $("#cleanLotteryRoomV45").hidden = true;
+          $("#cleanLotteryRoomV46").hidden = true;
           $("#cleanDraftEntry").hidden = false;
           return;
         }
-        const v45Pull = event.target.closest && event.target.closest("#v45PullNhlPlayersBtn");
-        if (v45Pull) {
+        const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn");
+        if (pull) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
