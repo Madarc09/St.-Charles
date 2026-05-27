@@ -1,4 +1,4 @@
-# Custom Hockey Pool
+# Hockey Pool
 
 Vercel/GitHub-ready custom NHL pool app with:
 
