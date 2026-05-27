@@ -1762,7 +1762,12 @@
         const board = $("#cleanDraftBoard");
         if (!board) return;
         if (!activeOwnerId) {
-          board.innerHTML = `<div class="clean-loading-card"><strong>Select your team above.</strong><span>After selecting, the real NHL board loads here.</span></div>`;
+          board.innerHTML = `
+            <div class="clean-loading-card start-draft-card">
+              <strong>Choose your team to load the room.</strong>
+              <span>Select your team above, then press the button below to start the draft and load the real NHL player pool.</span>
+              <button id="cleanStartDraftPoolBtn" class="primary start-draft-pool-btn" type="button">START DRAFT / LOAD PLAYER POOL</button>
+            </div>`;
           return;
         }
         if (!playersLoaded) {
@@ -1922,6 +1927,25 @@
           document.title = "Hockey Pool";
           return;
         }
+        const startPool = event.target.closest && event.target.closest("#cleanStartDraftPoolBtn");
+        if (startPool) {
+          event.preventDefault();
+          if (!activeOwnerId) {
+            const select = $("#cleanDraftAsSelect");
+            if (select && select.value) {
+              activeOwnerId = select.value;
+              localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
+            }
+          }
+          if (!activeOwnerId) {
+            toast("Select your team first.");
+            return;
+          }
+          renderRosterNeeds();
+          forceFreshPlayerLoad("Starting draft and loading real NHL player pool…");
+          return;
+        }
+
         const sign = event.target.closest && event.target.closest("[data-clean-sign]");
         if (sign) {
           event.preventDefault();

@@ -4565,3 +4565,23 @@ body.lottery-running { overflow: hidden; }
   min-height:150px;
   align-content:center;
 }
+
+
+/* v43 start draft/player pool button */
+.start-draft-card{
+  text-align:center;
+  justify-items:center;
+}
+.start-draft-pool-btn{
+  margin-top:8px;
+  min-width:min(420px,92%);
+  min-height:58px;
+  border-radius:16px;
+  font-weight:1000;
+  letter-spacing:.04em;
+  font-size:1rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.28);
+}
+.start-draft-pool-btn:hover{
+  transform:translateY(-1px);
+}
