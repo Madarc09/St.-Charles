@@ -2858,3 +2858,317 @@ body.lottery-running { overflow: hidden; }
 .pop-lower{position:absolute;left:0;right:0;bottom:0;z-index:20;min-height:70px;padding:16px 24px;background:linear-gradient(90deg,rgba(0,0,0,.94),rgba(5,13,28,.88),rgba(0,0,0,.94));border-top:2px solid rgba(245,195,91,.28);font-family:"Courier New",monospace;font-weight:900;letter-spacing:.08em;text-align:center;font-size:clamp(18px,2.5vw,34px)}
 .pop-lower span{color:#f5c35b}
 @media(max-width:760px){.lottery-popout-shell{width:98vw;height:92vh;border-radius:16px}.pop-title{left:5%;right:5%;top:7%}.pop-title strong{font-size:32px}.pop-machine{left:1%;bottom:28%;transform:scale(.72);transform-origin:left bottom}.pop-host{bottom:34%;width:125px;height:185px}.pop-card{right:2%;bottom:30%;transform:scale(.72);transform-origin:right bottom}.pop-results{left:2%;top:27%;width:180px;font-size:12px}.pop-results strong{font-size:20px}.pop-seats{right:2%;top:52%;width:54%;height:18%}.pop-seats span{font-size:9px}.pop-lower{font-size:14px;min-height:62px;padding:12px}.pop-bubble{font-size:16px}}
+
+
+/* v31 detailed Bettman-penguin announcer upgrade */
+.pop-host.detailed-bettman{
+  width:210px;
+  height:315px;
+  bottom:22%;
+  z-index:8;
+  animation:popHostBounce 1.15s ease-in-out infinite alternate;
+}
+@keyframes popHostBounce{
+  from{transform:translateX(-50%) translateY(0)}
+  to{transform:translateX(-50%) translateY(-5px)}
+}
+
+.detailed-bettman .pop-bubble{
+  left:58%;
+  top:-68px;
+  font-size:clamp(18px,2.2vw,34px);
+  transform:translateX(-15%);
+}
+
+.bettman-head{
+  position:absolute;
+  left:58px;
+  top:0;
+  width:96px;
+  height:112px;
+  transform-origin:48px 72px;
+  animation:bettmanFastHeadShake .22s ease-in-out infinite alternate;
+  z-index:6;
+}
+@keyframes bettmanFastHeadShake{
+  from{transform:rotate(-6deg) translateX(-2px)}
+  to{transform:rotate(6deg) translateX(2px)}
+}
+.bettman-face{
+  position:absolute;
+  left:10px;
+  top:22px;
+  width:76px;
+  height:86px;
+  border-radius:46% 46% 42% 42%;
+  background:linear-gradient(#efc19a,#c9855d);
+  border:4px solid #3b1b0f;
+  box-shadow:inset 0 -10px 0 rgba(80,35,12,.12);
+}
+.bettman-grey-hair{
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:2px;
+  height:44px;
+  border-radius:50% 50% 34% 34%;
+  background:linear-gradient(#9aa3ad,#616b76 75%,#4d5660);
+  border:3px solid #38414a;
+  z-index:3;
+}
+.bettman-grey-hair:before,
+.bettman-grey-hair:after{
+  content:"";
+  position:absolute;
+  top:26px;
+  width:20px;
+  height:40px;
+  border-radius:50%;
+  background:#b7bec7;
+  box-shadow:inset 0 0 8px rgba(0,0,0,.28);
+}
+.bettman-grey-hair:before{left:-7px;transform:rotate(14deg)}
+.bettman-grey-hair:after{right:-7px;transform:rotate(-14deg)}
+.bettman-brow{
+  position:absolute;
+  top:53px;
+  width:22px;
+  height:5px;
+  background:#4a3528;
+  border-radius:999px;
+  z-index:5;
+}
+.bettman-brow.left{left:26px;transform:rotate(-9deg)}
+.bettman-brow.right{right:26px;transform:rotate(9deg)}
+.bettman-eye{
+  position:absolute;
+  top:63px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#070707;
+  z-index:5;
+}
+.bettman-eye.left{left:35px}
+.bettman-eye.right{right:35px}
+.bettman-long-nose{
+  position:absolute;
+  left:45px;
+  top:61px;
+  width:25px;
+  height:32px;
+  z-index:5;
+  background:linear-gradient(90deg,#d39468,#f0bd93 55%,#a86446);
+  clip-path:polygon(0 0,72% 11%,100% 57%,34% 100%,12% 72%);
+  border-radius:10px 14px 15px 12px;
+  box-shadow:2px 2px 0 rgba(60,25,10,.35);
+}
+.bettman-mouth{
+  position:absolute;
+  left:37px;
+  top:94px;
+  width:29px;
+  height:10px;
+  border-radius:50%;
+  border-bottom:4px solid #5a2417;
+  z-index:5;
+  animation:bettmanTalkingMouth .18s steps(2,end) infinite;
+}
+@keyframes bettmanTalkingMouth{
+  0%,45%{
+    height:8px;
+    background:transparent;
+    border-bottom:4px solid #5a2417;
+  }
+  46%,100%{
+    height:13px;
+    background:#3b130d;
+    border:2px solid #5a2417;
+  }
+}
+
+/* Replace the old simple penguin with a built penguin torso/flippers */
+.pop-penguin{display:none!important}
+.penguin-body{
+  position:absolute;
+  left:47px;
+  top:102px;
+  width:118px;
+  height:188px;
+  border-radius:50% 50% 43% 43%;
+  background:#05080d;
+  border:4px solid #010306;
+  box-shadow:inset 0 -18px 0 rgba(255,255,255,.04);
+  z-index:4;
+}
+.penguin-belly{
+  position:absolute;
+  left:33px;
+  top:45px;
+  width:52px;
+  height:100px;
+  border-radius:50%;
+  background:#eef3f7;
+  box-shadow:inset 0 -15px 0 rgba(170,180,190,.24);
+}
+.penguin-jacket{
+  position:absolute;
+  left:15px;
+  right:15px;
+  top:16px;
+  height:112px;
+  border-radius:24px 24px 40px 40px;
+  background:linear-gradient(90deg,#0a2654,#2a65ad 48%,#061b3c);
+  border:2px solid #03142c;
+  opacity:.92;
+}
+.penguin-jacket:before,
+.penguin-jacket:after{
+  content:"";
+  position:absolute;
+  top:10px;
+  width:38px;
+  height:76px;
+  background:#071d42;
+  opacity:.86;
+}
+.penguin-jacket:before{
+  left:4px;
+  clip-path:polygon(0 0,100% 24%,42% 100%);
+}
+.penguin-jacket:after{
+  right:4px;
+  clip-path:polygon(100% 0,0 24%,58% 100%);
+}
+.penguin-tie{
+  position:absolute;
+  left:52px;
+  top:25px;
+  width:15px;
+  height:88px;
+  background:repeating-linear-gradient(45deg,#122f58 0 6px,#55739d 6px 12px);
+  clip-path:polygon(50% 0,100% 16%,66% 100%,34% 100%,0 16%);
+  z-index:2;
+}
+.penguin-flipper{
+  position:absolute;
+  top:48px;
+  width:42px;
+  height:118px;
+  border-radius:50%;
+  background:#05080d;
+  border:4px solid #010306;
+  z-index:-1;
+}
+.penguin-flipper.left{
+  left:-27px;
+  transform:rotate(24deg);
+}
+.penguin-flipper.right{
+  right:-27px;
+  transform:rotate(-24deg);
+  animation:rightFlipperTalk 0.45s ease-in-out infinite alternate;
+}
+@keyframes rightFlipperTalk{
+  from{transform:rotate(-20deg) translateY(0)}
+  to{transform:rotate(-42deg) translateY(-8px)}
+}
+.penguin-foot{
+  position:absolute;
+  bottom:-8px;
+  width:50px;
+  height:22px;
+  border-radius:50%;
+  background:#e8a133;
+  border:3px solid #5a2e07;
+  z-index:2;
+}
+.penguin-foot.left{left:16px;transform:rotate(-8deg)}
+.penguin-foot.right{right:16px;transform:rotate(8deg)}
+
+@media(max-width:760px){
+  .pop-host.detailed-bettman{
+    width:145px;
+    height:225px;
+    bottom:32%;
+  }
+  .bettman-head{
+    left:39px;
+    width:70px;
+    height:82px;
+    transform-origin:35px 54px;
+  }
+  .bettman-face{
+    left:8px;
+    top:17px;
+    width:54px;
+    height:62px;
+    border-width:3px;
+  }
+  .bettman-grey-hair{
+    left:6px;
+    right:6px;
+    top:1px;
+    height:32px;
+  }
+  .bettman-grey-hair:before,
+  .bettman-grey-hair:after{
+    top:18px;
+    width:14px;
+    height:28px;
+  }
+  .bettman-brow{top:39px;width:16px;height:4px}
+  .bettman-brow.left{left:19px}.bettman-brow.right{right:19px}
+  .bettman-eye{top:47px;width:5px;height:5px}
+  .bettman-eye.left{left:25px}.bettman-eye.right{right:25px}
+  .bettman-long-nose{
+    left:32px;
+    top:46px;
+    width:19px;
+    height:24px;
+  }
+  .bettman-mouth{
+    left:25px;
+    top:68px;
+    width:23px;
+  }
+  .penguin-body{
+    left:31px;
+    top:76px;
+    width:86px;
+    height:136px;
+  }
+  .penguin-belly{
+    left:24px;
+    top:33px;
+    width:38px;
+    height:72px;
+  }
+  .penguin-jacket{
+    left:11px;
+    right:11px;
+    top:12px;
+    height:82px;
+  }
+  .penguin-tie{
+    left:38px;
+    top:19px;
+    width:11px;
+    height:65px;
+  }
+  .penguin-flipper{
+    top:35px;
+    width:31px;
+    height:88px;
+  }
+  .penguin-flipper.left{left:-20px}
+  .penguin-flipper.right{right:-20px}
+  .penguin-foot{
+    width:37px;
+    height:17px;
+  }
+  .detailed-bettman .pop-bubble{
+    left:54%;
+    top:-54px;
+  }
+}
