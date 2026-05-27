@@ -640,38 +640,26 @@ function renderDraftLottery() {
 }
 
 async function runDraftLottery() {
-  try {
-    ensureOwnersExist();
-    if (!state.owners.length) return toast('Add teams before running the lottery.');
-    const lockedOrder = lockedLotteryOrderIds();
-    if (lockedOrder.length === state.owners.length) {
-      playSpyLottery(lockedOrder);
-      return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
-    }
-    if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
-    let result = equalShuffleOwners(state.owners).map(owner => owner.id);
-    try {
-      result = await saveGlobalLottery(result);
-    } catch (err) {
-      console.warn('Global lottery save failed; continuing with browser lock.', err);
-    }
-    state.draftBoard.draftOrder = result;
-    state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
-    state.draftBoard.lotteryRunNumber = 1;
-    updateLotteryShareUrl(result);
-    save();
-    renderAll();
-    playSpyLottery(result);
-    const first = state.owners.find(o => o.id === result[0]);
-    toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
-  } catch (err) {
-    console.error('Lottery run failed', err);
-    toast('Lottery had an error, opening fallback broadcast.');
-    const result = (state.owners?.length ? equalShuffleOwners(state.owners).map(owner => owner.id) : ['nick','chris','andrew','tyler','scott']);
-    try { playSpyLottery(result); } catch (inner) { console.error(inner); }
+  ensureOwnersExist();
+  if (!state.owners.length) return toast('Add teams before running the lottery.');
+  const lockedOrder = lockedLotteryOrderIds();
+  if (lockedOrder.length === state.owners.length) {
+    playSpyLottery(lockedOrder);
+    return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
   }
+  if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
+  let result = equalShuffleOwners(state.owners).map(owner => owner.id);
+  result = await saveGlobalLottery(result);
+  state.draftBoard.draftOrder = result;
+  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
+  state.draftBoard.lotteryRunNumber = 1;
+  updateLotteryShareUrl(result);
+  save();
+  renderAll();
+  playSpyLottery(result);
+  const first = state.owners.find(o => o.id === result[0]);
+  toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
 }
-
 
 function replayLockedLottery() {
   const lockedOrder = lockedLotteryOrderIds();
@@ -814,28 +802,206 @@ async function playSpyLottery(orderIds) {
   const modal = $('#spyLotteryModal');
   const scope = $('#scopeView');
   const screen = modal?.querySelector('.spy-screen');
-  if (!modal || !scope || !screen) return;
+  const folder = $('#classifiedFolder');
+  const target = $('#scopeTargetName');
+  const meta = $('#scopeTargetMeta');
+
+  if (!modal || !scope || !screen) {
+    toast('Lottery screen could not open.');
+    return;
+  }
 
   const ownersById = new Map(state.owners.map(o => [String(o.id), o]));
-  const orderNames = orderIds
-    .map(id => ownersById.get(String(id)))
-    .filter(Boolean)
-    .map(o => ownerShortName(o) || o.name || o.teamName || 'Owner');
+  const orderedOwners = orderIds.map(id => ownersById.get(String(id))).filter(Boolean);
+  if (!orderedOwners.length) {
+    toast('No lottery owners found.');
+    return;
+  }
 
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  screen.classList.add('broadcast-lottery-mode');
+  screen.classList.add('penguin-lottery-mode');
+  scope.className = 'scope-view penguin-broadcast-stage';
+  scope.innerHTML = buildPenguinLotteryHtml(orderedOwners);
 
-  scope.innerHTML = '';
-  const frame = document.createElement('iframe');
-  frame.id = 'broadcastLotteryFrame';
-  frame.className = 'broadcast-lottery-frame';
-  frame.setAttribute('title', 'Hockey Pool Draft Lottery Broadcast');
-  frame.setAttribute('loading', 'eager');
-  frame.setAttribute('allow', 'autoplay');
-  frame.src = `assets/lottery-broadcast.html?order=${encodeURIComponent(orderNames.join('|'))}`;
-  scope.appendChild(frame);
+  if (folder) folder.classList.remove('show', 'in-scene-folder');
+  if (target) target.textContent = 'BROADCAST LOTTERY LOADING...';
+  if (meta) meta.textContent = 'Equal odds • numbered bingo balls • 5th to 1st reveal';
+
+  await runPenguinLotterySequence(orderedOwners);
+}
+
+function buildPenguinLotteryHtml(orderedOwners) {
+  const safeOwners = orderedOwners.map(o => ({
+    id: escapeHtml(String(o.id)),
+    rawId: String(o.id),
+    name: escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')
+  }));
+
+  return `
+    <div class="pl-studio">
+      <div class="pl-wall"></div>
+      <div class="pl-truss"></div>
+      <div class="pl-light pl-light-a"></div>
+      <div class="pl-light pl-light-b"></div>
+      <div class="pl-light pl-light-c"></div>
+      <div class="pl-floor"></div>
+
+      <div class="pl-center-screen">
+        <span>2026</span>
+        <strong>DRAFT</strong>
+        <em>LOTTERY</em>
+      </div>
+
+      <div class="pl-board">
+        <h3>DRAFT ORDER</h3>
+        <div id="plBoardRows">
+          ${[1,2,3,4,5].map(n => `<div class="pl-board-row pending" data-pick="${n}"><b>${n}</b><span>---</span></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="pl-managers">
+        <h3>MANAGER SEATING</h3>
+        <div class="pl-seats">
+          ${safeOwners.map(o => `
+            <div class="pl-manager" data-owner="${o.id}">
+              <div class="pl-bubble">#@!*%</div>
+              <div class="pl-head"></div>
+              <div class="pl-body"></div>
+              <div class="pl-chair"></div>
+              <div class="pl-name">${o.name}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="pl-machine">
+        <div class="pl-globe" id="plGlobe">
+          <div class="pl-ball b1">1</div>
+          <div class="pl-ball b2">2</div>
+          <div class="pl-ball b3">3</div>
+          <div class="pl-ball b4">4</div>
+          <div class="pl-ball b5">5</div>
+        </div>
+        <div class="pl-chute"></div>
+        <div class="pl-pedestal">BINGO MACHINE</div>
+      </div>
+
+      <div class="pl-speech" id="plSpeech">I'M GARY BETTMAN</div>
+
+      <div class="pl-host" id="plHost" aria-label="half penguin half man announcer">
+        <div class="pl-host-head">
+          <div class="pl-grey-hair"></div>
+          <div class="pl-face"></div>
+          <div class="pl-eye left"></div>
+          <div class="pl-eye right"></div>
+          <div class="pl-nose"></div>
+          <div class="pl-mouth"></div>
+        </div>
+        <div class="pl-penguin-body">
+          <div class="pl-belly"></div>
+          <div class="pl-jacket"></div>
+          <div class="pl-tie"></div>
+          <div class="pl-flipper left"></div>
+          <div class="pl-flipper right"></div>
+          <div class="pl-mic">HP</div>
+        </div>
+        <div class="pl-foot left"></div>
+        <div class="pl-foot right"></div>
+      </div>
+
+      <div class="pl-desk">
+        <div class="pl-desk-logo">HOCKEY POOL</div>
+        <div class="pl-desk-ticker">OFFICIAL DRAFT LOTTERY BROADCAST</div>
+      </div>
+
+      <div class="pl-reveal">
+        <div class="pl-card" id="plCard">
+          <small id="plPickLabel">5TH OVERALL</small>
+          <strong id="plOwnerLabel">---</strong>
+        </div>
+      </div>
+
+      <div class="pl-lower" id="plLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>
+
+      <div class="pl-final" id="plFinal">
+        <h2>DRAFT ORDER LOCKED IN</h2>
+        <div class="pl-final-grid">
+          ${safeOwners.map((o, i) => `<div><b>${i + 1}</b><span>${o.name}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function runPenguinLotterySequence(orderedOwners) {
+  const host = $('#plHost');
+  const speech = $('#plSpeech');
+  const lower = $('#plLower');
+  const globe = $('#plGlobe');
+  const card = $('#plCard');
+  const final = $('#plFinal');
+  const pickLabel = $('#plPickLabel');
+  const ownerLabel = $('#plOwnerLabel');
+  const screen = document.querySelector('.penguin-broadcast-stage');
+
+  const say = (text, hi = '') => {
+    if (lower) lower.innerHTML = hi ? `${escapeHtml(text)} <span>${escapeHtml(hi)}</span>` : escapeHtml(text);
+  };
+
+  host?.classList.add('talking');
+  speech?.classList.add('show');
+  say('GOOD EVENING. TONIGHT WE DETERMINE THE FIRST FIVE SELECTIONS.');
+  await sleep(2300);
+
+  speech?.classList.remove('show');
+  say('ALL FIVE OWNERS HAVE', 'EQUAL ODDS');
+  globe?.classList.add('spin');
+  await sleep(1800);
+
+  say('THE NUMBERED BALLS ARE LOADED. WE BEGIN WITH', 'THE 5TH PICK');
+  await sleep(1200);
+
+  const revealOrder = [...orderedOwners].reverse();
+  for (let i = 0; i < revealOrder.length; i++) {
+    const owner = revealOrder[i];
+    const pickNumber = orderedOwners.length - i;
+    const name = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
+
+    say(`THE ${ordinalLabel(pickNumber)} PICK GOES TO`, String(name).toUpperCase());
+    globe?.classList.add('spin');
+    await sleep(900);
+    globe?.classList.remove('spin');
+
+    if (pickLabel) pickLabel.textContent = `${ordinalLabel(pickNumber)} OVERALL`;
+    if (ownerLabel) ownerLabel.textContent = name;
+    card?.classList.remove('show');
+    void card?.offsetWidth;
+    card?.classList.add('show');
+
+    const row = document.querySelector(`[data-pick="${pickNumber}"]`);
+    if (row) {
+      row.classList.remove('pending');
+      row.classList.add('revealed');
+      row.innerHTML = `<b>${pickNumber}</b><span>${escapeHtml(name)}</span>`;
+    }
+
+    const manager = document.querySelector(`.pl-manager[data-owner="${CSS.escape(String(owner.id))}"]`);
+    if (manager) {
+      manager.classList.remove('mad');
+      void manager.offsetWidth;
+      manager.classList.add('mad', 'pulled');
+    }
+
+    screen?.classList.add('shake');
+    setTimeout(() => screen?.classList.remove('shake'), 450);
+    await sleep(1700);
+  }
+
+  say('THAT CONCLUDES THE HOCKEY POOL DRAFT LOTTERY.', 'GOOD LUCK.');
+  final?.classList.add('show');
+  host?.classList.remove('talking');
 }
 
 function ensureMotionCutsceneElements(scope) {
@@ -965,10 +1131,8 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-  screen?.classList.remove('broadcast-lottery-mode');
-  const frame = $('#broadcastLotteryFrame');
-  if (frame) frame.remove();
-  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake');
+  screen?.classList.remove('penguin-lottery-mode');
+  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'penguin-broadcast-stage', 'shake');
   $('#storyboardCutscene')?.classList.remove('show');
   if (folder && screen && folder.parentElement !== screen) {
     screen.appendChild(folder);
