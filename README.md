@@ -1,11 +1,15 @@
-# Hockey Pool — 1998 Basement Draft Room
+# Custom Hockey Pool — v13 Locked Lottery Fix
 
-V12 changes:
-- Final owners set to Nick, Chris, Andrew, Tyler, and Scott.
-- Roster/team management moved out of the Draft Room into its own Teams tab.
-- Draft lottery is now equal-weighted and locked after the first run.
-- Lottery results show LOTTERY NOT COMPLETED YET until the first run.
-- Reset Draft clears rosters, picks, and the locked lottery result.
-- Lottery animation now uses cartoon stick-player targets, with Nick in a Sundin Leafs-style jersey and Andrew in a Lindros Flyers-style jersey.
+This version fixes the tab/navigation freeze and updates the draft lottery flow.
 
-Deploy by uploading these files to GitHub and connecting the repo to Vercel.
+## Lottery behavior
+- Before running: `LOTTERY NOT COMPLETED YET`.
+- First run: equal-weight random order for Nick, Chris, Andrew, Tyler, and Scott.
+- The first result locks into the page and becomes the draft order.
+- After locking, the main lottery button changes to `REPLAY LOCKED LOTTERY`.
+- Replay shows the exact same animation and order.
+- `Reset Draft` clears rosters, picks, and the locked lottery result, then returns the lottery to a fresh first run.
+- A `Copy Locked Replay Link` button appears after the lottery is locked. That link includes the locked order in the URL so others can open it and replay the exact same result on their device.
+
+## Notes
+This remains a static Vercel/GitHub project. Browser local storage saves the locked result on the current device. To share the exact result with other people, use the copied locked replay link or export/import the pool backup.

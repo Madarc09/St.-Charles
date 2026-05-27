@@ -97,8 +97,9 @@
               </div>
             </div>
             <div class="actions stack-sm lottery-actions">
-              <button class="primary" id="runLotteryBtn">Run Spy Lottery</button>
-              <button id="replayLotteryBtn">Replay Locked Results</button>
+              <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
+              <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
+              <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
             </div>
             <div id="lotteryResults" class="mini-list lottery-results"></div>
           </div>
@@ -270,6 +271,19 @@
     </div>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+    // Tiny no-dependency tab fallback so navigation still works even if a module error happens.
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest && event.target.closest('[data-tab]');
+      if (!btn) return;
+      var tab = btn.getAttribute('data-tab');
+      var panel = document.getElementById(tab);
+      if (!panel) return;
+      document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('active', p.id === tab); });
+      document.body.dataset.activeTab = tab;
+    });
+  </script>
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

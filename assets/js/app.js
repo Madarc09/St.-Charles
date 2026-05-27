@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v12-final-owners-equal-lottery';
+const STORAGE_KEY = 'custom-hockey-pool-v13-locked-lottery-replay';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -50,6 +50,7 @@ async function init() {
   const saved = localStorage.getItem(STORAGE_KEY);
   state = saved ? deepMerge(structuredClone(defaults), JSON.parse(saved)) : structuredClone(defaults);
   normalizeStateForDraftTesting();
+  applyLotteryFromUrl();
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
   bindEvents();
   renderAll();
@@ -64,6 +65,26 @@ function deepMerge(target, source) {
     else target[key] = value;
   }
   return target;
+}
+
+function normalizeStateForDraftTesting() {
+  state.settings = state.settings || structuredClone(defaults.settings || {});
+  state.owners = Array.isArray(state.owners) && state.owners.length ? state.owners : structuredClone(FINAL_OWNERS);
+  state.rosters = state.rosters && typeof state.rosters === 'object' && !Array.isArray(state.rosters) ? state.rosters : {};
+  state.draftBoard = state.draftBoard && typeof state.draftBoard === 'object' ? state.draftBoard : { currentPick: 1, draftOrder: [], picks: [] };
+  state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
+  state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) && state.draftBoard.draftOrder.length ? state.draftBoard.draftOrder : state.owners.map(o => o.id);
+  state.draftBoard.lotteryResult = Array.isArray(state.draftBoard.lotteryResult) ? state.draftBoard.lotteryResult : [];
+  state.draftBoard.lotteryRunNumber = state.draftBoard.lotteryRunNumber || 1;
+  state.manualPlayers = Array.isArray(state.manualPlayers) ? state.manualPlayers : [];
+  state.stats = state.stats && typeof state.stats === 'object' ? state.stats : { fetchedAt: null, players: [] };
+  state.stats.players = Array.isArray(state.stats.players) ? state.stats.players : [];
+  state.playerMap = state.playerMap || {};
+  state.statOverrides = state.statOverrides || {};
+  state.owners.forEach(o => { state.rosters[o.id] = Array.isArray(state.rosters[o.id]) ? state.rosters[o.id] : []; });
+  state.draftBoard.draftOrder = state.draftBoard.draftOrder.filter(id => state.owners.some(o => String(o.id) === String(id)));
+  state.owners.forEach(o => { if (!state.draftBoard.draftOrder.includes(o.id)) state.draftBoard.draftOrder.push(o.id); });
+  state.draftBoard.lotteryResult = state.draftBoard.lotteryResult.filter(r => state.owners.some(o => String(o.id) === String(typeof r === 'string' ? r : r.id)));
 }
 
 function save() {
@@ -89,10 +110,10 @@ function bindEvents() {
   $('#closeAssignModal')?.addEventListener('click', closeAssignModal);
   $('#assignModal')?.addEventListener('click', (e) => { if (e.target.id === 'assignModal') closeAssignModal(); });
   $('#statsSearch')?.addEventListener('input', renderPlayersTable);
-  $('#saveRulesBtn').addEventListener('click', saveRulesFromForm);
-  $('#resetRulesBtn').addEventListener('click', () => { state.settings = structuredClone(defaults.settings); save(); renderAll(); toast('Rules reset to defaults.'); });
-  $('#undoPickBtn').addEventListener('click', undoPick);
-  $('#resetDraftBtn').addEventListener('click', resetDraft);
+  $('#saveRulesBtn')?.addEventListener('click', saveRulesFromForm);
+  $('#resetRulesBtn')?.addEventListener('click', () => { state.settings = structuredClone(defaults.settings); save(); renderAll(); toast('Rules reset to defaults.'); });
+  $('#undoPickBtn')?.addEventListener('click', undoPick);
+  $('#resetDraftBtn')?.addEventListener('click', resetDraft);
   $('#addOwnerBtn')?.addEventListener('click', addOwner);
   $('#addOwnerBtnDraft')?.addEventListener('click', addOwner);
   $('#loadSampleOwnersBtn')?.addEventListener('click', loadSampleOwners);
@@ -100,19 +121,22 @@ function bindEvents() {
   $('#removeOwnerBtnDraft')?.addEventListener('click', removeOwnerFromDraftRoom);
   $('#runLotteryBtn')?.addEventListener('click', runDraftLottery);
   $('#replayLotteryBtn')?.addEventListener('click', replayLockedLottery);
+  $('#copyLotteryLinkBtn')?.addEventListener('click', copyLockedLotteryLink);
   $('#closeSpyLottery')?.addEventListener('click', closeSpyLottery);
   $('#spyLotteryModal')?.addEventListener('click', (e) => { if (e.target.id === 'spyLotteryModal') closeSpyLottery(); });
   $('#loadDemoPlayersBtn')?.addEventListener('click', loadDemoPlayers);
   $('#confirmAssignBtn')?.addEventListener('click', () => assignPlayerToOwner($('#assignOwnerSelect')?.value));
-  $('#exportBtn').addEventListener('click', exportPool);
-  $('#importFile').addEventListener('change', importPool);
-  $('#clearStatsBtn').addEventListener('click', () => { state.stats = { fetchedAt: null, players: [] }; save(); renderAll(); toast('Stats cache cleared.'); });
-  $('#factoryResetBtn').addEventListener('click', factoryReset);
+  $('#exportBtn')?.addEventListener('click', exportPool);
+  $('#importFile')?.addEventListener('change', importPool);
+  $('#clearStatsBtn')?.addEventListener('click', () => { state.stats = { fetchedAt: null, players: [] }; save(); renderAll(); toast('Stats cache cleared.'); });
+  $('#factoryResetBtn')?.addEventListener('click', factoryReset);
 }
 
 function showTab(tab) {
+  if (!tab || !document.getElementById(tab)) return;
   $$('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
   $$('.panel').forEach(panel => panel.classList.toggle('active', panel.id === tab));
+  document.body.dataset.activeTab = tab;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -140,7 +164,8 @@ function setRefreshDisabled(disabled) {
 }
 
 function renderAll() {
-  $('#poolTitle').textContent = state.settings.poolName || 'Custom Hockey Pool';
+  const titleEl = $('#poolTitle');
+  if (titleEl) titleEl.textContent = state.settings.poolName || 'Hockey Pool';
   if ($('#seasonDisplay')) $('#seasonDisplay').textContent = formatSeason(state.settings.seasonId);
   if ($('#lastUpdatedDisplay')) $('#lastUpdatedDisplay').textContent = state.stats.fetchedAt ? new Date(state.stats.fetchedAt).toLocaleString() : 'Never';
   renderDashboardCards();
@@ -331,7 +356,9 @@ function resetDraft() {
   state.rosters = {};
   state.owners.forEach(o => { state.rosters[o.id] = []; });
   state.draftBoard.lotteryResult = [];
+  state.draftBoard.lotteryRunNumber = 1;
   state.draftBoard.draftOrder = state.owners.map(o => o.id);
+  clearLotteryShareUrl();
   save(); renderAll(); toast('Draft and lottery reset.');
 }
 
@@ -369,6 +396,57 @@ function lockedLotteryOrderIds() {
   return result.map(r => typeof r === 'string' ? r : r.id).filter(id => state.owners.some(o => String(o.id) === String(id)));
 }
 
+function validLotteryOrder(ids) {
+  if (!Array.isArray(ids) || ids.length !== state.owners.length) return false;
+  const ownerIds = new Set(state.owners.map(o => String(o.id)));
+  const seen = new Set(ids.map(String));
+  return seen.size === ids.length && ids.every(id => ownerIds.has(String(id)));
+}
+
+function applyLotteryFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const lottery = params.get('lottery');
+    if (!lottery) return;
+    const ids = lottery.split(',').map(s => s.trim()).filter(Boolean);
+    if (!validLotteryOrder(ids)) return;
+    state.draftBoard.draftOrder = ids;
+    state.draftBoard.lotteryResult = ids.map((id, index) => ({ id, pick: index + 1, timestamp: 'from-shared-link', odds: 'equal' }));
+    state.draftBoard.lotteryRunNumber = 1;
+    save();
+  } catch (err) {
+    console.warn('Could not apply lottery from URL', err);
+  }
+}
+
+function updateLotteryShareUrl(orderIds) {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('lottery', orderIds.join(','));
+    window.history.replaceState({}, '', url);
+  } catch {}
+}
+
+function clearLotteryShareUrl() {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('lottery');
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+  } catch {}
+}
+
+async function copyLockedLotteryLink() {
+  const lockedOrder = lockedLotteryOrderIds();
+  if (lockedOrder.length !== state.owners.length) return toast('LOTTERY NOT COMPLETED YET. Run the lottery first.');
+  updateLotteryShareUrl(lockedOrder);
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    toast('Locked lottery replay link copied.');
+  } catch {
+    toast('Locked lottery is in the address bar. Copy the URL to share it.');
+  }
+}
+
 function renderDraftLottery() {
   const status = $('#lotteryStatus');
   const results = $('#lotteryResults');
@@ -380,9 +458,15 @@ function renderDraftLottery() {
   }
   const lockedOrder = lockedLotteryOrderIds();
   const hasResult = lockedOrder.length === state.owners.length;
+  const runBtn = $('#runLotteryBtn');
+  const replayBtn = $('#replayLotteryBtn');
+  const copyBtn = $('#copyLotteryLinkBtn');
+  if (runBtn) runBtn.textContent = hasResult ? 'REPLAY LOCKED LOTTERY' : 'RUN LOTTERY';
+  if (replayBtn) replayBtn.style.display = hasResult ? '' : 'none';
+  if (copyBtn) copyBtn.style.display = hasResult ? '' : 'none';
   status.textContent = hasResult ? 'Mission complete. Draft order locked until Reset Draft.' : 'LOTTERY NOT COMPLETED YET';
   if (!hasResult) {
-    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div><p class="muted compact-note">All five owners have equal odds. Run the lottery once to lock the order.</p>';
+    results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div><p class="muted compact-note">All five owners have equal odds. The first run locks the order. After that, the button becomes a replay button.</p>';
     return;
   }
   results.innerHTML = lockedOrder.map((id, index) => {
@@ -398,12 +482,14 @@ function runDraftLottery() {
   const lockedOrder = lockedLotteryOrderIds();
   if (lockedOrder.length === state.owners.length) {
     playSpyLottery(lockedOrder);
-    return toast('Lottery already locked. Use Reset Draft to clear it.');
+    return toast('Replaying the locked lottery. Use Reset Draft to clear it.');
   }
   if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
   const result = equalShuffleOwners(state.owners).map(owner => owner.id);
   state.draftBoard.draftOrder = result;
   state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal' }));
+  state.draftBoard.lotteryRunNumber = 1;
+  updateLotteryShareUrl(result);
   save();
   renderAll();
   playSpyLottery(result);
@@ -548,6 +634,8 @@ function restoreFinalOwners(showToast = true) {
   state.rosters = Object.fromEntries(state.owners.map(o => [o.id, oldRosters[o.id] || []]));
   state.draftBoard.draftOrder = state.owners.map(o => o.id);
   state.draftBoard.lotteryResult = [];
+  state.draftBoard.lotteryRunNumber = 1;
+  clearLotteryShareUrl();
   save();
   renderAll();
   if (showToast) toast('Restored final five owners and cleared lottery results.');
@@ -640,6 +728,9 @@ This will also release ${rosterCount} roster player(s) back to the draft board a
   state.draftBoard.picks = (state.draftBoard.picks || [])
     .filter(pick => String(pick.ownerId) !== String(owner.id))
     .map((pick, index) => ({ ...pick, pick: index + 1 }));
+  state.draftBoard.lotteryResult = [];
+  state.draftBoard.lotteryRunNumber = 1;
+  clearLotteryShareUrl();
   save();
   renderAll();
   toast(`${owner.teamName} removed.`);
