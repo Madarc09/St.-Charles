@@ -5715,3 +5715,37 @@ body.lottery-running { overflow: hidden; }
     color:#f5c35b;
   }
 }
+
+
+/* V57 goalie board labels */
+.clean-player-table.goalie-board-mode td:nth-child(4)::before{
+  content:"";
+}
+.clean-player-table.goalie-board-mode td:nth-child(5)::before{
+  content:"";
+}
+.clean-player-table.goalie-board-mode td:nth-child(6)::before{
+  content:"";
+}
+.clean-player-table.goalie-board-mode .team-goalie-row td:nth-child(4),
+.clean-player-table.goalie-board-mode .team-goalie-row td:nth-child(5),
+.clean-player-table.goalie-board-mode .team-goalie-row td:nth-child(6){
+  color:#e9f2ff;
+}
+@media(max-width:820px){
+  .clean-player-table.skater-board-mode td:nth-child(3)::before{content:"GP "!important; color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(4)::before{content:"G "!important; color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(5)::before{content:"A "!important; color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(6)::before{content:"P "!important; color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(7)::before{content:"FPTS "!important; color:#f5c35b;}
+
+  .clean-player-table.goalie-board-mode td:nth-child(3)::before{content:"GP "!important; color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(4)::before{content:"W "!important; color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(5)::before{content:"SV% "!important; color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(6)::before{content:"GAA "!important; color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(7)::before{content:"FPTS "!important; color:#f5c35b;}
+
+  .clean-player-table.goalie-board-mode .team-goalie-row .meta::before{
+    content:"";
+  }
+}

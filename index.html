@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V56 TEAM GOALIES DEFINED -->
+  <!-- V57 GOALIE BOARD LABELS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V56 TEAM GOALIES DEFINED</div>
+        <div class="v46-build-marker">V57 GOALIE BOARD LABELS</div>
         <div class="clean-entry-stack clean-entry-stack-v51">
           <div class="draft-step-card enter-step-card">
             <div class="step-number">1</div>
@@ -1966,6 +1966,10 @@ const OWNERS = [
         }
         const pick = currentPick();
         const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
+        const goalieBoardMode = positionFilter === "TG";
+        const tableHeaders = goalieBoardMode
+          ? `<tr><th>#</th><th>Team Goalies</th><th>GP</th><th>Wins</th><th>Save %</th><th>GAA</th><th>Fantasy Pts</th></tr>`
+          : `<tr><th>#</th><th>Player</th><th>GP</th><th>Goals</th><th>Assists</th><th>Pts</th><th>Fantasy Pts</th></tr>`;
         const rows = availablePlayers().map((p, i) => {
           const positionAllowed = activeOwnerId ? window.canOwnerDraftPosition(draft, activeOwnerId, p.position) : false;
           const disabled = (canPick && positionAllowed) ? "" : "disabled";
@@ -1977,7 +1981,7 @@ const OWNERS = [
           </tr>`;
         }).join("");
         const signed = (draft.picks || []).slice(-8).reverse().map(p => `<div><span>${p.pickNumber}</span><strong>${esc(p.player.name)}</strong><em>${esc(p.ownerName)}</em></div>`).join("");
-        board.innerHTML = `<table class="draft-table clean-player-table"><thead><tr><th>#</th><th>Player</th><th>GP</th><th>Goals</th><th>Assists</th><th>Pts</th><th>Fantasy Pts</th></tr></thead><tbody>${rows}</tbody></table><div class="clean-signed-log"><h3>Recent signed players</h3>${signed || "<p>No picks yet.</p>"}</div>`;
+        board.innerHTML = `<table class="draft-table clean-player-table ${goalieBoardMode ? "goalie-board-mode" : "skater-board-mode"}"><thead>${tableHeaders}</thead><tbody>${rows}</tbody></table><div class="clean-signed-log"><h3>Recent signed players</h3>${signed || "<p>No picks yet.</p>"}</div>`;
       }
       async function signPlayer(playerId) {
         const pick = currentPick();
@@ -1999,7 +2003,7 @@ const OWNERS = [
           ownerId: activeOwnerId,
           ownerName: o?.teamName || activeOwnerId,
           timestamp: new Date().toISOString(),
-          player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, fantasyPoints: fp(player) }
+          player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, goalieWins: player.goalieWins || 0, goalieShutouts: player.goalieShutouts || 0, savePct: player.savePct || 0, goalsAgainstAverage: player.goalsAgainstAverage || 0, fantasyPoints: fp(player) }
         });
         await saveSharedDraft();
         toast(`Signed ${player.name} to ${o?.teamName || activeOwnerId}.`);
