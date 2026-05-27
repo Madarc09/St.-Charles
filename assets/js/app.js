@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v28-hard-bypass';
+const STORAGE_KEY = 'custom-hockey-pool-v29-inline-lottery';
 let globalLotteryStorageConfigured = false;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -41,7 +41,9 @@ function forceFinalOwners() {
     ? state.draftBoard.draftOrder
     : FINAL_OWNERS.map(o => o.id);
   state.owners.forEach(owner => {
-    if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) state.draftBoard.draftOrder.push(owner.id);
+    if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) {
+      state.draftBoard.draftOrder.push(owner.id);
+    }
   });
 }
 
@@ -490,18 +492,19 @@ function undoPick() {
   save(); renderAll(); toast(`Undid ${last.player.name}.`);
 }
 
-async function resetDraft() {
+async async function resetDraft() {
+  forceFinalOwners();
   if (!confirm('Reset the entire draft, clear all rosters, and clear the locked lottery results?')) return;
-  await clearGlobalLottery();
   state.draftBoard.picks = [];
   state.rosters = {};
   state.owners.forEach(o => { state.rosters[o.id] = []; });
   state.draftBoard.lotteryResult = [];
-  state.draftBoard.lotteryRunNumber = 1;
+  state.draftBoard.lotteryRunNumber = 0;
   state.draftBoard.draftOrder = state.owners.map(o => o.id);
   clearLotteryShareUrl();
   save(); renderAll(); toast('Draft and lottery reset.');
 }
+
 
 function renderDraftOrderEditor() {
   const order = state.draftBoard.draftOrder.length ? state.draftBoard.draftOrder : state.owners.map(o => o.id);
@@ -682,17 +685,21 @@ async function runDraftLottery() {
   }
   if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
   let result = equalShuffleOwners(state.owners).map(owner => owner.id);
-  result = await saveGlobalLottery(result);
+
+  // For now keep this local only. This avoids Vercel/API/global-save issues while we restore stability.
+  globalLotteryStorageConfigured = false;
+
   state.draftBoard.draftOrder = result;
-  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: globalLotteryStorageConfigured ? 'global' : 'browser' }));
+  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString(), odds: 'equal', source: 'browser' }));
   state.draftBoard.lotteryRunNumber = 1;
   updateLotteryShareUrl(result);
   save();
   renderAll();
   playSpyLottery(result);
   const first = state.owners.find(o => o.id === result[0]);
-  toast(globalLotteryStorageConfigured ? `Global lottery locked: ${first?.teamName || 'Team 1'} gets pick 1.` : `Lottery locked on this device: ${first?.teamName || 'Team 1'} gets pick 1.`);
+  toast(`Lottery locked locally: ${first?.teamName || 'Team 1'} gets pick 1.`);
 }
+
 
 function replayLockedLottery() {
   const lockedOrder = lockedLotteryOrderIds();
@@ -830,99 +837,64 @@ function setStoryboardPanel(scene, index, total) {
   if (progress) progress.style.width = `${Math.round(((index + 1) / total) * 100)}%`;
 }
 
+async 
 async function playSpyLottery(orderIds) {
-  const modal = $('#spyLotteryModal');
-  const target = $('#scopeTargetName');
-  const meta = $('#scopeTargetMeta');
-  const list = $('#spyResultsList');
-  const scope = $('#scopeView');
-  const folder = $('#classifiedFolder');
-  const cutscene = $('#storyboardCutscene');
-  const puck = $('#flyingPuck');
-  if (!modal || !target || !list || !scope) return;
-
-  const winnerId = String(orderIds[0]);
-  const eliminationIds = [...orderIds].slice(1).reverse().map(String);
+  // v29: no modal. The lottery reveal is rendered directly inside the Draft Info page.
   const ownersById = new Map(state.owners.map(o => [String(o.id), o]));
-  const winner = ownersById.get(winnerId);
-  const winnerLabel = ownerLotteryLabel(winner);
+  const orderedOwners = orderIds.map(id => ownersById.get(String(id))).filter(Boolean);
+  if (!orderedOwners.length) return toast('No lottery owners found.');
 
-  list.innerHTML = '';
-  folder?.classList.remove('show', 'in-scene-folder');
-  renderBasementTargets(orderIds);
-  $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus', 'hero-winner', 'cutscene-enter', 'ducking'));
+  const results = $('#lotteryResults');
+  const status = $('#lotteryStatus');
+  if (!results) return;
 
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('lottery-running');
-  scope.classList.remove('storyboard-mode', 'scope-hit', 'scope-locking');
-  scope.classList.add('motion-mode');
-  cutscene?.classList.remove('show');
-  ensureMotionCutsceneElements(scope);
-  folder?.classList.add('in-scene-folder');
-  resetMotionCamera(scope);
-  target.textContent = 'MOTION COMIC CUTSCENE LOADING...';
-  if (meta) meta.textContent = '1998 basement lottery action sequence • reverse-order puck eliminations';
+  if (status) status.textContent = 'Lottery reveal running directly on the Draft Info page.';
 
-  const winnerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(winnerId)}"]`);
-  if (winnerEl) {
-    winnerEl.classList.add('hero-winner', 'cutscene-enter');
+  results.innerHTML = `
+    <div class="inline-lottery-stage">
+      <div class="inline-lottery-header">
+        <span>2026</span>
+        <strong>HOCKEY POOL DRAFT LOTTERY</strong>
+        <small>Equal odds • no overlay • no video modal</small>
+      </div>
+      <div class="inline-lottery-machine" id="inlineLotteryMachine">
+        <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i>
+      </div>
+      <div class="inline-lottery-card" id="inlineLotteryCard">
+        <small>READY</small>
+        <strong>---</strong>
+      </div>
+      <div class="inline-lottery-seats">
+        ${orderedOwners.map(o => `<div data-inline-owner="${escapeHtml(String(o.id))}"><b>#@!*%</b><span>${escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')}</span></div>`).join('')}
+      </div>
+      <ol class="inline-lottery-results" id="inlineLotteryRevealList"></ol>
+    </div>
+  `;
+
+  const machine = $('#inlineLotteryMachine');
+  const card = $('#inlineLotteryCard');
+  const list = $('#inlineLotteryRevealList');
+  machine?.classList.add('spin');
+
+  const revealOrder = [...orderedOwners].reverse();
+  for (let i = 0; i < revealOrder.length; i++) {
+    const owner = revealOrder[i];
+    const pickNumber = orderedOwners.length - i;
+    const name = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
+    await sleep(550);
+    if (card) card.innerHTML = `<small>${ordinalLabel(pickNumber)} OVERALL</small><strong>${escapeHtml(name)}</strong>`;
+    const seat = document.querySelector(`[data-inline-owner="${CSS.escape(String(owner.id))}"]`);
+    if (seat) {
+      seat.classList.remove('mad');
+      void seat.offsetWidth;
+      seat.classList.add('mad');
+    }
+    if (list) list.insertAdjacentHTML('afterbegin', `<li><span>${pickNumber}</span><strong>${escapeHtml(name)}</strong></li>`);
+    await sleep(650);
   }
 
-  setMotionCaption('0:00', `${ownerShortName(winner).toUpperCase()} COMES DOWN THE STAIRS`, 'The first-overall winner enters the 1998 basement draft room.');
-  setMotionCamera(scope, '-10%', '4%', 1.34, '15% 28%');
-  await sleep(2100);
-
-  setMotionCaption('0:03', 'BASEMENT DRAFT OPS: ALL TARGETS PRESENT', 'N64 on the CRT, pizza on the floor, pool books open, and five old men waiting for fate.');
-  resetMotionCamera(scope);
-  $$('.cartoon-owner').forEach(el => el.classList.add('ducking'));
-  await sleep(2100);
-  $$('.cartoon-owner').forEach(el => el.classList.remove('ducking'));
-
-  setMotionCaption('0:06', 'THE LOTTERY PUCK IS LIVE', 'The draft winner grabs a stick. The room realizes the standings are about to get physical.');
-  flashSpeedLines();
-  await sleep(1500);
-
-  for (const id of eliminationIds) {
-    const owner = ownersById.get(id);
-    if (!owner) continue;
-    const pickNumber = orderIds.map(String).indexOf(id) + 1;
-    const label = ownerLotteryLabel(owner);
-    const ownerEl = scope.querySelector(`[data-scene-owner="${CSS.escape(id)}"]`);
-    if (!ownerEl) continue;
-    const layout = lotteryTargetLayout(id);
-    const pan = panForTarget(layout.x, layout.y);
-    setMotionCamera(scope, pan.x, pan.y, 1.48, `${layout.x}% ${layout.y}%`);
-    ownerEl.classList.add('active-target', 'camera-focus');
-    setMotionCaption(`0:${String(8 + (5-pickNumber)*4).padStart(2, '0')}`, `${label.primary.toUpperCase()} — ${ordinalLabel(pickNumber)} PICK`, `${ownerShortName(winner)} lines up a basement ricochet. Hockey pucks only. No bullets. No mercy.`);
-    showMotionPickLabel(`${ordinalLabel(pickNumber)} PICK`);
-    await sleep(1050);
-    await launchCinematicPuck(scope, winnerEl, ownerEl);
-    ownerEl.classList.remove('active-target', 'camera-focus');
-    ownerEl.classList.add('puck-hit');
-    markEliminatedOnFolder(owner, pickNumber, `Knocked out by puck • awarded pick ${pickNumber}`);
-    target.textContent = `${ordinalLabel(pickNumber)} PICK LOCKED`;
-    if (meta) meta.textContent = `${label.primary} has been eliminated from first-overall contention.`;
-    await sleep(1100);
-  }
-
-  resetMotionCamera(scope);
-  if (winnerEl) {
-    winnerEl.classList.remove('cutscene-enter');
-    winnerEl.classList.add('winner-target', 'hero-winner');
-  }
-  setMotionCaption('0:25', `ONE OLD MAN LEFT: ${ownerShortName(winner).toUpperCase()}`, `${winnerLabel.primary} survives the basement and claims the first overall pick.`);
-  showMotionPickLabel('1ST OVERALL');
-  await sleep(2200);
-
-  list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the basement cutscene • awarded first overall</small></li>`);
-  setMotionCaption('0:28', 'CLASSIFIED FOLDER PRINTING', 'The final draft order is now locked and ready to replay.');
-  if (folder) {
-    folder.classList.add('show');
-    scope.appendChild(folder);
-  }
-  target.textContent = 'ORDER CONFIRMED';
-  if (meta) meta.textContent = 'Final classified folder printed inside the animated cutscene.';
+  machine?.classList.remove('spin');
+  if (status) status.textContent = 'Mission complete. Draft order locked until Reset Draft.';
 }
 
 function ensureMotionCutsceneElements(scope) {
@@ -1131,6 +1103,7 @@ function loadSampleOwners(showToast = true) {
 }
 
 function renderTeamManager() {
+  forceFinalOwners();
   const el = $('#teamManagerList');
   if (!el) return;
   const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);

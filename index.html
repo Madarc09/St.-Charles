@@ -182,7 +182,7 @@
         </article>
         <article class="card">
           <h3>Add / Restore Teams</h3>
-          <p class="muted">Hard-bypass controls. These work even if the main app module is having issues.</p>
+          <p class="muted">Use this if you want to add more testing teams or restore the original five.</p>
           <div class="actions stack-sm">
             <button class="primary" id="addOwnerBtn">Add Team</button>
             <button id="loadSampleOwnersBtn">Restore Final 5 Teams</button>
@@ -357,110 +357,33 @@
   <script>
     (function () {
       "use strict";
-
-      var STORAGE_KEY = "custom-hockey-pool-v28-hard-bypass-fallback";
-      var DEFAULT_OWNERS = [
-        { id: "nick", name: "Nick", teamName: "Nick" },
-        { id: "chris", name: "Chris", teamName: "Chris" },
-        { id: "andrew", name: "Andrew", teamName: "Andrew" },
-        { id: "tyler", name: "Tyler", teamName: "Tyler" },
-        { id: "scott", name: "Scott", teamName: "Scott" }
+      var KEY = "custom-hockey-pool-v29-inline-emergency";
+      var OWNERS = [
+        { id: "nick", teamName: "Nick" },
+        { id: "chris", teamName: "Chris" },
+        { id: "andrew", teamName: "Andrew" },
+        { id: "tyler", teamName: "Tyler" },
+        { id: "scott", teamName: "Scott" }
       ];
 
-      function clean(text) {
-        return String(text == null ? "" : text).replace(/[&<>"']/g, function (c) {
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
           return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
         });
       }
-
-      function clone(obj) {
-        return JSON.parse(JSON.stringify(obj));
-      }
-
-      function getState() {
+      function get() {
         try {
-          var raw = localStorage.getItem(STORAGE_KEY);
+          var raw = localStorage.getItem(KEY);
           if (raw) {
-            var parsed = JSON.parse(raw);
-            if (Array.isArray(parsed.owners) && parsed.owners.length) return parsed;
+            var state = JSON.parse(raw);
+            if (Array.isArray(state.owners) && state.owners.length) return state;
           }
         } catch (e) {}
-        return {
-          owners: clone(DEFAULT_OWNERS),
-          draftOrder: DEFAULT_OWNERS.map(function (o) { return o.id; }),
-          lotteryOrder: null,
-          rosters: {}
-        };
+        return { owners: OWNERS.slice(), lotteryOrder: null };
       }
-
-      function saveState(state) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+      function save(state) {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
       }
-
-      function toast(message) {
-        var el = document.getElementById("toast");
-        if (!el) return;
-        el.textContent = message;
-        el.classList.add("show");
-        setTimeout(function () { el.classList.remove("show"); }, 2600);
-      }
-
-      function owners() {
-        var state = getState();
-        if (!Array.isArray(state.owners) || !state.owners.length) {
-          state.owners = clone(DEFAULT_OWNERS);
-          saveState(state);
-        }
-        return state.owners;
-      }
-
-      function paintTeams() {
-        var list = document.getElementById("teamManagerList");
-        var select = document.getElementById("removeOwnerSelect");
-        var currentOwners = owners();
-
-        if (list) {
-          list.innerHTML = currentOwners.map(function (o) {
-            return '<div class="mini-list-row roster-manager-row team-manager-row">' +
-              '<div><strong>' + clean(o.teamName) + '</strong><div class="meta">' + clean(o.name) + ' • active draft owner</div></div>' +
-              '<span class="badge">OWNER</span></div>';
-          }).join("");
-        }
-
-        if (select) {
-          select.innerHTML = currentOwners.map(function (o) {
-            return '<option value="' + clean(o.id) + '">' + clean(o.teamName) + ' — 0 players</option>';
-          }).join("");
-          select.disabled = !currentOwners.length;
-        }
-      }
-
-      function paintLotteryStatus() {
-        var state = getState();
-        var results = document.getElementById("lotteryResults");
-        var status = document.getElementById("lotteryStatus");
-        var runBtn = document.getElementById("runLotteryBtn");
-        var replayBtn = document.getElementById("replayLotteryBtn");
-
-        if (!results || !status) return;
-
-        if (!state.lotteryOrder || !state.lotteryOrder.length) {
-          status.textContent = "LOTTERY NOT COMPLETED YET";
-          results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
-          if (runBtn) runBtn.textContent = "RUN LOTTERY";
-          if (replayBtn) replayBtn.style.display = "none";
-          return;
-        }
-
-        status.textContent = "Mission complete. Draft order locked until Reset Draft.";
-        results.innerHTML = state.lotteryOrder.map(function (id, i) {
-          var owner = state.owners.find(function (o) { return o.id === id; }) || { teamName: id };
-          return '<div class="mini-item"><span>' + (i + 1) + '</span><strong>' + clean(owner.teamName) + '</strong></div>';
-        }).join("");
-        if (runBtn) runBtn.textContent = "REPLAY LOCKED LOTTERY";
-        if (replayBtn) replayBtn.style.display = "";
-      }
-
       function shuffle(ids) {
         var a = ids.slice();
         for (var i = a.length - 1; i > 0; i--) {
@@ -469,201 +392,126 @@
         }
         return a;
       }
-
-      function suffix(n) {
-        return n === 1 ? "ST" : n === 2 ? "ND" : n === 3 ? "RD" : "TH";
+      function suffix(n) { return n === 1 ? "ST" : n === 2 ? "ND" : n === 3 ? "RD" : "TH"; }
+      function toast(msg) {
+        var t = document.getElementById("toast");
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(function () { t.classList.remove("show"); }, 2500);
       }
-
-      function openLottery(orderIds) {
-        var state = getState();
-        var modal = document.getElementById("spyLotteryModal");
-        var scope = document.getElementById("scopeView");
-        var screen = modal && modal.querySelector(".spy-screen");
-        if (!modal || !scope || !screen) {
-          alert("Lottery screen could not open.");
-          return;
+      function paintTeams() {
+        var state = get();
+        var list = document.getElementById("teamManagerList");
+        if (list) {
+          list.innerHTML = state.owners.map(function (o) {
+            return '<div class="mini-list-row roster-manager-row team-manager-row"><div><strong>' + esc(o.teamName) + '</strong><div class="meta">active owner</div></div><span class="badge">OWNER</span></div>';
+          }).join("");
         }
-
+        var select = document.getElementById("removeOwnerSelect");
+        if (select) {
+          select.innerHTML = state.owners.map(function (o) {
+            return '<option value="' + esc(o.id) + '">' + esc(o.teamName) + ' — 0 players</option>';
+          }).join("");
+        }
+      }
+      function renderInline(orderIds) {
+        var state = get();
+        var results = document.getElementById("lotteryResults");
+        var status = document.getElementById("lotteryStatus");
+        if (!results) return;
         var orderOwners = orderIds.map(function (id) {
-          return state.owners.find(function (o) { return o.id === id; }) || { id: id, name: id, teamName: id };
+          return state.owners.find(function (o) { return o.id === id; }) || { id: id, teamName: id };
         });
-
-        screen.classList.add("hb-lottery-mode");
-        scope.className = "scope-view hb-lottery-stage";
-        scope.innerHTML =
-          '<div class="hb-stage">' +
-            '<h2>HOCKEY POOL DRAFT LOTTERY</h2>' +
-            '<div class="hb-host"><div class="hb-bubble">I&#39;M GARY BETTMAN</div><div class="hb-penguin"></div></div>' +
-            '<div class="hb-machine spin"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>' +
-            '<div class="hb-seats">' + orderOwners.map(function (o) {
-              return '<div data-owner="' + clean(o.id) + '"><b>#@!*%</b><span>' + clean(o.teamName) + '</span></div>';
-            }).join("") + '</div>' +
-            '<div class="hb-card" id="hbCard"><small>READY</small><strong>---</strong></div>' +
-            '<ol class="hb-results" id="hbResults"></ol>' +
-            '<div class="hb-lower" id="hbLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>' +
+        if (status) status.textContent = "Lottery running directly on the page.";
+        results.innerHTML =
+          '<div class="inline-lottery-stage">' +
+            '<div class="inline-lottery-header"><span>2026</span><strong>HOCKEY POOL DRAFT LOTTERY</strong><small>Inline reveal — no overlay</small></div>' +
+            '<div class="inline-lottery-machine spin"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i></div>' +
+            '<div class="inline-lottery-card" id="emCard"><small>READY</small><strong>---</strong></div>' +
+            '<div class="inline-lottery-seats">' + orderOwners.map(function (o) { return '<div data-owner="' + esc(o.id) + '"><b>#@!*%</b><span>' + esc(o.teamName) + '</span></div>'; }).join("") + '</div>' +
+            '<ol class="inline-lottery-results" id="emList"></ol>' +
           '</div>';
-
-        modal.classList.add("show");
-        modal.setAttribute("aria-hidden", "false");
-        document.body.classList.add("lottery-running");
-
-        var card = document.getElementById("hbCard");
-        var results = document.getElementById("hbResults");
-        var lower = document.getElementById("hbLower");
-        var revealOwners = orderOwners.slice().reverse();
-        var index = 0;
-
-        function revealNext() {
-          if (index >= revealOwners.length) {
-            if (lower) lower.innerHTML = 'DRAFT ORDER <span>LOCKED</span>';
+        var reveal = orderOwners.slice().reverse();
+        var card = document.getElementById("emCard");
+        var list = document.getElementById("emList");
+        var i = 0;
+        function step() {
+          if (i >= reveal.length) {
+            if (status) status.textContent = "Mission complete. Draft order locked until Reset Draft.";
             return;
           }
-          var owner = revealOwners[index];
-          var pickNumber = revealOwners.length - index;
-          if (lower) lower.innerHTML = 'THE ' + pickNumber + suffix(pickNumber) + ' PICK GOES TO <span>' + clean(owner.teamName).toUpperCase() + '</span>';
-          if (card) card.innerHTML = '<small>' + pickNumber + suffix(pickNumber) + ' OVERALL</small><strong>' + clean(owner.teamName) + '</strong>';
-          var seat = scope.querySelector('[data-owner="' + CSS.escape(owner.id) + '"]');
+          var owner = reveal[i];
+          var pick = reveal.length - i;
+          if (card) card.innerHTML = '<small>' + pick + suffix(pick) + ' OVERALL</small><strong>' + esc(owner.teamName) + '</strong>';
+          var seat = results.querySelector('[data-owner="' + CSS.escape(owner.id) + '"]');
           if (seat) {
             seat.classList.remove("mad");
             void seat.offsetWidth;
             seat.classList.add("mad");
           }
-          if (results) {
-            results.insertAdjacentHTML("afterbegin", '<li><span>' + pickNumber + '</span><strong>' + clean(owner.teamName) + '</strong></li>');
-          }
-          index += 1;
-          setTimeout(revealNext, 1300);
+          if (list) list.insertAdjacentHTML("afterbegin", '<li><span>' + pick + '</span><strong>' + esc(owner.teamName) + '</strong></li>');
+          i++;
+          setTimeout(step, 850);
         }
-
-        setTimeout(revealNext, 700);
+        setTimeout(step, 500);
       }
-
-      function runLottery() {
-        var state = getState();
-        if (!Array.isArray(state.owners) || !state.owners.length) {
-          state.owners = clone(DEFAULT_OWNERS);
-        }
-        if (!state.lotteryOrder || !state.lotteryOrder.length) {
+      function run() {
+        var state = get();
+        if (!state.lotteryOrder) {
           state.lotteryOrder = shuffle(state.owners.map(function (o) { return o.id; }));
-          state.draftOrder = state.lotteryOrder.slice();
-          saveState(state);
+          save(state);
           toast("Lottery locked.");
         } else {
           toast("Replaying locked lottery.");
         }
-        paintTeams();
-        paintLotteryStatus();
-        openLottery(state.lotteryOrder);
+        renderInline(state.lotteryOrder);
       }
-
-      function resetDraft() {
-        var state = getState();
-        state.owners = Array.isArray(state.owners) && state.owners.length ? state.owners : clone(DEFAULT_OWNERS);
-        state.draftOrder = state.owners.map(function (o) { return o.id; });
+      function reset() {
+        var state = get();
         state.lotteryOrder = null;
-        state.rosters = {};
-        saveState(state);
+        state.owners = state.owners && state.owners.length ? state.owners : OWNERS.slice();
+        save(state);
         paintTeams();
-        paintLotteryStatus();
+        var results = document.getElementById("lotteryResults");
+        var status = document.getElementById("lotteryStatus");
+        if (status) status.textContent = "LOTTERY NOT COMPLETED YET";
+        if (results) results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
         toast("Draft and lottery reset.");
       }
-
-      function restoreFinalFive() {
-        var state = getState();
-        state.owners = clone(DEFAULT_OWNERS);
-        state.draftOrder = DEFAULT_OWNERS.map(function (o) { return o.id; });
-        state.lotteryOrder = null;
-        state.rosters = {};
-        saveState(state);
+      function restore() {
+        save({ owners: OWNERS.slice(), lotteryOrder: null });
         paintTeams();
-        paintLotteryStatus();
         toast("Final five teams restored.");
       }
-
-      function addTeam() {
-        var state = getState();
-        var name = prompt("Owner name?");
-        if (!name) return;
-        var teamName = prompt("Team name?", name) || name;
-        var id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || ("team-" + Date.now());
-        var base = id;
-        var n = 2;
-        while (state.owners.some(function (o) { return o.id === id; })) id = base + "-" + n++;
-        state.owners.push({ id: id, name: name, teamName: teamName });
-        state.draftOrder = state.owners.map(function (o) { return o.id; });
-        state.lotteryOrder = null;
-        saveState(state);
-        paintTeams();
-        paintLotteryStatus();
-        toast("Team added.");
-      }
-
-      function closeLottery() {
-        var modal = document.getElementById("spyLotteryModal");
-        var screen = modal && modal.querySelector(".spy-screen");
-        if (screen) screen.classList.remove("hb-lottery-mode");
-        if (modal) {
-          modal.classList.remove("show");
-          modal.setAttribute("aria-hidden", "true");
-        }
-        document.body.classList.remove("lottery-running");
-      }
-
       document.addEventListener("click", function (event) {
-        var run = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
-        if (run) {
+        var runBtn = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
+        if (runBtn) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          runLottery();
+          run();
           return;
         }
-
-        var reset = event.target.closest && event.target.closest("#resetDraftBtn");
-        if (reset) {
+        var resetBtn = event.target.closest && event.target.closest("#resetDraftBtn");
+        if (resetBtn) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          resetDraft();
+          reset();
           return;
         }
-
-        var restore = event.target.closest && event.target.closest("#restoreFinalOwnersBtn, #loadSampleOwnersBtn");
-        if (restore) {
+        var restoreBtn = event.target.closest && event.target.closest("#restoreFinalOwnersBtn, #loadSampleOwnersBtn");
+        if (restoreBtn) {
           event.preventDefault();
           event.stopPropagation();
           if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          restoreFinalFive();
-          return;
-        }
-
-        var add = event.target.closest && event.target.closest("#addOwnerBtn");
-        if (add) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          addTeam();
-          return;
-        }
-
-        var close = event.target.closest && event.target.closest("#closeSpyLottery");
-        if (close) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-          closeLottery();
+          restore();
           return;
         }
       }, true);
-
       window.addEventListener("load", function () {
-        if (!localStorage.getItem(STORAGE_KEY)) {
-          saveState({ owners: clone(DEFAULT_OWNERS), draftOrder: DEFAULT_OWNERS.map(function (o) { return o.id; }), lotteryOrder: null, rosters: {} });
-        }
-        setTimeout(function () {
-          paintTeams();
-          paintLotteryStatus();
-        }, 150);
+        setTimeout(paintTeams, 200);
       });
     })();
   </script>
