@@ -1,0 +1,37 @@
+{
+  "poolName": "Nick's Custom Hockey Pool",
+  "seasonId": "20252026",
+  "gameTypeId": 2,
+  "lastUpdated": null,
+  "scoring": {
+    "goals": 1,
+    "assists": 1,
+    "points": 0,
+    "powerPlayGoals": 0,
+    "powerPlayPoints": 0,
+    "shortHandedGoals": 0,
+    "gameWinningGoals": 0,
+    "shots": 0,
+    "hits": 0,
+    "blocks": 0,
+    "goalieWins": 2,
+    "goalieShutouts": 3,
+    "goalieSaves": 0,
+    "goalieGoalsAgainst": 0,
+    "goalieSavePctBonus": 0
+  },
+  "rosterRules": {
+    "forwards": 9,
+    "defense": 4,
+    "goalies": 2,
+    "bench": 3,
+    "ir": 0,
+    "totalRosterSize": 18
+  },
+  "draftRules": {
+    "type": "snake",
+    "rounds": 18,
+    "pickTimerSeconds": 0,
+    "allowTradingPicks": true
+  }
+}

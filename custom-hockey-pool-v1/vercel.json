@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/nhl", "destination": "/api/nhl.js" }
+  ]
+}
