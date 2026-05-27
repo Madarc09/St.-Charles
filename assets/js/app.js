@@ -725,103 +725,124 @@ function markEliminatedOnFolder(owner, pick, subtitle) {
   list.insertAdjacentHTML('afterbegin', `<li><span>${pick}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(subtitle || label.secondary)}</small></li>`);
 }
 
+function ordinalLabel(n) {
+  const value = Number(n);
+  if (value === 1) return '1ST';
+  if (value === 2) return '2ND';
+  if (value === 3) return '3RD';
+  return `${value}TH`;
+}
+
+function ownerShortName(owner) {
+  return owner?.name || owner?.teamName || 'Unknown';
+}
+
+function storyboardSceneList(orderIds) {
+  const owners = orderIds.map(id => state.owners.find(o => String(o.id) === String(id))).filter(Boolean);
+  const winner = owners[0];
+  const second = owners[1];
+  const third = owners[2];
+  const fourth = owners[3];
+  const fifth = owners[4];
+  const loserOrder = [fifth, fourth, third, second].filter(Boolean);
+  const pickOf = owner => owner ? orderIds.indexOf(owner.id) + 1 : '';
+  const nameOf = owner => ownerShortName(owner).toUpperCase();
+  const teamOf = owner => (owner?.teamName || ownerShortName(owner)).toUpperCase();
+  const base = [
+    { panel: 1, time: '0:00', title: 'COMING DOWN THE STAIRS...', sub: 'The locked lottery cutscene begins in the 1998 basement.' },
+    { panel: 2, time: '0:02', title: `${nameOf(winner)} ENTERS THE ROOM`, sub: 'First overall is the point of view character.' },
+    { panel: 3, time: '0:04', title: 'TARGETS IDENTIFIED', sub: 'Pizza, pool books, player cards, VHS tapes, and bad decisions everywhere.' },
+    { panel: 4, time: '0:07', title: `${nameOf(fifth)} — ${ordinalLabel(pickOf(fifth))} PICK`, sub: 'Last in the lottery order is marked first.' },
+    { panel: 5, time: '0:09', title: `${nameOf(fourth)} — ${ordinalLabel(pickOf(fourth))} PICK`, sub: 'Still thinking there is time to hide by the CRT.' },
+    { panel: 6, time: '0:12', title: `${nameOf(third)} — ${ordinalLabel(pickOf(third))} PICK`, sub: 'The N64 table is no longer safe.' },
+    { panel: 7, time: '0:15', title: `${nameOf(second)} — ${ordinalLabel(pickOf(second))} PICK`, sub: 'The pizza box becomes part of the action sequence.' },
+    { panel: 8, time: '0:17', title: 'ONE LOTTERY PUCK', sub: 'Loaded from the basement draft bag.' },
+    { panel: 9, time: '0:18', title: `${nameOf(loserOrder[0])} TAKES IT`, sub: `Knocked out by puck. Locked to pick ${pickOf(loserOrder[0])}.` },
+    { panel: 10, time: '0:20', title: `${nameOf(loserOrder[1])} GOES DOWN`, sub: `A tape-stack ricochet seals pick ${pickOf(loserOrder[1])}.` },
+    { panel: 11, time: '0:22', title: `${nameOf(loserOrder[2])} IS OUT`, sub: `The basement claims another old man at pick ${pickOf(loserOrder[2])}.` },
+    { panel: 12, time: '0:24', title: `${nameOf(loserOrder[3])} MEETS HIS MATCH`, sub: `The last puck hit locks pick ${pickOf(loserOrder[3])}.` },
+    { panel: 13, time: '0:26', title: `ONE LEFT: ${nameOf(winner)}`, sub: 'No puck for first overall.' },
+    { panel: 14, time: '0:28', title: 'THE ROOM IS SILENT', sub: 'Only the hum of the CRT remains.' },
+    { panel: 15, time: '0:29', title: `${nameOf(second)} KNOWS`, sub: 'Second overall is good. First overall was better.' },
+    { panel: 16, time: '0:30', title: 'NO ESCAPE', sub: 'The last ricochet echoes through the basement.' },
+    { panel: 17, time: '0:31', title: 'GAME OVER', sub: 'Pizza is ruined. Draft order is almost official.' },
+    { panel: 18, time: '0:33', title: `THE DRAFT IS ${nameOf(winner)}’S`, sub: `${teamOf(winner)} claims the first pick.` },
+    { panel: 19, time: '0:34', title: 'CLASSIFIED FILE PRINTING', sub: 'The final folder is typed up in real time.' },
+    { panel: 20, time: '0:35', title: 'DRAFT ORDER LOCKED IN', sub: 'Let the draft begin.' }
+  ];
+  return base.map(scene => ({
+    ...scene,
+    title: scene.title.replace(/UNDEFINED|null/gi, 'UNKNOWN')
+  }));
+}
+
+function setStoryboardPanel(scene, index, total) {
+  const cutscene = $('#storyboardCutscene');
+  const panel = $('#storyboardPanel');
+  const caption = $('#storyboardCaption');
+  const subcaption = $('#storyboardSubcaption');
+  const timecode = $('#storyboardTimecode');
+  const progress = $('#storyboardProgress');
+  if (!cutscene || !panel) return;
+  const col = (scene.panel - 1) % 5;
+  const row = Math.floor((scene.panel - 1) / 5);
+  panel.style.setProperty('--story-x', `${col * 25}%`);
+  panel.style.setProperty('--story-y', `${row * 33.333333}%`);
+  panel.classList.remove('panel-pop');
+  void panel.offsetWidth;
+  panel.classList.add('panel-pop');
+  if (caption) caption.textContent = scene.title;
+  if (subcaption) subcaption.textContent = scene.sub;
+  if (timecode) timecode.textContent = scene.time;
+  if (progress) progress.style.width = `${Math.round(((index + 1) / total) * 100)}%`;
+}
+
 async function playSpyLottery(orderIds) {
   const modal = $('#spyLotteryModal');
   const target = $('#scopeTargetName');
   const meta = $('#scopeTargetMeta');
   const list = $('#spyResultsList');
-  const flash = $('#scopeFlash');
   const scope = $('#scopeView');
   const folder = $('#classifiedFolder');
-  const puck = $('#flyingPuck');
+  const cutscene = $('#storyboardCutscene');
   if (!modal || !target || !list || !scope) return;
 
-  const ownerCount = orderIds.length;
-  const eliminationIds = [...orderIds].slice(1).reverse(); // 5th, 4th, 3rd, 2nd. Pick 1 never gets hit.
   const winnerId = orderIds[0];
+  const scenes = storyboardSceneList(orderIds);
 
   list.innerHTML = '';
   folder?.classList.remove('show');
   renderBasementTargets(orderIds);
   $$('.cartoon-owner').forEach(el => el.classList.remove('active-target', 'tagged-target', 'puck-hit', 'winner-target', 'camera-focus'));
-  puck?.classList.remove('launch');
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  target.textContent = 'Basement sweep loading...';
-  if (meta) meta.textContent = 'Equal odds • cartoon puck elimination cutscene';
-  await sleep(900);
+  scope.classList.add('storyboard-mode');
+  cutscene?.classList.add('show');
+  target.textContent = 'CUTSCENE LOADING...';
+  if (meta) meta.textContent = 'Full cartoon storyboard cutscene • reverse-order puck eliminations';
 
-  // Establishing shots: visit every old man in the room before the puck chaos starts.
-  for (const id of orderIds) {
-    const owner = state.owners.find(o => String(o.id) === String(id));
-    const label = ownerLotteryLabel(owner);
-    const layout = lotteryTargetLayout(id);
-    const el = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(id));
-    target.textContent = label.primary;
-    if (meta) meta.textContent = `${label.secondary} • ${layout.activity}`;
-    scope.style.setProperty('--scope-x', `${layout.x}%`);
-    scope.style.setProperty('--scope-y', `${layout.y}%`);
-    $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
-    el?.classList.add('active-target', 'camera-focus');
-    scope.classList.remove('scope-hit');
-    scope.classList.add('scope-locking');
-    await sleep(1500);
+  for (let i = 0; i < scenes.length; i++) {
+    const scene = scenes[i];
+    setStoryboardPanel(scene, i, scenes.length);
+    target.textContent = scene.title;
+    if (meta) meta.textContent = scene.sub;
+    await sleep(i < 3 ? 950 : i < 8 ? 1050 : i < 13 ? 900 : 820);
   }
 
-  // Reverse reveal: lowest lottery result gets hit first, winner is left standing.
+  const eliminationIds = [...orderIds].slice(1).reverse();
   for (const id of eliminationIds) {
     const pickNumber = orderIds.indexOf(id) + 1;
     const owner = state.owners.find(o => String(o.id) === String(id));
-    const label = ownerLotteryLabel(owner);
-    const layout = lotteryTargetLayout(id);
-    const el = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(id));
-    target.textContent = `${pickNumber}TH PICK`; 
-    if (pickNumber === 2) target.textContent = '2ND PICK';
-    if (pickNumber === 3) target.textContent = '3RD PICK';
-    if (meta) meta.textContent = `${label.primary} gets knocked out by a basement puck.`;
-    scope.style.setProperty('--scope-x', `${layout.x}%`);
-    scope.style.setProperty('--scope-y', `${layout.y}%`);
-    $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
-    el?.classList.add('active-target');
-    scope.classList.remove('scope-hit');
-    scope.classList.add('scope-locking');
-    await sleep(850);
-
-    scope.classList.remove('scope-locking');
-    scope.classList.add('scope-hit');
-    if (puck) {
-      puck.style.setProperty('--puck-end-x', `${layout.x}%`);
-      puck.style.setProperty('--puck-end-y', `${layout.y}%`);
-      puck.classList.remove('launch');
-      void puck.offsetWidth;
-      puck.classList.add('launch');
-    }
-    flash?.classList.remove('pulse');
-    void flash?.offsetWidth;
-    flash?.classList.add('pulse');
-    await sleep(360);
-    el?.classList.add('puck-hit', 'tagged-target');
-    markEliminatedOnFolder(owner, pickNumber, `Knocked out by puck • awarded pick ${pickNumber}`);
-    await sleep(1400);
+    markEliminatedOnFolder(owner, pickNumber, `Puck elimination • awarded pick ${pickNumber}`);
   }
 
   const winner = state.owners.find(o => String(o.id) === String(winnerId));
   const winnerLabel = ownerLotteryLabel(winner);
-  const winnerLayout = lotteryTargetLayout(winnerId);
-  const winnerEl = $$('.cartoon-owner').find(node => String(node.dataset.sceneOwner) === String(winnerId));
-  scope.style.setProperty('--scope-x', `${winnerLayout.x}%`);
-  scope.style.setProperty('--scope-y', `${winnerLayout.y}%`);
-  $$('.cartoon-owner').forEach(t => t.classList.remove('active-target', 'camera-focus'));
-  winnerEl?.classList.add('active-target', 'winner-target');
-  target.textContent = 'FIRST OVERALL';
-  if (meta) meta.textContent = `${winnerLabel.primary} survives the puck barrage and wins the lottery.`;
-  await sleep(1700);
-  list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the room • awarded first overall</small></li>`);
+  list.insertAdjacentHTML('afterbegin', `<li class="winner-file"><span>1</span><strong>${escapeHtml(winnerLabel.primary)}</strong><small>Survived the basement cutscene • awarded first overall</small></li>`);
   folder?.classList.add('show');
   target.textContent = 'ORDER CONFIRMED';
-  if (meta) meta.textContent = 'Final file printed inside the cutscene';
-  scope.classList.remove('scope-hit', 'scope-locking');
+  if (meta) meta.textContent = 'Final classified folder printed inside the cutscene.';
 }
 
 function closeSpyLottery() {
@@ -829,7 +850,10 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
+  $('#scopeView')?.classList.remove('storyboard-mode', 'scope-hit', 'scope-locking');
+  $('#storyboardCutscene')?.classList.remove('show');
 }
+
 
 function renderPickHistory() {
   const rows = [...state.draftBoard.picks].reverse().map(p => {

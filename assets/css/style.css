@@ -2446,3 +2446,155 @@ body.lottery-running { overflow: hidden; }
   .cartoon-owner[style*="--tx:21%"] { left: 25% !important; }
   .lottery-end-screen { max-height: 38vh; overflow: auto; }
 }
+
+/* v18 — storyboard cutscene lottery upgrade */
+.scope-view.storyboard-mode {
+  min-height: clamp(360px, 50vw, 610px);
+  background: #050604;
+}
+.scope-view.storyboard-mode .scope-vignette,
+.scope-view.storyboard-mode .scope-ring,
+.scope-view.storyboard-mode .scope-cross,
+.scope-view.storyboard-mode .scope-sweep,
+.scope-view.storyboard-mode .scope-flash,
+.scope-view.storyboard-mode .basement-target-layer,
+.scope-view.storyboard-mode .flying-puck {
+  opacity: 0;
+  pointer-events: none;
+}
+.storyboard-cutscene {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: none;
+  place-items: center;
+  padding: clamp(10px, 2vw, 20px);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 220, 127, .12), transparent 34%),
+    linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.9));
+}
+.storyboard-cutscene.show { display: grid; }
+.storyboard-frame-shell {
+  position: relative;
+  width: min(100%, 980px);
+  aspect-ratio: 16 / 8.2;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(236, 225, 181, .38);
+  background: #020302;
+  box-shadow:
+    0 18px 52px rgba(0,0,0,.64),
+    inset 0 0 0 1px rgba(255,255,255,.1),
+    inset 0 0 80px rgba(0,0,0,.55);
+}
+.storyboard-panel {
+  position: absolute;
+  inset: 0;
+  background-image: url('../images/lottery-storyboard-filmstrip.png');
+  background-size: 500% 400%;
+  background-position: var(--story-x, 0%) var(--story-y, 0%);
+  background-repeat: no-repeat;
+  filter: contrast(1.08) saturate(1.05) brightness(.92);
+  transform: scale(1.035);
+}
+.storyboard-panel.panel-pop {
+  animation: storyboardPanelPop .72s cubic-bezier(.18,.8,.25,1) both;
+}
+@keyframes storyboardPanelPop {
+  0% { opacity: .38; transform: scale(1.12); filter: blur(2px) contrast(1.25) saturate(1.18); }
+  22% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1.035); filter: blur(0) contrast(1.08) saturate(1.05) brightness(.92); }
+}
+.storyboard-grain {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.045) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 7px);
+  mix-blend-mode: screen;
+  opacity: .32;
+}
+.storyboard-overlay-copy {
+  position: absolute;
+  left: clamp(12px, 2vw, 24px);
+  right: clamp(12px, 2vw, 24px);
+  bottom: clamp(10px, 2vw, 20px);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .45rem .8rem;
+  align-items: end;
+  padding: .75rem .9rem;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(0,0,0,.72), rgba(0,0,0,.44));
+  box-shadow: 0 12px 34px rgba(0,0,0,.35), inset 0 0 24px rgba(0,0,0,.32);
+  color: #fff2c8;
+  text-shadow: 0 2px 0 rgba(0,0,0,.8);
+}
+.storyboard-overlay-copy span {
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  letter-spacing: .08em;
+  color: #f2fff1;
+  font-size: clamp(.8rem, 2vw, 1.05rem);
+}
+.storyboard-overlay-copy strong {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: clamp(1.15rem, 3.6vw, 2.45rem);
+  line-height: .95;
+}
+.storyboard-overlay-copy small {
+  grid-column: 2;
+  color: rgba(255,242,200,.78);
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  font-size: clamp(.72rem, 1.75vw, .95rem);
+}
+.storyboard-progress {
+  position:absolute;
+  left: clamp(22px, 4vw, 54px);
+  right: clamp(22px, 4vw, 54px);
+  bottom: clamp(7px, 1.1vw, 12px);
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  overflow:hidden;
+  box-shadow: 0 0 12px rgba(0,0,0,.5);
+}
+.storyboard-progress span {
+  display:block;
+  height:100%;
+  width:0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f2c56b, #9effca);
+  transition: width .55s ease;
+}
+.scope-view.storyboard-mode .target-card {
+  z-index: 9;
+  left: 50%;
+  top: 9%;
+  min-width: min(680px, 86vw);
+  padding: .68rem .9rem;
+  background: rgba(0,0,0,.64);
+  border-color: rgba(242,197,107,.45);
+}
+.scope-view.storyboard-mode .target-card strong {
+  font-size: clamp(1.05rem, 2.8vw, 2rem);
+}
+.scope-view.storyboard-mode + .lottery-end-screen,
+.lottery-end-screen.show {
+  max-width: min(560px, 92%);
+}
+@media (max-width: 760px) {
+  .scope-view.storyboard-mode { min-height: 470px; }
+  .storyboard-frame-shell { aspect-ratio: 10 / 8.4; }
+  .storyboard-overlay-copy {
+    grid-template-columns: 1fr;
+    gap: .25rem;
+  }
+  .storyboard-overlay-copy small { grid-column: 1; }
+  .scope-view.storyboard-mode .target-card { top: 12%; }
+}
