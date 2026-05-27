@@ -803,9 +803,7 @@ async function playSpyLottery(orderIds) {
   const scope = $('#scopeView');
   const screen = modal?.querySelector('.spy-screen');
   const folder = $('#classifiedFolder');
-  const target = $('#scopeTargetName');
-  const meta = $('#scopeTargetMeta');
-
+  const list = $('#spyResultsList');
   if (!modal || !scope || !screen) {
     toast('Lottery screen could not open.');
     return;
@@ -821,185 +819,129 @@ async function playSpyLottery(orderIds) {
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  screen.classList.add('penguin-lottery-mode');
-  scope.className = 'scope-view penguin-broadcast-stage';
-  scope.innerHTML = buildPenguinLotteryHtml(orderedOwners);
+  screen.classList.add('simple-lottery-mode');
 
-  if (folder) folder.classList.remove('show', 'in-scene-folder');
-  if (target) target.textContent = 'BROADCAST LOTTERY LOADING...';
-  if (meta) meta.textContent = 'Equal odds • numbered bingo balls • 5th to 1st reveal';
+  scope.className = 'scope-view simple-lottery-stage';
+  scope.innerHTML = buildSimpleLotteryHtml(orderedOwners);
+  folder?.classList.remove('show', 'in-scene-folder');
+  if (list) list.innerHTML = '';
 
-  await runPenguinLotterySequence(orderedOwners);
+  await runSimpleLotterySequence(orderedOwners);
 }
 
-function buildPenguinLotteryHtml(orderedOwners) {
-  const safeOwners = orderedOwners.map(o => ({
+function buildSimpleLotteryHtml(orderedOwners) {
+  const safe = orderedOwners.map(o => ({
     id: escapeHtml(String(o.id)),
-    rawId: String(o.id),
     name: escapeHtml(ownerShortName(o) || o.name || o.teamName || 'Owner')
   }));
-
   return `
-    <div class="pl-studio">
-      <div class="pl-wall"></div>
-      <div class="pl-truss"></div>
-      <div class="pl-light pl-light-a"></div>
-      <div class="pl-light pl-light-b"></div>
-      <div class="pl-light pl-light-c"></div>
-      <div class="pl-floor"></div>
-
-      <div class="pl-center-screen">
+    <div class="sl-stage">
+      <div class="sl-wall"></div>
+      <div class="sl-screen">
         <span>2026</span>
-        <strong>DRAFT</strong>
-        <em>LOTTERY</em>
+        <strong>HOCKEY POOL</strong>
+        <em>DRAFT LOTTERY</em>
       </div>
 
-      <div class="pl-board">
-        <h3>DRAFT ORDER</h3>
-        <div id="plBoardRows">
-          ${[1,2,3,4,5].map(n => `<div class="pl-board-row pending" data-pick="${n}"><b>${n}</b><span>---</span></div>`).join('')}
+      <div class="sl-machine" id="slMachine">
+        <div class="sl-globe" id="slGlobe">
+          <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i>
         </div>
+        <b>BINGO MACHINE</b>
       </div>
 
-      <div class="pl-managers">
-        <h3>MANAGER SEATING</h3>
-        <div class="pl-seats">
-          ${safeOwners.map(o => `
-            <div class="pl-manager" data-owner="${o.id}">
-              <div class="pl-bubble">#@!*%</div>
-              <div class="pl-head"></div>
-              <div class="pl-body"></div>
-              <div class="pl-chair"></div>
-              <div class="pl-name">${o.name}</div>
-            </div>
-          `).join('')}
-        </div>
+      <div class="sl-host" id="slHost">
+        <div class="sl-bubble" id="slBubble">I'M GARY BETTMAN</div>
+        <div class="sl-head"><span></span></div>
+        <div class="sl-body"><i></i></div>
+        <div class="sl-flipper left"></div>
+        <div class="sl-flipper right"></div>
       </div>
 
-      <div class="pl-machine">
-        <div class="pl-globe" id="plGlobe">
-          <div class="pl-ball b1">1</div>
-          <div class="pl-ball b2">2</div>
-          <div class="pl-ball b3">3</div>
-          <div class="pl-ball b4">4</div>
-          <div class="pl-ball b5">5</div>
-        </div>
-        <div class="pl-chute"></div>
-        <div class="pl-pedestal">BINGO MACHINE</div>
+      <div class="sl-managers">
+        ${safe.map(o => `
+          <div class="sl-manager" data-owner="${o.id}">
+            <div class="sl-swear">#@!*%</div>
+            <div class="sl-person"></div>
+            <small>${o.name}</small>
+          </div>
+        `).join('')}
       </div>
 
-      <div class="pl-speech" id="plSpeech">I'M GARY BETTMAN</div>
-
-      <div class="pl-host" id="plHost" aria-label="half penguin half man announcer">
-        <div class="pl-host-head">
-          <div class="pl-grey-hair"></div>
-          <div class="pl-face"></div>
-          <div class="pl-eye left"></div>
-          <div class="pl-eye right"></div>
-          <div class="pl-nose"></div>
-          <div class="pl-mouth"></div>
-        </div>
-        <div class="pl-penguin-body">
-          <div class="pl-belly"></div>
-          <div class="pl-jacket"></div>
-          <div class="pl-tie"></div>
-          <div class="pl-flipper left"></div>
-          <div class="pl-flipper right"></div>
-          <div class="pl-mic">HP</div>
-        </div>
-        <div class="pl-foot left"></div>
-        <div class="pl-foot right"></div>
+      <div class="sl-card" id="slCard">
+        <small id="slPick">5TH OVERALL</small>
+        <strong id="slName">---</strong>
       </div>
 
-      <div class="pl-desk">
-        <div class="pl-desk-logo">HOCKEY POOL</div>
-        <div class="pl-desk-ticker">OFFICIAL DRAFT LOTTERY BROADCAST</div>
+      <div class="sl-order" id="slOrder">
+        ${[1,2,3,4,5].map(n => `<div data-pick="${n}"><b>${n}</b><span>---</span></div>`).join('')}
       </div>
 
-      <div class="pl-reveal">
-        <div class="pl-card" id="plCard">
-          <small id="plPickLabel">5TH OVERALL</small>
-          <strong id="plOwnerLabel">---</strong>
-        </div>
-      </div>
+      <div class="sl-lower" id="slLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>
 
-      <div class="pl-lower" id="plLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>
-
-      <div class="pl-final" id="plFinal">
+      <div class="sl-final" id="slFinal">
         <h2>DRAFT ORDER LOCKED IN</h2>
-        <div class="pl-final-grid">
-          ${safeOwners.map((o, i) => `<div><b>${i + 1}</b><span>${o.name}</span></div>`).join('')}
-        </div>
+        ${safe.map((o, i) => `<p><b>${i+1}</b><span>${o.name}</span></p>`).join('')}
       </div>
     </div>
   `;
 }
 
-async function runPenguinLotterySequence(orderedOwners) {
-  const host = $('#plHost');
-  const speech = $('#plSpeech');
-  const lower = $('#plLower');
-  const globe = $('#plGlobe');
-  const card = $('#plCard');
-  const final = $('#plFinal');
-  const pickLabel = $('#plPickLabel');
-  const ownerLabel = $('#plOwnerLabel');
-  const screen = document.querySelector('.penguin-broadcast-stage');
+async function runSimpleLotterySequence(orderedOwners) {
+  const host = $('#slHost');
+  const bubble = $('#slBubble');
+  const globe = $('#slGlobe');
+  const lower = $('#slLower');
+  const card = $('#slCard');
+  const pick = $('#slPick');
+  const name = $('#slName');
+  const final = $('#slFinal');
 
   const say = (text, hi = '') => {
     if (lower) lower.innerHTML = hi ? `${escapeHtml(text)} <span>${escapeHtml(hi)}</span>` : escapeHtml(text);
   };
 
   host?.classList.add('talking');
-  speech?.classList.add('show');
+  bubble?.classList.add('show');
   say('GOOD EVENING. TONIGHT WE DETERMINE THE FIRST FIVE SELECTIONS.');
-  await sleep(2300);
+  await sleep(1600);
 
-  speech?.classList.remove('show');
+  bubble?.classList.remove('show');
   say('ALL FIVE OWNERS HAVE', 'EQUAL ODDS');
   globe?.classList.add('spin');
-  await sleep(1800);
-
-  say('THE NUMBERED BALLS ARE LOADED. WE BEGIN WITH', 'THE 5TH PICK');
-  await sleep(1200);
+  await sleep(1300);
 
   const revealOrder = [...orderedOwners].reverse();
   for (let i = 0; i < revealOrder.length; i++) {
     const owner = revealOrder[i];
     const pickNumber = orderedOwners.length - i;
-    const name = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
+    const ownerName = ownerShortName(owner) || owner.name || owner.teamName || 'Owner';
 
-    say(`THE ${ordinalLabel(pickNumber)} PICK GOES TO`, String(name).toUpperCase());
+    say(`THE ${ordinalLabel(pickNumber)} PICK GOES TO`, String(ownerName).toUpperCase());
     globe?.classList.add('spin');
-    await sleep(900);
+    await sleep(700);
     globe?.classList.remove('spin');
 
-    if (pickLabel) pickLabel.textContent = `${ordinalLabel(pickNumber)} OVERALL`;
-    if (ownerLabel) ownerLabel.textContent = name;
+    if (pick) pick.textContent = `${ordinalLabel(pickNumber)} OVERALL`;
+    if (name) name.textContent = ownerName;
     card?.classList.remove('show');
     void card?.offsetWidth;
     card?.classList.add('show');
 
     const row = document.querySelector(`[data-pick="${pickNumber}"]`);
-    if (row) {
-      row.classList.remove('pending');
-      row.classList.add('revealed');
-      row.innerHTML = `<b>${pickNumber}</b><span>${escapeHtml(name)}</span>`;
-    }
+    if (row) row.innerHTML = `<b>${pickNumber}</b><span>${escapeHtml(ownerName)}</span>`;
 
-    const manager = document.querySelector(`.pl-manager[data-owner="${CSS.escape(String(owner.id))}"]`);
+    const manager = document.querySelector(`.sl-manager[data-owner="${CSS.escape(String(owner.id))}"]`);
     if (manager) {
       manager.classList.remove('mad');
       void manager.offsetWidth;
-      manager.classList.add('mad', 'pulled');
+      manager.classList.add('mad');
     }
 
-    screen?.classList.add('shake');
-    setTimeout(() => screen?.classList.remove('shake'), 450);
-    await sleep(1700);
+    await sleep(1200);
   }
 
-  say('THAT CONCLUDES THE HOCKEY POOL DRAFT LOTTERY.', 'GOOD LUCK.');
+  say('THAT CONCLUDES THE DRAFT LOTTERY.', 'ORDER LOCKED');
   final?.classList.add('show');
   host?.classList.remove('talking');
 }
@@ -1131,8 +1073,8 @@ function closeSpyLottery() {
   modal?.classList.remove('show');
   modal?.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lottery-running');
-  screen?.classList.remove('penguin-lottery-mode');
-  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'penguin-broadcast-stage', 'shake');
+  screen?.classList.remove('simple-lottery-mode');
+  scope?.classList.remove('storyboard-mode', 'motion-mode', 'scope-hit', 'scope-locking', 'scope-shake', 'simple-lottery-stage');
   $('#storyboardCutscene')?.classList.remove('show');
   if (folder && screen && folder.parentElement !== screen) {
     screen.appendChild(folder);
@@ -1386,5 +1328,53 @@ function labelize(key) {
 function escapeHtml(str) {
   return String(str).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
 }
+
+
+// Stability repair layer: direct fallback bindings for critical buttons.
+function bindCriticalFallbacks() {
+  document.addEventListener('click', async (event) => {
+    const run = event.target.closest?.('#runLotteryBtn');
+    if (run) {
+      event.preventDefault();
+      try {
+        await runDraftLottery();
+      } catch (err) {
+        console.error('Fallback lottery failed', err);
+        toast('Lottery error. Reset draft and try again.');
+      }
+      return;
+    }
+
+    const replay = event.target.closest?.('#replayLotteryBtn');
+    if (replay) {
+      event.preventDefault();
+      try { replayLockedLottery(); } catch (err) { console.error(err); }
+      return;
+    }
+
+    const reset = event.target.closest?.('#resetDraftBtn');
+    if (reset) {
+      event.preventDefault();
+      try { resetDraft(); } catch (err) { console.error(err); toast('Reset error.'); }
+      return;
+    }
+
+    const room = event.target.closest?.('[data-draft-room]');
+    if (room) {
+      event.preventDefault();
+      try { setDraftRoomView(room.dataset.draftRoom); } catch (err) { console.error(err); }
+      return;
+    }
+
+    const close = event.target.closest?.('#closeSpyLottery');
+    if (close) {
+      event.preventDefault();
+      try { closeSpyLottery(); } catch (err) { console.error(err); }
+      return;
+    }
+  }, true);
+}
+
+bindCriticalFallbacks();
 
 init();
