@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v4-roster-test';
+const STORAGE_KEY = 'custom-hockey-pool-v7-home-leaderboard-lottery';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -80,16 +80,17 @@ function bindEvents() {
   $('#draftSortSelect')?.addEventListener('change', () => { draftSort = { key: $('#draftSortSelect').value, direction: draftSort.direction || 'desc' }; renderDraftBoard(); });
   $('#closeAssignModal')?.addEventListener('click', closeAssignModal);
   $('#assignModal')?.addEventListener('click', (e) => { if (e.target.id === 'assignModal') closeAssignModal(); });
-  $('#statsSearch').addEventListener('input', renderPlayersTable);
+  $('#statsSearch')?.addEventListener('input', renderPlayersTable);
   $('#saveRulesBtn').addEventListener('click', saveRulesFromForm);
   $('#resetRulesBtn').addEventListener('click', () => { state.settings = structuredClone(defaults.settings); save(); renderAll(); toast('Rules reset to defaults.'); });
-  $('#addManualPlayerBtn').addEventListener('click', addManualPlayer);
   $('#undoPickBtn').addEventListener('click', undoPick);
   $('#resetDraftBtn').addEventListener('click', resetDraft);
   $('#addOwnerBtn').addEventListener('click', addOwner);
   $('#addOwnerBtnDraft')?.addEventListener('click', addOwner);
   $('#loadSampleOwnersBtn')?.addEventListener('click', loadSampleOwners);
   $('#removeOwnerBtnDraft')?.addEventListener('click', removeOwnerFromDraftRoom);
+  $('#runLotteryBtn')?.addEventListener('click', runDraftLottery);
+  $('#resetOrderBtn')?.addEventListener('click', resetDraftOrderToTeamList);
   $('#loadDemoPlayersBtn')?.addEventListener('click', loadDemoPlayers);
   $('#confirmAssignBtn')?.addEventListener('click', () => assignPlayerToOwner($('#assignOwnerSelect')?.value));
   $('#exportBtn').addEventListener('click', exportPool);
@@ -117,7 +118,7 @@ async function refreshStats() {
     toast(`Loaded ${data.players.length} NHL players. Draft board is ready.`);
   } catch (error) {
     console.error(error);
-    toast('NHL API pull failed. Try again after deploy or use manual players.');
+    toast('NHL API pull failed. Try again after deploy or use demo players.');
   } finally {
     setRefreshDisabled(false);
   }
@@ -171,6 +172,7 @@ function renderDraft() {
   renderDraftBoard();
   renderDraftOwnerList();
   renderDraftOrderEditor();
+  renderDraftLottery();
   renderPickHistory();
 }
 
@@ -334,6 +336,78 @@ function moveOwner(id, delta) {
   [order[i], order[j]] = [order[j], order[i]];
   state.draftBoard.draftOrder = order;
   save(); renderDraft();
+}
+
+
+function lotteryWeightForOwner(owner, rankedOwners) {
+  const index = rankedOwners.findIndex(o => o.id === owner.id);
+  const base = Math.max(1, rankedOwners.length - index);
+  const rosterSize = (state.rosters[owner.id] || []).length;
+  return Math.max(1, base + Math.max(0, 3 - rosterSize));
+}
+
+function renderDraftLottery() {
+  const status = $('#lotteryStatus');
+  const results = $('#lotteryResults');
+  if (!status || !results) return;
+  if (!state.owners.length) {
+    status.textContent = 'Add rosters first.';
+    results.innerHTML = '<p class="muted">No teams available for the lottery yet.</p>';
+    return;
+  }
+  const order = state.draftBoard.draftOrder?.length ? state.draftBoard.draftOrder : state.owners.map(o => o.id);
+  const ranked = state.owners
+    .map(o => ({ ...o, total: ownerTotal(o.id, state) }))
+    .sort((a, b) => a.total - b.total || String(a.teamName).localeCompare(String(b.teamName)));
+  const hasResult = Array.isArray(state.draftBoard.lotteryResult) && state.draftBoard.lotteryResult.length;
+  status.textContent = hasResult ? 'Lottery order locked in.' : 'Ready for the commissioner.';
+  results.innerHTML = order.map((id, index) => {
+    const owner = state.owners.find(o => o.id === id);
+    if (!owner) return '';
+    const weight = lotteryWeightForOwner(owner, ranked);
+    return `<div class="mini-list-row lottery-row"><div><strong>${index + 1}. ${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${weight} frozen envelope${weight === 1 ? '' : 's'}</div></div><span>${ownerTotal(owner.id, state)} pts</span></div>`;
+  }).join('');
+}
+
+function weightedDraw(pool, rankedOwners) {
+  const total = pool.reduce((sum, owner) => sum + lotteryWeightForOwner(owner, rankedOwners), 0);
+  let ticket = Math.random() * total;
+  for (const owner of pool) {
+    ticket -= lotteryWeightForOwner(owner, rankedOwners);
+    if (ticket <= 0) return owner;
+  }
+  return pool[pool.length - 1];
+}
+
+function runDraftLottery() {
+  ensureOwnersExist();
+  if (!state.owners.length) return toast('Add teams before running the lottery.');
+  if (state.draftBoard.picks.length && !confirm('You already have drafted players. Running the lottery only changes the draft order, not existing picks. Continue?')) return;
+  const rankedOwners = state.owners
+    .map(o => ({ ...o, total: ownerTotal(o.id, state) }))
+    .sort((a, b) => a.total - b.total || String(a.teamName).localeCompare(String(b.teamName)));
+  const remaining = [...state.owners];
+  const result = [];
+  while (remaining.length) {
+    const winner = weightedDraw(remaining, rankedOwners);
+    result.push(winner.id);
+    remaining.splice(remaining.findIndex(o => o.id === winner.id), 1);
+  }
+  state.draftBoard.draftOrder = result;
+  state.draftBoard.lotteryResult = result.map((id, index) => ({ id, pick: index + 1, timestamp: new Date().toISOString() }));
+  save();
+  renderAll();
+  const first = state.owners.find(o => o.id === result[0]);
+  toast(`The frozen envelope opens: ${first?.teamName || 'Team 1'} wins the lottery.`);
+}
+
+function resetDraftOrderToTeamList() {
+  ensureOwnersExist();
+  state.draftBoard.draftOrder = state.owners.map(o => o.id);
+  state.draftBoard.lotteryResult = [];
+  save();
+  renderAll();
+  toast('Draft order reset to the team list.');
 }
 
 function renderPickHistory() {
@@ -511,18 +585,22 @@ This will also release ${rosterCount} roster player(s) back to the draft board a
 }
 
 function renderLeaderboard() {
+  const table = $('#leaderboardTable');
+  if (!table) return;
   const rows = state.owners.map(o => ({ ...o, total: ownerTotal(o.id, state), count: (state.rosters[o.id] || []).length }))
     .sort((a, b) => b.total - a.total)
     .map((o, i) => `<tr><td>${i + 1}</td><td><strong>${escapeHtml(o.teamName)}</strong><div class="meta">${escapeHtml(o.name)}</div></td><td>${o.count}</td><td><strong>${o.total}</strong></td></tr>`).join('');
-  $('#leaderboardTable').innerHTML = `<table><thead><tr><th>Rank</th><th>Team</th><th>Players</th><th>Fantasy Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+  table.innerHTML = `<table><thead><tr><th>Rank</th><th>Team</th><th>Players</th><th>Fantasy Points</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function renderPlayersTable() {
+  const table = $('#playersTable');
+  if (!table) return;
   const q = ($('#statsSearch')?.value || '').toLowerCase();
   const draftedIds = new Set(state.draftBoard.picks.map(p => String(p.player.id)));
   const rows = playerPool().filter(p => !q || p.name.toLowerCase().includes(q) || String(p.nhlTeam || '').toLowerCase().includes(q)).slice(0, 250).map(p => `
     <tr><td>${escapeHtml(p.name)}</td><td>${p.position || ''}</td><td>${p.nhlTeam || ''}</td><td>${p.gamesPlayed || 0}</td><td>${p.goals ?? ''}</td><td>${p.assists ?? ''}</td><td>${p.points ?? ''}</td><td>${p.goalieWins ?? ''}</td><td>${fantasyPoints(p, state.settings.scoring)}</td><td>${draftedIds.has(String(p.id)) ? '<span class="badge">Drafted</span>' : ''}</td></tr>`).join('');
-  $('#playersTable').innerHTML = `<table><thead><tr><th>Player</th><th>Pos</th><th>NHL</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>W</th><th>Pool Pts</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No player stats loaded yet.</td></tr>'}</tbody></table>`;
+  table.innerHTML = `<table><thead><tr><th>Player</th><th>Pos</th><th>NHL</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>W</th><th>Pool Pts</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="10">No player stats loaded yet.</td></tr>'}</tbody></table>`;
 }
 
 function renderRulesForms() {
@@ -550,15 +628,6 @@ function saveRulesFromForm() {
     obj[key] = input.type === 'number' ? Number(input.value || 0) : input.value;
   });
   save(); renderAll(); toast('Rules saved.');
-}
-
-function addManualPlayer() {
-  const name = $('#manualName').value.trim();
-  if (!name) return toast('Add a player name first.');
-  const player = { id: `manual-${Date.now()}`, name, position: $('#manualPos').value, nhlTeam: $('#manualTeam').value.trim().toUpperCase(), type: $('#manualPos').value === 'G' ? 'goalie' : 'skater', manual: true, gamesPlayed: 0, goals: 0, assists: 0, points: 0, goalieWins: 0, goalieShutouts: 0 };
-  state.manualPlayers.push(player);
-  $('#manualName').value = ''; $('#manualTeam').value = '';
-  save(); renderAll(); toast('Manual player added.');
 }
 
 function exportPool() {

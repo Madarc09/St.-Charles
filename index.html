@@ -24,8 +24,6 @@
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
-    <button class="tab" data-tab="leaderboard">Leaderboard</button>
-    <button class="tab" data-tab="players">Player Stats</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
     <button class="tab" data-tab="admin">Admin</button>
   </nav>
@@ -51,6 +49,17 @@
         </article>
       </div>
       <div class="grid three" id="dashboardCards"></div>
+      <article class="card home-leaderboard-card">
+        <div class="section-head compact-head">
+          <div>
+            <p class="eyebrow">Main Leaderboard</p>
+            <h2>Pool standings</h2>
+            <p class="muted">This now lives on the main page and updates from your editable scoring rules.</p>
+          </div>
+          <button class="primary" id="refreshStatsBtn2">Pull NHL Stats</button>
+        </div>
+        <div id="leaderboardTable" class="table-wrap"></div>
+      </article>
     </section>
 
     <section id="draft" class="panel">
@@ -100,17 +109,22 @@
           <div id="draftBoardTable" class="table-wrap draft-board-wrap"></div>
         </article>
         <article class="card">
-          <h3>Add Manual Player</h3>
-          <p class="muted">Use this if a player does not appear in the free NHL feed yet. Manual players appear on the draft board with zero stats until updated.</p>
-          <div class="form-grid">
-            <input id="manualName" placeholder="Player name" />
-            <select id="manualPos">
-              <option value="F">Forward</option>
-              <option value="D">Defense</option>
-              <option value="G">Goalie</option>
-            </select>
-            <input id="manualTeam" placeholder="NHL team abbreviation" />
-            <button id="addManualPlayerBtn">Add to Draft Board</button>
+          <div class="lottery-machine">
+            <p class="eyebrow">Draft Lottery</p>
+            <h3>The Frozen Envelope</h3>
+            <p class="muted">Spin the frozen lottery drum to create a draft order. Lower current leaderboard teams get a little extra luck, but chaos can still win.</p>
+            <div class="lottery-stage" id="lotteryStage">
+              <div class="lottery-puck">?</div>
+              <div>
+                <span class="label">Lottery Status</span>
+                <strong id="lotteryStatus">Ready for the commissioner.</strong>
+              </div>
+            </div>
+            <div class="actions stack-sm lottery-actions">
+              <button class="primary" id="runLotteryBtn">Run Draft Lottery</button>
+              <button id="resetOrderBtn">Reset Order to Team List</button>
+            </div>
+            <div id="lotteryResults" class="mini-list lottery-results"></div>
           </div>
           <hr />
           <h3>Manage Rosters</h3>
@@ -149,31 +163,6 @@
         <button id="addOwnerBtn">Add Owner</button>
       </div>
       <div id="rosterCards" class="grid roster-grid"></div>
-    </section>
-
-    <section id="leaderboard" class="panel">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Leaderboard</p>
-          <h2>Calculated from your editable rules</h2>
-        </div>
-        <button class="primary" id="refreshStatsBtn2">Pull NHL Stats</button>
-      </div>
-      <div id="leaderboardTable" class="table-wrap"></div>
-    </section>
-
-    <section id="players" class="panel">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Player Stats</p>
-          <h2>NHL stats cache</h2>
-        </div>
-        <div class="actions">
-          <input id="statsSearch" placeholder="Filter players…" />
-          <button id="refreshStatsBtn3">Refresh</button>
-        </div>
-      </div>
-      <div id="playersTable" class="table-wrap"></div>
     </section>
 
     <section id="rules" class="panel">
