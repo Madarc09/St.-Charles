@@ -4862,3 +4862,196 @@ body.lottery-running { overflow: hidden; }
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* V53 admin reset buttons + mobile draft-room cleanup */
+@media(max-width:820px){
+  .clean-live-draft-shell{
+    padding-inline:10px;
+  }
+
+  .clean-draft-room{
+    gap:10px;
+  }
+
+  .roster-needs-topbar{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    padding:10px!important;
+  }
+
+  #cleanExitDraftBtn{
+    width:100%;
+    min-height:42px;
+  }
+
+  .clean-draft-control-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    padding:10px!important;
+    border-radius:16px!important;
+  }
+
+  .clean-control,
+  .clean-current-pick,
+  .clean-sync-box{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:10px;
+    background:rgba(0,0,0,.18);
+  }
+
+  .clean-current-pick strong,
+  .clean-sync-box strong{
+    font-size:clamp(24px,8vw,36px)!important;
+  }
+
+  .v46-pull-players-btn{
+    min-height:52px;
+    font-size:1rem;
+  }
+
+  .clean-on-clock-banner{
+    font-size:clamp(30px,10vw,54px)!important;
+    padding:14px!important;
+    border-radius:16px!important;
+  }
+
+  .clean-draft-actions{
+    position:sticky;
+    top:6px;
+    z-index:20;
+    display:grid!important;
+    grid-template-columns:1fr 1fr;
+    gap:8px!important;
+    padding:10px!important;
+    border-radius:16px!important;
+    backdrop-filter:blur(12px);
+    background:rgba(7,21,43,.92)!important;
+  }
+
+  .clean-draft-actions select,
+  .clean-draft-actions button{
+    width:100%;
+    min-height:42px;
+    font-size:.88rem;
+  }
+
+  .clean-draft-actions #cleanRefreshBtn{
+    grid-column:1/-1;
+  }
+
+  .clean-draft-order-strip{
+    padding:8px 0;
+  }
+
+  .clean-draft-order-strip span{
+    font-size:.75rem;
+    padding:6px 8px;
+  }
+
+  .needs-grid-with-players,
+  .needs-grid{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  .needs-grid div{
+    padding:10px!important;
+  }
+
+  .needs-grid strong{
+    font-size:38px!important;
+  }
+
+  .needs-player-list{
+    gap:4px!important;
+  }
+
+  .needs-player-list li{
+    padding:5px 6px!important;
+  }
+
+  .clean-player-table{
+    display:block;
+    width:100%;
+    border-spacing:0;
+  }
+
+  .clean-player-table thead{
+    display:none;
+  }
+
+  .clean-player-table tbody,
+  .clean-player-table tr,
+  .clean-player-table td{
+    display:block;
+    width:100%;
+  }
+
+  .clean-player-table tr{
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:16px;
+    background:rgba(0,0,0,.22);
+    margin-bottom:10px;
+    padding:10px;
+  }
+
+  .clean-player-table td{
+    border:0!important;
+    padding:4px 0!important;
+  }
+
+  .clean-player-table .rank-cell{
+    width:auto;
+    color:#f5c35b;
+    font-weight:1000;
+  }
+
+  .clean-player-table td:nth-child(3),
+  .clean-player-table td:nth-child(4),
+  .clean-player-table td:nth-child(5),
+  .clean-player-table td:nth-child(6),
+  .clean-player-table td:nth-child(7){
+    display:inline-block!important;
+    width:auto!important;
+    margin-right:10px;
+    color:#cbd7ea;
+    font-size:.82rem;
+  }
+
+  .clean-player-table td:nth-child(4)::before{content:"G: "; color:#f5c35b;}
+  .clean-player-table td:nth-child(5)::before{content:"A: "; color:#f5c35b;}
+  .clean-player-table td:nth-child(6)::before{content:"PTS: "; color:#f5c35b;}
+  .clean-player-table td:nth-child(7)::before{content:"FPTS: "; color:#f5c35b;}
+
+  .player-draft-line{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  .clean-sign-btn{
+    width:100%;
+    min-height:48px;
+    justify-content:center;
+  }
+
+  .clean-signed-log{
+    padding:10px!important;
+  }
+
+  .clean-signed-log div{
+    grid-template-columns:36px 1fr!important;
+  }
+
+  .clean-signed-log em{
+    grid-column:2;
+  }
+
+  .compact-lottery-summary{
+    padding:10px!important;
+  }
+}

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V52 LIVE ROSTERS -->
+  <!-- V53 ADMIN MOBILE CLEANUP -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V52 LIVE ROSTERS</div>
+        <div class="v46-build-marker">V53 ADMIN MOBILE CLEANUP</div>
         <div class="clean-entry-stack clean-entry-stack-v51">
           <div class="draft-step-card enter-step-card">
             <div class="step-number">1</div>
@@ -147,7 +147,6 @@
             <option value="name">Sort by Name</option>
           </select>
           <button id="cleanRefreshBtn" type="button">Refresh Room</button>
-          <button id="cleanResetLiveDraftBtn" class="danger" type="button">Reset Live Draft</button>
         </div>
 
         <div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div>
@@ -255,6 +254,8 @@
           <h3>Danger Zone</h3>
           <p class="muted">These affect only your browser’s saved copy unless you export and commit updated data files.</p>
           <div class="actions stack-sm">
+            <button id="adminResetLotteryBtn" class="danger">Reset Draft Lottery</button>
+            <button id="adminResetDraftBtn" class="danger">Reset Live Draft Picks</button>
             <button id="clearStatsBtn">Clear NHL Stats Cache</button>
             <button class="danger" id="factoryResetBtn">Factory Reset Browser Data</button>
           </div>
@@ -1974,13 +1975,7 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
           pullPlayers();
           return;
         }
-        const reset = event.target.closest && event.target.closest("#cleanResetLiveDraftBtn");
-        if (reset) {
-          event.preventDefault();
-          resetLiveDraft();
-          return;
-        }
-      }, true);
+}, true);
       window.addEventListener("load", () => {
         const pos = $("#cleanPositionFilter");
         if (pos) pos.onchange = () => { positionFilter = pos.value; renderRoom(); };
@@ -2147,6 +2142,109 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
         if (localDraft) window.renderDraftRosters(localDraft);
       } catch (e) {}
     });
+  </script>
+
+
+  <script>
+    (function(){
+      const OWNER_IDS = ["nick", "chris", "andrew", "tyler", "scott"];
+      const OWNERS = OWNER_IDS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1), teamName: id[0].toUpperCase() + id.slice(1) }));
+
+      function toast(message) {
+        const t = document.getElementById("toast");
+        if (!t) return;
+        t.textContent = message;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2600);
+      }
+
+      function lotteryOrderFromStorage() {
+        const keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
+        for (const key of keys) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length === 5) return parsed.lotteryOrder.slice();
+          } catch(e) {}
+        }
+        return OWNER_IDS.slice();
+      }
+
+      function defaultDraftState() {
+        return {
+          owners: OWNERS,
+          draftOrder: lotteryOrderFromStorage(),
+          picks: [],
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      async function saveDraftState(draft) {
+        try {
+          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(draft));
+        } catch(e) {}
+        try {
+          await fetch("/api/draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draft)
+          });
+        } catch(e) {}
+        if (window.renderDraftRosters) window.renderDraftRosters(draft);
+        if (window.renderRosterNeeds) {
+          const active = localStorage.getItem("custom-hockey-pool-active-owner") || "";
+          const owner = OWNERS.find(o => o.id === active);
+          window.renderRosterNeeds(draft, active, owner ? owner.teamName : active);
+        }
+      }
+
+      function paintLotteryReset() {
+        const status = document.getElementById("compactLotteryStatus");
+        const results = document.getElementById("lotteryResults");
+        const lotteryStatus = document.getElementById("lotteryStatus");
+        const run = document.getElementById("runLotteryBtn");
+        const replay = document.getElementById("replayLotteryBtn");
+        const summary = document.getElementById("compactLotterySummary");
+        if (summary) summary.classList.remove("completed");
+        if (status) status.innerHTML = "LOTTERY NOT COMPLETED YET";
+        if (lotteryStatus) lotteryStatus.textContent = "LOTTERY NOT COMPLETED YET";
+        if (results) results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
+        if (run) { run.style.display = "inline-flex"; run.textContent = "RUN LOTTERY"; }
+        if (replay) replay.style.display = "none";
+      }
+
+      async function resetLottery() {
+        if (!confirm("Reset the draft lottery? This clears the locked lottery order on this browser.")) return;
+        ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"].forEach(k => {
+          try { localStorage.removeItem(k); } catch(e) {}
+        });
+        paintLotteryReset();
+        const draft = defaultDraftState();
+        await saveDraftState(draft);
+        toast("Draft lottery reset.");
+      }
+
+      async function resetDraft() {
+        if (!confirm("Reset live draft picks? This clears all drafted players from the live draft.")) return;
+        const draft = defaultDraftState();
+        await saveDraftState(draft);
+        toast("Live draft picks reset.");
+      }
+
+      document.addEventListener("click", function(event){
+        const resetLotteryBtn = event.target.closest && event.target.closest("#adminResetLotteryBtn");
+        if (resetLotteryBtn) {
+          event.preventDefault();
+          resetLottery();
+          return;
+        }
+        const resetDraftBtn = event.target.closest && event.target.closest("#adminResetDraftBtn");
+        if (resetDraftBtn) {
+          event.preventDefault();
+          resetDraft();
+          return;
+        }
+      }, true);
+    })();
   </script>
 
   <script type="module" src="assets/js/app.js"></script>
