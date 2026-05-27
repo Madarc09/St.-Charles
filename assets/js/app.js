@@ -180,23 +180,27 @@ function bindEvents() {
 
 
 function setDraftRoomView(view) {
+  forceFinalOwners();
   if (view === 'board') {
-    const current = activeDraftOwner();
+    let current = activeDraftOwner();
     if (!current) {
-      draftRoomView = 'info';
-      renderDraftRooms();
-      openOldManModal();
-      return;
+      const fallbackOwner = state.owners[0] || FINAL_OWNERS[0];
+      activeDraftOwnerId = String(fallbackOwner.id);
+      localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
+      current = fallbackOwner;
+      toast(`Entered the draft room as ${fallbackOwner.teamName}. Use the selector to switch old men.`);
     }
     draftRoomView = 'board';
   } else {
     draftRoomView = 'info';
   }
   renderDraftRooms();
+  renderDraftBoard();
   if (draftRoomView === 'board') setTimeout(() => $('#draftBoardPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 
 function openOldManModal() {
+  forceFinalOwners();
   const modal = $('#oldManModal');
   const wrap = $('#oldManOptions');
   if (!modal || !wrap) return;
@@ -246,14 +250,20 @@ function renderDraftRooms() {
 }
 
 function renderActiveDraftOwnerControls() {
-  const current = activeDraftOwner();
+  forceFinalOwners();
+  let current = activeDraftOwner();
+  if (draftRoomView === 'board' && !current && state.owners.length) {
+    activeDraftOwnerId = String(state.owners[0].id);
+    localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
+    current = state.owners[0];
+  }
   const select = $('#activeDraftOwnerSelect');
   if (select) {
-    select.innerHTML = `<option value="">Choose old man…</option>` + state.owners.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.teamName)}</option>`).join('');
-    select.value = current ? current.id : '';
+    select.innerHTML = state.owners.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.teamName)}</option>`).join('');
+    select.value = current ? current.id : (state.owners[0]?.id || '');
   }
   const label = $('#activeDraftOwnerLabel');
-  if (label) label.textContent = current ? current.teamName : 'No old man selected';
+  if (label) label.textContent = current ? current.teamName : (state.owners[0]?.teamName || 'Choose team');
   const board = $('#draftBoardTable');
   if (board && draftRoomView === 'board' && !current) {
     board.innerHTML = '<div class="empty-draft-board">Choose which old man you are first.</div>';

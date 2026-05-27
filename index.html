@@ -462,27 +462,41 @@
         stage.innerHTML =
           '<div class="pop-bg"></div>' +
           '<div class="pop-title"><span>2026</span><strong>HOCKEY POOL DRAFT LOTTERY</strong><small>Equal Odds • Locked Replay</small></div>' +
-          '<div class="pop-host detailed-bettman">' +
+          '<div class="pop-host clean-announcer">' +
             '<div class="pop-bubble">I&#39;M GARY BETTMAN</div>' +
-            '<div class="bettman-head">' +
-              '<div class="bettman-grey-hair"></div>' +
-              '<div class="bettman-face"></div>' +
-              '<div class="bettman-brow left"></div>' +
-              '<div class="bettman-brow right"></div>' +
-              '<div class="bettman-eye left"></div>' +
-              '<div class="bettman-eye right"></div>' +
-              '<div class="bettman-long-nose"></div>' +
-              '<div class="bettman-mouth"></div>' +
-            '</div>' +
-            '<div class="penguin-body">' +
-              '<div class="penguin-belly"></div>' +
-              '<div class="penguin-jacket"></div>' +
-              '<div class="penguin-tie"></div>' +
-              '<div class="penguin-flipper left"></div>' +
-              '<div class="penguin-flipper right"></div>' +
-              '<div class="penguin-foot left"></div>' +
-              '<div class="penguin-foot right"></div>' +
-            '</div>' +
+            '<svg class="clean-announcer-svg" viewBox="0 0 220 340" role="img" aria-label="cartoon penguin announcer">' +
+              '<defs>' +
+                '<linearGradient id="skinClean" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0c29a"/><stop offset="1" stop-color="#c9875f"/></linearGradient>' +
+                '<linearGradient id="suitClean" x1="0" x2="1"><stop offset="0" stop-color="#0a2654"/><stop offset=".5" stop-color="#2a65ad"/><stop offset="1" stop-color="#061b3c"/></linearGradient>' +
+                '<linearGradient id="hairClean" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d8dde3"/><stop offset=".55" stop-color="#939ca6"/><stop offset="1" stop-color="#5d6670"/></linearGradient>' +
+              '</defs>' +
+              '<g class="clean-body">' +
+                '<ellipse cx="110" cy="214" rx="63" ry="98" fill="#06090e" stroke="#010306" stroke-width="5"/>' +
+                '<ellipse cx="110" cy="225" rx="35" ry="67" fill="#eef3f7"/>' +
+                '<path d="M57 156 C31 180 26 224 44 252 C55 267 76 257 68 239 C58 218 66 189 89 170 Z" fill="#06090e" stroke="#010306" stroke-width="5" class="leftFlipper"/>' +
+                '<path d="M163 156 C189 180 194 224 176 252 C165 267 144 257 152 239 C162 218 154 189 131 170 Z" fill="#06090e" stroke="#010306" stroke-width="5" class="rightFlipper"/>' +
+                '<path d="M70 145 C82 126 96 119 110 119 C124 119 138 126 150 145 L143 247 C124 260 96 260 77 247 Z" fill="url(#suitClean)" stroke="#03142c" stroke-width="4"/>' +
+                '<path d="M91 130 L129 130 L121 239 C114 245 106 245 99 239 Z" fill="#f3f7fb"/>' +
+                '<path d="M110 138 L121 156 L115 232 L104 232 L99 156 Z" fill="#17345d"/>' +
+                '<path d="M73 311 C91 302 104 309 105 325 C87 331 72 330 58 322 C59 317 64 313 73 311 Z" fill="#e8a133" stroke="#5a2e07" stroke-width="3"/>' +
+                '<path d="M147 311 C129 302 116 309 115 325 C133 331 148 330 162 322 C161 317 156 313 147 311 Z" fill="#e8a133" stroke="#5a2e07" stroke-width="3"/>' +
+              '</g>' +
+              '<g class="clean-head">' +
+                '<path d="M68 56 C70 27 88 12 110 12 C133 12 151 28 152 57 C153 88 136 109 112 111 C88 113 67 89 68 56 Z" fill="url(#skinClean)" stroke="#3b1b0f" stroke-width="4"/>' +
+                '<path d="M73 43 C79 22 92 11 110 11 C129 11 144 24 148 45 C131 36 90 35 73 43 Z" fill="url(#hairClean)" stroke="#4c5661" stroke-width="3"/>' +
+                '<path d="M68 51 C55 60 58 82 72 78" fill="none" stroke="#c7ced6" stroke-width="9" stroke-linecap="round"/>' +
+                '<path d="M151 51 C165 60 161 83 148 79" fill="none" stroke="#c7ced6" stroke-width="9" stroke-linecap="round"/>' +
+                '<path d="M87 58 C94 54 101 54 106 58" stroke="#543927" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+                '<path d="M116 58 C123 54 131 55 136 59" stroke="#543927" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+                '<ellipse cx="96" cy="69" rx="4" ry="4" fill="#090909"/>' +
+                '<ellipse cx="126" cy="69" rx="4" ry="4" fill="#090909"/>' +
+                '<path d="M112 69 C109 76 109 83 116 85" stroke="#8b5438" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+                '<ellipse cx="117" cy="84" rx="3" ry="2" fill="#7b3d27" opacity=".55"/>' +
+                '<path class="mouthClosed" d="M98 96 C106 101 119 101 128 96" stroke="#5a2417" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+                '<ellipse class="mouthOpen" cx="113" cy="98" rx="16" ry="7" fill="#3b130d" stroke="#5a2417" stroke-width="2"/>' +
+                '<path d="M88 27 C101 18 124 19 137 31" stroke="#e1e5ea" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/>' +
+              '</g>' +
+            '</svg>' +
           '</div>' +
           '<div class="pop-machine spin"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>' +
           '<div class="pop-seats">' + orderOwners.map(function (o) { return '<div class="manager-seat manager-' + esc(o.id) + '" data-owner="' + esc(o.id) + '"><b>#@!*%</b><div class="manager-head"></div><div class="manager-jersey"></div><div class="manager-chair"></div><span>' + esc(o.teamName) + '</span></div>'; }).join("") + '</div>' +
@@ -582,6 +596,15 @@
           reset();
           return;
         }
+        var draftRoomBtn = event.target.closest && event.target.closest('[data-draft-room="board"]');
+        if (draftRoomBtn) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          enterDraftRoomFallback();
+          return;
+        }
+
         var restoreBtn = event.target.closest && event.target.closest("#restoreFinalOwnersBtn, #loadSampleOwnersBtn");
         if (restoreBtn) {
           event.preventDefault();
@@ -602,6 +625,39 @@
           return;
         }
       }, true);
+
+
+      function enterDraftRoomFallback() {
+        try { localStorage.setItem("custom-hockey-pool-active-owner", "nick"); } catch (e) {}
+
+        var info = document.getElementById("draftInfoRoom");
+        var board = document.getElementById("draftBoardPanel");
+        if (info) info.classList.remove("active");
+        if (board) {
+          board.classList.add("active");
+          board.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        document.querySelectorAll("[data-draft-room]").forEach(function (btn) {
+          btn.classList.toggle("active", btn.dataset.draftRoom === "board");
+        });
+
+        var select = document.getElementById("activeDraftOwnerSelect");
+        if (select) {
+          if (!select.options.length) {
+            select.innerHTML = OWNERS.map(function (o) {
+              return '<option value="' + esc(o.id) + '">' + esc(o.teamName) + '</option>';
+            }).join("");
+          }
+          select.value = "nick";
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        var label = document.getElementById("activeDraftOwnerLabel");
+        if (label) label.textContent = "Nick";
+
+        toast("Entered Draft Room as Nick. Use the Drafting As selector to switch teams.");
+      }
 
       window.addEventListener("load", function () {
         setTimeout(function () {
