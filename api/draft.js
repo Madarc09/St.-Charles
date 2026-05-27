@@ -1,4 +1,5 @@
 const STORAGE_KEY = process.env.DRAFT_STORAGE_KEY || 'hockey-pool:official-draft:v1';
+let MEMORY_DRAFT = null;
 
 function redisConfig() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_REST_API_URL;
@@ -15,37 +16,64 @@ async function redisCommand(path) {
   return { configured: true, result: data.result };
 }
 
-async function getDraft() {
+async function getStoredDraft() {
+  const { configured } = redisConfig();
+  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory' };
   const key = encodeURIComponent(STORAGE_KEY);
   const data = await redisCommand(`/get/${key}`);
-  if (!data.configured || !data.result) return { configured: data.configured, draft: null };
+  if (!data.result) return { configured: true, draft: null, storage: 'kv' };
   try {
-    return { configured: true, draft: typeof data.result === 'string' ? JSON.parse(data.result) : data.result };
+    return { configured: true, draft: typeof data.result === 'string' ? JSON.parse(data.result) : data.result, storage: 'kv' };
   } catch {
-    return { configured: true, draft: null };
+    return { configured: true, draft: null, storage: 'kv' };
   }
 }
 
-async function setDraft(draft) {
+async function setStoredDraft(draft) {
+  const { configured } = redisConfig();
+  if (!configured) {
+    MEMORY_DRAFT = draft;
+    return { configured: false, storage: 'server-memory' };
+  }
   const key = encodeURIComponent(STORAGE_KEY);
   const payload = encodeURIComponent(JSON.stringify(draft));
-  return redisCommand(`/set/${key}/${payload}`);
+  await redisCommand(`/set/${key}/${payload}`);
+  return { configured: true, storage: 'kv' };
+}
+
+async function clearStoredDraft() {
+  const { configured } = redisConfig();
+  if (!configured) {
+    MEMORY_DRAFT = null;
+    return { configured: false, storage: 'server-memory' };
+  }
+  await redisCommand(`/del/${encodeURIComponent(STORAGE_KEY)}`);
+  return { configured: true, storage: 'kv' };
 }
 
 const allowedOwners = new Set(['nick', 'chris', 'andrew', 'tyler', 'scott']);
+const defaultOwners = [
+  { id: 'nick', name: 'Nick', teamName: 'Nick' },
+  { id: 'chris', name: 'Chris', teamName: 'Chris' },
+  { id: 'andrew', name: 'Andrew', teamName: 'Andrew' },
+  { id: 'tyler', name: 'Tyler', teamName: 'Tyler' },
+  { id: 'scott', name: 'Scott', teamName: 'Scott' }
+];
 
 function cleanDraft(input) {
   const body = input && typeof input === 'object' ? input : {};
-  const owners = Array.isArray(body.owners) ? body.owners : [];
+  const owners = Array.isArray(body.owners) && body.owners.length ? body.owners : defaultOwners;
+  const cleanedOwners = owners.filter(o => allowedOwners.has(String(o.id))).map(o => ({
+    id: String(o.id),
+    teamName: String(o.teamName || o.name || o.id),
+    name: String(o.name || o.teamName || o.id)
+  }));
   const draftOrder = Array.isArray(body.draftOrder) ? body.draftOrder.map(String).filter(id => allowedOwners.has(id)) : [];
   const picks = Array.isArray(body.picks) ? body.picks : [];
+
   return {
-    owners: owners.filter(o => allowedOwners.has(String(o.id))).map(o => ({
-      id: String(o.id),
-      teamName: String(o.teamName || o.name || o.id),
-      name: String(o.name || o.teamName || o.id)
-    })),
-    draftOrder: draftOrder.length ? draftOrder : ['nick','chris','andrew','tyler','scott'],
+    owners: cleanedOwners.length ? cleanedOwners : defaultOwners,
+    draftOrder: draftOrder.length === 5 ? draftOrder : ['nick', 'chris', 'andrew', 'tyler', 'scott'],
     picks: picks.map((p, index) => ({
       pickNumber: Number(p.pickNumber || index + 1),
       round: Number(p.round || 1),
@@ -64,7 +92,7 @@ function cleanDraft(input) {
         points: Number(p.player?.points || 0),
         fantasyPoints: Number(p.player?.fantasyPoints || 0)
       }
-    })).filter(p => p.ownerId && p.player.id),
+    })).filter(p => allowedOwners.has(p.ownerId) && p.player.id),
     updatedAt: new Date().toISOString()
   };
 }
@@ -79,25 +107,20 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const current = await getDraft();
+      const current = await getStoredDraft();
       return res.status(200).json({ ok: true, ...current });
     }
 
     if (req.method === 'POST') {
-      const { configured } = redisConfig();
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
       const draft = cleanDraft(body);
-      if (!configured) {
-        return res.status(200).json({ ok: true, configured: false, draft, message: 'Persistent draft storage is not configured.' });
-      }
-      await setDraft(draft);
-      return res.status(200).json({ ok: true, configured: true, draft });
+      const storage = await setStoredDraft(draft);
+      return res.status(200).json({ ok: true, ...storage, draft });
     }
 
     if (req.method === 'DELETE') {
-      const { configured } = redisConfig();
-      if (configured) await redisCommand(`/del/${encodeURIComponent(STORAGE_KEY)}`);
-      return res.status(200).json({ ok: true, configured, deleted: true });
+      const storage = await clearStoredDraft();
+      return res.status(200).json({ ok: true, ...storage, deleted: true });
     }
 
     return res.status(405).json({ ok: false, error: 'Method not allowed' });

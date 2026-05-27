@@ -38,118 +38,80 @@
       </article>
     </section>
 
-    <section id="draft" class="panel draft-room-shell">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Draft Room</p>
-          <h2>Basement draft headquarters</h2>
-          <p class="muted">Draft Info holds the lottery and order. Enter Draft Room asks which old man you are, then you can draft from the player board.</p>
-        </div>
-        <div class="actions">
-          <button class="primary" id="refreshStatsBtnDraft">Pull NHL Stats</button>
-          <button id="loadDemoPlayersBtn">Pull Real NHL Players</button>
-          <button id="undoPickBtn">Undo Last Pick</button>
-          <button class="danger" id="resetDraftBtn">Reset Draft</button>
-        </div>
+    
+    <section id="draft" class="panel clean-live-draft-shell">
+      <div id="cleanDraftEntry" class="clean-draft-entry-screen">
+        <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
       </div>
 
-      <div class="draft-room-switcher" role="tablist" aria-label="Draft room sections">
-        <button class="draft-room-tab active" type="button" data-draft-room="info">Draft Info Room</button>
-        <button class="draft-room-tab" type="button" data-draft-room="board">Enter Draft Room</button>
-      </div>
-
-      <div id="draftInfoRoom" class="draft-room-section active">
-        <div class="grid two wide-left">
-          <article class="card draft-hq-card">
-            <p class="eyebrow">Draft Info Room</p>
-            <h3>Official basement desk</h3>
-            <p class="muted">Lottery, draft order, and pick history live here. To actually make picks, use the Enter Draft Room tab. The first time you enter, the site will ask: “Which old man are you?”</p>
-            <div class="basement-info-board">
-              <div><span class="label">Owners</span><strong>Nick • Chris • Andrew • Tyler • Scott</strong></div>
-              <div><span class="label">Draft style</span><strong>Owner selected in-room</strong></div>
-              <div><span class="label">Texted picks</span><strong>Switch the draft-room selector to that team and draft for them</strong></div>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="lottery-machine">
-              <p class="eyebrow">Draft Lottery</p>
-              <h3>Basement Spy Lottery</h3>
-              <p class="muted">Equal-weight lottery. First run locks the order. After that, the button replays the same result until Reset Draft is used.</p>
-              <div class="lottery-stage spy-lottery-stage" id="lotteryStage">
-                <div class="lottery-puck spy-disc">64</div>
-                <div>
-                  <span class="label">Mission Status</span>
-                  <strong id="lotteryStatus">Standing by in the basement.</strong>
-                </div>
-              </div>
-              <div class="actions stack-sm lottery-actions">
-                <button class="primary" id="runLotteryBtn">RUN LOTTERY</button>
-                <button id="replayLotteryBtn" style="display:none">Replay Locked Results</button>
-                <button id="copyLotteryLinkBtn" style="display:none">Copy Locked Replay Link</button>
-              </div>
-              <div id="lotteryResults" class="mini-list lottery-results"></div>
-            </div>
-          </article>
-        </div>
-
-        <div class="grid two">
-          <article class="card">
-            <h3>Draft Order</h3>
-            <p class="muted">Once the lottery has run, this becomes the official draft order. Until then, it stays in the default owner order.</p>
-            <div id="draftOrderEditor"></div>
-          </article>
-          <article class="card">
-            <h3>Pick History</h3>
-            <div id="pickHistory" class="table-wrap"></div>
-          </article>
-        </div>
-      </div>
-
-      <div id="draftBoardPanel" class="draft-room-section">
-        <article class="card actual-draft-card">
-          <div class="actual-draft-header">
-            <div>
-              <p class="eyebrow">Actual Draft Room</p>
-              <h3>Now drafting for: <span id="activeDraftOwnerLabel">Choose team</span></h3>
-              <p class="muted">You entered as an old man. Use this selector only when you need to write down a texted pick for somebody else.</p>
-            </div>
-            <div class="active-owner-picker">
-              <label for="activeDraftOwnerSelect">Drafting as</label>
-              <select id="activeDraftOwnerSelect"></select>
-              <button type="button" id="changeOldManBtn" class="small-btn">Which old man?</button>
-            </div>
+      <div id="cleanDraftRoom" class="clean-draft-room" hidden>
+        <div class="clean-draft-topbar">
+          <div>
+            <p class="eyebrow">Official Live Snake Draft</p>
+            <h2>Draft Room</h2>
+            <p class="muted">Pick your team below. The board refreshes from shared draft state and removes signed players.</p>
           </div>
+          <button id="cleanExitDraftBtn" type="button">Back</button>
+        </div>
 
-          <div class="draft-status draft-board-status">
-            <div>
-              <span class="label">Drafted Players</span>
-              <h3 id="draftedCount">0</h3>
-            </div>
-            <div>
-              <span class="label">Available Board</span>
-              <h3>Top <span id="draftBoardLimit">75</span></h3>
-            </div>
-          </div>
-          <div class="draft-toolbar">
-            <select id="draftPositionFilter">
-              <option value="all">All Positions</option>
-              <option value="F">Forwards</option>
-              <option value="D">Defense</option>
-              <option value="G">Goalies</option>
-            </select>
-            <select id="draftSortSelect">
-              <option value="fantasyPoints">Sort by Fantasy Pts</option>
-              <option value="points">Sort by NHL Pts</option>
-              <option value="goals">Sort by Goals</option>
-              <option value="assists">Sort by Assists</option>
-              <option value="gamesPlayed">Sort by GP</option>
-              <option value="name">Sort by Name</option>
+        <div class="clean-draft-control-card">
+          <div class="clean-control">
+            <label for="cleanDraftAsSelect">You are drafting as</label>
+            <select id="cleanDraftAsSelect">
+              <option value="">Select your team…</option>
+              <option value="nick">Nick</option>
+              <option value="chris">Chris</option>
+              <option value="andrew">Andrew</option>
+              <option value="tyler">Tyler</option>
+              <option value="scott">Scott</option>
             </select>
           </div>
-          <div class="hint">Official draft room: select your team, wait for your snake-draft turn, then Sign Player.</div>
-          <div id="draftBoardTable" class="table-wrap draft-board-wrap"></div>
-        </article>
+
+          <div class="clean-current-pick" id="cleanCurrentPickBox">
+            <span class="label">Currently drafting</span>
+            <strong id="cleanCurrentlyDrafting">Loading…</strong>
+            <em id="cleanPickDetails">Syncing draft state</em>
+          </div>
+
+          <div class="clean-sync-box">
+            <span class="label">Live room status</span>
+            <strong id="cleanSyncStatus">Starting…</strong>
+            <em id="cleanLastRefresh">Refreshes automatically</em>
+          </div>
+        </div>
+
+        <div id="cleanOnClockBanner" class="clean-on-clock-banner" hidden>
+          YOU ARE ON THE CLOCK
+        </div>
+
+        <div class="clean-draft-actions">
+          <select id="cleanPositionFilter">
+            <option value="all">All Positions</option>
+            <option value="F">Forwards</option>
+            <option value="C">C</option>
+            <option value="L">L/LW</option>
+            <option value="R">R/RW</option>
+            <option value="D">D</option>
+            <option value="G">G</option>
+          </select>
+          <select id="cleanSortSelect">
+            <option value="fantasyPoints">Sort by Fantasy Pts</option>
+            <option value="points">Sort by NHL Pts</option>
+            <option value="goals">Sort by Goals</option>
+            <option value="assists">Sort by Assists</option>
+            <option value="gamesPlayed">Sort by GP</option>
+            <option value="name">Sort by Name</option>
+          </select>
+          <button id="cleanRefreshBtn" type="button">Refresh Room</button>
+          <button id="cleanResetLiveDraftBtn" class="danger" type="button">Reset Live Draft</button>
+        </div>
+
+        <div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div>
+        <div id="cleanDraftBoard" class="clean-draft-board">
+          <div class="clean-loading-card">
+            <strong>Choose your team to load the room.</strong>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1428,6 +1390,422 @@
           return;
         }
       }, true);
+    })();
+  </script>
+
+
+  <script>
+    (function () {
+      "use strict";
+
+      const OWNERS = [
+        { id: "nick", name: "Nick", teamName: "Nick" },
+        { id: "chris", name: "Chris", teamName: "Chris" },
+        { id: "andrew", name: "Andrew", teamName: "Andrew" },
+        { id: "tyler", name: "Tyler", teamName: "Tyler" },
+        { id: "scott", name: "Scott", teamName: "Scott" }
+      ];
+      const LOCAL_KEY = "custom-hockey-pool-v40-clean-live-draft";
+      let activeOwnerId = localStorage.getItem("custom-hockey-pool-active-owner") || "";
+      let draft = null;
+      let players = [];
+      let playersLoaded = false;
+      let loadingPlayers = false;
+      let sortKey = "fantasyPoints";
+      let positionFilter = "all";
+      let poll = null;
+      let lastOnClockId = "";
+
+      const $ = (sel, root = document) => root.querySelector(sel);
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      }
+      function toast(message) {
+        const t = $("#toast");
+        if (!t) return;
+        t.textContent = message;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2600);
+      }
+      function currentSeasonId() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const start = month >= 7 ? year : year - 1;
+        return `${start}${start + 1}`;
+      }
+      function defaultDraft() {
+        return { owners: OWNERS.slice(), draftOrder: lotteryOrder() || OWNERS.map(o => o.id), picks: [], updatedAt: new Date().toISOString() };
+      }
+      function localDraft() {
+        try {
+          const raw = localStorage.getItem(LOCAL_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.picks)) return parsed;
+          }
+        } catch (e) {}
+        return defaultDraft();
+      }
+      function saveLocal() {
+        if (!draft) return;
+        try { localStorage.setItem(LOCAL_KEY, JSON.stringify(draft)); } catch (e) {}
+      }
+      function owner(id) {
+        return OWNERS.find(o => o.id === id) || null;
+      }
+      function lotteryOrder() {
+        const keys = [
+          "custom-hockey-pool-v30-popout-emergency",
+          "custom-hockey-pool-v29-inline-emergency",
+          "custom-hockey-pool-v28-hard-bypass-fallback"
+        ];
+        for (const key of keys) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            if (Array.isArray(parsed?.lotteryOrder) && parsed.lotteryOrder.length === 5) return parsed.lotteryOrder.slice();
+          } catch (e) {}
+        }
+        return null;
+      }
+      async function loadSharedDraft() {
+        try {
+          const res = await fetch("/api/draft", { cache: "no-store" });
+          const data = await res.json();
+          if (data?.draft && Array.isArray(data.draft.picks)) {
+            draft = data.draft;
+            saveLocal();
+            setSyncStatus(data.configured ? "Shared sync connected" : "Temporary server sync");
+            return;
+          }
+          draft = localDraft();
+          setSyncStatus(data?.configured === false ? "Temporary server sync" : "Local draft state");
+        } catch (e) {
+          draft = localDraft();
+          setSyncStatus("Local fallback only");
+        }
+      }
+      async function saveSharedDraft() {
+        if (!draft) draft = defaultDraft();
+        draft.updatedAt = new Date().toISOString();
+        saveLocal();
+        try {
+          const res = await fetch("/api/draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(draft)
+          });
+          const data = await res.json().catch(() => ({}));
+          setSyncStatus(data.configured ? "Shared sync connected" : "Temporary server sync");
+        } catch (e) {
+          setSyncStatus("Local fallback only");
+        }
+      }
+      function setSyncStatus(text) {
+        const el = $("#cleanSyncStatus");
+        if (el) el.textContent = text;
+        const time = $("#cleanLastRefresh");
+        if (time) time.textContent = "Last refresh: " + new Date().toLocaleTimeString();
+      }
+      function rosterLimit() { return 15; }
+      function pickLimit() { return OWNERS.length * rosterLimit(); }
+      function snakePick(pickNumber) {
+        const order = Array.isArray(draft?.draftOrder) && draft.draftOrder.length === 5 ? draft.draftOrder : OWNERS.map(o => o.id);
+        const roundIndex = Math.floor((pickNumber - 1) / order.length);
+        const slotIndex = (pickNumber - 1) % order.length;
+        const ownerIndex = roundIndex % 2 === 0 ? slotIndex : order.length - 1 - slotIndex;
+        return { pickNumber, round: roundIndex + 1, slot: slotIndex + 1, ownerId: order[ownerIndex] };
+      }
+      function currentPick() {
+        if (!draft) draft = defaultDraft();
+        const pickNumber = (draft.picks || []).length + 1;
+        if (pickNumber > pickLimit()) return null;
+        return snakePick(pickNumber);
+      }
+      function draftedIds() {
+        return new Set((draft?.picks || []).map(p => String(p.player.id)));
+      }
+      function fp(p) {
+        if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
+        return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
+      }
+      function normalizeSkater(row) {
+        const first = row.firstName || row.firstNameDefault || "";
+        const last = row.lastName || row.lastNameDefault || "";
+        const name = row.skaterFullName || row.playerFullName || row.fullName || `${first} ${last}`.trim();
+        return {
+          id: String(row.playerId || row.skaterId || row.id || name),
+          name,
+          position: row.positionCode || row.position || "F",
+          nhlTeam: row.teamAbbrevs || row.teamAbbrev || row.team || "",
+          gamesPlayed: Number(row.gamesPlayed || 0),
+          goals: Number(row.goals || 0),
+          assists: Number(row.assists || 0),
+          points: Number(row.points || 0),
+          goalieWins: 0,
+          goalieShutouts: 0
+        };
+      }
+      function normalizeGoalie(row) {
+        const first = row.firstName || row.firstNameDefault || "";
+        const last = row.lastName || row.lastNameDefault || "";
+        const name = row.goalieFullName || row.playerFullName || row.fullName || `${first} ${last}`.trim();
+        return {
+          id: String(row.playerId || row.goalieId || row.id || name) + "-G",
+          name,
+          position: "G",
+          nhlTeam: row.teamAbbrevs || row.teamAbbrev || row.team || "",
+          gamesPlayed: Number(row.gamesPlayed || 0),
+          goals: 0,
+          assists: 0,
+          points: 0,
+          goalieWins: Number(row.wins || 0),
+          goalieShutouts: Number(row.shutouts || 0)
+        };
+      }
+      async function pullPlayers() {
+        if (loadingPlayers || playersLoaded) return;
+        loadingPlayers = true;
+        showBoardLoading("Pulling real NHL player board…");
+        try {
+          const season = currentSeasonId();
+          let payload;
+          try {
+            const res = await fetch(`/api/nhl?season=${season}&gameType=2&limit=1000`, { cache: "no-store" });
+            const text = await res.text();
+            if (!res.ok) throw new Error("HTTP " + res.status + " from /api/nhl\n" + text.slice(0, 1000));
+            payload = JSON.parse(text);
+            if (payload.ok === false) throw new Error(payload.detail || payload.error || "NHL API route failed.");
+          } catch (proxyError) {
+            const skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "points", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
+            const goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "wins", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
+            const [skaters, goalies] = await Promise.all([
+              fetch(`https://api.nhle.com/stats/rest/en/skater/summary?${skaterParams.toString()}`).then(r => r.json()),
+              fetch(`https://api.nhle.com/stats/rest/en/goalie/summary?${goalieParams.toString()}`).then(r => r.json())
+            ]);
+            payload = { skaters: skaters.data || [], goalies: goalies.data || [] };
+          }
+          const map = new Map();
+          (payload.skaters || []).map(normalizeSkater).filter(p => p.name).forEach(p => { p.fantasyPoints = fp(p); map.set(`${p.id}-${p.position}`, p); });
+          (payload.goalies || []).map(normalizeGoalie).filter(p => p.name).forEach(p => { p.fantasyPoints = fp(p); map.set(p.id, p); });
+          players = [...map.values()];
+          playersLoaded = players.length > 0;
+          if (!playersLoaded) throw new Error("The NHL API responded but returned zero players.");
+          renderRoom();
+        } catch (error) {
+          showBoardError(error.message || String(error));
+        } finally {
+          loadingPlayers = false;
+        }
+      }
+      function availablePlayers() {
+        const taken = draftedIds();
+        let list = players.filter(p => !taken.has(String(p.id)));
+        if (positionFilter === "F") list = list.filter(p => ["C", "L", "R", "LW", "RW", "F"].includes(p.position));
+        else if (positionFilter !== "all") list = list.filter(p => p.position === positionFilter);
+        list.forEach(p => p.fantasyPoints = fp(p));
+        return list.sort((a, b) => {
+          const av = sortKey === "name" ? String(a.name).toLowerCase() : Number(a[sortKey] || 0);
+          const bv = sortKey === "name" ? String(b.name).toLowerCase() : Number(b[sortKey] || 0);
+          if (typeof av === "string") return av.localeCompare(String(bv));
+          return (bv - av) || a.name.localeCompare(b.name);
+        }).slice(0, 200);
+      }
+      function showBoardLoading(message) {
+        const board = $("#cleanDraftBoard");
+        if (!board) return;
+        board.innerHTML = `<div class="clean-loading-card"><strong>${esc(message)}</strong><span>Loading Goals, Assists, Points, and Fantasy Points.</span></div>`;
+      }
+      function showBoardError(message) {
+        const board = $("#cleanDraftBoard");
+        if (!board) return;
+        board.innerHTML = `<div class="clean-loading-card error"><strong>Real NHL player list failed.</strong><pre>${esc(message)}</pre><button id="cleanRetryPlayers" class="primary" type="button">Retry</button><a href="/api/nhl?season=${currentSeasonId()}&gameType=2&limit=10" target="_blank" rel="noopener">Open /api/nhl test</a></div>`;
+      }
+      function updateCurrentPickUI() {
+        const pick = currentPick();
+        const currentOwner = pick ? owner(pick.ownerId) : null;
+        const currentName = currentOwner ? currentOwner.teamName : "Draft complete";
+        const box = $("#cleanCurrentPickBox");
+        const strong = $("#cleanCurrentlyDrafting");
+        const detail = $("#cleanPickDetails");
+        const banner = $("#cleanOnClockBanner");
+        if (strong) strong.textContent = currentName;
+        if (detail) detail.textContent = pick ? `Pick ${pick.pickNumber} • Round ${pick.round}` : "All roster spots filled";
+        if (banner) banner.hidden = !(pick && activeOwnerId === pick.ownerId);
+        if (box) box.classList.toggle("you-are-up", Boolean(pick && activeOwnerId === pick.ownerId));
+        if (pick && activeOwnerId === pick.ownerId) {
+          document.title = "YOUR PICK — Hockey Pool";
+          if (lastOnClockId !== pick.ownerId) {
+            lastOnClockId = pick.ownerId;
+            playSoftBeep();
+          }
+        } else {
+          document.title = "Hockey Pool";
+          lastOnClockId = pick ? pick.ownerId : "";
+        }
+      }
+      function playSoftBeep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = 660;
+          gain.gain.setValueAtTime(0.001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.38);
+        } catch (e) {}
+      }
+      function renderOrderStrip() {
+        const strip = $("#cleanDraftOrderStrip");
+        if (!strip || !draft) return;
+        const nextPick = (draft.picks || []).length + 1;
+        const preview = [];
+        for (let i = 1; i <= Math.min(20, pickLimit()); i++) {
+          const info = snakePick(i);
+          const o = owner(info.ownerId);
+          preview.push(`<span class="${i === nextPick ? "current" : ""}">${i}. ${esc(o?.teamName || info.ownerId)}</span>`);
+        }
+        strip.innerHTML = preview.join("");
+      }
+      function renderRoom() {
+        updateCurrentPickUI();
+        renderOrderStrip();
+        const board = $("#cleanDraftBoard");
+        if (!board) return;
+        if (!activeOwnerId) {
+          board.innerHTML = `<div class="clean-loading-card"><strong>Select your team above.</strong><span>After selecting, the real NHL board loads here.</span></div>`;
+          return;
+        }
+        if (!playersLoaded) {
+          pullPlayers();
+          return;
+        }
+        const pick = currentPick();
+        const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
+        const rows = availablePlayers().map((p, i) => {
+          const disabled = canPick ? "" : "disabled";
+          const buttonText = canPick ? "Sign Player" : `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}`;
+          return `<tr>
+            <td class="rank-cell">${i + 1}</td>
+            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(p.position)} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
+            <td>${p.gamesPlayed || 0}</td><td>${p.goals || 0}</td><td>${p.assists || 0}</td><td>${p.points || 0}</td><td><strong>${fp(p)}</strong></td>
+          </tr>`;
+        }).join("");
+        const signed = (draft.picks || []).slice(-8).reverse().map(p => `<div><span>${p.pickNumber}</span><strong>${esc(p.player.name)}</strong><em>${esc(p.ownerName)}</em></div>`).join("");
+        board.innerHTML = `<table class="draft-table clean-player-table"><thead><tr><th>#</th><th>Player</th><th>GP</th><th>Goals</th><th>Assists</th><th>Pts</th><th>Fantasy Pts</th></tr></thead><tbody>${rows}</tbody></table><div class="clean-signed-log"><h3>Recent signed players</h3>${signed || "<p>No picks yet.</p>"}</div>`;
+      }
+      async function signPlayer(playerId) {
+        const pick = currentPick();
+        if (!pick) return toast("Draft complete.");
+        if (pick.ownerId !== activeOwnerId) return toast(`It is ${owner(pick.ownerId)?.teamName || "another team"}'s pick.`);
+        const player = players.find(p => String(p.id) === String(playerId));
+        if (!player) return toast("Player not found.");
+        if (draftedIds().has(String(player.id))) return toast("That player is already signed.");
+        const o = owner(activeOwnerId);
+        draft.picks.push({
+          pickNumber: pick.pickNumber,
+          round: pick.round,
+          slot: pick.slot,
+          ownerId: activeOwnerId,
+          ownerName: o?.teamName || activeOwnerId,
+          timestamp: new Date().toISOString(),
+          player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, fantasyPoints: fp(player) }
+        });
+        await saveSharedDraft();
+        toast(`Signed ${player.name} to ${o?.teamName || activeOwnerId}.`);
+        renderRoom();
+      }
+      async function startRoom() {
+        $("#cleanDraftEntry").hidden = true;
+        $("#cleanDraftRoom").hidden = false;
+        await loadSharedDraft();
+        const order = lotteryOrder();
+        if (order && (!draft.draftOrder || JSON.stringify(draft.draftOrder) === JSON.stringify(OWNERS.map(o => o.id)))) {
+          draft.draftOrder = order;
+          await saveSharedDraft();
+        }
+        const select = $("#cleanDraftAsSelect");
+        if (select) {
+          select.value = activeOwnerId;
+          select.onchange = () => {
+            activeOwnerId = select.value;
+            localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
+            renderRoom();
+            pullPlayers();
+          };
+        }
+        if (activeOwnerId && select) select.value = activeOwnerId;
+        renderRoom();
+        pullPlayers();
+        startPolling();
+      }
+      async function refreshRoom() {
+        await loadSharedDraft();
+        renderRoom();
+      }
+      function startPolling() {
+        clearInterval(poll);
+        poll = setInterval(refreshRoom, 5000);
+      }
+      async function resetLiveDraft() {
+        if (!confirm("Reset the live draft picks?")) return;
+        draft = defaultDraft();
+        await saveSharedDraft();
+        try { await fetch("/api/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) }); } catch (e) {}
+        renderRoom();
+        toast("Live draft reset.");
+      }
+      document.addEventListener("click", async (event) => {
+        const enter = event.target.closest && event.target.closest("#cleanEnterDraftBtn");
+        if (enter) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          startRoom();
+          return;
+        }
+        const exit = event.target.closest && event.target.closest("#cleanExitDraftBtn");
+        if (exit) {
+          event.preventDefault();
+          $("#cleanDraftRoom").hidden = true;
+          $("#cleanDraftEntry").hidden = false;
+          document.title = "Hockey Pool";
+          return;
+        }
+        const sign = event.target.closest && event.target.closest("[data-clean-sign]");
+        if (sign) {
+          event.preventDefault();
+          signPlayer(sign.dataset.cleanSign);
+          return;
+        }
+        const refresh = event.target.closest && event.target.closest("#cleanRefreshBtn, #cleanRetryPlayers");
+        if (refresh) {
+          event.preventDefault();
+          playersLoaded = false;
+          players = [];
+          await refreshRoom();
+          pullPlayers();
+          return;
+        }
+        const reset = event.target.closest && event.target.closest("#cleanResetLiveDraftBtn");
+        if (reset) {
+          event.preventDefault();
+          resetLiveDraft();
+          return;
+        }
+      }, true);
+      window.addEventListener("load", () => {
+        const pos = $("#cleanPositionFilter");
+        if (pos) pos.onchange = () => { positionFilter = pos.value; renderRoom(); };
+        const sort = $("#cleanSortSelect");
+        if (sort) sort.onchange = () => { sortKey = sort.value; renderRoom(); };
+      });
     })();
   </script>
 
