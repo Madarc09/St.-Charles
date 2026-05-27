@@ -43,7 +43,7 @@
         <div>
           <p class="eyebrow">Draft Room</p>
           <h2>Basement draft headquarters</h2>
-          <p class="muted">Start in Draft Info for the lottery and order. Enter the Actual Draft Room by choosing the team you are drafting for.</p>
+          <p class="muted">Draft Info holds the lottery and order. Enter Draft Room asks which old man you are, then you can draft from the player board.</p>
         </div>
         <div class="actions">
           <button class="primary" id="refreshStatsBtnDraft">Pull NHL Stats</button>
@@ -55,16 +55,20 @@
 
       <div class="draft-room-switcher" role="tablist" aria-label="Draft room sections">
         <button class="draft-room-tab active" type="button" data-draft-room="info">Draft Info Room</button>
-        <button class="draft-room-tab" type="button" data-draft-room="board">Actual Draft Room</button>
+        <button class="draft-room-tab" type="button" data-draft-room="board">Enter Draft Room</button>
       </div>
 
       <div id="draftInfoRoom" class="draft-room-section active">
         <div class="grid two wide-left">
           <article class="card draft-hq-card">
-            <p class="eyebrow">Enter the Room</p>
-            <h3>Choose who you are drafting for</h3>
-            <p class="muted">No logins. Tap your team name, then every Draft button places the player directly on that team. If someone texts a pick, just enter as their team and make the pick for them.</p>
-            <div id="draftEntryCards" class="draft-entry-grid"></div>
+            <p class="eyebrow">Draft Info Room</p>
+            <h3>Official basement desk</h3>
+            <p class="muted">Lottery, draft order, and pick history live here. To actually make picks, use the Enter Draft Room tab. The first time you enter, the site will ask: “Which old man are you?”</p>
+            <div class="basement-info-board">
+              <div><span class="label">Owners</span><strong>Nick • Chris • Andrew • Tyler • Scott</strong></div>
+              <div><span class="label">Draft style</span><strong>Owner selected in-room</strong></div>
+              <div><span class="label">Texted picks</span><strong>Switch the draft-room selector to that team and draft for them</strong></div>
+            </div>
           </article>
 
           <article class="card">
@@ -108,11 +112,12 @@
             <div>
               <p class="eyebrow">Actual Draft Room</p>
               <h3>Now drafting for: <span id="activeDraftOwnerLabel">Choose team</span></h3>
-              <p class="muted">Switch the team here if you need to enter a pick someone texted you.</p>
+              <p class="muted">You entered as an old man. Use this selector only when you need to write down a texted pick for somebody else.</p>
             </div>
             <div class="active-owner-picker">
               <label for="activeDraftOwnerSelect">Drafting as</label>
               <select id="activeDraftOwnerSelect"></select>
+              <button type="button" id="changeOldManBtn" class="small-btn">Which old man?</button>
             </div>
           </div>
 
@@ -249,6 +254,21 @@
   </main>
 
 
+
+  <div id="oldManModal" class="modal old-man-modal" aria-hidden="true">
+    <div class="modal-card old-man-card-modal" role="dialog" aria-modal="true" aria-labelledby="oldManTitle">
+      <div class="section-head modal-head">
+        <div>
+          <p class="eyebrow">Enter Draft Room</p>
+          <h2 id="oldManTitle">Which old man are you?</h2>
+          <p class="muted">Pick your name. Every Draft button will send players straight to that roster. You can still switch teams inside the room for texted picks.</p>
+        </div>
+        <button id="closeOldManModal" class="small-btn">Close</button>
+      </div>
+      <div id="oldManOptions" class="old-man-options"></div>
+    </div>
+  </div>
+
   <div id="assignModal" class="modal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="assignModalTitle">
       <div class="section-head modal-head">
@@ -283,7 +303,8 @@
         <div class="scope-cross vertical"></div>
         <div class="scope-sweep"></div>
         <div class="scope-flash" id="scopeFlash"></div>
-        <div class="stick-target" id="stickTarget" aria-hidden="true">
+        <div id="basementTargetLayer" class="basement-target-layer" aria-hidden="true"></div>
+        <div class="stick-target legacy-stick-target" id="stickTarget" aria-hidden="true">
           <div class="stick-head"></div>
           <div class="stick-body"><span class="jersey-number">00</span><span class="jersey-name">POOL</span></div>
           <div class="stick-arm left"></div><div class="stick-arm right"></div>

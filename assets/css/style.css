@@ -1781,3 +1781,303 @@ body.lottery-running { overflow: hidden; }
   .player-draft-line { align-items: flex-start; }
   .single-draft-btn { padding: .72rem .9rem; }
 }
+
+/* v16: basement-scene lottery, old-man entry modal, contract draft button */
+.legacy-stick-target { display: none !important; }
+
+/* Keep Home as the visual default and make the tabs less cramped on phones */
+.tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tab { flex: 0 0 auto; }
+
+.basement-info-board {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.basement-info-board > div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,216,157,.22);
+  background: linear-gradient(180deg, rgba(255,216,157,.08), rgba(0,0,0,.18));
+}
+.basement-info-board strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff0b8;
+}
+
+.old-man-modal.show { display: flex; }
+.old-man-card-modal {
+  max-width: 760px;
+  background:
+    linear-gradient(135deg, rgba(43,28,13,.97), rgba(8,10,7,.98)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 10px);
+  border-color: rgba(255,216,157,.36);
+}
+.old-man-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.old-man-card {
+  min-height: 132px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,216,157,.26);
+  background:
+    radial-gradient(circle at 30% 15%, rgba(255,240,184,.12), transparent 33%),
+    linear-gradient(180deg, rgba(255,216,157,.08), rgba(0,0,0,.22));
+  color: #fff0b8;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+.old-man-card:hover { transform: translateY(-2px); border-color: rgba(158,255,202,.52); }
+.old-man-card span:last-child { display: grid; gap: 2px; }
+.old-man-card small { color: rgba(234,255,217,.68); }
+.mini-jersey {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px 10px 7px 7px;
+  border: 3px solid #101010;
+  background: linear-gradient(180deg, #0d54a7 0 23%, #fff 23% 32%, #0d54a7 32% 72%, #fff 72% 81%, #0a3570 81% 100%);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.16), 0 8px 18px rgba(0,0,0,.3);
+  color: #fff;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+.mini-jersey strong { font-size: 1.4rem; line-height: 1; text-shadow: 1px 1px 0 #000; }
+.mini-jersey em { font-size: .46rem; font-style: normal; letter-spacing: .07em; }
+.old-man-card.owner-andrew .mini-jersey { background: linear-gradient(180deg, #f47a21 0 22%, #fff 22% 31%, #111 31% 72%, #fff 72% 81%, #f47a21 81% 100%); }
+@media (max-width: 860px) { .old-man-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .old-man-options { grid-template-columns: 1fr; } }
+
+/* Contract signing draft button: no duplicate DRAFT text */
+.draft-player-btn::before { content: "" !important; display: none !important; }
+.contract-draft-btn {
+  gap: 7px;
+  min-width: 104px;
+  padding: .54rem .72rem !important;
+  background: linear-gradient(180deg, #f7e0a4, #d89942 55%, #7d4217) !important;
+  color: #1b0e04 !important;
+  border-color: rgba(255,244,203,.65) !important;
+}
+.contract-icon {
+  position: relative;
+  width: 24px;
+  height: 28px;
+  border-radius: 3px;
+  background: #fff5c9;
+  border: 1px solid rgba(45,25,7,.55);
+  box-shadow: inset 0 -4px 0 rgba(90,45,10,.08), 0 2px 0 rgba(0,0,0,.25);
+  transform: rotate(-4deg);
+  flex: 0 0 auto;
+}
+.contract-icon::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 7px;
+  height: 2px;
+  background: #6d3b16;
+  box-shadow: 0 5px 0 #6d3b16, 0 10px 0 rgba(109,59,22,.65);
+}
+.contract-icon::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  bottom: 2px;
+  width: 18px;
+  height: 4px;
+  border-radius: 999px;
+  background: #151515;
+  transform: rotate(-34deg);
+  box-shadow: -8px 5px 0 -2px #d7a657;
+}
+.contract-icon i {
+  position: absolute;
+  right: 2px;
+  bottom: 4px;
+  width: 9px;
+  height: 6px;
+  border-bottom: 2px solid #173b83;
+  border-left: 2px solid #173b83;
+  transform: skewX(-18deg) rotate(-8deg);
+}
+
+/* Full-room lottery scene: five detailed jersey targets in the 1998 basement */
+.scope-view {
+  min-height: clamp(390px, 48vw, 620px);
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255,244,203,.10), transparent 17%),
+    linear-gradient(90deg, rgba(16,28,20,.50), rgba(26,20,13,.38)),
+    url('../images/header-1998-basement-hangout.jpg') center / cover no-repeat;
+}
+.scope-view::before {
+  z-index: 5;
+  pointer-events: none;
+}
+.basement-target-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.scene-stick-target {
+  position: absolute;
+  left: var(--tx);
+  top: var(--ty);
+  width: 102px;
+  height: 178px;
+  translate: -50% -50%;
+  transform-origin: 50% 92%;
+  z-index: 3;
+  filter: drop-shadow(0 16px 14px rgba(0,0,0,.62));
+  transition: transform .28s ease, filter .28s ease, opacity .28s ease;
+}
+.scene-stick-target .stick-head,
+.scene-stick-target .stick-body,
+.scene-stick-target .stick-arm,
+.scene-stick-target .stick-leg { z-index: 4; }
+.scene-stick-target .stick-head { top: 0; }
+.scene-stick-target .stick-body { top: 42px; }
+.scene-stick-target .stick-arm { top: 54px; }
+.scene-stick-target .stick-leg { top: 105px; }
+.scene-stick-target.active-target {
+  transform: scale(1.12) translateY(-6px);
+  filter: drop-shadow(0 0 18px rgba(255,240,184,.55)) drop-shadow(0 18px 18px rgba(0,0,0,.70));
+}
+.scene-stick-target.tagged-target {
+  animation: basementTagHit .62s cubic-bezier(.22,.86,.25,1) forwards;
+}
+@keyframes basementTagHit {
+  0% { transform: scale(1.08) rotate(0deg); opacity: 1; }
+  45% { transform: translate(18px, -13px) scale(1.04) rotate(18deg); opacity: 1; }
+  100% { transform: translate(40px, 46px) scale(.94) rotate(60deg); opacity: .78; }
+}
+.scene-stick-target .hit-stamp {
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  translate: -50% 0;
+  padding: .18rem .42rem;
+  border-radius: 6px;
+  background: rgba(255, 76, 51, .88);
+  color: #fff;
+  font-size: .56rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 950;
+  letter-spacing: .11em;
+  opacity: 0;
+  box-shadow: 0 0 18px rgba(255,76,51,.42);
+}
+.scene-stick-target.tagged-target .hit-stamp { opacity: 1; }
+.scene-stick-target .pick-bubble {
+  position: absolute;
+  left: 74px;
+  top: 2px;
+  width: 28px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff0b8;
+  color: #241205;
+  border: 2px solid #201206;
+  font-weight: 950;
+  box-shadow: 0 7px 12px rgba(0,0,0,.38);
+}
+.target-nameplate {
+  position: absolute;
+  left: 50%;
+  top: 138px;
+  translate: -50% 0;
+  width: 156px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(8,10,7,.76);
+  border: 1px solid rgba(255,216,157,.24);
+  color: #fff0b8;
+  text-align: center;
+  font-size: .72rem;
+  box-shadow: 0 8px 16px rgba(0,0,0,.32);
+}
+.target-nameplate strong { display: block; text-transform: uppercase; }
+.target-nameplate small { display: block; color: rgba(234,255,217,.65); margin-top: 2px; }
+.activity-prop {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 106px;
+  translate: -50% 0;
+  filter: drop-shadow(0 9px 8px rgba(0,0,0,.45));
+}
+.activity-prop span { display: block; }
+.prop-controller {
+  width: 76px; height: 28px; border-radius: 50% 50% 42% 42%;
+  background: linear-gradient(180deg, #3d3d3d, #101010);
+  border: 2px solid #050505;
+}
+.prop-controller::before, .prop-controller::after {
+  content: ""; position: absolute; top: 8px; width: 10px; aspect-ratio: 1; border-radius: 50%; background: #d33;
+}
+.prop-controller::before { left: 12px; box-shadow: 15px 0 0 #2c8cff; }
+.prop-controller::after { right: 14px; background: #f4d244; box-shadow: 14px 0 0 #33b65c; }
+.prop-pizza {
+  width: 84px; height: 34px; border-radius: 6px;
+  background: linear-gradient(180deg, #d9b071, #9b5d27);
+  border: 2px solid #5f2f10;
+}
+.prop-pizza::before { content: "PIZZA"; position: absolute; inset: 7px 10px; color: #6e2313; font-family: Impact; letter-spacing: .08em; }
+.prop-poolbook {
+  width: 76px; height: 46px; background: #f3d980; border: 2px solid #3a210b; transform: rotate(-5deg);
+}
+.prop-poolbook::before { content: "POOL\\A BOOK"; white-space: pre; position: absolute; inset: 6px; color: #2a1608; font: 800 .55rem/1.05 'Courier New'; }
+.prop-cards {
+  width: 84px; height: 40px;
+}
+.prop-cards::before, .prop-cards::after, .prop-cards span {
+  content: ""; position: absolute; width: 28px; height: 38px; border-radius: 4px; border: 2px solid #eee; background: linear-gradient(180deg, #d91f31 0 45%, #eee 45% 55%, #122a62 55%); box-shadow: 0 5px 8px rgba(0,0,0,.3);
+}
+.prop-cards::before { left: 5px; rotate: -12deg; }
+.prop-cards span { left: 28px; rotate: 1deg; }
+.prop-cards::after { left: 51px; rotate: 12deg; }
+.prop-pop {
+  width: 68px; height: 42px;
+}
+.prop-pop::before, .prop-pop::after, .prop-pop span {
+  content: ""; position: absolute; bottom: 0; width: 18px; height: 38px; border-radius: 5px 5px 3px 3px; background: linear-gradient(180deg, #888, #264f94 45%, #13294f); border: 1px solid #ddd;
+}
+.prop-pop::before { left: 6px; }
+.prop-pop span { left: 27px; background: linear-gradient(180deg, #888, #287e38 45%, #143d20); }
+.prop-pop::after { left: 48px; background: linear-gradient(180deg, #888, #7e2020 45%, #401010); }
+.pose-gaming .stick-arm.left { rotate: 58deg; }
+.pose-gaming .stick-arm.right { rotate: -58deg; }
+.pose-pizza .stick-arm.right { rotate: -74deg; }
+.pose-book .stick-arm.left { rotate: 62deg; }
+.pose-cards .stick-arm.left { rotate: 72deg; }
+.pose-vhs .stick-arm.right { rotate: -18deg; }
+.scope-ring,
+.scope-cross,
+.scope-flash,
+.target-card,
+.scope-vignette,
+.scope-sweep { z-index: 6; }
+.target-card { z-index: 7; }
+.scope-crt-lines, .spy-crt-lines { z-index: 8; }
+
+@media (max-width: 720px) {
+  .scope-view { min-height: 520px; background-position: center; }
+  .scene-stick-target { width: 78px; height: 138px; }
+  .scene-stick-target .stick-body { top: 33px; width: 58px; height: 56px; }
+  .scene-stick-target .stick-arm { top: 43px; height: 48px; width: 10px; }
+  .scene-stick-target .stick-leg { top: 86px; height: 50px; }
+  .target-nameplate { width: 118px; top: 112px; font-size: .58rem; }
+  .activity-prop { transform: scale(.76); top: 82px; }
+  .scene-stick-target[style*="--tx:84%"] { left: 78% !important; }
+  .scene-stick-target[style*="--tx:21%"] { left: 25% !important; }
+  .contract-draft-btn { min-width: 96px; }
+}

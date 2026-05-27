@@ -113,6 +113,13 @@ function bindEvents() {
   $('#draftSortSelect')?.addEventListener('change', () => { draftSort = { key: $('#draftSortSelect').value, direction: draftSort.direction || 'desc' }; renderDraftBoard(); });
   $$('[data-draft-room]').forEach(btn => btn.addEventListener('click', () => setDraftRoomView(btn.dataset.draftRoom)));
   $('#activeDraftOwnerSelect')?.addEventListener('change', (e) => setActiveDraftOwner(e.target.value));
+  $('#changeOldManBtn')?.addEventListener('click', openOldManModal);
+  $('#closeOldManModal')?.addEventListener('click', closeOldManModal);
+  $('#oldManModal')?.addEventListener('click', (e) => { if (e.target.id === 'oldManModal') closeOldManModal(); });
+  $('#oldManOptions')?.addEventListener('click', (e) => {
+    const btn = e.target.closest?.('[data-old-man]');
+    if (btn) setActiveDraftOwner(btn.dataset.oldMan, true);
+  });
   $('#closeAssignModal')?.addEventListener('click', closeAssignModal);
   $('#assignModal')?.addEventListener('click', (e) => { if (e.target.id === 'assignModal') closeAssignModal(); });
   $('#statsSearch')?.addEventListener('input', renderPlayersTable);
@@ -140,17 +147,51 @@ function bindEvents() {
 
 
 function setDraftRoomView(view) {
-  draftRoomView = view === 'board' ? 'board' : 'info';
+  if (view === 'board') {
+    const current = activeDraftOwner();
+    if (!current) {
+      draftRoomView = 'info';
+      renderDraftRooms();
+      openOldManModal();
+      return;
+    }
+    draftRoomView = 'board';
+  } else {
+    draftRoomView = 'info';
+  }
   renderDraftRooms();
   if (draftRoomView === 'board') setTimeout(() => $('#draftBoardPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 
-function setActiveDraftOwner(ownerId) {
+function openOldManModal() {
+  const modal = $('#oldManModal');
+  const wrap = $('#oldManOptions');
+  if (!modal || !wrap) return;
+  wrap.innerHTML = state.owners.map(owner => {
+    const count = (state.rosters[owner.id] || []).length;
+    const jersey = ownerLotteryLabel(owner);
+    return `<button type="button" class="old-man-card ${jersey.jerseyClass || ''}" data-old-man="${escapeHtml(owner.id)}">
+      <span class="mini-jersey"><strong>${escapeHtml(jersey.number)}</strong><em>${escapeHtml(jersey.jerseyName)}</em></span>
+      <span><strong>${escapeHtml(owner.teamName)}</strong><small>${count} players drafted</small></span>
+    </button>`;
+  }).join('');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeOldManModal() {
+  const modal = $('#oldManModal');
+  modal?.classList.remove('show');
+  modal?.setAttribute('aria-hidden', 'true');
+}
+
+function setActiveDraftOwner(ownerId, fromOldManModal = false) {
   const owner = state?.owners?.find(o => String(o.id) === String(ownerId));
-  if (!owner) return toast('Choose one of the five teams first.');
+  if (!owner) return toast('Choose one of the five old men first.');
   activeDraftOwnerId = String(owner.id);
   localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
   draftRoomView = 'board';
+  if (fromOldManModal) closeOldManModal();
   renderDraftRooms();
   renderDraftBoard();
   toast(`Entered the draft room as ${owner.teamName}.`);
@@ -158,8 +199,8 @@ function setActiveDraftOwner(ownerId) {
 
 function activeDraftOwner() {
   if (!state?.owners?.some(o => String(o.id) === String(activeDraftOwnerId))) {
-    activeDraftOwnerId = state?.owners?.[0]?.id || '';
-    if (activeDraftOwnerId) localStorage.setItem('custom-hockey-pool-active-owner', activeDraftOwnerId);
+    activeDraftOwnerId = '';
+    localStorage.removeItem('custom-hockey-pool-active-owner');
   }
   return state?.owners?.find(o => String(o.id) === String(activeDraftOwnerId)) || null;
 }
@@ -168,31 +209,22 @@ function renderDraftRooms() {
   $$('[data-draft-room]').forEach(btn => btn.classList.toggle('active', btn.dataset.draftRoom === draftRoomView));
   $('#draftInfoRoom')?.classList.toggle('active', draftRoomView === 'info');
   $('#draftBoardPanel')?.classList.toggle('active', draftRoomView === 'board');
-  renderDraftEntryCards();
+  renderActiveDraftOwnerControls();
 }
 
-function renderDraftEntryCards() {
-  const wrap = $('#draftEntryCards');
-  if (!wrap) return;
+function renderActiveDraftOwnerControls() {
   const current = activeDraftOwner();
-  wrap.innerHTML = state.owners.map(owner => {
-    const count = (state.rosters[owner.id] || []).length;
-    const active = current && String(current.id) === String(owner.id);
-    return `<button type="button" class="draft-entry-card ${active ? 'active' : ''}" data-enter-owner="${escapeHtml(owner.id)}">
-      <span class="mini-tv-light"></span>
-      <strong>${escapeHtml(owner.teamName)}</strong>
-      <small>${count} drafted</small>
-      <em>${active ? 'Currently inside' : 'Enter room'}</em>
-    </button>`;
-  }).join('');
-  $$('[data-enter-owner]').forEach(btn => btn.addEventListener('click', () => setActiveDraftOwner(btn.dataset.enterOwner)));
   const select = $('#activeDraftOwnerSelect');
   if (select) {
-    select.innerHTML = state.owners.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.teamName)}</option>`).join('');
-    if (current) select.value = current.id;
+    select.innerHTML = `<option value="">Choose old man…</option>` + state.owners.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.teamName)}</option>`).join('');
+    select.value = current ? current.id : '';
   }
   const label = $('#activeDraftOwnerLabel');
-  if (label) label.textContent = current ? current.teamName : 'Choose team';
+  if (label) label.textContent = current ? current.teamName : 'No old man selected';
+  const board = $('#draftBoardTable');
+  if (board && draftRoomView === 'board' && !current) {
+    board.innerHTML = '<div class="empty-draft-board">Choose which old man you are first.</div>';
+  }
 }
 
 function showTab(tab) {
@@ -212,7 +244,6 @@ async function refreshStats() {
     state.settings.lastUpdated = data.fetchedAt;
     save();
     renderAll();
-    showTab('draft');
     toast(`Loaded ${data.players.length} NHL players. Draft board is ready.`);
   } catch (error) {
     console.error(error);
@@ -319,7 +350,7 @@ function renderDraftBoard() {
   const current = activeDraftOwner();
   const sortArrow = (key) => draftSort.key === key ? (draftSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
   const header = (label, key) => `<button class="sort-head" data-draft-sort="${key}">${label}${sortArrow(key)}</button>`;
-  const draftButton = (p) => `<button type="button" class="draft-player-btn single-draft-btn" data-draft-player="${escapeHtml(String(p.id))}" ${current ? '' : 'disabled'}>Draft</button>`;
+  const draftButton = (p) => `<button type="button" class="draft-player-btn single-draft-btn contract-draft-btn" data-draft-player="${escapeHtml(String(p.id))}" ${current ? '' : 'disabled'} aria-label="Draft ${escapeHtml(p.name)}"><span class="contract-icon" aria-hidden="true"><i></i></span><span>Draft</span></button>`;
   const rows = list.map((p, index) => `
     <tr>
       <td class="rank-cell">${index + 1}</td>
@@ -339,7 +370,7 @@ function renderDraftBoard() {
       <td>${p.goalieWins ?? ''}</td>
       <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
     </tr>`).join('');
-  const chosenText = current ? `Drafting for ${escapeHtml(current.teamName)}` : 'Choose a team to enter the room';
+  const chosenText = current ? `Drafting for ${escapeHtml(current.teamName)}` : 'Choose which old man you are before drafting';
   $('#draftBoardTable').innerHTML = `
     <div class="active-draft-banner">${chosenText}</div>
     <table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')}</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No available players yet. Pull NHL stats or load demo players.</td></tr>'}</tbody></table>`;
@@ -358,7 +389,7 @@ function changeDraftSort(key) {
 
 function draftPlayerForActiveOwner(playerId) {
   const owner = activeDraftOwner();
-  if (!owner) return toast('Select your team name to enter the Draft Room first.');
+  if (!owner) { openOldManModal(); return toast('Which old man are you? Choose before drafting.'); }
   const player = playerPool().find(p => String(p.id) === String(playerId) && !p.drafted);
   if (!player) return toast('That player is no longer available.');
   return assignPlayerToOwner(owner.id, playerId);
@@ -652,6 +683,38 @@ function ownerLotteryLabel(owner) {
   return { primary, secondary: `${owner.name || 'Owner'} • draft lottery target`, jerseyClass: '', number: '00', jerseyName: 'POOL' };
 }
 
+function lotteryTargetLayout(ownerId) {
+  const id = String(ownerId || '').toLowerCase();
+  const base = {
+    nick:   { x: 70, y: 60, activity: 'N64 controller locked in', prop: 'controller', pose: 'gaming' },
+    chris:  { x: 39, y: 66, activity: 'checking the hockey pool book', prop: 'poolbook', pose: 'book' },
+    andrew: { x: 21, y: 67, activity: 'guarding the pizza box', prop: 'pizza', pose: 'pizza' },
+    tyler:  { x: 54, y: 70, activity: 'sorting player cards', prop: 'cards', pose: 'cards' },
+    scott:  { x: 84, y: 58, activity: 'standing by the VHS stack', prop: 'pop', pose: 'vhs' }
+  };
+  return base[id] || { x: 50, y: 62, activity: 'basement target', prop: 'puck', pose: 'idle' };
+}
+
+function renderBasementTargets(orderIds = []) {
+  const layer = $('#basementTargetLayer');
+  if (!layer) return;
+  const orderIndex = new Map(orderIds.map((id, index) => [String(id), index + 1]));
+  layer.innerHTML = state.owners.map(owner => {
+    const label = ownerLotteryLabel(owner);
+    const layout = lotteryTargetLayout(owner.id);
+    return `<div class="scene-stick-target ${label.jerseyClass || ''} pose-${layout.pose}" data-scene-owner="${escapeHtml(owner.id)}" style="--tx:${layout.x}%;--ty:${layout.y}%">
+      <div class="activity-prop prop-${layout.prop}" aria-hidden="true"><span></span></div>
+      <div class="stick-head"></div>
+      <div class="stick-body"><span class="jersey-number">${escapeHtml(label.number)}</span><span class="jersey-name">${escapeHtml(label.jerseyName)}</span></div>
+      <div class="stick-arm left"></div><div class="stick-arm right"></div>
+      <div class="stick-leg left"></div><div class="stick-leg right"></div>
+      <div class="target-nameplate"><strong>${escapeHtml(owner.teamName)}</strong><small>${escapeHtml(layout.activity)}</small></div>
+      <div class="hit-stamp">LOCKED</div>
+      ${orderIndex.has(String(owner.id)) ? `<div class="pick-bubble">${orderIndex.get(String(owner.id))}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
 async function playSpyLottery(orderIds) {
   const modal = $('#spyLotteryModal');
   const target = $('#scopeTargetName');
@@ -659,43 +722,40 @@ async function playSpyLottery(orderIds) {
   const list = $('#spyResultsList');
   const flash = $('#scopeFlash');
   const scope = $('#scopeView');
-  const stick = $('#stickTarget');
   if (!modal || !target || !list || !scope) return;
 
   list.innerHTML = '';
+  renderBasementTargets(orderIds);
+  $$('.scene-stick-target').forEach(el => el.classList.remove('active-target', 'tagged-target'));
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('lottery-running');
-  target.textContent = 'Mission loading...';
-  if (meta) meta.textContent = 'Equal odds armed • five basement targets';
-  stick?.classList.remove('shot', 'owner-nick', 'owner-andrew', 'owner-chris', 'owner-tyler', 'owner-scott');
-  await sleep(550);
+  target.textContent = 'Basement sweep loading...';
+  if (meta) meta.textContent = 'Equal odds • every old man visible in the room';
+  await sleep(700);
 
   for (let i = 0; i < orderIds.length; i++) {
     const owner = state.owners.find(o => String(o.id) === String(orderIds[i]));
     const label = ownerLotteryLabel(owner);
+    const layout = lotteryTargetLayout(orderIds[i]);
+    const el = $$('.scene-stick-target').find(node => String(node.dataset.sceneOwner) === String(orderIds[i]));
     target.textContent = label.primary;
-    if (meta) meta.textContent = `Pick ${i + 1} • ${label.secondary}`;
-    scope.style.setProperty('--scope-x', `${39 + Math.random() * 22}%`);
-    scope.style.setProperty('--scope-y', `${30 + Math.random() * 24}%`);
-    if (stick) {
-      stick.className = `stick-target ${label.jerseyClass || ''}`.trim();
-      const num = stick.querySelector('.jersey-number');
-      const name = stick.querySelector('.jersey-name');
-      if (num) num.textContent = label.number;
-      if (name) name.textContent = label.jerseyName;
-    }
+    if (meta) meta.textContent = `Pick ${i + 1} • ${label.secondary} • ${layout.activity}`;
+    scope.style.setProperty('--scope-x', `${layout.x}%`);
+    scope.style.setProperty('--scope-y', `${layout.y}%`);
+    $$('.scene-stick-target').forEach(t => t.classList.remove('active-target'));
+    el?.classList.add('active-target');
     scope.classList.remove('scope-hit');
     scope.classList.add('scope-locking');
-    await sleep(820);
+    await sleep(900);
     scope.classList.remove('scope-locking');
     scope.classList.add('scope-hit');
-    stick?.classList.add('shot');
+    el?.classList.add('tagged-target');
     flash?.classList.remove('pulse');
     void flash?.offsetWidth;
     flash?.classList.add('pulse');
-    list.insertAdjacentHTML('beforeend', `<li><span>${i + 1}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(label.secondary)}</small></li>`);
-    await sleep(680);
+    list.insertAdjacentHTML('beforeend', `<li><span>${i + 1}</span><strong>${escapeHtml(label.primary)}</strong><small>${escapeHtml(label.secondary)} • ${escapeHtml(layout.activity)}</small></li>`);
+    await sleep(760);
   }
 
   target.textContent = 'ORDER CONFIRMED';
