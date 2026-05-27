@@ -62,6 +62,7 @@
         </div>
         <div class="actions">
           <button class="primary" id="refreshStatsBtnDraft">Pull NHL Stats</button>
+          <button id="loadDemoPlayersBtn">Load Demo Players</button>
           <button id="undoPickBtn">Undo Last Pick</button>
           <button class="danger" id="resetDraftBtn">Reset Draft</button>
         </div>
@@ -111,6 +112,14 @@
             <input id="manualTeam" placeholder="NHL team abbreviation" />
             <button id="addManualPlayerBtn">Add to Draft Board</button>
           </div>
+          <hr />
+          <h3>Test Rosters</h3>
+          <p class="muted">Create or reset sample rosters here so you can test the draft board right away.</p>
+          <div class="actions stack-sm">
+            <button id="addOwnerBtnDraft">Add Owner / Roster</button>
+            <button id="loadSampleOwnersBtn">Load 8 Sample Rosters</button>
+          </div>
+          <div id="draftOwnerList" class="mini-list"></div>
           <hr />
           <h3>Draft Order</h3>
           <p class="muted">This is kept for reference, but the new draft board lets you assign a selected player to any roster.</p>
@@ -230,6 +239,11 @@
         </div>
         <button id="closeAssignModal" class="small-btn">Close</button>
       </div>
+      <div class="assign-select-row">
+        <select id="assignOwnerSelect"></select>
+        <button class="primary" id="confirmAssignBtn">Add Player</button>
+      </div>
+      <p class="muted compact-note">You can also tap one of the roster cards below.</p>
       <div id="assignRosterOptions" class="assign-options"></div>
     </div>
   </div>
