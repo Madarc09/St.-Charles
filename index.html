@@ -181,6 +181,14 @@
           <div id="teamManagerList" class="mini-list roster-manager-list"></div>
         </article>
         <article class="card">
+          <h3>Add / Restore Teams</h3>
+          <p class="muted">Use this for testing or if the team list disappears. The Restore button brings back Nick, Chris, Andrew, Tyler, and Scott.</p>
+          <div class="actions stack-sm">
+            <button class="primary" id="addOwnerBtn">Add Team</button>
+            <button id="loadSampleOwnersBtn">Restore Final 5 Teams</button>
+          </div>
+        </article>
+        <article class="card">
           <h3>Remove Team</h3>
           <p class="muted">Use this only for testing. Removing a team releases its drafted players back to the board and removes that team from the draft order.</p>
           <div class="remove-team-box">
@@ -417,6 +425,69 @@
           document.body.classList.remove('lottery-running');
         }
       }, true);
+    })();
+  </script>
+
+
+  <script>
+    // v27 emergency team restore. This runs outside the module and forces the five teams into browser storage if needed.
+    (function () {
+      var finalOwners = [
+        { id: 'nick', name: 'Nick', teamName: 'Nick' },
+        { id: 'chris', name: 'Chris', teamName: 'Chris' },
+        { id: 'andrew', name: 'Andrew', teamName: 'Andrew' },
+        { id: 'tyler', name: 'Tyler', teamName: 'Tyler' },
+        { id: 'scott', name: 'Scott', teamName: 'Scott' }
+      ];
+      function toast(msg) {
+        var el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(function(){ el.classList.remove('show'); }, 2600);
+      }
+      function restoreTeamsToStorage() {
+        try {
+          var key = 'custom-hockey-pool-v25-clean';
+          var raw = localStorage.getItem(key);
+          var state = raw ? JSON.parse(raw) : {};
+          state.owners = finalOwners.slice();
+          state.rosters = state.rosters || {};
+          finalOwners.forEach(function(o){ state.rosters[o.id] = Array.isArray(state.rosters[o.id]) ? state.rosters[o.id] : []; });
+          state.draftBoard = state.draftBoard || {};
+          state.draftBoard.currentPick = state.draftBoard.currentPick || 1;
+          state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
+          state.draftBoard.draftOrder = finalOwners.map(function(o){ return o.id; });
+          state.draftBoard.lotteryResult = [];
+          state.draftBoard.lotteryRunNumber = 0;
+          localStorage.setItem(key, JSON.stringify(state));
+          return true;
+        } catch (e) {
+          console.error(e);
+          return false;
+        }
+      }
+      function paintTeamsIfEmpty() {
+        var list = document.getElementById('teamManagerList');
+        if (!list || list.children.length) return;
+        list.innerHTML = finalOwners.map(function(o){
+          return '<div class="mini-list-row roster-manager-row team-manager-row"><div><strong>' + o.teamName + '</strong><div class="meta">' + o.name + ' • restored owner</div></div><span class="badge">FINAL OWNER</span></div>';
+        }).join('');
+        var select = document.getElementById('removeOwnerSelect');
+        if (select) select.innerHTML = finalOwners.map(function(o){ return '<option value="' + o.id + '">' + o.teamName + ' — 0 players</option>'; }).join('');
+      }
+      document.addEventListener('click', function(e){
+        var btn = e.target.closest && e.target.closest('#restoreFinalOwnersBtn, #loadSampleOwnersBtn');
+        if (!btn) return;
+        var ok = restoreTeamsToStorage();
+        paintTeamsIfEmpty();
+        toast(ok ? 'Final five teams restored. Refreshing…' : 'Could not restore teams.');
+        if (ok) setTimeout(function(){ location.reload(); }, 700);
+      }, true);
+      window.addEventListener('load', function(){
+        // If the visible list is blank after load, paint it so you are not staring at an empty Teams tab.
+        setTimeout(paintTeamsIfEmpty, 1200);
+      });
     })();
   </script>
 

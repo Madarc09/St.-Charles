@@ -24,20 +24,46 @@ const FINAL_OWNERS = [
 
 function forceRestoreFinalOwnersIfEmpty() {
   if (!state) return;
-  if (!Array.isArray(state.owners) || state.owners.length === 0) {
+
+  const hasUsableOwners = Array.isArray(state.owners) && state.owners.length > 0;
+  if (!hasUsableOwners) {
     state.owners = structuredClone(FINAL_OWNERS);
   }
+
+  // Never allow the five official owners to disappear.
+  state.owners = Array.isArray(state.owners) ? state.owners : [];
+  FINAL_OWNERS.forEach(finalOwner => {
+    if (!state.owners.some(o => String(o.id) === String(finalOwner.id))) {
+      state.owners.push(structuredClone(finalOwner));
+    }
+  });
+
   state.rosters = state.rosters || {};
   state.owners.forEach(owner => {
-    state.rosters[owner.id] = Array.isArray(state.rosters[owner.id]) ? state.rosters[owner.id] : [];
+    if (!Array.isArray(state.rosters[owner.id])) state.rosters[owner.id] = [];
   });
+
   state.draftBoard = state.draftBoard || {};
   state.draftBoard.picks = Array.isArray(state.draftBoard.picks) ? state.draftBoard.picks : [];
   state.draftBoard.draftOrder = Array.isArray(state.draftBoard.draftOrder) ? state.draftBoard.draftOrder : [];
+
+  // If draft order is empty, start with the final five.
+  if (!state.draftBoard.draftOrder.length) {
+    state.draftBoard.draftOrder = FINAL_OWNERS.map(o => o.id);
+  }
+
+  // Ensure every owner is in the draft order at least once.
   state.owners.forEach(owner => {
     if (!state.draftBoard.draftOrder.some(id => String(id) === String(owner.id))) {
       state.draftBoard.draftOrder.push(owner.id);
     }
+  });
+
+  // Remove lottery results that refer to vanished owners.
+  state.draftBoard.lotteryResult = Array.isArray(state.draftBoard.lotteryResult) ? state.draftBoard.lotteryResult : [];
+  state.draftBoard.lotteryResult = state.draftBoard.lotteryResult.filter(r => {
+    const id = typeof r === 'string' ? r : r.id;
+    return state.owners.some(o => String(o.id) === String(id));
   });
 }
 
@@ -1099,6 +1125,7 @@ function loadSampleOwners(showToast = true) {
 }
 
 function renderTeamManager() {
+  forceRestoreFinalOwnersIfEmpty();
   const el = $('#teamManagerList');
   if (!el) return;
   const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
