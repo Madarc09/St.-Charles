@@ -1,16 +1,17 @@
-# Custom Hockey Pool v1
+# Custom Hockey Pool v2
 
 A Vercel-ready custom NHL pool website for a private friends league.
 
 ## What it does
 
-- Draft room with snake draft support
+- Draft board showing the top 75 available players with sortable stat columns
 - Editable scoring rules
 - Editable roster sizes
 - Owner/team setup
 - Rosters
 - Leaderboard
 - NHL stats pull using free public NHL endpoints
+- Add-to-roster pop-up so any selected player can be assigned to the correct owner
 - Manual player add option
 - Export/import full pool backup as JSON
 - Vercel serverless proxy route at `/api/nhl` to reduce browser/CORS problems
@@ -21,7 +22,7 @@ A Vercel-ready custom NHL pool website for a private friends league.
 2. Upload all files from this folder into the repo root.
 3. Go to Vercel and import the GitHub repo.
 4. Deploy with the default settings.
-5. Open the deployed site and click **Pull NHL Stats**.
+5. Open the deployed site, click **Pull NHL Stats**, then use **Draft Room** to sort the board and assign players to rosters.
 
 ## Important
 

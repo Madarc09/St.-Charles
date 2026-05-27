@@ -57,40 +57,50 @@
       <div class="section-head">
         <div>
           <p class="eyebrow">Draft Room</p>
-          <h2>Build rosters pick by pick</h2>
+          <h2>Available player draft board</h2>
+          <p class="muted">Pull NHL stats, sort the top available players, then add any player to the roster you choose.</p>
         </div>
         <div class="actions">
+          <button class="primary" id="refreshStatsBtnDraft">Pull NHL Stats</button>
           <button id="undoPickBtn">Undo Last Pick</button>
           <button class="danger" id="resetDraftBtn">Reset Draft</button>
         </div>
       </div>
+
       <div class="grid two wide-left">
         <article class="card">
-          <div class="draft-status">
+          <div class="draft-status draft-board-status">
             <div>
-              <span class="label">On the clock</span>
-              <h3 id="onClock">—</h3>
+              <span class="label">Drafted Players</span>
+              <h3 id="draftedCount">0</h3>
             </div>
             <div>
-              <span class="label">Pick</span>
-              <h3 id="pickNumber">1</h3>
+              <span class="label">Available Board</span>
+              <h3>Top <span id="draftBoardLimit">75</span></h3>
             </div>
           </div>
-          <div class="search-row">
-            <input id="playerSearch" placeholder="Search NHL player after stats load…" />
-            <select id="positionFilter">
-              <option value="all">All</option>
+          <div class="draft-toolbar">
+            <select id="draftPositionFilter">
+              <option value="all">All Positions</option>
               <option value="F">Forwards</option>
               <option value="D">Defense</option>
               <option value="G">Goalies</option>
             </select>
+            <select id="draftSortSelect">
+              <option value="fantasyPoints">Sort by Fantasy Pts</option>
+              <option value="points">Sort by NHL Pts</option>
+              <option value="goals">Sort by Goals</option>
+              <option value="assists">Sort by Assists</option>
+              <option value="gamesPlayed">Sort by GP</option>
+              <option value="name">Sort by Name</option>
+            </select>
           </div>
-          <div class="hint">Tip: pull NHL stats first, then search and draft. You can also add a manual player.</div>
-          <div id="playerResults" class="list"></div>
+          <div class="hint">Click a stat header to sort. Drafted players disappear from this board and move to their selected roster.</div>
+          <div id="draftBoardTable" class="table-wrap draft-board-wrap"></div>
         </article>
         <article class="card">
           <h3>Add Manual Player</h3>
-          <p class="muted">Use this if a player does not appear in the free NHL feed yet.</p>
+          <p class="muted">Use this if a player does not appear in the free NHL feed yet. Manual players appear on the draft board with zero stats until updated.</p>
           <div class="form-grid">
             <input id="manualName" placeholder="Player name" />
             <select id="manualPos">
@@ -99,10 +109,11 @@
               <option value="G">Goalie</option>
             </select>
             <input id="manualTeam" placeholder="NHL team abbreviation" />
-            <button id="addManualPlayerBtn">Add to Available Players</button>
+            <button id="addManualPlayerBtn">Add to Draft Board</button>
           </div>
           <hr />
           <h3>Draft Order</h3>
+          <p class="muted">This is kept for reference, but the new draft board lets you assign a selected player to any roster.</p>
           <div id="draftOrderEditor"></div>
         </article>
       </div>
@@ -111,6 +122,7 @@
         <div id="pickHistory" class="table-wrap"></div>
       </article>
     </section>
+
 
     <section id="rosters" class="panel">
       <div class="section-head">
@@ -207,6 +219,20 @@
     </section>
   </main>
 
+
+  <div id="assignModal" class="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="assignModalTitle">
+      <div class="section-head modal-head">
+        <div>
+          <p class="eyebrow">Add to Roster</p>
+          <h2 id="assignModalTitle">Assign Player</h2>
+          <p class="muted" id="assignPlayerMeta">Choose which roster gets this player.</p>
+        </div>
+        <button id="closeAssignModal" class="small-btn">Close</button>
+      </div>
+      <div id="assignRosterOptions" class="assign-options"></div>
+    </div>
+  </div>
   <div id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="assets/js/app.js"></script>
 </body>

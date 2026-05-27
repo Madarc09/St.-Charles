@@ -7,6 +7,8 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 let defaults = {};
 let state = null;
+let draftSort = { key: 'fantasyPoints', direction: 'desc' };
+let pendingAssignPlayerId = null;
 
 async function loadJson(path, fallback) {
   try {
@@ -69,9 +71,11 @@ function toast(msg) {
 function bindEvents() {
   $$('.tab').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
   $$('[data-tab-jump]').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tabJump)));
-  ['#refreshStatsBtn', '#refreshStatsBtn2', '#refreshStatsBtn3'].forEach(sel => $(sel)?.addEventListener('click', refreshStats));
-  $('#playerSearch').addEventListener('input', renderPlayerResults);
-  $('#positionFilter').addEventListener('change', renderPlayerResults);
+  ['#refreshStatsBtn', '#refreshStatsBtn2', '#refreshStatsBtn3', '#refreshStatsBtnDraft'].forEach(sel => $(sel)?.addEventListener('click', refreshStats));
+  $('#draftPositionFilter')?.addEventListener('change', renderDraftBoard);
+  $('#draftSortSelect')?.addEventListener('change', () => { draftSort = { key: $('#draftSortSelect').value, direction: draftSort.direction || 'desc' }; renderDraftBoard(); });
+  $('#closeAssignModal')?.addEventListener('click', closeAssignModal);
+  $('#assignModal')?.addEventListener('click', (e) => { if (e.target.id === 'assignModal') closeAssignModal(); });
   $('#statsSearch').addEventListener('input', renderPlayersTable);
   $('#saveRulesBtn').addEventListener('click', saveRulesFromForm);
   $('#resetRulesBtn').addEventListener('click', () => { state.settings = structuredClone(defaults.settings); save(); renderAll(); toast('Rules reset to defaults.'); });
@@ -110,7 +114,7 @@ async function refreshStats() {
 }
 
 function setRefreshDisabled(disabled) {
-  ['#refreshStatsBtn', '#refreshStatsBtn2', '#refreshStatsBtn3'].forEach(sel => { const b = $(sel); if (b) b.disabled = disabled; });
+  ['#refreshStatsBtn', '#refreshStatsBtn2', '#refreshStatsBtn3', '#refreshStatsBtnDraft'].forEach(sel => { const b = $(sel); if (b) b.disabled = disabled; });
 }
 
 function renderAll() {
@@ -153,11 +157,8 @@ function currentOwnerId() {
 }
 
 function renderDraft() {
-  const ownerId = currentOwnerId();
-  const owner = state.owners.find(o => o.id === ownerId);
-  $('#onClock').textContent = owner ? `${owner.name} (${owner.teamName})` : 'Draft complete';
-  $('#pickNumber').textContent = state.draftBoard.picks.length + 1;
-  renderPlayerResults();
+  $('#draftedCount').textContent = state.draftBoard.picks.length;
+  renderDraftBoard();
   renderDraftOrderEditor();
   renderPickHistory();
 }
@@ -170,36 +171,104 @@ function playerPool() {
   return [...map.values()];
 }
 
-function renderPlayerResults() {
-  const q = ($('#playerSearch').value || '').trim().toLowerCase();
-  const pos = $('#positionFilter').value;
-  const list = playerPool()
-    .filter(p => !p.drafted)
-    .filter(p => !q || p.name.toLowerCase().includes(q) || String(p.nhlTeam || '').toLowerCase().includes(q))
-    .filter(p => pos === 'all' || (pos === 'F' ? ['C','L','R','F','LW','RW'].includes(p.position) : p.position === pos))
-    .slice(0, 80);
-  $('#playerResults').innerHTML = list.length ? list.map(p => `
-    <div class="row-card">
-      <div><strong>${escapeHtml(p.name)}</strong><div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} • ${p.type || 'skater'} • ${fantasyPoints(p, state.settings.scoring)} pts</div></div>
-      <button class="small-btn primary" data-draft-player="${escapeHtml(String(p.id))}">Draft</button>
-    </div>`).join('') : `<p class="muted">No available players found. Pull stats or add a manual player.</p>`;
-  $$('[data-draft-player]').forEach(btn => btn.addEventListener('click', () => draftPlayer(btn.dataset.draftPlayer)));
+function positionMatches(p, pos) {
+  if (pos === 'all') return true;
+  if (pos === 'F') return ['C','L','R','F','LW','RW'].includes(p.position);
+  return p.position === pos;
 }
 
-function draftPlayer(playerId) {
-  const ownerId = currentOwnerId();
-  if (!ownerId) return toast('Draft is already complete.');
-  const player = playerPool().find(p => String(p.id) === String(playerId));
-  if (!player) return toast('Player not found.');
+function draftValue(p, key) {
+  if (key === 'fantasyPoints') return fantasyPoints(p, state.settings.scoring);
+  if (key === 'name') return String(p.name || '').toLowerCase();
+  return Number(p[key] ?? 0);
+}
+
+function availableDraftBoardPlayers() {
+  const pos = $('#draftPositionFilter')?.value || 'all';
+  const key = draftSort.key || $('#draftSortSelect')?.value || 'fantasyPoints';
+  const dir = draftSort.direction === 'asc' ? 1 : -1;
+  return playerPool()
+    .filter(p => !p.drafted)
+    .filter(p => positionMatches(p, pos))
+    .sort((a, b) => {
+      const av = draftValue(a, key);
+      const bv = draftValue(b, key);
+      if (typeof av === 'string' || typeof bv === 'string') return String(av).localeCompare(String(bv)) * dir;
+      return (av - bv) * dir || String(a.name).localeCompare(String(b.name));
+    })
+    .slice(0, 75);
+}
+
+function renderDraftBoard() {
+  const list = availableDraftBoardPlayers();
+  const sortArrow = (key) => draftSort.key === key ? (draftSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
+  const header = (label, key) => `<button class="sort-head" data-draft-sort="${key}">${label}${sortArrow(key)}</button>`;
+  const rows = list.map((p, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td><strong>${escapeHtml(p.name)}</strong><div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} ${p.manual ? '• Manual' : ''}</div></td>
+      <td>${p.gamesPlayed || 0}</td>
+      <td>${p.goals ?? 0}</td>
+      <td>${p.assists ?? 0}</td>
+      <td>${p.points ?? 0}</td>
+      <td>${p.goalieWins ?? ''}</td>
+      <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
+      <td><button class="small-btn primary" data-open-assign="${escapeHtml(String(p.id))}">Add to Roster</button></td>
+    </tr>`).join('');
+  $('#draftBoardTable').innerHTML = `<table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')}</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th><th>Draft</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No available players yet. Pull NHL stats or add a manual player.</td></tr>'}</tbody></table>`;
+  $$('[data-draft-sort]').forEach(btn => btn.addEventListener('click', () => changeDraftSort(btn.dataset.draftSort)));
+  $$('[data-open-assign]').forEach(btn => btn.addEventListener('click', () => openAssignModal(btn.dataset.openAssign)));
+}
+
+function changeDraftSort(key) {
+  if (draftSort.key === key) draftSort.direction = draftSort.direction === 'asc' ? 'desc' : 'asc';
+  else draftSort = { key, direction: key === 'name' ? 'asc' : 'desc' };
+  const select = $('#draftSortSelect');
+  if (select) select.value = key;
+  renderDraftBoard();
+}
+
+function openAssignModal(playerId) {
+  const player = playerPool().find(p => String(p.id) === String(playerId) && !p.drafted);
+  if (!player) return toast('That player is no longer available.');
+  pendingAssignPlayerId = String(playerId);
+  $('#assignModalTitle').textContent = player.name;
+  $('#assignPlayerMeta').textContent = `${player.position || '—'} • ${player.nhlTeam || '—'} • ${fantasyPoints(player, state.settings.scoring)} fantasy pts`;
+  $('#assignRosterOptions').innerHTML = state.owners.map(owner => {
+    const count = (state.rosters[owner.id] || []).length;
+    const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
+    const full = count >= limit;
+    return `<button class="assign-option ${full ? 'disabled' : ''}" data-assign-owner="${owner.id}" ${full ? 'disabled' : ''}>
+      <strong>${escapeHtml(owner.teamName)}</strong>
+      <span>${escapeHtml(owner.name)} • ${count}/${limit} players</span>
+    </button>`;
+  }).join('');
+  $$('[data-assign-owner]').forEach(btn => btn.addEventListener('click', () => assignPlayerToOwner(btn.dataset.assignOwner)));
+  $('#assignModal').classList.add('show');
+  $('#assignModal').setAttribute('aria-hidden', 'false');
+}
+
+function closeAssignModal() {
+  pendingAssignPlayerId = null;
+  $('#assignModal')?.classList.remove('show');
+  $('#assignModal')?.setAttribute('aria-hidden', 'true');
+}
+
+function assignPlayerToOwner(ownerId) {
+  if (!pendingAssignPlayerId) return closeAssignModal();
+  const player = playerPool().find(p => String(p.id) === String(pendingAssignPlayerId) && !p.drafted);
+  const owner = state.owners.find(o => o.id === ownerId);
+  if (!player || !owner) return toast('Player or owner not found.');
   const rosterLimit = Number(state.settings.rosterRules?.totalRosterSize || 99);
-  if ((state.rosters[ownerId] || []).length >= rosterLimit) return toast('That owner is already at the roster limit.');
+  if ((state.rosters[ownerId] || []).length >= rosterLimit) return toast('That roster is already full.');
   const pick = { pick: state.draftBoard.picks.length + 1, ownerId, player: minimalPlayer(player), timestamp: new Date().toISOString() };
   state.draftBoard.picks.push(pick);
   state.rosters[ownerId] = state.rosters[ownerId] || [];
   state.rosters[ownerId].push(minimalPlayer(player));
+  closeAssignModal();
   save();
   renderAll();
-  toast(`Drafted ${player.name}.`);
+  toast(`Added ${player.name} to ${owner.teamName}.`);
 }
 
 function minimalPlayer(p) {
