@@ -3953,16 +3953,30 @@ body.lottery-running { overflow: hidden; }
 }
 
 
-/* v36 player board restore */
-#draftBoardTable{
-  min-height:180px;
+/* v37 real NHL player board */
+.real-nhl-loading,
+.real-nhl-error{
+  padding:22px;
+  border:1px solid rgba(245,195,91,.38);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(11,31,61,.82),rgba(0,0,0,.35));
+  display:grid;
+  gap:10px;
+  color:#f2f6ff;
 }
-#draftBoardTable .draft-table{
-  width:100%;
+.real-nhl-loading strong,
+.real-nhl-error strong{
+  color:#f5c35b;
+  font-size:1.05rem;
 }
-#draftBoardTable .draft-player-btn{
+.real-nhl-loading span,
+.real-nhl-error span{
+  color:#cbd7ea;
+}
+.draft-table th,
+.draft-table td{
+  vertical-align:middle;
+}
+.draft-table .sort-head{
   white-space:nowrap;
-}
-#draftBoardTable .active-draft-banner{
-  margin-bottom:10px;
 }

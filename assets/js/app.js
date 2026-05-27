@@ -194,11 +194,12 @@ function setDraftRoomView(view) {
   } else {
     draftRoomView = 'info';
   }
-  ensureDemoPlayersIfEmpty();
   renderDraftRooms();
   renderDraftBoard();
-  save();
-  if (draftRoomView === 'board') setTimeout(() => $('#draftBoardPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  if (draftRoomView === 'board') {
+    ensureRealNhlPlayersForDraft();
+    setTimeout(() => $('#draftBoardPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  }
 }
 
 function openOldManModal() {
@@ -347,66 +348,61 @@ function currentOwnerId() {
 }
 
 
-function demoDraftPlayers() {
-  return [
-    ['demo-1','Connor McDavid','C','EDM',82,64,89,153],
-    ['demo-2','Nathan MacKinnon','C','COL',82,51,89,140],
-    ['demo-3','Nikita Kucherov','R','TBL',81,44,100,144],
-    ['demo-4','Auston Matthews','C','TOR',81,69,38,107],
-    ['demo-5','David Pastrnak','R','BOS',82,47,63,110],
-    ['demo-6','Leon Draisaitl','C','EDM',81,41,65,106],
-    ['demo-7','Mikko Rantanen','R','COL',80,42,62,104],
-    ['demo-8','Artemi Panarin','L','NYR',82,49,71,120],
-    ['demo-9','Cale Makar','D','COL',77,21,69,90],
-    ['demo-10','Quinn Hughes','D','VAN',82,17,75,92],
-    ['demo-11','William Nylander','R','TOR',82,40,58,98],
-    ['demo-12','Mitch Marner','R','TOR',69,26,59,85],
-    ['demo-13','Brady Tkachuk','L','OTT',81,37,37,74],
-    ['demo-14','Jack Hughes','C','NJD',62,27,47,74],
-    ['demo-15','Sidney Crosby','C','PIT',82,42,52,94],
-    ['demo-16','Igor Shesterkin','G','NYR',55,0,0,0,36,4,1400,120],
-    ['demo-17','Connor Hellebuyck','G','WPG',60,0,0,0,37,5,1600,125],
-    ['demo-18','Jeremy Swayman','G','BOS',44,0,0,0,25,3,1200,100],
-    ['demo-19','Andrei Vasilevskiy','G','TBL',52,0,0,0,30,2,1450,135],
-    ['demo-20','Jake Oettinger','G','DAL',54,0,0,0,35,3,1350,120],
-    ['demo-21','Auston Matthews 2','C','TOR',81,55,45,100],
-    ['demo-22','Elias Pettersson','C','VAN',82,34,55,89],
-    ['demo-23','David Rantanen','R','COL',82,39,52,91],
-    ['demo-24','Adam Fox','D','NYR',75,17,55,72],
-    ['demo-25','Roman Josi','D','NSH',82,23,62,85],
-    ['demo-26','Alex Ovechkin','L','WSH',79,42,24,66],
-    ['demo-27','Kirill Kaprizov','L','MIN',75,45,48,93],
-    ['demo-28','Jack Eichel','C','VGK',73,31,49,80],
-    ['demo-29','Mika Zibanejad','C','NYR',81,29,48,77],
-    ['demo-30','Roope Hintz','C','DAL',80,31,43,74]
-  ].map(row => {
-    const isGoalie = row[2] === 'G';
-    return {
-      id: row[0], name: row[1], position: row[2], nhlTeam: row[3], type: isGoalie ? 'goalie' : 'skater',
-      gamesPlayed: row[4], goals: row[5], assists: row[6], points: row[7],
-      goalieWins: row[8] || 0, goalieShutouts: row[9] || 0, goalieSaves: row[10] || 0, goalieGoalsAgainst: row[11] || 0,
-      manual: true, demo: true
-    };
-  });
+let realNhlDraftLoadPromise = null;
+
+function hasRealNhlPlayers() {
+  return Array.isArray(state?.stats?.players) && state.stats.players.length > 0 && state.stats.source !== 'demo-board' && state.stats.source !== 'auto-demo-board';
 }
 
-function ensureDemoPlayersIfEmpty() {
-  state.stats = state.stats && typeof state.stats === 'object' ? state.stats : { fetchedAt: null, players: [] };
-  state.stats.players = Array.isArray(state.stats.players) ? state.stats.players : [];
-  if (!state.stats.players.length && !state.manualPlayers?.length) {
-    state.stats = {
-      source: 'auto-demo-board',
-      fetchedAt: new Date().toISOString(),
-      seasonId: state.settings.seasonId,
-      gameTypeId: state.settings.gameTypeId || 2,
-      players: demoDraftPlayers()
-    };
+async function loadRealNhlPlayersForDraft(force = false) {
+  if (realNhlDraftLoadPromise) return realNhlDraftLoadPromise;
+  if (!force && hasRealNhlPlayers()) return state.stats;
+
+  const target = $('#draftBoardTable');
+  if (target) {
+    target.innerHTML = `
+      <div class="real-nhl-loading">
+        <strong>Pulling real NHL player stats…</strong>
+        <span>Loading Goals, Assists, Points, and Fantasy Points from the NHL API.</span>
+      </div>`;
   }
+
+  realNhlDraftLoadPromise = (async () => {
+    try {
+      const data = await fetchNhlStats(state.settings.seasonId, state.settings.gameTypeId || 2);
+      state.stats = data;
+      state.settings.lastUpdated = data.fetchedAt;
+      save();
+      renderAll();
+      toast(`Loaded ${data.players.length} real NHL players.`);
+      return data;
+    } catch (error) {
+      console.error(error);
+      if (target) {
+        target.innerHTML = `
+          <div class="real-nhl-error">
+            <strong>NHL API pull failed.</strong>
+            <span>Try the Pull Real NHL Players button again after deploy/refresh.</span>
+            <button type="button" class="primary" id="retryRealNhlPullBtn">Retry NHL Pull</button>
+          </div>`;
+        $('#retryRealNhlPullBtn')?.addEventListener('click', () => loadRealNhlPlayersForDraft(true));
+      }
+      toast('NHL API pull failed. No demo players were loaded.');
+      return null;
+    } finally {
+      realNhlDraftLoadPromise = null;
+    }
+  })();
+
+  return realNhlDraftLoadPromise;
+}
+
+function ensureRealNhlPlayersForDraft() {
+  if (!hasRealNhlPlayers()) loadRealNhlPlayersForDraft(false);
 }
 
 
 function renderDraft() {
-  ensureDemoPlayersIfEmpty();
   $('#draftedCount').textContent = state.draftBoard.picks.length;
   renderDraftRooms();
   renderDraftBoard();
@@ -452,9 +448,20 @@ function availableDraftBoardPlayers() {
 }
 
 function renderDraftBoard() {
-  ensureDemoPlayersIfEmpty();
   const tableTarget = $('#draftBoardTable');
   if (!tableTarget) return;
+
+  if (!hasRealNhlPlayers()) {
+    tableTarget.innerHTML = `
+      <div class="real-nhl-loading">
+        <strong>No real NHL stats loaded yet.</strong>
+        <span>Click Pull Real NHL Players, or wait — the draft room will try the NHL API automatically.</span>
+        <button type="button" class="primary" id="inlineRealNhlPullBtn">Pull Real NHL Players</button>
+      </div>`;
+    $('#inlineRealNhlPullBtn')?.addEventListener('click', () => loadRealNhlPlayersForDraft(true));
+    return;
+  }
+
   const list = availableDraftBoardPlayers();
   const current = activeDraftOwner();
   const sortArrow = (key) => draftSort.key === key ? (draftSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
@@ -467,7 +474,7 @@ function renderDraftBoard() {
         <div class="player-draft-line compact-player-line">
           <div>
             <strong>${escapeHtml(p.name)}</strong>
-            <div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} ${p.manual ? '• Manual' : ''}</div>
+            <div class="meta">${p.position || '—'} • ${p.nhlTeam || '—'} • Real NHL API</div>
           </div>
           ${draftButton(p)}
         </div>
@@ -476,16 +483,24 @@ function renderDraftBoard() {
       <td>${p.goals ?? 0}</td>
       <td>${p.assists ?? 0}</td>
       <td>${p.points ?? 0}</td>
-      <td>${p.goalieWins ?? ''}</td>
       <td><strong>${fantasyPoints(p, state.settings.scoring)}</strong></td>
     </tr>`).join('');
   const chosenText = current ? `Drafting for ${escapeHtml(current.teamName)}` : 'Choose which old man you are before drafting';
   tableTarget.innerHTML = `
     <div class="active-draft-banner">${chosenText}</div>
-    <table class="draft-table"><thead><tr><th>#</th><th>${header('Player','name')}</th><th>${header('GP','gamesPlayed')}</th><th>${header('G','goals')}</th><th>${header('A','assists')}</th><th>${header('PTS','points')}</th><th>${header('W','goalieWins')}</th><th>${header('Fantasy','fantasyPoints')}</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No available players yet. Pull NHL stats or load demo players.</td></tr>'}</tbody></table>`;
+    <table class="draft-table"><thead><tr>
+      <th>#</th>
+      <th>${header('Player','name')}</th>
+      <th>${header('GP','gamesPlayed')}</th>
+      <th>${header('Goals','goals')}</th>
+      <th>${header('Assists','assists')}</th>
+      <th>${header('Pts','points')}</th>
+      <th>${header('Fantasy Pts','fantasyPoints')}</th>
+    </tr></thead><tbody>${rows || '<tr><td colspan="7">No available real NHL players found. Try Pull Real NHL Players again.</td></tr>'}</tbody></table>`;
   $$('[data-draft-sort]').forEach(btn => btn.addEventListener('click', () => changeDraftSort(btn.dataset.draftSort)));
   $$('[data-draft-player]').forEach(btn => btn.addEventListener('click', () => draftPlayerForActiveOwner(btn.dataset.draftPlayer)));
 }
+
 
 function changeDraftSort(key) {
   if (draftSort.key === key) draftSort.direction = draftSort.direction === 'asc' ? 'desc' : 'asc';
@@ -557,7 +572,21 @@ function assignPlayerToOwner(ownerId, directPlayerId = null) {
 }
 
 function minimalPlayer(p) {
-  return { id: String(p.id), name: p.name, position: p.position, nhlTeam: p.nhlTeam, type: p.type || (p.position === 'G' ? 'goalie' : 'skater') };
+  return {
+    id: String(p.id),
+    name: p.name,
+    position: p.position,
+    nhlTeam: p.nhlTeam,
+    type: p.type || (p.position === 'G' ? 'goalie' : 'skater'),
+    gamesPlayed: Number(p.gamesPlayed || 0),
+    goals: Number(p.goals || 0),
+    assists: Number(p.assists || 0),
+    points: Number(p.points || 0),
+    goalieWins: Number(p.goalieWins || 0),
+    goalieShutouts: Number(p.goalieShutouts || 0),
+    goalieSaves: Number(p.goalieSaves || 0),
+    goalieGoalsAgainst: Number(p.goalieGoalsAgainst || 0)
+  };
 }
 
 function undoPick() {
@@ -1202,11 +1231,10 @@ function renderTeamManager() {
   }).join('') || '<p class="muted">No rosters yet.</p>';
 }
 
-function loadDemoPlayers() {
-  state.stats = { source: 'demo-board', fetchedAt: new Date().toISOString(), seasonId: state.settings.seasonId, gameTypeId: state.settings.gameTypeId || 2, players: demoDraftPlayers() };
-  save();
-  renderAll();
-  toast('Demo player board loaded. You can test Draft now.');
+async function loadDemoPlayers() {
+  // Kept this function name only because the existing button uses this id.
+  // It now pulls real NHL API players, not demo players.
+  return loadRealNhlPlayersForDraft(true);
 }
 
 
