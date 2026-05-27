@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Custom Hockey Pool</title>
+  <title>Custom Hockey Pool Draft War Room</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <header class="hero">
     <div class="hero__glass">
-      <p class="eyebrow">Friends Pool • Draft • Stats • Rules</p>
+      <p class="eyebrow">Draft War Room • Friends Pool • NHL Stats</p>
       <h1 id="poolTitle">Custom Hockey Pool</h1>
-      <p class="sub">Run your own draft, edit scoring every season, pull free NHL stats, and export backups.</p>
+      <p class="sub">Build your own draft board, fill every roster, pull free NHL stats, and tune the scoring like a commissioner.</p>
       <div class="hero-actions">
         <button class="primary" data-tab-jump="draft">Open Draft Room</button>
         <button data-tab-jump="rules">Edit Rules</button>
@@ -113,13 +113,20 @@
             <button id="addManualPlayerBtn">Add to Draft Board</button>
           </div>
           <hr />
-          <h3>Test Rosters</h3>
-          <p class="muted">Create or reset sample rosters here so you can test the draft board right away.</p>
-          <div class="actions stack-sm">
+          <h3>Manage Rosters</h3>
+          <p class="muted">Create, test, or remove teams directly from the Draft Room.</p>
+          <div class="actions stack-sm roster-tools">
             <button id="addOwnerBtnDraft">Add Owner / Roster</button>
             <button id="loadSampleOwnersBtn">Load 8 Sample Rosters</button>
+            <div class="remove-team-box">
+              <label for="removeOwnerSelect">Remove team</label>
+              <div class="remove-team-row">
+                <select id="removeOwnerSelect"></select>
+                <button class="danger" id="removeOwnerBtnDraft">Remove Team</button>
+              </div>
+            </div>
           </div>
-          <div id="draftOwnerList" class="mini-list"></div>
+          <div id="draftOwnerList" class="mini-list roster-manager-list"></div>
           <hr />
           <h3>Draft Order</h3>
           <p class="muted">This is kept for reference, but the new draft board lets you assign a selected player to any roster.</p>

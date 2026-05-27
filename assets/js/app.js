@@ -89,6 +89,7 @@ function bindEvents() {
   $('#addOwnerBtn').addEventListener('click', addOwner);
   $('#addOwnerBtnDraft')?.addEventListener('click', addOwner);
   $('#loadSampleOwnersBtn')?.addEventListener('click', loadSampleOwners);
+  $('#removeOwnerBtnDraft')?.addEventListener('click', removeOwnerFromDraftRoom);
   $('#loadDemoPlayersBtn')?.addEventListener('click', loadDemoPlayers);
   $('#confirmAssignBtn')?.addEventListener('click', () => assignPlayerToOwner($('#assignOwnerSelect')?.value));
   $('#exportBtn').addEventListener('click', exportPool);
@@ -462,10 +463,51 @@ function renderDraftOwnerList() {
   const el = $('#draftOwnerList');
   if (!el) return;
   const limit = Number(state.settings.rosterRules?.totalRosterSize || 99);
+  const removeSelect = $('#removeOwnerSelect');
+  if (removeSelect) {
+    removeSelect.innerHTML = state.owners.map(owner => {
+      const count = (state.rosters[owner.id] || []).length;
+      return `<option value="${escapeHtml(owner.id)}">${escapeHtml(owner.teamName)} — ${count} players</option>`;
+    }).join('') || '<option value="">No teams available</option>';
+    removeSelect.disabled = !state.owners.length;
+  }
+  const removeBtn = $('#removeOwnerBtnDraft');
+  if (removeBtn) removeBtn.disabled = !state.owners.length;
+
   el.innerHTML = state.owners.map(owner => {
     const count = (state.rosters[owner.id] || []).length;
-    return `<div class="mini-list-row"><strong>${escapeHtml(owner.teamName)}</strong><span>${count}/${limit}</span></div>`;
+    return `<div class="mini-list-row roster-manager-row">
+      <div><strong>${escapeHtml(owner.teamName)}</strong><div class="meta">${escapeHtml(owner.name)} • ${count}/${limit} players</div></div>
+      <button class="small-btn danger" data-remove-owner-inline="${escapeHtml(owner.id)}">Remove</button>
+    </div>`;
   }).join('') || '<p class="muted">No rosters yet.</p>';
+  $$('[data-remove-owner-inline]').forEach(btn => btn.addEventListener('click', () => removeOwner(btn.dataset.removeOwnerInline)));
+}
+
+function removeOwnerFromDraftRoom() {
+  const ownerId = $('#removeOwnerSelect')?.value;
+  if (!ownerId) return toast('No team selected.');
+  removeOwner(ownerId);
+}
+
+function removeOwner(ownerId) {
+  const owner = state.owners.find(o => String(o.id) === String(ownerId));
+  if (!owner) return toast('Team not found.');
+  const rosterCount = (state.rosters[owner.id] || []).length;
+  const pickCount = state.draftBoard.picks.filter(p => String(p.ownerId) === String(owner.id)).length;
+  const warning = rosterCount || pickCount ? `
+
+This will also release ${rosterCount} roster player(s) back to the draft board and remove ${pickCount} pick history item(s).` : '';
+  if (!confirm(`Remove ${owner.teamName}?${warning}`)) return;
+  state.owners = state.owners.filter(o => String(o.id) !== String(owner.id));
+  delete state.rosters[owner.id];
+  state.draftBoard.draftOrder = (state.draftBoard.draftOrder || []).filter(id => String(id) !== String(owner.id));
+  state.draftBoard.picks = (state.draftBoard.picks || [])
+    .filter(pick => String(pick.ownerId) !== String(owner.id))
+    .map((pick, index) => ({ ...pick, pick: index + 1 }));
+  save();
+  renderAll();
+  toast(`${owner.teamName} removed.`);
 }
 
 function renderLeaderboard() {
