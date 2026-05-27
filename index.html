@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V48 NO ROSTER SCOPE ERRORS -->
+  <!-- V49 ROSTER NEEDS GLOBAL -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V48 NO ROSTER SCOPE ERRORS</div>
+        <div class="v46-build-marker">V49 ROSTER NEEDS GLOBAL</div>
         <div class="clean-entry-stack">
           <button id="cleanLotteryBtnV46" class="clean-enter-draft-btn lottery-entry-btn" type="button">DRAFT LOTTERY</button>
           <button id="cleanEnterDraftBtn" class="clean-enter-draft-btn" type="button">ENTER THE DRAFT</button>
@@ -337,6 +337,51 @@
     </div>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // V49: global-safe roster needs renderer. This prevents renderRosterNeeds scope errors.
+    window.__draftRosterLimits = { F: 6, D: 4, G: 2 };
+
+    window.__draftBucket = function(position) {
+      if (position === "G") return "G";
+      if (position === "D") return "D";
+      return "F";
+    };
+
+    window.renderRosterNeeds = function(draft, ownerId, ownerName) {
+      var panel = document.getElementById("cleanRosterNeedsPanel");
+      if (!panel) return;
+
+      if (!ownerId) {
+        panel.innerHTML = '<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 6 forwards, 4 defense, 2 goalies</span></div>';
+        return;
+      }
+
+      var counts = { F: 0, D: 0, G: 0 };
+      try {
+        var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
+        picks.forEach(function(p) {
+          if (String(p.ownerId) !== String(ownerId)) return;
+          var bucket = window.__draftBucket(p.player && p.player.position);
+          counts[bucket] = (counts[bucket] || 0) + 1;
+        });
+      } catch (e) {}
+
+      var limits = window.__draftRosterLimits;
+      var remF = Math.max(0, limits.F - (counts.F || 0));
+      var remD = Math.max(0, limits.D - (counts.D || 0));
+      var remG = Math.max(0, limits.G - (counts.G || 0));
+
+      panel.innerHTML =
+        '<div class="needs-title"><span class="eyebrow">Roster Needs</span><strong>' + (ownerName || ownerId) + '</strong></div>' +
+        '<div class="needs-grid">' +
+          '<div class="' + (remF === 0 ? 'filled' : '') + '"><span>Forwards needed</span><strong>' + remF + '</strong><em>' + (counts.F || 0) + '/6 drafted</em></div>' +
+          '<div class="' + (remD === 0 ? 'filled' : '') + '"><span>Defense needed</span><strong>' + remD + '</strong><em>' + (counts.D || 0) + '/4 drafted</em></div>' +
+          '<div class="' + (remG === 0 ? 'filled' : '') + '"><span>Goalies needed</span><strong>' + remG + '</strong><em>' + (counts.G || 0) + '/2 drafted</em></div>' +
+        '</div>';
+    };
+  </script>
+
   <script>
     // Tiny no-dependency tab fallback so navigation still works even if a module error happens.
     document.addEventListener('click', function (event) {
@@ -1752,7 +1797,7 @@ const OWNERS = [
       }
       function renderRoom() {
         updateCurrentPickUI();
-        renderRosterNeeds();
+        window.renderRosterNeeds(draft, activeOwnerId, owner(activeOwnerId)?.teamName || activeOwnerId);
         renderOrderStrip();
         const board = $("#cleanDraftBoard");
         if (!board) return;

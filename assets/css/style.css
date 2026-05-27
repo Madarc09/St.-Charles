@@ -4432,7 +4432,7 @@ body.lottery-running { overflow: hidden; }
 }
 
 
-/* V48 no roster scope errors build */
+/* V49 roster needs global build */
 .v46-build-marker{
   position:absolute;
   top:14px;
