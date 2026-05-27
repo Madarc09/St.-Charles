@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V55 TEAM GOALIES MOBILE CARDS -->
+  <!-- V56 TEAM GOALIES DEFINED -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen">
-        <div class="v46-build-marker">V55 TEAM GOALIES MOBILE CARDS</div>
+        <div class="v46-build-marker">V56 TEAM GOALIES DEFINED</div>
         <div class="clean-entry-stack clean-entry-stack-v51">
           <div class="draft-step-card enter-step-card">
             <div class="step-number">1</div>
@@ -347,6 +347,64 @@
     </div>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+
+
+  <script>
+    // V56: global-safe Team Goalies helper. Prevents buildTeamGoalies/teamBuildGoalies scope errors.
+    window.buildTeamGoalies = function(goalies) {
+      var byTeam = new Map();
+      (Array.isArray(goalies) ? goalies : []).forEach(function(g) {
+        var team = g.nhlTeam || g.teamAbbrev || g.team || "TEAM";
+        if (!byTeam.has(team)) {
+          byTeam.set(team, {
+            id: "TG-" + team,
+            name: team + " Team Goalies",
+            position: "TG",
+            nhlTeam: team,
+            gamesPlayed: 0,
+            goals: 0,
+            assists: 0,
+            points: 0,
+            goalieWins: 0,
+            goalieShutouts: 0,
+            saves: 0,
+            shotsAgainst: 0,
+            goalsAgainst: 0,
+            weightedGaa: 0,
+            weightedSavePct: 0,
+            type: "teamGoalie"
+          });
+        }
+
+        var t = byTeam.get(team);
+        var gp = Number(g.gamesPlayed || 0);
+        var saves = Number(g.saves || 0);
+        var shotsAgainst = Number(g.shotsAgainst || 0);
+        var goalsAgainst = Number(g.goalsAgainst || 0);
+        var savePct = Number(g.savePct || g.savePercentage || 0);
+        var gaa = Number(g.goalsAgainstAverage || g.gaa || 0);
+
+        t.gamesPlayed += gp;
+        t.goalieWins += Number(g.goalieWins || g.wins || 0);
+        t.goalieShutouts += Number(g.goalieShutouts || g.shutouts || 0);
+        t.saves += saves;
+        t.shotsAgainst += shotsAgainst;
+        t.goalsAgainst += goalsAgainst;
+        t.weightedGaa += gaa * gp;
+        t.weightedSavePct += savePct * gp;
+      });
+
+      return Array.from(byTeam.values()).map(function(t) {
+        t.savePct = t.shotsAgainst > 0 ? Number((t.saves / t.shotsAgainst).toFixed(3)) : Number((t.weightedSavePct / Math.max(1, t.gamesPlayed)).toFixed(3));
+        t.goalsAgainstAverage = t.gamesPlayed > 0 ? Number((t.weightedGaa / Math.max(1, t.gamesPlayed)).toFixed(2)) : 0;
+        t.fantasyPoints = Math.round((Number(t.goalieWins || 0) * 4) + (Number(t.goalieShutouts || 0) * 3));
+        return t;
+      });
+    };
+
+    // Alias for the typo/alternate wording if anything calls it.
+    window.teamBuildGoalies = window.buildTeamGoalies;
+  </script>
 
   <script>
     // V49: global-safe roster needs renderer. This prevents renderRosterNeeds scope errors.
@@ -1792,7 +1850,7 @@ const OWNERS = [
           }
           const map = new Map();
           (payload.skaters || []).map(normalizeSkater).filter(p => p.name).forEach(p => { p.fantasyPoints = fp(p); map.set(`${p.id}-${p.position}`, p); });
-          const teamGoalies = buildTeamGoalies((payload.goalies || []).map(normalizeGoalie).filter(p => p.name));
+          const teamGoalies = window.buildTeamGoalies((payload.goalies || []).map(normalizeGoalie).filter(p => p.name));
           teamGoalies.forEach(p => { p.fantasyPoints = fp(p); map.set(p.id, p); });
           players = [...map.values()];
           playersLoaded = players.length > 0;

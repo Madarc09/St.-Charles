@@ -5581,7 +5581,7 @@ body.lottery-running { overflow: hidden; }
 }
 
 
-/* V55 mobile polish + team goalie board */
+/* V56 team goalies defined + mobile polish */
 .player-headshot{
   display:none;
 }
