@@ -462,9 +462,30 @@
         stage.innerHTML =
           '<div class="pop-bg"></div>' +
           '<div class="pop-title"><span>2026</span><strong>HOCKEY POOL DRAFT LOTTERY</strong><small>Equal Odds • Locked Replay</small></div>' +
-          '<div class="pop-host"><div class="pop-bubble">I&#39;M GARY BETTMAN</div><div class="pop-penguin"></div></div>' +
+          '<div class="pop-host detailed-bettman">' +
+            '<div class="pop-bubble">I&#39;M GARY BETTMAN</div>' +
+            '<div class="bettman-head">' +
+              '<div class="bettman-grey-hair"></div>' +
+              '<div class="bettman-face"></div>' +
+              '<div class="bettman-brow left"></div>' +
+              '<div class="bettman-brow right"></div>' +
+              '<div class="bettman-eye left"></div>' +
+              '<div class="bettman-eye right"></div>' +
+              '<div class="bettman-long-nose"></div>' +
+              '<div class="bettman-mouth"></div>' +
+            '</div>' +
+            '<div class="penguin-body">' +
+              '<div class="penguin-belly"></div>' +
+              '<div class="penguin-jacket"></div>' +
+              '<div class="penguin-tie"></div>' +
+              '<div class="penguin-flipper left"></div>' +
+              '<div class="penguin-flipper right"></div>' +
+              '<div class="penguin-foot left"></div>' +
+              '<div class="penguin-foot right"></div>' +
+            '</div>' +
+          '</div>' +
           '<div class="pop-machine spin"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>' +
-          '<div class="pop-seats">' + orderOwners.map(function (o) { return '<div data-owner="' + esc(o.id) + '"><b>#@!*%</b><span>' + esc(o.teamName) + '</span></div>'; }).join("") + '</div>' +
+          '<div class="pop-seats">' + orderOwners.map(function (o) { return '<div class="manager-seat manager-' + esc(o.id) + '" data-owner="' + esc(o.id) + '"><b>#@!*%</b><div class="manager-head"></div><div class="manager-jersey"></div><div class="manager-chair"></div><span>' + esc(o.teamName) + '</span></div>'; }).join("") + '</div>' +
           '<div class="pop-card" id="popCard"><small>READY</small><strong>---</strong></div>' +
           '<ol class="pop-results" id="popResults"></ol>' +
           '<div class="pop-lower" id="popLower">WELCOME TO THE <span>HOCKEY POOL DRAFT LOTTERY</span></div>';

@@ -3172,3 +3172,351 @@ body.lottery-running { overflow: hidden; }
     top:-54px;
   }
 }
+
+
+/* v32 visibility fix + detailed manager jerseys */
+.pop-host.detailed-bettman{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:20%!important;
+  width:230px!important;
+  height:335px!important;
+  transform:translateX(-50%)!important;
+  z-index:60!important;
+  pointer-events:none;
+  overflow:visible!important;
+  animation:v32AnnouncerBob 1.1s ease-in-out infinite alternate!important;
+}
+@keyframes v32AnnouncerBob{
+  from{transform:translateX(-50%) translateY(0)!important}
+  to{transform:translateX(-50%) translateY(-5px)!important}
+}
+.pop-host.detailed-bettman *{
+  box-sizing:border-box;
+  visibility:visible!important;
+}
+.pop-host.detailed-bettman .pop-bubble{
+  display:block!important;
+  opacity:1!important;
+  z-index:80!important;
+  left:62%!important;
+  top:-72px!important;
+}
+.pop-host.detailed-bettman .bettman-head{
+  display:block!important;
+  position:absolute!important;
+  left:64px!important;
+  top:0!important;
+  width:102px!important;
+  height:118px!important;
+  z-index:75!important;
+  transform-origin:51px 75px!important;
+  animation:v32FastHeadShake .19s ease-in-out infinite alternate!important;
+}
+@keyframes v32FastHeadShake{
+  from{transform:rotate(-7deg) translateX(-2px)}
+  to{transform:rotate(7deg) translateX(2px)}
+}
+.pop-host.detailed-bettman .bettman-face{
+  display:block!important;
+  position:absolute!important;
+  left:10px!important;
+  top:23px!important;
+  width:82px!important;
+  height:92px!important;
+  border-radius:45% 45% 42% 42%!important;
+  background:linear-gradient(#f1c49c,#c9875e)!important;
+  border:4px solid #3b1b0f!important;
+  z-index:2!important;
+}
+.pop-host.detailed-bettman .bettman-grey-hair{
+  display:block!important;
+  position:absolute!important;
+  left:7px!important;
+  right:7px!important;
+  top:0!important;
+  height:48px!important;
+  border-radius:50% 50% 34% 34%!important;
+  background:linear-gradient(#c8ced6 0%, #8f98a2 50%, #59636e 100%)!important;
+  border:3px solid #3f4852!important;
+  z-index:8!important;
+}
+.pop-host.detailed-bettman .bettman-brow{
+  display:block!important;
+  position:absolute!important;
+  top:57px!important;
+  width:24px!important;
+  height:5px!important;
+  background:#493427!important;
+  border-radius:999px!important;
+  z-index:10!important;
+}
+.pop-host.detailed-bettman .bettman-brow.left{left:28px!important;transform:rotate(-12deg)!important}
+.pop-host.detailed-bettman .bettman-brow.right{right:28px!important;transform:rotate(12deg)!important}
+.pop-host.detailed-bettman .bettman-eye{
+  display:block!important;
+  position:absolute!important;
+  top:68px!important;
+  width:7px!important;
+  height:7px!important;
+  background:#050505!important;
+  border-radius:50%!important;
+  z-index:11!important;
+}
+.pop-host.detailed-bettman .bettman-eye.left{left:38px!important}
+.pop-host.detailed-bettman .bettman-eye.right{right:38px!important}
+.pop-host.detailed-bettman .bettman-long-nose{
+  display:block!important;
+  position:absolute!important;
+  left:49px!important;
+  top:65px!important;
+  width:30px!important;
+  height:37px!important;
+  background:linear-gradient(90deg,#c9875e 0%, #f1c49c 58%, #9d5d3d 100%)!important;
+  clip-path:polygon(0 0,72% 12%,100% 56%,34% 100%,10% 70%)!important;
+  border-radius:10px 15px 16px 12px!important;
+  box-shadow:2px 2px 0 rgba(60,25,10,.4)!important;
+  z-index:12!important;
+}
+.pop-host.detailed-bettman .bettman-mouth{
+  display:block!important;
+  position:absolute!important;
+  left:39px!important;
+  top:100px!important;
+  width:33px!important;
+  height:11px!important;
+  border-radius:50%!important;
+  z-index:12!important;
+  animation:v32MouthTalk .16s steps(2,end) infinite!important;
+}
+@keyframes v32MouthTalk{
+  0%,45%{height:9px;background:transparent;border-bottom:4px solid #5a2417}
+  46%,100%{height:15px;background:#3b130d;border:2px solid #5a2417}
+}
+.pop-host.detailed-bettman .penguin-body{
+  display:block!important;
+  position:absolute!important;
+  left:48px!important;
+  top:106px!important;
+  width:134px!important;
+  height:205px!important;
+  border-radius:50% 50% 43% 43%!important;
+  background:#05080d!important;
+  border:4px solid #010306!important;
+  z-index:50!important;
+}
+.pop-host.detailed-bettman .penguin-belly{
+  display:block!important;
+  position:absolute!important;
+  left:39px!important;
+  top:55px!important;
+  width:56px!important;
+  height:108px!important;
+  border-radius:50%!important;
+  background:#eef3f7!important;
+  z-index:2!important;
+}
+.pop-host.detailed-bettman .penguin-jacket{
+  display:block!important;
+  position:absolute!important;
+  left:17px!important;
+  right:17px!important;
+  top:18px!important;
+  height:124px!important;
+  border-radius:24px 24px 40px 40px!important;
+  background:linear-gradient(90deg,#0a2654,#2a65ad 48%,#061b3c)!important;
+  border:2px solid #03142c!important;
+  opacity:.95!important;
+  z-index:3!important;
+}
+.pop-host.detailed-bettman .penguin-tie{
+  display:block!important;
+  position:absolute!important;
+  left:59px!important;
+  top:30px!important;
+  width:16px!important;
+  height:94px!important;
+  background:repeating-linear-gradient(45deg,#122f58 0 6px,#55739d 6px 12px)!important;
+  clip-path:polygon(50% 0,100% 16%,66% 100%,34% 100%,0 16%)!important;
+  z-index:4!important;
+}
+.pop-host.detailed-bettman .penguin-flipper{
+  display:block!important;
+  position:absolute!important;
+  top:52px!important;
+  width:46px!important;
+  height:128px!important;
+  border-radius:50%!important;
+  background:#05080d!important;
+  border:4px solid #010306!important;
+  z-index:49!important;
+}
+.pop-host.detailed-bettman .penguin-flipper.left{left:-28px!important;transform:rotate(25deg)!important}
+.pop-host.detailed-bettman .penguin-flipper.right{
+  right:-28px!important;
+  transform:rotate(-24deg)!important;
+  animation:v32RightFlipper .43s ease-in-out infinite alternate!important;
+}
+@keyframes v32RightFlipper{
+  from{transform:rotate(-20deg) translateY(0)}
+  to{transform:rotate(-44deg) translateY(-9px)}
+}
+.pop-host.detailed-bettman .penguin-foot{
+  display:block!important;
+  position:absolute!important;
+  bottom:-9px!important;
+  width:54px!important;
+  height:24px!important;
+  border-radius:50%!important;
+  background:#e8a133!important;
+  border:3px solid #5a2e07!important;
+  z-index:55!important;
+}
+.pop-host.detailed-bettman .penguin-foot.left{left:18px!important;transform:rotate(-8deg)!important}
+.pop-host.detailed-bettman .penguin-foot.right{right:18px!important;transform:rotate(8deg)!important}
+
+/* Manager chairs / jerseys */
+.pop-seats{
+  align-items:end!important;
+}
+.pop-seats .manager-seat{
+  position:relative!important;
+  min-height:128px!important;
+  justify-content:flex-end!important;
+}
+.pop-seats .manager-seat:after{
+  display:none!important;
+}
+.pop-seats .manager-seat .manager-head{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:linear-gradient(#e8bb92,#b8754e);
+  border:2px solid #2a1208;
+  z-index:3;
+  box-shadow:0 2px 0 rgba(0,0,0,.35);
+}
+.pop-seats .manager-seat .manager-jersey{
+  position:relative;
+  width:48px;
+  height:58px;
+  border-radius:12px 12px 5px 5px;
+  background:linear-gradient(180deg,#1f5faf,#0b3470);
+  border:3px solid #06172e;
+  box-shadow:inset 0 8px 0 rgba(255,255,255,.14),0 8px 12px rgba(0,0,0,.35);
+}
+.pop-seats .manager-seat .manager-jersey:before{
+  content:"";
+  position:absolute;
+  left:6px;
+  right:6px;
+  top:17px;
+  height:7px;
+  background:#fff;
+  box-shadow:0 15px 0 #fff;
+}
+.pop-seats .manager-seat .manager-jersey:after{
+  content:"TOR";
+  position:absolute;
+  left:50%;
+  top:27px;
+  transform:translateX(-50%);
+  width:24px;
+  height:20px;
+  border-radius:50% 50% 45% 45%;
+  background:#fff;
+  color:#0b3470;
+  display:grid;
+  place-items:center;
+  font-family:Impact, Haettenschweiler, "Arial Narrow Bold";
+  font-size:9px;
+  letter-spacing:.02em;
+  clip-path:polygon(50% 0,61% 17%,79% 7%,75% 29%,96% 31%,78% 45%,90% 65%,66% 60%,50% 100%,34% 60%,10% 65%,22% 45%,4% 31%,25% 29%,21% 7%,39% 17%);
+}
+.pop-seats .manager-seat .manager-chair{
+  width:54px;
+  height:36px;
+  border-radius:9px 9px 3px 3px;
+  background:linear-gradient(#7e2e32,#2a0e12);
+  border:2px solid rgba(255,255,255,.18);
+  box-shadow:0 8px 16px rgba(0,0,0,.45);
+}
+.pop-seats .manager-seat span{
+  position:relative;
+  z-index:4;
+  font-size:12px!important;
+  text-shadow:0 2px 0 #000;
+}
+.pop-seats .manager-andrew .manager-jersey{
+  background:linear-gradient(180deg,#f27622,#e85f16 55%,#111 56%,#111 67%,#f27622 68%);
+  border-color:#1a0a05;
+}
+.pop-seats .manager-andrew .manager-jersey:before{
+  background:#fff;
+  box-shadow:0 15px 0 #fff;
+}
+.pop-seats .manager-andrew .manager-jersey:after{
+  content:"88";
+  clip-path:none;
+  border-radius:4px;
+  background:#fff;
+  color:#111;
+  font-size:14px;
+  top:28px;
+}
+.pop-seats .manager-andrew span::after{
+  content:" 88";
+  color:#fff;
+  font-weight:1000;
+}
+.pop-seats .manager-nick .manager-jersey:after{content:"13"}
+.pop-seats .manager-chris .manager-jersey:after{content:"16"}
+.pop-seats .manager-tyler .manager-jersey:after{content:"34"}
+.pop-seats .manager-scott .manager-jersey:after{content:"93"}
+.pop-seats .manager-nick .manager-jersey:after,
+.pop-seats .manager-chris .manager-jersey:after,
+.pop-seats .manager-tyler .manager-jersey:after,
+.pop-seats .manager-scott .manager-jersey:after{
+  clip-path:none;
+  border-radius:4px;
+  top:28px;
+  font-size:14px;
+}
+.pop-seats .manager-seat b{
+  bottom:112px!important;
+}
+
+@media(max-width:760px){
+  .pop-host.detailed-bettman{
+    width:155px!important;
+    height:230px!important;
+    bottom:32%!important;
+  }
+  .pop-host.detailed-bettman .bettman-head{
+    left:43px!important;
+    width:70px!important;
+    height:84px!important;
+  }
+  .pop-host.detailed-bettman .penguin-body{
+    left:31px!important;
+    top:78px!important;
+    width:92px!important;
+    height:138px!important;
+  }
+  .pop-host.detailed-bettman .penguin-flipper{
+    width:33px!important;
+    height:88px!important;
+  }
+  .pop-seats .manager-seat{
+    min-height:90px!important;
+  }
+  .pop-seats .manager-seat .manager-head{width:22px;height:22px}
+  .pop-seats .manager-seat .manager-jersey{width:32px;height:40px}
+  .pop-seats .manager-seat .manager-chair{width:38px;height:24px}
+  .pop-seats .manager-seat .manager-jersey:before{top:11px;height:4px;box-shadow:0 10px 0 #fff}
+  .pop-seats .manager-seat .manager-jersey:after{top:19px!important;font-size:10px!important;width:18px;height:14px}
+  .pop-seats .manager-seat b{bottom:78px!important}
+}
