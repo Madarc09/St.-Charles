@@ -10742,3 +10742,54 @@ header.site-header::before{
   background-position:center center!important;
 }
 /* END V104 */
+
+
+/* V105 mobile sticky roster needs only */
+@media(max-width:820px){
+  /*
+    Keep only the Roster Needs card sticky over the player list.
+    Draft order, current pick, buttons, and other header controls stay normal.
+  */
+  #cleanRosterNeeds,
+  .clean-roster-needs,
+  .roster-needs,
+  #rosterNeeds,
+  [data-roster-needs]{
+    position:sticky!important;
+    top:0!important;
+    z-index:60!important;
+    margin-top:0!important;
+    margin-bottom:8px!important;
+    backdrop-filter:blur(10px)!important;
+    -webkit-backdrop-filter:blur(10px)!important;
+    box-shadow:0 12px 24px rgba(0,0,0,.38)!important;
+  }
+
+  /* Make sure parent containers do not clip sticky positioning on mobile. */
+  #draft,
+  #draft.active,
+  #cleanDraftRoom,
+  .clean-draft-room,
+  .draft-room,
+  .panel.active{
+    overflow:visible!important;
+  }
+
+  /* Keep player list under the sticky roster card with enough breathing room. */
+  #cleanDraftBoard{
+    position:relative!important;
+    z-index:1!important;
+  }
+
+  /* If browser has a URL bar/notch offset, keep the sticky panel readable. */
+  @supports (top: env(safe-area-inset-top)){
+    #cleanRosterNeeds,
+    .clean-roster-needs,
+    .roster-needs,
+    #rosterNeeds,
+    [data-roster-needs]{
+      top:env(safe-area-inset-top)!important;
+    }
+  }
+}
+/* END V105 */
