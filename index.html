@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V84 CLEAN HOME ROSTER SOURCE -->
+  <!-- V85 ROSTERS DRAFTROOM CLEANUP -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -46,17 +46,19 @@
 
     
     <section id="draft" class="panel clean-live-draft-shell">
-      <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V84 CLEAN HOME ROSTER SOURCE</div>
-        <div class="clean-loading-card">
-          <strong>Opening Draft Room…</strong>
-          <span>If this does not open automatically, press below.</span>
-          <button id="cleanEnterDraftBtn" class="primary" type="button">ENTER THE DRAFT</button>
+<div id="cleanDraftRoom" class="clean-draft-room">
+
+        <div id="draftRoomLotteryTop" class="draft-room-lottery-top">
+          <div class="draft-room-lottery-head">
+            <span class="eyebrow">Draft Lottery</span>
+            <strong>Draft order</strong>
+          </div>
+          <div id="draftRoomLotteryOrder" class="draft-room-lottery-order">
+            Loading draft order…
+          </div>
         </div>
-      </div>
 
-      <div id="cleanDraftRoom" class="clean-draft-room" hidden>
-
+        
         <div class="clean-draft-control-card">
           <div class="clean-control clean-draft-as-control">
             <label for="cleanDraftAsSelect">You are drafting as</label>
@@ -1703,7 +1705,7 @@ const OWNERS = [
           if (data?.draft && Array.isArray(data.draft.picks)) {
             draft = data.draft;
             saveLocal();
-            window.renderDraftRosters(draft);
+            if (window.renderDraftRosters) window.renderDraftRosters(draft);
             setSyncStatus(data.configured ? "Shared sync connected" : "Temporary server sync");
             return;
           }
@@ -1718,7 +1720,7 @@ const OWNERS = [
         if (!draft) draft = defaultDraft();
         draft.updatedAt = new Date().toISOString();
         saveLocal();
-        window.renderDraftRosters(draft);
+        if (window.renderDraftRosters) window.renderDraftRosters(draft);
         try {
           const res = await fetch("/api/draft", {
             method: "POST",
@@ -2558,6 +2560,165 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       });
     })();
   </script>
+
+
+  <script>
+    // V85 robust rosters source
+    (function(){
+      const ROSTER_OWNERS = [
+        { id:"nick", name:"Nick", teamName:"Nick" },
+        { id:"chris", name:"Chris", teamName:"Chris" },
+        { id:"andrew", name:"Andrew", teamName:"Andrew" },
+        { id:"tyler", name:"Tyler", teamName:"Tyler" },
+        { id:"scott", name:"Scott", teamName:"Scott" }
+      ];
+
+      function esc(s){
+        return String(s == null ? "" : s).replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
+      }
+
+      function bucket(position){
+        if (position === "D") return "D";
+        if (position === "G" || position === "TG") return "G";
+        return "F";
+      }
+
+      function localDraftBackup(){
+        const keys = [
+          "custom-hockey-pool-v40-clean-live-draft",
+          "custom-hockey-pool-v38-official-snake",
+          "custom-hockey-pool-active-draft"
+        ];
+        let best = null;
+        keys.forEach(key => {
+          try{
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            if (parsed && Array.isArray(parsed.picks)) {
+              if (!best || parsed.picks.length > best.picks.length) best = parsed;
+            }
+          }catch(e){}
+        });
+        return best;
+      }
+
+      async function sharedDraft(){
+        try{
+          const res = await fetch("/api/draft?t=" + Date.now(), { cache:"no-store" });
+          const data = await res.json();
+          if (res.ok && data && data.draft && Array.isArray(data.draft.picks)) {
+            data.draft.__source = data.configured ? "shared API" : "temporary API";
+            try { localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(data.draft)); } catch(e) {}
+            return data.draft;
+          }
+        }catch(e){}
+        return null;
+      }
+
+      async function getBestDraftForRosters(){
+        const apiDraft = await sharedDraft();
+        if (apiDraft && apiDraft.picks && apiDraft.picks.length) return apiDraft;
+        const local = localDraftBackup();
+        if (local) {
+          local.__source = "local backup";
+          return local;
+        }
+        return { owners: ROSTER_OWNERS, draftOrder: ROSTER_OWNERS.map(o=>o.id), picks: [], __source:"empty" };
+      }
+
+      function ownerName(owner){
+        return owner.teamName || owner.name || owner.id;
+      }
+
+      function playerLine(pick){
+        const p = pick.player || {};
+        const pos = p.position === "TG" ? "Team Goalies" : (p.position || "");
+        const nhl = p.nhlTeam || "";
+        return `<div class="roster-player-row"><strong>${esc(p.name || "Unknown")}</strong><span>${esc(pos)} ${nhl ? "• " + esc(nhl) : ""}</span></div>`;
+      }
+
+      function section(title, picks, limit){
+        return `<div class="roster-section">
+          <h4>${esc(title)} <small>${picks.length}/${limit}</small></h4>
+          <div class="roster-player-list">${picks.length ? picks.map(playerLine).join("") : '<div class="roster-empty">No players yet</div>'}</div>
+        </div>`;
+      }
+
+      window.renderDraftRosters = function(draft){
+        const target = document.getElementById("rosterCards");
+        if (!target) return;
+
+        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
+        const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
+        const source = draft && draft.__source ? draft.__source : "draft state";
+
+        if (!picks.length) {
+          target.innerHTML = `<article class="card rosters-status-card">
+            <h3>No roster picks found yet</h3>
+            <p class="muted">The Rosters tab reads the same draft object as the Draft Room. Source checked: ${esc(source)}.</p>
+          </article>`;
+          renderDraftRoomLottery(draft || {});
+          return;
+        }
+
+        target.innerHTML = owners.map(owner => {
+          const mine = picks.filter(p => String(p.ownerId) === String(owner.id));
+          const forwards = mine.filter(p => bucket(p.player && p.player.position) === "F");
+          const defense = mine.filter(p => bucket(p.player && p.player.position) === "D");
+          const goalies = mine.filter(p => bucket(p.player && p.player.position) === "G");
+          return `<article class="card roster-card live-roster-card">
+            <div class="roster-card-head"><h3>${esc(ownerName(owner))}</h3><span>${mine.length}/12</span></div>
+            ${section("Forwards", forwards, 6)}
+            ${section("Defense", defense, 4)}
+            ${section("Goalies", goalies, 2)}
+          </article>`;
+        }).join("") + `<article class="card rosters-status-card"><p class="muted">Roster source: ${esc(source)}. Total picks: ${esc(picks.length)}.</p></article>`;
+
+        renderDraftRoomLottery(draft);
+      };
+
+      function lotteryOrderFromStorage(){
+        const keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
+        for (const key of keys) {
+          try{
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length) return parsed.lotteryOrder.slice();
+          }catch(e){}
+        }
+        return null;
+      }
+
+      window.renderDraftRoomLottery = function(draft){
+        const target = document.getElementById("draftRoomLotteryOrder");
+        if (!target) return;
+        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
+        const map = new Map(owners.map(o => [String(o.id), o]));
+        const order = (Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : lotteryOrderFromStorage()) || owners.map(o => o.id);
+        target.innerHTML = order.map((id, idx) => {
+          const o = map.get(String(id)) || { teamName: id };
+          return `<div class="draft-lottery-slot"><b>${idx + 1}</b><span>${esc(ownerName(o))}</span></div>`;
+        }).join("");
+      };
+
+      async function syncRosterTab(){
+        const draft = await getBestDraftForRosters();
+        if (window.renderDraftRosters) window.renderDraftRosters(draft);
+      }
+
+      window.addEventListener("load", function(){
+        setTimeout(syncRosterTab, 350);
+      });
+
+      document.addEventListener("click", function(event){
+        const tab = event.target.closest && event.target.closest("[data-tab]");
+        if (tab && (tab.dataset.tab === "rosters" || tab.dataset.tab === "draft")) {
+          setTimeout(syncRosterTab, 100);
+        }
+      }, true);
+
+      window.addEventListener("focus", syncRosterTab);
+    })();
+  </script>
+
 
   <script type="module" src="assets/js/app.js"></script>
 </body>

@@ -9389,3 +9389,115 @@ body.lottery-running { overflow: hidden; }
   border:1px solid rgba(255,255,255,.08);
   line-height:1.45;
 }
+
+
+/* V85 draft room cleanup */
+#cleanDraftEntry,
+.auto-enter-fallback{
+  display:none!important;
+}
+.draft-room-lottery-top{
+  display:grid;
+  gap:8px;
+  padding:12px;
+  border-radius:18px;
+  background:linear-gradient(135deg,rgba(7,21,43,.94),rgba(34,16,4,.86));
+  border:1px solid rgba(245,195,91,.28);
+  box-shadow:0 14px 30px rgba(0,0,0,.28);
+}
+.draft-room-lottery-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:end;
+}
+.draft-room-lottery-head strong{
+  color:#fff;
+  font-size:1.35rem;
+}
+.draft-room-lottery-order{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:8px;
+}
+.draft-lottery-slot{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+}
+.draft-lottery-slot b{
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:#f5c35b;
+  color:#140d05;
+}
+.draft-lottery-slot span{
+  color:#fff;
+  font-weight:900;
+}
+.roster-card.live-roster-card{
+  overflow:hidden;
+}
+.roster-card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.roster-card-head span{
+  color:#f5c35b;
+  font-weight:1000;
+}
+.roster-section{
+  margin-top:10px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+}
+.roster-section h4{
+  margin:0 0 8px;
+  color:#f5c35b;
+}
+.roster-player-list{
+  display:grid;
+  gap:5px;
+}
+.roster-player-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:9px;
+  background:rgba(0,0,0,.18);
+}
+.roster-player-row strong{
+  color:#fff;
+}
+.roster-player-row span{
+  color:#cbd7ea;
+  font-size:.82rem;
+}
+.roster-empty{
+  color:#8fa0b8;
+  font-size:.86rem;
+}
+.rosters-status-card{
+  grid-column:1/-1;
+}
+@media(max-width:820px){
+  .draft-room-lottery-top{
+    padding:8px;
+    border-radius:14px;
+  }
+  .draft-room-lottery-order{
+    grid-template-columns:1fr;
+  }
+}
