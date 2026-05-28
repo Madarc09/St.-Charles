@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V91 RESTORE SELECT PERSISTENCE -->
+  <!-- V92 DESKTOP HEADSHOTS MOBILE NAMEPLATE -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1814,15 +1814,16 @@
         </select>`;
 
         const headers = goalieMode
-          ? `<tr><th>${posSelect}</th><th>${sortHead("goalieWins","Wins")}</th><th>${sortHead("savePct","Save %")}</th><th>${sortHead("goalsAgainstAverage","GAA")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`
-          : `<tr><th>${posSelect}</th><th>${sortHead("goals","Goals")}</th><th>${sortHead("assists","Assists")}</th><th>${sortHead("points","Pts")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`;
+          ? `<tr><th class="headshot-col">Pic</th><th>${posSelect}</th><th>${sortHead("goalieWins","Wins")}</th><th>${sortHead("savePct","Save %")}</th><th>${sortHead("goalsAgainstAverage","GAA")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`
+          : `<tr><th class="headshot-col">Pic</th><th>${posSelect}</th><th>${sortHead("goals","Goals")}</th><th>${sortHead("assists","Assists")}</th><th>${sortHead("points","Pts")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`;
 
         const rows = filteredPlayers().slice(0, 900).map(p => {
           const allowed = activeOwnerId ? canOwnerDraftPosition(activeOwnerId, p.position) : false;
           const disabled = (canPick && allowed) ? "" : "disabled";
           const text = !canPick ? "Wait" : (!allowed ? "Full" : "Draft");
           return `<tr class="${p.position === "TG" ? "team-goalie-row" : ""} ${esc(teamClassName(p.nhlTeam))}" data-mobile-sign="${esc(p.id)}" style="--team-logo:url('${esc(teamLogoUrl(p.nhlTeam))}')">
-            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><img class="player-headshot inline-player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"><div class="player-name-wrap"><strong>${esc(p.name)}</strong><div class="meta">${esc(displayPosition(p.position))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span>${text}</span></button></div></td>
+            <td class="desktop-headshot-cell"><img class="desktop-player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"></td>
+            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div class="player-name-wrap"><strong>${esc(p.name)}</strong><div class="meta">${esc(displayPosition(p.position))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span>${text}</span></button></div></td>
             <td>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</td>
             <td>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</td>
             <td>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</td>
