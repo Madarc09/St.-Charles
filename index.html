@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V65 MOBILE COMPACT DESKTOP MATCH -->
+  <!-- V66 HEADER FILTER SORT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V65 MOBILE COMPACT DESKTOP MATCH</div>
+        <div class="v46-build-marker">V66 HEADER FILTER SORT</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -97,24 +97,7 @@
           YOU ARE ON THE CLOCK
         </div>
 
-        <div class="clean-draft-actions">
-          <select id="cleanPositionFilter">
-            <option value="all">All Positions</option>
-            <option value="F">Forwards</option>
-            <option value="C">C</option>
-            <option value="L">L/LW</option>
-            <option value="R">R/RW</option>
-            <option value="D">D</option>
-            <option value="TG">Team Goalies</option>
-          </select>
-          <select id="cleanSortSelect">
-            <option value="fantasyPoints">Sort by Fantasy Pts</option>
-            <option value="points">Sort by NHL Pts</option>
-            <option value="goals">Sort by Goals</option>
-            <option value="assists">Sort by Assists</option>
-            <option value="gamesPlayed">Sort by GP</option>
-            <option value="name">Sort by Name</option>
-          </select>
+        <div class="clean-draft-actions clean-draft-actions-minimal">
           <button id="cleanRefreshBtn" type="button">Refresh Room</button>
         </div>
 
@@ -1644,7 +1627,7 @@ const OWNERS = [
       let playersLoaded = false;
       let loadingPlayers = false;
       let sortKey = "fantasyPoints";
-      let positionFilter = "all";
+      let positionFilter = "F";
       let poll = null;
       let lastOnClockId = "";
 
@@ -1965,17 +1948,24 @@ const OWNERS = [
         const pick = currentPick();
         const canPick = Boolean(pick && pick.ownerId === activeOwnerId);
         const goalieBoardMode = positionFilter === "TG";
+        const playerTypeSelect = `<select id="cleanPositionFilter" class="table-position-filter" aria-label="Player type">
+            <option value="F" ${positionFilter === "F" ? "selected" : ""}>Forward</option>
+            <option value="D" ${positionFilter === "D" ? "selected" : ""}>Defense</option>
+            <option value="TG" ${positionFilter === "TG" ? "selected" : ""}>Team Goalie</option>
+          </select>`;
+        const sortArrow = key => sortKey === key ? " ▲" : "";
+        const sortHead = (key, label) => `<button type="button" class="stat-sort-header" data-sort-key="${key}">${label}${sortArrow(key)}</button>`;
         const tableHeaders = goalieBoardMode
-          ? `<tr><th>#</th><th>Team Goalies</th><th>GP</th><th>Wins</th><th>Save %</th><th>GAA</th><th>Fantasy Pts</th></tr>`
-          : `<tr><th>#</th><th>Player</th><th>GP</th><th>Goals</th><th>Assists</th><th>Pts</th><th>Fantasy Pts</th></tr>`;
+          ? `<tr><th>#</th><th>${playerTypeSelect}</th><th>${sortHead("goalieWins", "Wins")}</th><th>${sortHead("savePct", "Save %")}</th><th>${sortHead("goalsAgainstAverage", "GAA")}</th><th>${sortHead("fantasyPoints", "Fantasy Pts")}</th></tr>`
+          : `<tr><th>#</th><th>${playerTypeSelect}</th><th>${sortHead("goals", "Goals")}</th><th>${sortHead("assists", "Assists")}</th><th>${sortHead("points", "Pts")}</th><th>${sortHead("fantasyPoints", "Fantasy Pts")}</th></tr>`;
         const rows = availablePlayers().map((p, i) => {
           const positionAllowed = activeOwnerId ? window.canOwnerDraftPosition(draft, activeOwnerId, p.position) : false;
           const disabled = (canPick && positionAllowed) ? "" : "disabled";
-          const buttonText = !canPick ? `Waiting for ${esc(owner(pick?.ownerId)?.teamName || "next pick")}` : (!positionAllowed ? `${window.__draftBucket(p.position)} limit reached` : "Sign Player");
+          const buttonText = !canPick ? "Wait" : (!positionAllowed ? "Full" : "Draft");
           return `<tr class="${p.position === "TG" ? "team-goalie-row" : ""} ${esc(teamClassName(p.nhlTeam))}" data-mobile-sign="${esc(p.id)}" data-team="${esc(p.nhlTeam || "")}" style="--team-logo:url('${esc(teamLogoUrl(p.nhlTeam))}')">
             <td class="rank-cell"><img class="player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"><span>${i + 1}</span></td>
             <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div><strong>${esc(p.name)}</strong><div class="meta">${esc(playerDisplayPosition(p))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span class="contract-icon" aria-hidden="true"><i></i></span><span>${buttonText}</span></button></div></td>
-            <td>${p.gamesPlayed || 0}</td><td>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</td><td>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</td><td>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</td><td><strong>${fp(p)}</strong></td>
+            <td>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</td><td>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</td><td>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</td><td><strong>${fp(p)}</strong></td>
           </tr>`;
         }).join("");
         const signed = (draft.picks || []).slice(-8).reverse().map(p => `<div><span>${p.pickNumber}</span><strong>${esc(p.player.name)}</strong><em>${esc(p.ownerName)}</em></div>`).join("");
@@ -1994,7 +1984,7 @@ const OWNERS = [
           return toast(`You already have the maximum number of ${label}.`);
         }
         const o = owner(activeOwnerId);
-        const confirmMessage = `Sign ${player.name} to ${o?.teamName || activeOwnerId}?`;
+        const confirmMessage = `Draft ${player.name} to ${o?.teamName || activeOwnerId}?`;
         if (!window.confirm(confirmMessage)) {
           toast("Pick cancelled.");
           return;
@@ -2009,7 +1999,7 @@ const OWNERS = [
           player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, goalieWins: player.goalieWins || 0, goalieShutouts: player.goalieShutouts || 0, savePct: player.savePct || 0, goalsAgainstAverage: player.goalsAgainstAverage || 0, fantasyPoints: fp(player) }
         });
         await saveSharedDraft();
-        toast(`Signed ${player.name} to ${o?.teamName || activeOwnerId}.`);
+        toast(`Drafted ${player.name} to ${o?.teamName || activeOwnerId}.`);
         renderRoom();
       }
       async function startRoom() {
@@ -2114,6 +2104,19 @@ const mobileRowSign = event.target.closest && event.target.closest("tr[data-mobi
           signPlayer(sign.dataset.cleanSign);
           return;
         }
+        const headerFilter = event.target.closest && event.target.closest("#cleanPositionFilter");
+        if (headerFilter) {
+          // Let change event handle this select.
+        }
+
+        const sortHeader = event.target.closest && event.target.closest("[data-sort-key]");
+        if (sortHeader) {
+          event.preventDefault();
+          sortKey = sortHeader.dataset.sortKey || "fantasyPoints";
+          renderRoom();
+          return;
+        }
+
         const refresh = event.target.closest && event.target.closest("#cleanRefreshBtn, #cleanRetryPlayers");
         if (refresh) {
           event.preventDefault();
@@ -2124,6 +2127,15 @@ const mobileRowSign = event.target.closest && event.target.closest("tr[data-mobi
           return;
         }
 }, true);
+      document.addEventListener("change", (event) => {
+        const posSelect = event.target.closest && event.target.closest("#cleanPositionFilter");
+        if (!posSelect) return;
+        positionFilter = posSelect.value || "F";
+        if (positionFilter === "TG" && !["fantasyPoints","goalieWins","savePct","goalsAgainstAverage","goalieShutouts"].includes(sortKey)) sortKey = "fantasyPoints";
+        if (positionFilter !== "TG" && !["fantasyPoints","points","goals","assists","name"].includes(sortKey)) sortKey = "fantasyPoints";
+        renderRoom();
+      }, true);
+
       window.addEventListener("draft-tab-opened", () => {
         setTimeout(autoEnterDraftRoom, 25);
       });
@@ -2132,36 +2144,6 @@ const mobileRowSign = event.target.closest && event.target.closest("tr[data-mobi
         if (document.getElementById("draft")?.classList.contains("active")) {
           setTimeout(autoEnterDraftRoom, 50);
         }
-        const pos = $("#cleanPositionFilter");
-        const sort = $("#cleanSortSelect");
-        function setSortOptionsForPosition() {
-          if (!sort) return;
-          const goalieMode = pos && pos.value === "TG";
-          const current = sort.value;
-          if (goalieMode) {
-            sort.innerHTML = `
-              <option value="fantasyPoints">Sort by Fantasy Pts</option>
-              <option value="goalieWins">Sort by Wins</option>
-              <option value="savePct">Sort by Save %</option>
-              <option value="goalsAgainstAverage">Sort by GAA</option>
-              <option value="goalieShutouts">Sort by Shutouts</option>
-              <option value="gamesPlayed">Sort by GP</option>`;
-            if (!["fantasyPoints","goalieWins","savePct","goalsAgainstAverage","goalieShutouts","gamesPlayed"].includes(current)) sort.value = "fantasyPoints";
-          } else {
-            sort.innerHTML = `
-              <option value="fantasyPoints">Sort by Fantasy Pts</option>
-              <option value="points">Sort by NHL Pts</option>
-              <option value="goals">Sort by Goals</option>
-              <option value="assists">Sort by Assists</option>
-              <option value="gamesPlayed">Sort by GP</option>
-              <option value="name">Sort by Name</option>`;
-            if (!["fantasyPoints","points","goals","assists","gamesPlayed","name"].includes(current)) sort.value = "fantasyPoints";
-          }
-          sortKey = sort.value;
-        }
-        if (pos) pos.onchange = () => { positionFilter = pos.value; setSortOptionsForPosition(); renderRoom(); };
-        if (sort) sort.onchange = () => { sortKey = sort.value; renderRoom(); };
-        setSortOptionsForPosition();
       });
     })();
   </script>
