@@ -7111,3 +7111,417 @@ body.lottery-running { overflow: hidden; }
   }
 }
 /* END V64 CENTERED WATERMARK + NO BACK BUTTON + MOBILE DOWNSIZE */
+
+
+/* ==========================================================
+   V65 MOBILE COMPACT + DESKTOP-MATCHING DRAFT LAYOUT
+   Easy revert: remove this section only.
+   Goals:
+   - Mobile player name tags are much smaller
+   - Mobile visually follows desktop more closely
+   - Only Roster Needs sticks while scrolling
+   - Draft Board gets its own wider row
+   - Remove aggressive mobile overflow/zoom-lock styling
+   ========================================================== */
+
+/* Only Roster Needs should stay sticky now */
+#draft .roster-needs-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:70!important;
+}
+
+#draft .clean-draft-control-card,
+#draft .clean-draft-actions{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+  box-shadow:none!important;
+}
+
+/* Draft board gets its own row and more breathing room */
+.clean-draft-control-card{
+  grid-template-columns:minmax(210px,.8fr) minmax(230px,.8fr)!important;
+}
+.clean-mini-draft-board-box{
+  grid-column:1 / -1!important;
+  width:100%!important;
+}
+.mini-draft-board-list{
+  max-height:180px!important;
+}
+.mini-pick{
+  grid-template-columns:30px 70px 1fr 34px!important;
+}
+
+/* Desktop: keep cockpit compact but not all sticky */
+@media(min-width:821px){
+  #draft .roster-needs-topbar{
+    padding:6px 8px!important;
+    border-radius:14px!important;
+  }
+  #draft .clean-draft-control-card{
+    padding:7px 9px!important;
+    gap:8px!important;
+    border-radius:14px!important;
+  }
+  #draft .clean-draft-actions{
+    padding:6px 8px!important;
+    gap:8px!important;
+    border-radius:12px!important;
+  }
+}
+
+/* Mobile: stop forcing the page to feel locked; let the browser zoom normally */
+@media(max-width:820px){
+  html, body{
+    max-width:none!important;
+    overflow-x:auto!important;
+    touch-action:auto!important;
+  }
+
+  .shell{
+    width:100%!important;
+    max-width:none!important;
+    padding-left:4px!important;
+    padding-right:4px!important;
+  }
+
+  #draft.panel{
+    padding:4px!important;
+  }
+
+  .clean-draft-room{
+    width:100%!important;
+    max-width:none!important;
+    overflow-x:visible!important;
+    gap:5px!important;
+  }
+
+  /* Roster Needs is the only sticky item */
+  #draft .roster-needs-topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:80!important;
+    margin:-4px -4px 4px!important;
+    padding:4px!important;
+    border-radius:0 0 10px 10px!important;
+    box-shadow:0 8px 18px rgba(0,0,0,.35)!important;
+  }
+
+  #draft .clean-draft-control-card,
+  #draft .clean-draft-actions{
+    position:static!important;
+    top:auto!important;
+    z-index:auto!important;
+    box-shadow:none!important;
+  }
+
+  /* Compact cockpit more like desktop */
+  .clean-draft-control-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+    padding:5px!important;
+    border-radius:10px!important;
+  }
+
+  .clean-draft-as-control{
+    display:grid!important;
+    grid-template-columns:1fr 88px!important;
+    gap:5px!important;
+    padding:5px!important;
+    border-radius:9px!important;
+  }
+
+  .clean-draft-as-control label{
+    grid-column:1/-1!important;
+  }
+
+  #cleanDraftAsSelect,
+  .v46-pull-players-btn,
+  .clean-draft-actions select,
+  .clean-draft-actions button{
+    min-height:28px!important;
+    font-size:.58rem!important;
+    padding:2px 5px!important;
+    border-radius:7px!important;
+  }
+
+  .v46-pull-players-btn{
+    width:88px!important;
+    min-width:88px!important;
+    max-width:88px!important;
+  }
+
+  .clean-current-pick{
+    padding:5px!important;
+    border-radius:9px!important;
+    min-height:auto!important;
+  }
+
+  .clean-current-pick strong{
+    font-size:.9rem!important;
+    line-height:1!important;
+  }
+
+  .clean-current-pick .label,
+  .clean-control label{
+    font-size:.48rem!important;
+  }
+
+  .clean-current-pick em{
+    font-size:.50rem!important;
+  }
+
+  /* Draft Board is its own row */
+  .clean-mini-draft-board-box{
+    grid-column:1/-1!important;
+    padding:6px!important;
+    border-radius:9px!important;
+  }
+
+  .mini-draft-board-head{
+    margin-bottom:4px!important;
+  }
+
+  .mini-draft-board-head .label{
+    font-size:.56rem!important;
+  }
+
+  #cleanLastRefresh,
+  #cleanSyncStatus{
+    font-size:.48rem!important;
+  }
+
+  .mini-draft-board-list{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+    max-height:122px!important;
+    overflow:auto!important;
+  }
+
+  .mini-pick{
+    max-width:none!important;
+    width:100%!important;
+    flex:none!important;
+    grid-template-columns:20px 40px 1fr 20px!important;
+    gap:3px!important;
+    padding:3px 4px!important;
+    border-radius:7px!important;
+  }
+
+  .mini-pick b{
+    width:16px!important;
+    height:16px!important;
+    font-size:.50rem!important;
+  }
+
+  .mini-pick span,
+  .mini-pick strong,
+  .mini-pick em{
+    font-size:.50rem!important;
+  }
+
+  /* Draft tools are normal row, not sticky */
+  .clean-draft-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 34px!important;
+    gap:4px!important;
+    padding:4px!important;
+    border-radius:9px!important;
+    background:rgba(7,21,43,.88)!important;
+  }
+
+  /* Roster Needs compact */
+  .needs-title-swapped{
+    padding:3px 5px!important;
+    margin-bottom:3px!important;
+  }
+
+  .needs-title-swapped .needs-team-name{
+    font-size:.78rem!important;
+  }
+
+  .needs-title-swapped .needs-heading-centered{
+    font-size:.52rem!important;
+  }
+
+  .needs-grid,
+  .needs-grid-with-players{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:3px!important;
+  }
+
+  .needs-grid div{
+    padding:3px!important;
+    border-radius:7px!important;
+  }
+
+  .needs-grid span{
+    font-size:.40rem!important;
+  }
+
+  .needs-grid strong{
+    font-size:.90rem!important;
+  }
+
+  .needs-grid em{
+    font-size:.40rem!important;
+  }
+
+  /* Player chart should be much smaller: closer to desktop rows */
+  .clean-player-table{
+    display:table!important;
+    width:100%!important;
+    table-layout:fixed!important;
+    border-collapse:separate!important;
+    border-spacing:0 3px!important;
+  }
+
+  .clean-player-table thead{
+    display:none!important;
+  }
+
+  .clean-player-table tbody{
+    display:table-row-group!important;
+  }
+
+  .clean-player-table tr[data-mobile-sign],
+  .clean-player-table tr{
+    display:table-row!important;
+    min-height:0!important;
+    padding:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+
+  .clean-player-table td{
+    display:table-cell!important;
+    vertical-align:middle!important;
+    padding:2px 3px!important;
+    border:0!important;
+    height:22px!important;
+    line-height:1!important;
+    font-size:.52rem!important;
+  }
+
+  .clean-player-table .rank-cell{
+    width:26px!important;
+    height:22px!important;
+    padding:0!important;
+    border-radius:7px 0 0 7px!important;
+  }
+
+  .rank-cell .player-headshot{
+    width:22px!important;
+    height:22px!important;
+    object-fit:cover!important;
+    border-radius:50%!important;
+    display:block!important;
+    margin:auto!important;
+  }
+
+  .player-draft-cell{
+    width:auto!important;
+    padding:2px 5px!important;
+    border-radius:0!important;
+    max-width:100%!important;
+  }
+
+  .player-draft-cell::before{
+    background-size:100% 100%, auto 105%!important;
+    background-position:center, center!important;
+    opacity:.32!important;
+  }
+
+  .player-draft-line{
+    display:grid!important;
+    grid-template-columns:40px minmax(0,1fr)!important;
+    gap:4px!important;
+    align-items:center!important;
+  }
+
+  .clean-sign-btn{
+    grid-column:1!important;
+    width:36px!important;
+    min-width:36px!important;
+    max-width:36px!important;
+    height:20px!important;
+    min-height:20px!important;
+    padding:1px!important;
+    border-radius:6px!important;
+  }
+
+  .clean-sign-btn:not(:disabled) span:last-child::after{
+    content:"SIGN";
+    font-size:.48rem!important;
+  }
+
+  .clean-sign-btn:disabled{
+    width:36px!important;
+    min-width:36px!important;
+    max-width:36px!important;
+    height:18px!important;
+    min-height:18px!important;
+  }
+
+  .clean-sign-btn:disabled span:last-child{
+    max-width:30px!important;
+    font-size:.32rem!important;
+    line-height:.9!important;
+  }
+
+  .player-draft-line > div{
+    grid-column:2!important;
+    min-width:0!important;
+  }
+
+  .player-draft-line strong{
+    font-size:.58rem!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .player-draft-line .meta{
+    display:none!important;
+  }
+
+  .clean-player-table td:nth-child(3),
+  .clean-player-table td:nth-child(4),
+  .clean-player-table td:nth-child(5),
+  .clean-player-table td:nth-child(6),
+  .clean-player-table td:nth-child(7){
+    width:38px!important;
+    max-width:38px!important;
+    padding:1px 2px!important;
+    font-size:.44rem!important;
+    background:rgba(255,255,255,.06)!important;
+    border-radius:0!important;
+    text-align:center!important;
+  }
+
+  .clean-player-table td:nth-child(7){
+    border-radius:0 7px 7px 0!important;
+  }
+
+  .clean-player-table td:nth-child(3)::before,
+  .clean-player-table td:nth-child(4)::before,
+  .clean-player-table td:nth-child(5)::before,
+  .clean-player-table td:nth-child(6)::before,
+  .clean-player-table td:nth-child(7)::before{
+    font-size:.38rem!important;
+  }
+
+  .clean-player-table tr[data-mobile-sign]::after{
+    content:none!important;
+  }
+
+  .clean-signed-log{
+    display:none!important;
+  }
+}
+/* END V65 MOBILE COMPACT + DESKTOP-MATCHING DRAFT LAYOUT */
