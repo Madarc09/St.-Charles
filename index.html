@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V88 SOURCE STATUS NO STATIC OVERRIDE -->
+  <!-- V89 RESET SMART AUTODRAFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -111,7 +111,7 @@
 
         <div class="clean-draft-actions clean-draft-actions-minimal">
           <button id="cleanRefreshBtn" type="button">Refresh Room</button>
-          <button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Next Pick</button>
+          <button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button>
         </div>
 
         <div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div>
@@ -207,7 +207,8 @@
           <h2>Backup, restore, and data tools</h2>
         </div>
       </div>
-      <div class="grid two">
+      <div class="actions stack-sm"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button></div>
+<div class="grid two">
         <article class="card">
           <h3>Export / Import Pool File</h3>
           <p class="muted">Export creates a JSON backup containing settings, owners, rosters, draft picks, manual players, and stat overrides.</p>
@@ -2185,28 +2186,83 @@ const OWNERS = [
         renderRoom();
       }
 
-      function filteredAutoDraftCandidates(ownerId) {
-        const taken = draftedIds();
-        let eligible = players.filter(p => !taken.has(String(p.id)) && window.canOwnerDraftPosition(draft, ownerId, p.position));
-        const filtered = eligible.filter(p => {
-          if (positionFilter === "F") return ["C", "L", "R", "LW", "RW", "F"].includes(p.position);
-          if (positionFilter === "D") return p.position === "D";
-          if (positionFilter === "TG") return p.position === "TG";
-          return true;
+      function ownerRosterCounts(ownerId) {
+        const mine = (draft?.picks || []).filter(p => String(p.ownerId) === String(ownerId));
+        const counts = { F: 0, D: 0, TG: 0 };
+        mine.forEach(p => {
+          const b = window.__draftBucket(p.player?.position);
+          if (b === "F") counts.F += 1;
+          else if (b === "D") counts.D += 1;
+          else counts.TG += 1;
         });
-        if (filtered.length) eligible = filtered;
-        return eligible.sort((a, b) => (fp(b) - fp(a)) || String(a.name).localeCompare(String(b.name)));
+        return counts;
       }
 
-      async function autoDraftNextPick() {
-        await loadSharedDraft();
-        const pick = currentPick();
-        if (!pick) return toast("Draft complete.");
-        if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
+      function rosterTargets() {
+        return { F: 6, D: 4, TG: 2 };
+      }
+
+      function eligiblePlayersFor(ownerId, positionBucket) {
+        const taken = draftedIds();
+        return players
+          .filter(p => !taken.has(String(p.id)))
+          .filter(p => window.__draftBucket(p.position) === positionBucket)
+          .filter(p => window.canOwnerDraftPosition(draft, ownerId, p.position))
+          .sort((a, b) => (fp(b) - fp(a)) || String(a.name).localeCompare(String(b.name)));
+      }
+
+      function chooseAutoDraftBucket(ownerId) {
+        const counts = ownerRosterCounts(ownerId);
+        const targets = rosterTargets();
+        const open = ["F", "D", "TG"].filter(b => counts[b] < targets[b] && eligiblePlayersFor(ownerId, b).length);
+
+        if (!open.length) return null;
+
+        const totalHave = counts.F + counts.D + counts.TG;
+        const roundish = totalHave + 1;
+
+        // Hard protection: don't let teams get trapped without scarce positions.
+        if (counts.TG === 0 && roundish >= 5 && open.includes("TG")) return "TG";
+        if (counts.D <= 1 && roundish >= 5 && open.includes("D")) return "D";
+        if (counts.TG < 2 && roundish >= 9 && open.includes("TG")) return "TG";
+        if (counts.D < 4 && roundish >= 9 && open.includes("D")) return "D";
+
+        // Need pressure: missing percentage plus scarcity protection.
+        const pressure = open.map(b => {
+          const missing = targets[b] - counts[b];
+          const missingPct = missing / targets[b];
+          const scarcity = b === "TG" ? 0.30 : b === "D" ? 0.20 : 0.00;
+          const random = Math.random() * 0.18;
+          const top = eligiblePlayersFor(ownerId, b)[0];
+          const topScore = top ? Math.min(fp(top) / 500, 0.25) : 0;
+          return { b, score: missingPct + scarcity + random + topScore };
+        }).sort((a, b) => b.score - a.score);
+
+        return pressure[0].b;
+      }
+
+      function pickAutoDraftPlayer(ownerId) {
+        const bucket = chooseAutoDraftBucket(ownerId);
+        if (!bucket) return null;
+
+        const candidates = eligiblePlayersFor(ownerId, bucket);
+        if (!candidates.length) return null;
+
+        // Mostly take best available, but add slight variation so the draft is not a pure spreadsheet.
+        const poolSize = bucket === "TG" ? 2 : bucket === "D" ? 4 : 6;
+        const shortList = candidates.slice(0, Math.min(poolSize, candidates.length));
+        const weighted = shortList.map((p, i) => ({ p, w: Math.max(1, shortList.length - i) }));
+        const total = weighted.reduce((sum, item) => sum + item.w, 0);
+        let roll = Math.random() * total;
+        for (const item of weighted) {
+          roll -= item.w;
+          if (roll <= 0) return item.p;
+        }
+        return shortList[0];
+      }
+
+      function pushDraftPick(pick, player) {
         const o = owner(pick.ownerId);
-        const candidates = filteredAutoDraftCandidates(pick.ownerId);
-        if (!candidates.length) return toast(`No eligible players left for ${o?.teamName || pick.ownerId}.`);
-        const player = candidates[0];
         draft.picks.push({
           pickNumber: pick.pickNumber,
           round: pick.round,
@@ -2214,11 +2270,58 @@ const OWNERS = [
           ownerId: pick.ownerId,
           ownerName: o?.teamName || pick.ownerId,
           timestamp: new Date().toISOString(),
-          player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, goalieWins: player.goalieWins || 0, goalieShutouts: player.goalieShutouts || 0, savePct: player.savePct || 0, goalsAgainstAverage: player.goalsAgainstAverage || 0, fantasyPoints: fp(player) }
+          player: {
+            id: String(player.id),
+            name: player.name,
+            position: player.position,
+            nhlTeam: player.nhlTeam,
+            gamesPlayed: player.gamesPlayed || 0,
+            goals: player.goals || 0,
+            assists: player.assists || 0,
+            points: player.points || 0,
+            goalieWins: player.goalieWins || 0,
+            goalieShutouts: player.goalieShutouts || 0,
+            savePct: player.savePct || 0,
+            goalsAgainstAverage: player.goalsAgainstAverage || 0,
+            fantasyPoints: fp(player)
+          }
         });
+      }
+
+      async function autoDraftNextPick() {
+        await loadSharedDraft();
+        const pick = currentPick();
+        if (!pick) return toast("Draft complete.");
+        if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
+        const player = pickAutoDraftPlayer(pick.ownerId);
+        if (!player) return toast("No eligible players left for the current team.");
+        pushDraftPick(pick, player);
         await saveSharedDraft();
-        toast(`Auto drafted ${player.name} to ${o?.teamName || pick.ownerId}.`);
+        toast(`Auto drafted ${player.name}.`);
         renderRoom();
+      }
+
+      async function autoDraftEntireDraft() {
+        await loadSharedDraft();
+        if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
+
+        const ok = confirm("Auto draft the entire remaining draft? This will fill every team to 6F / 4D / 2G.");
+        if (!ok) return;
+
+        let made = 0;
+        let guard = 0;
+        while (currentPick() && guard < 500) {
+          guard += 1;
+          const pick = currentPick();
+          const player = pickAutoDraftPlayer(pick.ownerId);
+          if (!player) break;
+          pushDraftPick(pick, player);
+          made += 1;
+        }
+
+        await saveSharedDraft();
+        renderRoom();
+        toast(`Auto drafted ${made} picks.`);
       }
 
       async function startRoom() {
@@ -2263,14 +2366,35 @@ const OWNERS = [
         poll = setInterval(refreshRoom, 5000);
       }
       async function resetLiveDraft() {
-        if (!confirm("Reset the live draft picks?")) return;
-        draft = defaultDraft();
-        await saveSharedDraft();
-        try { await fetch("/api/draft", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) }); } catch (e) {}
+        if (!confirm("Reset the live draft picks for everyone?")) return;
+
+        if (window.officialDraftApi) {
+          draft = await window.officialDraftApi.reset();
+        } else {
+          draft = defaultDraft();
+          await saveSharedDraft();
+        }
+
+        try { localStorage.removeItem("custom-hockey-pool-v40-clean-live-draft"); } catch(e) {}
+        try { localStorage.removeItem("custom-hockey-pool-v38-official-snake"); } catch(e) {}
+        try { localStorage.removeItem("custom-hockey-pool-active-draft"); } catch(e) {}
+
+        await loadSharedDraft();
+        if (window.renderDraftRosters) window.renderDraftRosters(draft);
+        renderDraftRoomLottery(draft);
         renderRoom();
-        toast("Live draft reset.");
+        toast("Shared live draft reset.");
       }
       document.addEventListener("click", async (event) => {
+        const resetAny = event.target.closest && event.target.closest("#resetLiveDraftBtn, #resetDraftBtn, [data-reset-draft]");
+        if (resetAny) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          await resetLiveDraft();
+          return;
+        }
+
 const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn");
         if (pull) {
           event.preventDefault();
@@ -2339,7 +2463,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         const autoDraft = event.target.closest && event.target.closest("#cleanAutoDraftBtn");
         if (autoDraft) {
           event.preventDefault();
-          autoDraftNextPick();
+          autoDraftEntireDraft();
           return;
         }
 
