@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V60 MOBILE STICKY TEAM CARDS -->
+  <!-- V61 MOBILE CONFIRM LAYOUT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V60 MOBILE STICKY TEAM CARDS</div>
+        <div class="v46-build-marker">V61 MOBILE CONFIRM LAYOUT</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -1988,6 +1988,11 @@ const OWNERS = [
           return toast(`You already have the maximum number of ${label}.`);
         }
         const o = owner(activeOwnerId);
+        const confirmMessage = `Sign ${player.name} to ${o?.teamName || activeOwnerId}?`;
+        if (!window.confirm(confirmMessage)) {
+          toast("Pick cancelled.");
+          return;
+        }
         draft.picks.push({
           pickNumber: pick.pickNumber,
           round: pick.round,
