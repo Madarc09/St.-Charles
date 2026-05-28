@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V72 MOBILE WATERMARK RIGHT STATS -->
+  <!-- V73 AUTO DRAFT LOGO FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V72 MOBILE WATERMARK RIGHT STATS</div>
+        <div class="v46-build-marker">V73 AUTO DRAFT LOGO FIX</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -101,6 +101,7 @@
 
         <div class="clean-draft-actions clean-draft-actions-minimal">
           <button id="cleanRefreshBtn" type="button">Refresh Room</button>
+          <button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Next Pick</button>
         </div>
 
         <div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div>
@@ -2042,6 +2043,43 @@ const OWNERS = [
         toast(`Drafted ${player.name} to ${o?.teamName || activeOwnerId}.`);
         renderRoom();
       }
+
+      function filteredAutoDraftCandidates(ownerId) {
+        const taken = draftedIds();
+        let eligible = players.filter(p => !taken.has(String(p.id)) && window.canOwnerDraftPosition(draft, ownerId, p.position));
+        const filtered = eligible.filter(p => {
+          if (positionFilter === "F") return ["C", "L", "R", "LW", "RW", "F"].includes(p.position);
+          if (positionFilter === "D") return p.position === "D";
+          if (positionFilter === "TG") return p.position === "TG";
+          return true;
+        });
+        if (filtered.length) eligible = filtered;
+        return eligible.sort((a, b) => (fp(b) - fp(a)) || String(a.name).localeCompare(String(b.name)));
+      }
+
+      async function autoDraftNextPick() {
+        await loadSharedDraft();
+        const pick = currentPick();
+        if (!pick) return toast("Draft complete.");
+        if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
+        const o = owner(pick.ownerId);
+        const candidates = filteredAutoDraftCandidates(pick.ownerId);
+        if (!candidates.length) return toast(`No eligible players left for ${o?.teamName || pick.ownerId}.`);
+        const player = candidates[0];
+        draft.picks.push({
+          pickNumber: pick.pickNumber,
+          round: pick.round,
+          slot: pick.slot,
+          ownerId: pick.ownerId,
+          ownerName: o?.teamName || pick.ownerId,
+          timestamp: new Date().toISOString(),
+          player: { id: String(player.id), name: player.name, position: player.position, nhlTeam: player.nhlTeam, gamesPlayed: player.gamesPlayed || 0, goals: player.goals || 0, assists: player.assists || 0, points: player.points || 0, goalieWins: player.goalieWins || 0, goalieShutouts: player.goalieShutouts || 0, savePct: player.savePct || 0, goalsAgainstAverage: player.goalsAgainstAverage || 0, fantasyPoints: fp(player) }
+        });
+        await saveSharedDraft();
+        toast(`Auto drafted ${player.name} to ${o?.teamName || pick.ownerId}.`);
+        renderRoom();
+      }
+
       async function startRoom() {
         $("#cleanDraftEntry").hidden = true;
         $("#cleanDraftRoom").hidden = false;
@@ -2154,6 +2192,13 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           event.preventDefault();
           sortKey = sortHeader.dataset.sortKey || "fantasyPoints";
           renderRoom();
+          return;
+        }
+
+        const autoDraft = event.target.closest && event.target.closest("#cleanAutoDraftBtn");
+        if (autoDraft) {
+          event.preventDefault();
+          autoDraftNextPick();
           return;
         }
 
