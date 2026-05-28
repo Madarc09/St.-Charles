@@ -7323,24 +7323,26 @@ body.lottery-running { overflow: hidden; }
 
 
 /* ==========================================================
-   V67 MOBILE STRUCTURE REBUILD — EASY REVERT
-   This is the new phone structure. Remove this block only to revert.
-   Intent:
-   - no horizontal overflow
-   - roster needs sticky only
-   - player board becomes clean mobile cards
-   - filter/sort controls become a compact mobile strip
+   V68 MOBILE TRUE CARDS — EASY REVERT
+   Mobile no longer uses a sticky/mini table header.
+   It uses a compact filter strip + true player cards.
    ========================================================== */
+
+.mobile-player-tools{
+  display:none;
+}
+
 @media(max-width:820px){
   html,
   body{
     width:100%!important;
     max-width:100%!important;
-    min-width:0!important;
     overflow-x:hidden!important;
   }
 
-  *{
+  *,
+  *::before,
+  *::after{
     box-sizing:border-box!important;
   }
 
@@ -7357,105 +7359,93 @@ body.lottery-running { overflow: hidden; }
   }
 
   main.shell{
-    padding-left:4px!important;
-    padding-right:4px!important;
+    padding:4px!important;
   }
 
   #draft.panel{
-    padding:4px!important;
+    padding:3px!important;
   }
 
   .clean-draft-room{
     display:grid!important;
-    gap:6px!important;
+    gap:5px!important;
   }
 
-  /* Only roster needs follows the screen */
+  /* Only roster needs is sticky */
   #draft .roster-needs-topbar{
     position:sticky!important;
     top:0!important;
-    z-index:90!important;
+    z-index:80!important;
     width:100%!important;
-    max-width:100%!important;
-    margin:0 0 5px!important;
+    margin:0 0 4px!important;
     padding:4px!important;
-    border-radius:0 0 12px 12px!important;
+    border-radius:0 0 10px 10px!important;
     background:rgba(7,21,43,.97)!important;
-    box-shadow:0 8px 22px rgba(0,0,0,.42)!important;
-    backdrop-filter:blur(12px)!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.38)!important;
   }
 
   #draft .clean-draft-control-card,
-  #draft .clean-draft-actions,
-  .clean-draft-order-strip{
+  #draft .clean-draft-actions{
     position:static!important;
     top:auto!important;
     z-index:auto!important;
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    overflow:hidden!important;
+    box-shadow:none!important;
   }
 
-  /* Roster needs: compact scoreboard */
-  .needs-title-swapped,
-  .needs-title{
+  /* Compact roster needs */
+  .needs-title,
+  .needs-title-swapped{
     display:grid!important;
     grid-template-columns:1fr!important;
+    text-align:center!important;
     gap:1px!important;
-    padding:4px 6px!important;
-    margin:0 0 4px!important;
-    text-align:center!important;
-    border-radius:9px!important;
+    padding:3px 5px!important;
+    margin:0 0 3px!important;
   }
 
-  .needs-title-swapped .needs-heading-centered,
-  .needs-title .eyebrow{
+  .needs-title .eyebrow,
+  .needs-heading-centered{
     justify-self:center!important;
-    text-align:center!important;
-    font-size:.55rem!important;
+    font-size:.50rem!important;
     line-height:1!important;
-    letter-spacing:.08em!important;
   }
 
-  .needs-title-swapped .needs-team-name,
-  .needs-title strong{
+  .needs-title strong,
+  .needs-team-name{
     justify-self:center!important;
-    text-align:center!important;
-    font-size:.86rem!important;
-    line-height:1.05!important;
+    font-size:.78rem!important;
+    line-height:1!important;
     max-width:100%!important;
+    white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
-    white-space:nowrap!important;
   }
 
   .needs-grid,
   .needs-grid-with-players{
     display:grid!important;
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:4px!important;
-    width:100%!important;
+    gap:3px!important;
   }
 
   .needs-grid div{
     min-width:0!important;
-    padding:4px 3px!important;
-    border-radius:8px!important;
+    padding:3px!important;
+    border-radius:7px!important;
   }
 
   .needs-grid span{
-    font-size:.42rem!important;
+    font-size:.38rem!important;
     line-height:1!important;
   }
 
   .needs-grid strong{
-    font-size:1.05rem!important;
+    font-size:.88rem!important;
     line-height:.9!important;
   }
 
   .needs-grid em{
-    font-size:.43rem!important;
+    font-size:.38rem!important;
     line-height:1!important;
   }
 
@@ -7464,42 +7454,39 @@ body.lottery-running { overflow: hidden; }
     display:none!important;
   }
 
-  /* Draft controls: stacked and compact */
+  /* Controls */
   .clean-draft-control-card{
     display:grid!important;
     grid-template-columns:1fr!important;
-    gap:5px!important;
+    gap:4px!important;
     padding:5px!important;
-    border-radius:12px!important;
-    background:rgba(7,21,43,.86)!important;
-    border:1px solid rgba(245,195,91,.20)!important;
+    border-radius:10px!important;
   }
 
   .clean-draft-as-control{
     display:grid!important;
-    grid-template-columns:1fr 94px!important;
+    grid-template-columns:1fr 86px!important;
     gap:5px!important;
-    align-items:end!important;
     padding:5px!important;
-    border-radius:9px!important;
-    min-width:0!important;
+    border-radius:8px!important;
   }
 
   .clean-draft-as-control label{
     grid-column:1/-1!important;
-    font-size:.50rem!important;
-    line-height:1!important;
+    font-size:.48rem!important;
   }
 
-  #cleanDraftAsSelect{
-    width:100%!important;
-    min-width:0!important;
+  #cleanDraftAsSelect,
+  .v46-pull-players-btn{
+    min-height:28px!important;
+    font-size:.56rem!important;
+    padding:2px 5px!important;
+    border-radius:7px!important;
   }
 
   .v46-pull-players-btn{
-    width:94px!important;
-    min-width:94px!important;
-    max-width:94px!important;
+    width:86px!important;
+    min-width:86px!important;
   }
 
   #v46PullHint{
@@ -7507,204 +7494,189 @@ body.lottery-running { overflow: hidden; }
   }
 
   .clean-current-pick{
-    display:grid!important;
-    grid-template-columns:1fr auto!important;
-    gap:4px!important;
-    align-items:center!important;
-    min-height:0!important;
     padding:5px!important;
-    border-radius:9px!important;
+    border-radius:8px!important;
+    min-height:auto!important;
   }
 
   .clean-current-pick .label{
-    grid-column:1/-1!important;
-    font-size:.48rem!important;
-    line-height:1!important;
+    font-size:.46rem!important;
   }
 
   .clean-current-pick strong{
-    min-width:0!important;
-    font-size:.90rem!important;
+    font-size:.86rem!important;
     line-height:1!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    white-space:nowrap!important;
   }
 
   .clean-current-pick em{
-    font-size:.50rem!important;
-    line-height:1!important;
+    font-size:.48rem!important;
   }
 
   .clean-mini-draft-board-box{
-    width:100%!important;
-    padding:6px!important;
-    border-radius:9px!important;
-    min-width:0!important;
+    padding:5px!important;
+    border-radius:8px!important;
   }
 
   .mini-draft-board-head{
-    margin:0 0 4px!important;
+    margin-bottom:3px!important;
   }
 
-  .mini-draft-board-head .label{
-    font-size:.55rem!important;
-    line-height:1!important;
-  }
-
+  .mini-draft-board-head .label,
   #cleanLastRefresh,
   #cleanSyncStatus{
     font-size:.46rem!important;
-    line-height:1!important;
   }
 
   .mini-draft-board-list{
     display:grid!important;
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:4px!important;
-    max-height:98px!important;
+    gap:3px!important;
+    max-height:86px!important;
     overflow:auto!important;
-    width:100%!important;
   }
 
   .mini-pick{
-    width:100%!important;
+    display:grid!important;
+    grid-template-columns:16px 34px minmax(0,1fr) 16px!important;
+    gap:2px!important;
+    padding:2px 3px!important;
+    border-radius:6px!important;
     min-width:0!important;
     max-width:none!important;
-    display:grid!important;
-    grid-template-columns:18px 36px minmax(0,1fr) 18px!important;
-    gap:3px!important;
-    padding:3px!important;
-    border-radius:7px!important;
+    width:100%!important;
   }
 
   .mini-pick b{
-    width:16px!important;
-    height:16px!important;
-    font-size:.48rem!important;
+    width:14px!important;
+    height:14px!important;
+    font-size:.44rem!important;
   }
 
   .mini-pick span,
   .mini-pick strong,
   .mini-pick em{
+    font-size:.44rem!important;
     min-width:0!important;
-    font-size:.48rem!important;
     line-height:1!important;
   }
 
-  /* Minimal top action row */
   .clean-draft-actions-minimal,
   .clean-draft-actions{
     display:grid!important;
     grid-template-columns:1fr!important;
-    gap:4px!important;
-    padding:4px!important;
-    border-radius:9px!important;
+    padding:3px!important;
+    border-radius:8px!important;
   }
 
-  .clean-draft-actions-minimal #cleanRefreshBtn,
-  .clean-draft-actions button{
+  #cleanRefreshBtn{
     width:100%!important;
-    min-height:28px!important;
-    font-size:.58rem!important;
-    border-radius:7px!important;
+    min-height:26px!important;
+    font-size:.54rem!important;
+    border-radius:6px!important;
   }
 
   .clean-draft-order-strip{
     display:flex!important;
     gap:3px!important;
-    padding:3px 0!important;
     overflow-x:auto!important;
-    overflow-y:hidden!important;
+    padding:2px 0!important;
   }
 
   .clean-draft-order-strip span{
     flex:0 0 auto!important;
-    font-size:.50rem!important;
-    padding:3px 5px!important;
-    border-radius:999px!important;
+    font-size:.46rem!important;
+    padding:2px 5px!important;
   }
 
-  /* PLAYER BOARD: mobile cards that actually fit */
+  /* MOBILE PLAYER TOOLS: separate from table header */
+  .mobile-player-tools{
+    display:grid!important;
+    grid-template-columns:92px 1fr!important;
+    gap:4px!important;
+    align-items:center!important;
+    width:100%!important;
+    max-width:100%!important;
+    padding:4px!important;
+    margin:0 0 4px!important;
+    border-radius:9px!important;
+    background:rgba(7,21,43,.94)!important;
+    border:1px solid rgba(245,195,91,.22)!important;
+  }
+
+  .mobile-position-filter{
+    width:92px!important;
+    min-width:0!important;
+    min-height:26px!important;
+    padding:2px 4px!important;
+    border-radius:7px!important;
+    background:#07152b!important;
+    color:#fff!important;
+    border:1px solid rgba(245,195,91,.35)!important;
+    font-size:.50rem!important;
+    font-weight:900!important;
+  }
+
+  .mobile-sort-row{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:3px!important;
+    min-width:0!important;
+  }
+
+  .mobile-sort-row button{
+    min-width:0!important;
+    min-height:24px!important;
+    padding:2px!important;
+    border-radius:6px!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    background:rgba(255,255,255,.07)!important;
+    color:#f5c35b!important;
+    font-size:.48rem!important;
+    font-weight:900!important;
+  }
+
+  /* Hide table header completely on mobile to stop overlap */
+  .clean-player-table thead{
+    display:none!important;
+  }
+
   .clean-player-table{
     display:block!important;
     width:100%!important;
     max-width:100%!important;
-    table-layout:auto!important;
-    border-collapse:separate!important;
+    min-width:0!important;
+    border:0!important;
     border-spacing:0!important;
-  }
-
-  .clean-player-table thead{
-    display:block!important;
-    position:sticky!important;
-    top:78px!important;
-    z-index:60!important;
-    width:100%!important;
-    padding:4px!important;
-    margin-bottom:4px!important;
-    border-radius:10px!important;
-    background:rgba(7,21,43,.96)!important;
-    border:1px solid rgba(245,195,91,.22)!important;
-    backdrop-filter:blur(10px)!important;
-  }
-
-  .clean-player-table thead tr{
-    display:grid!important;
-    grid-template-columns:34px minmax(0,1fr) repeat(4,42px)!important;
-    gap:3px!important;
-    align-items:center!important;
-  }
-
-  .clean-player-table thead th{
-    display:block!important;
-    padding:0!important;
-    min-width:0!important;
-    font-size:.50rem!important;
-    line-height:1!important;
-    text-align:center!important;
-  }
-
-  .table-position-filter{
-    width:100%!important;
-    min-width:0!important;
-    min-height:24px!important;
-    padding:2px 4px!important;
-    border-radius:7px!important;
-    font-size:.50rem!important;
-  }
-
-  .stat-sort-header{
-    font-size:.48rem!important;
-    line-height:1!important;
   }
 
   .clean-player-table tbody{
     display:grid!important;
     grid-template-columns:1fr!important;
-    gap:4px!important;
+    gap:3px!important;
     width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
   }
 
   .clean-player-table tr[data-mobile-sign]{
     display:grid!important;
-    grid-template-columns:30px minmax(0,1fr) 36px!important;
+    grid-template-columns:28px minmax(0,1fr) 36px!important;
     grid-template-areas:
       "avatar name button"
       "avatar stats button"!important;
-    gap:3px 5px!important;
+    gap:2px 5px!important;
     align-items:center!important;
     width:100%!important;
     max-width:100%!important;
     min-width:0!important;
-    min-height:42px!important;
-    padding:4px!important;
-    border-radius:10px!important;
+    min-height:38px!important;
+    padding:3px!important;
+    border-radius:9px!important;
     overflow:hidden!important;
     background:
-      linear-gradient(90deg,var(--team-a,rgba(11,31,61,.92)),var(--team-b,rgba(0,0,0,.78)))!important;
-    border:1px solid rgba(255,255,255,.12)!important;
-    box-shadow:0 4px 10px rgba(0,0,0,.22)!important;
+      linear-gradient(90deg,var(--team-a,rgba(11,31,61,.95)),var(--team-b,rgba(0,0,0,.78)))!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    box-shadow:0 3px 8px rgba(0,0,0,.20)!important;
   }
 
   .clean-player-table tr[data-mobile-sign]::after{
@@ -7714,20 +7686,20 @@ body.lottery-running { overflow: hidden; }
   .clean-player-table .rank-cell{
     grid-area:avatar!important;
     display:block!important;
-    width:28px!important;
-    height:28px!important;
-    min-width:28px!important;
+    width:26px!important;
+    height:26px!important;
+    min-width:26px!important;
     padding:0!important;
     border-radius:50%!important;
     overflow:hidden!important;
-    justify-self:center!important;
     align-self:center!important;
+    justify-self:center!important;
   }
 
   .rank-cell .player-headshot{
     display:block!important;
-    width:28px!important;
-    height:28px!important;
+    width:26px!important;
+    height:26px!important;
     object-fit:cover!important;
     border-radius:50%!important;
   }
@@ -7739,23 +7711,21 @@ body.lottery-running { overflow: hidden; }
   .player-draft-cell{
     grid-area:name!important;
     display:block!important;
+    min-width:0!important;
     width:100%!important;
     max-width:100%!important;
-    min-width:0!important;
     padding:2px 5px!important;
-    border-radius:8px!important;
+    border-radius:7px!important;
   }
 
   .player-draft-cell::before{
     background-position:center, center!important;
-    background-size:100% 100%, auto 104%!important;
-    opacity:.34!important;
+    background-size:100% 100%, auto 96%!important;
+    opacity:.32!important;
   }
 
   .player-draft-line{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:0!important;
+    display:block!important;
     width:100%!important;
     min-width:0!important;
   }
@@ -7767,8 +7737,9 @@ body.lottery-running { overflow: hidden; }
 
   .player-draft-line strong{
     display:block!important;
+    width:100%!important;
     max-width:100%!important;
-    font-size:.62rem!important;
+    font-size:.58rem!important;
     line-height:1.05!important;
     white-space:nowrap!important;
     overflow:hidden!important;
@@ -7786,10 +7757,10 @@ body.lottery-running { overflow: hidden; }
     width:34px!important;
     min-width:34px!important;
     max-width:34px!important;
-    height:24px!important;
-    min-height:24px!important;
+    height:22px!important;
+    min-height:22px!important;
     padding:1px!important;
-    border-radius:7px!important;
+    border-radius:6px!important;
     justify-self:center!important;
   }
 
@@ -7799,7 +7770,7 @@ body.lottery-running { overflow: hidden; }
 
   .clean-sign-btn:not(:disabled) span:last-child::after{
     content:"DRAFT";
-    font-size:.42rem!important;
+    font-size:.40rem!important;
     line-height:1!important;
   }
 
@@ -7807,16 +7778,16 @@ body.lottery-running { overflow: hidden; }
     width:34px!important;
     min-width:34px!important;
     max-width:34px!important;
-    height:20px!important;
-    min-height:20px!important;
-    opacity:.66!important;
+    height:18px!important;
+    min-height:18px!important;
+    opacity:.68!important;
   }
 
   .clean-sign-btn:disabled span:last-child{
     max-width:30px!important;
-    font-size:.32rem!important;
-    line-height:.9!important;
     white-space:normal!important;
+    font-size:.30rem!important;
+    line-height:.9!important;
   }
 
   .clean-player-table tr[data-mobile-sign] td:nth-child(3),
@@ -7827,10 +7798,10 @@ body.lottery-running { overflow: hidden; }
     display:inline-flex!important;
     width:auto!important;
     max-width:max-content!important;
-    padding:1px 4px!important;
     margin:0 2px 0 0!important;
+    padding:1px 3px!important;
     border-radius:999px!important;
-    font-size:.46rem!important;
+    font-size:.42rem!important;
     line-height:1!important;
     background:rgba(255,255,255,.08)!important;
     color:#fff!important;
@@ -7855,4 +7826,163 @@ body.lottery-running { overflow: hidden; }
     display:none!important;
   }
 }
-/* END V67 MOBILE STRUCTURE REBUILD */
+/* END V68 MOBILE TRUE CARDS */
+
+
+/* ==========================================================
+   V69 ROSTER NEEDS BELOW + NO # COLUMN
+   Easy revert: remove this section only.
+   ========================================================== */
+
+/* Avatar/logo now lives inside the player name plate */
+.inline-player-headshot{
+  width:38px;
+  height:38px;
+  object-fit:cover;
+  border-radius:50%;
+  background:#07152b;
+  border:1px solid rgba(245,195,91,.35);
+  flex:0 0 auto;
+}
+.team-goalie-row .inline-player-headshot{
+  object-fit:contain;
+  padding:5px;
+}
+.player-name-wrap{
+  min-width:0;
+}
+.player-draft-line{
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  align-items:center;
+}
+.clean-player-table th:first-child{
+  min-width:260px;
+}
+
+/* Roster Needs is below the draft controls now. Keep it sticky, but lower. */
+#draft .roster-needs-topbar{
+  top:0!important;
+}
+
+/* Desktop column sizing after removing # */
+@media(min-width:821px){
+  .clean-player-table th:nth-child(1){
+    width:auto!important;
+  }
+  .clean-player-table th:nth-child(2),
+  .clean-player-table th:nth-child(3),
+  .clean-player-table th:nth-child(4),
+  .clean-player-table th:nth-child(5){
+    width:96px!important;
+  }
+}
+
+/* Mobile: no table header overlap, no #/rank column, image inside name card */
+@media(max-width:820px){
+  #draft .roster-needs-topbar{
+    top:0!important;
+    z-index:80!important;
+  }
+
+  .clean-player-table thead{
+    display:none!important;
+  }
+
+  .mobile-player-tools{
+    display:grid!important;
+  }
+
+  .clean-player-table tr[data-mobile-sign]{
+    grid-template-columns:minmax(0,1fr) 34px!important;
+    grid-template-areas:
+      "name button"
+      "stats button"!important;
+    gap:2px 5px!important;
+    min-height:36px!important;
+    padding:3px!important;
+  }
+
+  .player-draft-cell{
+    grid-area:name!important;
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .player-draft-line{
+    display:grid!important;
+    grid-template-columns:24px minmax(0,1fr)!important;
+    gap:5px!important;
+    align-items:center!important;
+  }
+
+  .inline-player-headshot{
+    width:24px!important;
+    height:24px!important;
+    border-radius:50%!important;
+  }
+
+  .team-goalie-row .inline-player-headshot{
+    padding:3px!important;
+  }
+
+  .player-name-wrap{
+    min-width:0!important;
+  }
+
+  .player-draft-line strong{
+    font-size:.58rem!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .player-draft-line .meta{
+    display:none!important;
+  }
+
+  .clean-sign-btn{
+    grid-area:button!important;
+    width:34px!important;
+    min-width:34px!important;
+    max-width:34px!important;
+    height:22px!important;
+    min-height:22px!important;
+  }
+
+  /* Stat cells shifted because the # column is gone */
+  .clean-player-table tr[data-mobile-sign] td:nth-child(2),
+  .clean-player-table tr[data-mobile-sign] td:nth-child(3),
+  .clean-player-table tr[data-mobile-sign] td:nth-child(4),
+  .clean-player-table tr[data-mobile-sign] td:nth-child(5){
+    grid-area:stats!important;
+    display:inline-flex!important;
+    width:auto!important;
+    max-width:max-content!important;
+    margin:0 2px 0 0!important;
+    padding:1px 3px!important;
+    border-radius:999px!important;
+    font-size:.42rem!important;
+    line-height:1!important;
+    background:rgba(255,255,255,.08)!important;
+    color:#fff!important;
+    align-items:center!important;
+  }
+
+  .clean-player-table tr[data-mobile-sign] td:nth-child(6),
+  .clean-player-table tr[data-mobile-sign] td:nth-child(7){
+    display:none!important;
+  }
+
+  .clean-player-table.skater-board-mode td:nth-child(2)::before{content:"G "!important;color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(3)::before{content:"A "!important;color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(4)::before{content:"P "!important;color:#f5c35b;}
+  .clean-player-table.skater-board-mode td:nth-child(5)::before{content:"FPTS "!important;color:#f5c35b;}
+
+  .clean-player-table.goalie-board-mode td:nth-child(2)::before{content:"W "!important;color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(3)::before{content:"SV% "!important;color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(4)::before{content:"GAA "!important;color:#f5c35b;}
+  .clean-player-table.goalie-board-mode td:nth-child(5)::before{content:"FPTS "!important;color:#f5c35b;}
+}
+/* END V69 ROSTER NEEDS BELOW + NO # COLUMN */
