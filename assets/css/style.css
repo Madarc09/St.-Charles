@@ -10665,3 +10665,80 @@ button.danger{
   }
 }
 /* END V103 */
+
+
+/* V104 move desktop watermark farther left + brighten + zoom out existing header image */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard .desktop-player-row .name-cell::after,
+  section#draft #cleanDraftBoard .desktop-player-row .name-cell::after{
+    right:304px!important; /* V103 was 124px; moved left by roughly two logo widths */
+    width:98px!important;
+    height:98px!important;
+    opacity:.34!important;
+    filter:brightness(1.35) contrast(1.08)!important;
+  }
+}
+
+/* Show more of the existing webpage/header/backdrop image instead of cropping it tightly. */
+.hero,
+.site-hero,
+.home-hero,
+.main-hero,
+.page-hero,
+.header-hero,
+.league-hero,
+.hero-card,
+.hero-backdrop,
+.header-backdrop,
+.home-backdrop,
+.backdrop,
+.pool-backdrop,
+.league-backdrop,
+.site-header,
+header.hero,
+header.site-header{
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  background-position:center center!important;
+}
+
+.hero img,
+.site-hero img,
+.home-hero img,
+.main-hero img,
+.page-hero img,
+.header-hero img,
+.league-hero img,
+.hero-backdrop img,
+.header-backdrop img,
+.home-backdrop img,
+.backdrop img,
+.pool-backdrop img,
+.league-backdrop img,
+.site-header img,
+header img{
+  object-fit:contain!important;
+  object-position:center center!important;
+}
+
+/* If a header relies on a pseudo-element image, zoom that out too. */
+.hero::before,
+.site-hero::before,
+.home-hero::before,
+.main-hero::before,
+.page-hero::before,
+.header-hero::before,
+.league-hero::before,
+.hero-backdrop::before,
+.header-backdrop::before,
+.home-backdrop::before,
+.backdrop::before,
+.pool-backdrop::before,
+.league-backdrop::before,
+.site-header::before,
+header.site-header::before{
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  background-position:center center!important;
+}
+/* END V104 */
