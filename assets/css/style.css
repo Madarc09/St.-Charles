@@ -8521,3 +8521,459 @@ body.lottery-running { overflow: hidden; }
   }
 }
 /* END V70 ROSTER ONLY STICKY + MOBILE MATCHES DESKTOP */
+
+
+/* ==========================================================
+   V71 MOBILE REBUILT FROM SCRATCH — EASY REVERT
+   This bypasses the old mobile table/card experiments.
+   Desktop keeps the normal table. Phone gets its own board.
+   ========================================================== */
+
+.mobile-draft-board-list{
+  display:none;
+}
+
+@media(max-width:820px){
+  html,
+  body{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  *,
+  *::before,
+  *::after{
+    box-sizing:border-box!important;
+  }
+
+  main.shell,
+  .shell,
+  #draft,
+  #draft.panel,
+  .clean-live-draft-shell,
+  .clean-draft-room,
+  .clean-draft-board{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+  }
+
+  main.shell{
+    padding:4px!important;
+  }
+
+  #draft.panel{
+    padding:3px!important;
+  }
+
+  .clean-draft-room{
+    display:grid!important;
+    gap:5px!important;
+  }
+
+  /* Only Roster Needs is sticky. Nothing else follows. */
+  #draft .roster-needs-topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:100!important;
+    width:100%!important;
+    margin:0 0 5px!important;
+    padding:4px!important;
+    border-radius:0 0 10px 10px!important;
+    background:rgba(7,21,43,.98)!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.42)!important;
+    backdrop-filter:blur(12px)!important;
+  }
+
+  #draft .clean-draft-control-card,
+  #draft .clean-draft-actions,
+  .clean-draft-order-strip,
+  .clean-player-table thead,
+  .mobile-player-tools{
+    position:static!important;
+    top:auto!important;
+    z-index:auto!important;
+    box-shadow:none!important;
+  }
+
+  /* Compact top dashboard */
+  .clean-draft-control-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+    padding:5px!important;
+    border-radius:10px!important;
+    background:rgba(7,21,43,.86)!important;
+    border:1px solid rgba(245,195,91,.20)!important;
+  }
+
+  .clean-draft-as-control{
+    display:grid!important;
+    grid-template-columns:1fr 88px!important;
+    gap:5px!important;
+    align-items:end!important;
+    padding:5px!important;
+    border-radius:8px!important;
+  }
+
+  .clean-draft-as-control label{
+    grid-column:1/-1!important;
+    font-size:.48rem!important;
+    line-height:1!important;
+  }
+
+  #cleanDraftAsSelect,
+  .v46-pull-players-btn{
+    min-height:28px!important;
+    font-size:.56rem!important;
+    padding:2px 5px!important;
+    border-radius:7px!important;
+  }
+
+  .v46-pull-players-btn{
+    width:88px!important;
+    min-width:88px!important;
+    max-width:88px!important;
+  }
+
+  #v46PullHint{
+    display:none!important;
+  }
+
+  .clean-current-pick,
+  .clean-mini-draft-board-box{
+    padding:5px!important;
+    border-radius:8px!important;
+    min-height:auto!important;
+  }
+
+  .clean-current-pick .label,
+  .mini-draft-board-head .label{
+    font-size:.46rem!important;
+    line-height:1!important;
+  }
+
+  .clean-current-pick strong{
+    font-size:.86rem!important;
+    line-height:1!important;
+  }
+
+  .clean-current-pick em,
+  #cleanLastRefresh,
+  #cleanSyncStatus{
+    font-size:.46rem!important;
+    line-height:1!important;
+  }
+
+  .mini-draft-board-list{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3px!important;
+    max-height:86px!important;
+    overflow:auto!important;
+  }
+
+  .mini-pick{
+    display:grid!important;
+    grid-template-columns:16px 34px minmax(0,1fr) 16px!important;
+    gap:2px!important;
+    padding:2px 3px!important;
+    border-radius:6px!important;
+    min-width:0!important;
+    max-width:none!important;
+    width:100%!important;
+  }
+
+  .mini-pick b{
+    width:14px!important;
+    height:14px!important;
+    font-size:.44rem!important;
+  }
+
+  .mini-pick span,
+  .mini-pick strong,
+  .mini-pick em{
+    min-width:0!important;
+    font-size:.44rem!important;
+    line-height:1!important;
+  }
+
+  /* Roster needs compact */
+  .needs-title,
+  .needs-title-swapped{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:1px!important;
+    padding:3px 5px!important;
+    margin:0 0 3px!important;
+    text-align:center!important;
+    border-radius:8px!important;
+  }
+
+  .needs-title .eyebrow,
+  .needs-heading-centered{
+    justify-self:center!important;
+    font-size:.50rem!important;
+    line-height:1!important;
+  }
+
+  .needs-title strong,
+  .needs-team-name{
+    justify-self:center!important;
+    font-size:.78rem!important;
+    line-height:1.05!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  .needs-grid,
+  .needs-grid-with-players{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:3px!important;
+  }
+
+  .needs-grid div{
+    min-width:0!important;
+    padding:3px!important;
+    border-radius:7px!important;
+  }
+
+  .needs-grid span{
+    font-size:.38rem!important;
+    line-height:1!important;
+  }
+
+  .needs-grid strong{
+    font-size:.88rem!important;
+    line-height:.9!important;
+  }
+
+  .needs-grid em{
+    font-size:.38rem!important;
+    line-height:1!important;
+  }
+
+  .needs-player-list,
+  .needs-empty{
+    display:none!important;
+  }
+
+  .clean-draft-actions-minimal,
+  .clean-draft-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    padding:3px!important;
+    border-radius:8px!important;
+  }
+
+  #cleanRefreshBtn{
+    width:100%!important;
+    min-height:26px!important;
+    font-size:.54rem!important;
+    border-radius:6px!important;
+  }
+
+  .clean-draft-order-strip{
+    display:flex!important;
+    gap:3px!important;
+    overflow-x:auto!important;
+    padding:2px 0!important;
+  }
+
+  .clean-draft-order-strip span{
+    flex:0 0 auto!important;
+    font-size:.46rem!important;
+    padding:2px 5px!important;
+  }
+
+  /* Mobile gets its own controls, separate from the desktop table header. */
+  .mobile-player-tools{
+    display:grid!important;
+    grid-template-columns:92px 1fr!important;
+    gap:4px!important;
+    align-items:center!important;
+    width:100%!important;
+    padding:4px!important;
+    margin:0 0 4px!important;
+    border-radius:9px!important;
+    background:rgba(7,21,43,.94)!important;
+    border:1px solid rgba(245,195,91,.22)!important;
+  }
+
+  .mobile-position-filter{
+    width:92px!important;
+    min-height:26px!important;
+    padding:2px 4px!important;
+    border-radius:7px!important;
+    background:#07152b!important;
+    color:#fff!important;
+    border:1px solid rgba(245,195,91,.35)!important;
+    font-size:.50rem!important;
+    font-weight:900!important;
+  }
+
+  .mobile-sort-row{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:3px!important;
+    min-width:0!important;
+  }
+
+  .mobile-sort-row button{
+    min-width:0!important;
+    min-height:24px!important;
+    padding:2px!important;
+    border-radius:6px!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    background:rgba(255,255,255,.07)!important;
+    color:#f5c35b!important;
+    font-size:.48rem!important;
+    font-weight:900!important;
+  }
+
+  /* IMPORTANT: hide desktop table on phone completely. This prevents the broken overlap. */
+  .clean-player-table{
+    display:none!important;
+  }
+
+  .mobile-draft-board-list{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:4px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+
+  .mobile-draft-player-card{
+    display:grid!important;
+    gap:2px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    padding:4px!important;
+    border-radius:10px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    background:
+      linear-gradient(90deg,var(--team-a,rgba(11,31,61,.95)),var(--team-b,rgba(0,0,0,.78)))!important;
+    box-shadow:0 3px 8px rgba(0,0,0,.22)!important;
+  }
+
+  .mobile-card-main{
+    display:grid!important;
+    grid-template-columns:28px minmax(0,1fr) 38px!important;
+    gap:5px!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+
+  .mobile-card-logo{
+    width:26px!important;
+    height:26px!important;
+    object-fit:cover!important;
+    border-radius:50%!important;
+    background:#07152b!important;
+    border:1px solid rgba(245,195,91,.35)!important;
+  }
+
+  .team-goalie-row .mobile-card-logo{
+    object-fit:contain!important;
+    padding:3px!important;
+  }
+
+  .mobile-card-nameplate{
+    position:relative!important;
+    isolation:isolate!important;
+    min-width:0!important;
+    padding:2px 5px!important;
+    border-radius:7px!important;
+    overflow:hidden!important;
+    background:
+      linear-gradient(90deg,rgba(0,0,0,.34),rgba(0,0,0,.12)),
+      var(--team-logo)!important;
+    background-repeat:no-repeat!important;
+    background-size:100% 100%, auto 100%!important;
+    background-position:center, center!important;
+  }
+
+  .mobile-card-nameplate strong{
+    display:block!important;
+    max-width:100%!important;
+    font-size:.58rem!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    color:#fff!important;
+    text-shadow:0 2px 5px rgba(0,0,0,.8)!important;
+  }
+
+  .mobile-card-nameplate span{
+    display:block!important;
+    max-width:100%!important;
+    font-size:.44rem!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    color:#cbd7ea!important;
+    text-shadow:0 2px 5px rgba(0,0,0,.8)!important;
+  }
+
+  .mobile-draft-btn{
+    display:grid!important;
+    place-items:center!important;
+    width:36px!important;
+    min-width:36px!important;
+    max-width:36px!important;
+    height:24px!important;
+    min-height:24px!important;
+    padding:1px!important;
+    border-radius:7px!important;
+    font-size:.42rem!important;
+    font-weight:1000!important;
+  }
+
+  .mobile-draft-btn:disabled{
+    opacity:.66!important;
+    font-size:.32rem!important;
+  }
+
+  .mobile-card-stats{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:3px!important;
+    padding-left:33px!important;
+    min-width:0!important;
+  }
+
+  .mobile-card-stats span{
+    display:inline-flex!important;
+    gap:2px!important;
+    align-items:center!important;
+    width:auto!important;
+    max-width:max-content!important;
+    padding:1px 4px!important;
+    border-radius:999px!important;
+    font-size:.42rem!important;
+    line-height:1!important;
+    background:rgba(255,255,255,.08)!important;
+    color:#fff!important;
+  }
+
+  .mobile-card-stats b{
+    color:#f5c35b!important;
+    font-size:.40rem!important;
+  }
+
+  .clean-signed-log{
+    display:none!important;
+  }
+}
+/* END V71 MOBILE REBUILT FROM SCRATCH */
