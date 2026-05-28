@@ -10578,3 +10578,42 @@ button.danger{
   }
 }
 /* END V101 */
+
+
+/* V102 re-add desktop NHL team watermark to grid rows */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard .desktop-player-row:not(.desktop-player-header),
+  section#draft #cleanDraftBoard .desktop-player-row:not(.desktop-player-header){
+    position:relative!important;
+    overflow:hidden!important;
+    background:
+      linear-gradient(90deg, rgba(6,20,38,.92), rgba(3,8,16,.96))!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before,
+  section#draft #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:var(--team-logo);
+    background-position:center;
+    background-size:92px 92px;
+    background-repeat:no-repeat;
+    opacity:.13;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row:not(.desktop-player-header) > div,
+  section#draft #cleanDraftBoard .desktop-player-row:not(.desktop-player-header) > div{
+    position:relative!important;
+    z-index:1!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-header,
+  section#draft #cleanDraftBoard .desktop-player-header{
+    position:relative!important;
+    overflow:hidden!important;
+  }
+}
+/* END V102 */
