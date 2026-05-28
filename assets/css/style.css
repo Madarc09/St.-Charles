@@ -9954,3 +9954,98 @@ button.danger{
   }
 }
 /* END V94 */
+
+
+/* V95 force player board to true left + restore mobile headshots */
+@media(min-width:821px){
+  section#draft .clean-draft-room,
+  section#draft #cleanDraftRoom{
+    align-items:stretch!important;
+  }
+
+  section#draft #cleanDraftBoard.clean-draft-board,
+  section#draft #cleanDraftBoard{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    text-align:left!important;
+    justify-content:flex-start!important;
+    justify-items:start!important;
+    align-items:start!important;
+  }
+
+  section#draft #cleanDraftBoard > table.clean-player-table,
+  section#draft #cleanDraftBoard > .clean-player-table,
+  section#draft #cleanDraftBoard .draft-table.clean-player-table{
+    display:table!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    transform:none!important;
+  }
+
+  section#draft #cleanDraftBoard .mobile-draft-board-list,
+  section#draft #cleanDraftBoard .mobile-player-tools{
+    display:none!important;
+  }
+
+  section#draft .clean-player-table .headshot-col,
+  section#draft .clean-player-table .desktop-headshot-cell{
+    text-align:left!important;
+    padding-left:10px!important;
+  }
+
+  section#draft .clean-player-table .player-draft-cell{
+    min-width:0!important;
+    width:44%!important;
+  }
+
+  section#draft .clean-player-table td,
+  section#draft .clean-player-table th{
+    box-sizing:border-box!important;
+  }
+}
+
+@media(max-width:820px){
+  .mobile-card-logo{
+    display:block!important;
+    align-self:center!important;
+    justify-self:center!important;
+    width:36px!important;
+    height:36px!important;
+    border-radius:10px!important;
+    object-fit:cover!important;
+    background:rgba(255,255,255,.08)!important;
+    border:1px solid rgba(245,195,91,.20)!important;
+    position:relative!important;
+    z-index:2!important;
+  }
+
+  .team-goalie-row .mobile-card-logo{
+    object-fit:contain!important;
+    padding:4px!important;
+  }
+
+  .mobile-card-main{
+    grid-template-columns:42px minmax(0,1fr) 58px!important;
+    gap:5px!important;
+  }
+
+  .mobile-card-nameplate{
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    padding:0 5px!important;
+  }
+
+  .mobile-card-nameplate strong,
+  .mobile-card-nameplate span{
+    text-shadow:0 2px 4px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.7)!important;
+  }
+}
+/* END V95 */
