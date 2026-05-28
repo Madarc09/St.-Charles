@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V96 FLUSH LEFT MOBILE FULL NAME -->
+  <!-- V97 HARD LEFT CONFIRM DRAFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1926,6 +1926,10 @@
         const player = players.find(p => String(p.id) === String(id));
         if (!player) return toast("Player not found. Pull NHL players again.");
         if (!canOwnerDraftPosition(activeOwnerId, player.position)) return toast("That roster position is full.");
+
+        const ok = confirm(`Draft ${player.name} to ${ownerName(activeOwnerId)}?`);
+        if (!ok) return;
+
         pushPick(pick, player);
         await saveSharedDraft();
         toast(`Drafted ${player.name} to ${ownerName(activeOwnerId)}.`);

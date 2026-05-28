@@ -10200,3 +10200,79 @@ button.danger{
   }
 }
 /* END V96 */
+
+
+/* V97 hard desktop left alignment + confirm draft restore */
+@media(min-width:821px){
+  /*
+    HARD LEFT FIX:
+    Previous versions moved the table inside the centered page column.
+    This breaks the player board out to the viewport-left edge so the Pic column
+    lines up with the far-left draft-room area instead of starting near pick 6.
+  */
+  body:has(section#draft.active) #cleanDraftBoard{
+    position:relative!important;
+    left:50%!important;
+    transform:translateX(-50vw)!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:42px!important;
+    padding-right:42px!important;
+    box-sizing:border-box!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .clean-player-table{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    transform:none!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .clean-player-table .headshot-col,
+  body:has(section#draft.active) #cleanDraftBoard .clean-player-table .desktop-headshot-cell{
+    width:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    padding-left:0!important;
+    text-align:left!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .desktop-player-headshot{
+    margin-left:0!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .clean-player-table .player-draft-cell{
+    min-width:500px!important;
+    width:48%!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .mobile-draft-board-list,
+  body:has(section#draft.active) #cleanDraftBoard .mobile-player-tools{
+    display:none!important;
+  }
+}
+
+/* Fallback for browsers that dislike :has() */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard{
+    position:relative!important;
+    left:50%!important;
+    transform:translateX(-50vw)!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:42px!important;
+    padding-right:42px!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard .clean-player-table{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+  }
+}
+/* END V97 */
