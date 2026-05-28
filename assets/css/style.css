@@ -9519,3 +9519,145 @@ body.lottery-running { overflow: hidden; }
   background:rgba(255,255,255,.055);
   border:1px solid rgba(255,255,255,.08);
 }
+
+
+/* V87 compact mobile playoff dropdown/breakdown */
+@media(max-width:820px){
+  .playoff-breakdown-row td{
+    padding:4px!important;
+  }
+
+  .playoff-breakdown-panel{
+    gap:5px!important;
+  }
+
+  .playoff-breakdown-panel h3{
+    font-size:.82rem!important;
+    line-height:1!important;
+    margin:0 0 2px!important;
+  }
+
+  .mobile-playoff-breakdown-list{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:4px!important;
+  }
+
+  .mobile-playoff-player-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      "name total"
+      "stats stats"
+      "calc calc"!important;
+    gap:2px 6px!important;
+    padding:5px 6px!important;
+    border-radius:9px!important;
+    background:rgba(255,255,255,.055)!important;
+  }
+
+  .mobile-playoff-player-head{
+    display:contents!important;
+  }
+
+  .mobile-playoff-player-head strong{
+    grid-area:name!important;
+    font-size:.66rem!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .mobile-playoff-player-head b{
+    grid-area:total!important;
+    font-size:.66rem!important;
+    line-height:1!important;
+    color:#f5c35b!important;
+    white-space:nowrap!important;
+  }
+
+  .mobile-playoff-player-card > small{
+    display:none!important;
+  }
+
+  .mobile-playoff-stat-grid{
+    grid-area:stats!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:2px!important;
+  }
+
+  .mobile-playoff-stat-grid span{
+    padding:2px 1px!important;
+    border-radius:6px!important;
+    font-size:.58rem!important;
+    line-height:1!important;
+    min-width:0!important;
+  }
+
+  .mobile-playoff-stat-grid em{
+    font-size:.42rem!important;
+    line-height:1!important;
+  }
+
+  .mobile-playoff-player-card p{
+    grid-area:calc!important;
+    margin:0!important;
+    font-size:.54rem!important;
+    line-height:1.05!important;
+    color:#b9c6da!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .playoff-player-list{
+    gap:3px!important;
+  }
+
+  .playoff-player-chip{
+    font-size:.58rem!important;
+    padding:3px 5px!important;
+    gap:3px!important;
+  }
+
+  .playoff-leaderboard th,
+  .playoff-leaderboard td{
+    padding:5px!important;
+    font-size:.66rem!important;
+  }
+
+  .playoff-leaderboard .total-cell{
+    font-size:.92rem!important;
+  }
+
+  .playoff-team-toggle{
+    gap:3px!important;
+    font-size:.68rem!important;
+  }
+}
+/* END V87 compact mobile playoff dropdown/breakdown */
+
+
+/* V88 source status + no static override */
+.official-source-status{
+  margin:8px 0 10px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(245,195,91,.22);
+  color:#cbd7ea;
+  font-size:.78rem;
+  line-height:1.35;
+}
+#draftRoomSourceStatus{
+  margin-top:0;
+}
+@media(max-width:820px){
+  .official-source-status{
+    font-size:.66rem;
+    padding:6px 8px;
+  }
+}
+/* END V88 */

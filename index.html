@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V86 SHARED API SOURCE -->
+  <!-- V88 SOURCE STATUS NO STATIC OVERRIDE -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -35,7 +35,8 @@
           </div>
           <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
         </div>
-        <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
+<div id="homeRosterSourceStatus" class="official-source-status">Source: loading…</div>
+                <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
           <div class="clean-loading-card">
             <strong>Playoff leaderboard loading…</strong>
             <span>Press Pull Playoff Stats if it does not load automatically.</span>
@@ -47,6 +48,8 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
 <div id="cleanDraftRoom" class="clean-draft-room">
+
+        <div id="draftRoomSourceStatus" class="official-source-status">Source: loading…</div>
 
         <div id="draftRoomLotteryTop" class="draft-room-lottery-top">
           <div class="draft-room-lottery-head">
@@ -128,6 +131,7 @@
           <h2>Teams and drafted players</h2>
         </div>
       </div>
+      <div id="rostersSourceStatus" class="official-source-status">Source: loading…</div>
       <div id="rosterCards" class="grid roster-grid"></div>
     </section>
 
@@ -459,10 +463,41 @@
         return saveSharedDraftOfficial(fresh).catch(() => fresh);
       }
 
+      function describeDraft(draft){
+        const count = draft && Array.isArray(draft.picks) ? draft.picks.length : 0;
+        const source = draft && draft.__source ? draft.__source : "unknown";
+        const storage = draft && draft.__storage ? draft.__storage : "";
+        const mode = draft && draft.__mode ? draft.__mode : "";
+        const updated = draft && draft.updatedAt ? new Date(draft.updatedAt).toLocaleString() : "not saved";
+        return `Source: ${source}${storage ? " / " + storage : ""}${mode ? " / " + mode : ""} • Picks: ${count} • Updated: ${updated}`;
+      }
+
+      function updateSourceStatus(draft){
+        const text = describeDraft(draft);
+        ["homeRosterSourceStatus","draftRoomSourceStatus","rostersSourceStatus"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = text;
+        });
+      }
+
       window.officialDraftApi = {
-        load: loadSharedDraftOfficial,
-        save: saveSharedDraftOfficial,
-        reset: resetSharedDraftOfficial,
+        load: async function(){
+          const draft = await loadSharedDraftOfficial();
+          updateSourceStatus(draft);
+          return draft;
+        },
+        save: async function(draft){
+          const saved = await saveSharedDraftOfficial(draft);
+          updateSourceStatus(saved);
+          return saved;
+        },
+        reset: async function(){
+          const fresh = await resetSharedDraftOfficial();
+          updateSourceStatus(fresh);
+          return fresh;
+        },
+        describe: describeDraft,
+        updateSourceStatus,
         defaultDraft,
         backupKey: KEY
       };
@@ -2435,7 +2470,9 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           return null;
         }
 
-        return (await tryStaticFinal()) || (await trySharedDraft()) || { owners: DEFAULT_OWNERS, picks: [], __source:"no shared roster/draft source found" };
+        // During live draft testing, do not let old data/final-draft.json override the shared API.
+        // Static final draft can be re-enabled later after the draft is truly locked.
+        return (await trySharedDraft()) || { owners: DEFAULT_OWNERS, picks: [], __source:"no shared roster/draft source found" };
       }
 
       function normalizeName(s){
@@ -2506,11 +2543,12 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
 
         try{
           const draft = await readRosterDraftState();
+          if (window.officialDraftApi && window.officialDraftApi.updateSourceStatus) window.officialDraftApi.updateSourceStatus(draft);
           const owners = Array.isArray(draft.owners) && draft.owners.length ? draft.owners : DEFAULT_OWNERS;
           const picks = Array.isArray(draft.picks) ? draft.picks : [];
 
           if (!picks.length) {
-            target.innerHTML = `<div class="clean-loading-card"><strong>No roster picks found.</strong><span>Home checked the locked final roster, then /api/draft, then local browser backup. Source: ${esc(draft.__source || "unknown")}.</span></div>`;
+            target.innerHTML = `<div class="clean-loading-card"><strong>No roster picks found.</strong><span>Home checked /api/draft only for the live roster. Source: ${esc(draft.__source || "unknown")}.</span></div>`;
             return;
           }
 
@@ -2700,6 +2738,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       window.renderDraftRosters = function(draft){
+        if (window.officialDraftApi && window.officialDraftApi.updateSourceStatus) window.officialDraftApi.updateSourceStatus(draft);
         const target = document.getElementById("rosterCards");
         if (!target) return;
 
