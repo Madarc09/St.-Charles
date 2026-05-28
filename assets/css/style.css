@@ -9276,3 +9276,103 @@ body.lottery-running { overflow: hidden; }
     overflow-x:auto;
   }
 }
+
+
+/* V78 mobile full-team playoff breakdown */
+.mobile-playoff-breakdown-list{
+  display:none;
+}
+@media(max-width:820px){
+  .playoff-breakdown-panel{
+    overflow:visible!important;
+  }
+
+  .playoff-breakdown-table{
+    display:none!important;
+  }
+
+  .mobile-playoff-breakdown-list{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+
+  .mobile-playoff-player-card{
+    display:grid;
+    gap:5px;
+    width:100%;
+    padding:9px;
+    border-radius:12px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+  }
+
+  .mobile-playoff-player-head{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:center;
+  }
+
+  .mobile-playoff-player-head strong{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:#fff;
+  }
+
+  .mobile-playoff-player-head b{
+    flex:0 0 auto;
+    color:#f5c35b;
+  }
+
+  .mobile-playoff-player-card small{
+    color:#cbd7ea;
+  }
+
+  .mobile-playoff-stat-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:4px;
+  }
+
+  .mobile-playoff-stat-grid span{
+    display:grid;
+    place-items:center;
+    gap:2px;
+    padding:4px 2px;
+    border-radius:8px;
+    background:rgba(0,0,0,.22);
+    color:#fff;
+    font-size:.76rem;
+    font-weight:900;
+  }
+
+  .mobile-playoff-stat-grid em{
+    font-style:normal;
+    color:#f5c35b;
+    font-size:.54rem;
+    text-transform:uppercase;
+  }
+
+  .mobile-playoff-player-card p{
+    margin:0;
+    color:#e9f2ff;
+    font-size:.72rem;
+  }
+
+  .playoff-breakdown-row td{
+    padding:8px!important;
+  }
+}
+
+
+/* V79 home shared draft state fix */
+.playoff-updated{
+  padding:8px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+}

@@ -90,6 +90,10 @@ function cleanDraft(input) {
         goals: Number(p.player?.goals || 0),
         assists: Number(p.player?.assists || 0),
         points: Number(p.player?.points || 0),
+        goalieWins: Number(p.player?.goalieWins || 0),
+        goalieShutouts: Number(p.player?.goalieShutouts || 0),
+        savePct: Number(p.player?.savePct || 0),
+        goalsAgainstAverage: Number(p.player?.goalsAgainstAverage || 0),
         fantasyPoints: Number(p.player?.fantasyPoints || 0)
       }
     })).filter(p => allowedOwners.has(p.ownerId) && p.player.id),

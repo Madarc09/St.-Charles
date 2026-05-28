@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V77 EXPANDABLE PLAYOFF BREAKDOWN -->
+  <!-- V79 HOME SHARED DRAFT FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -47,7 +47,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V77 EXPANDABLE PLAYOFF BREAKDOWN</div>
+        <div class="v46-build-marker">V79 HOME SHARED DRAFT FIX</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -2548,13 +2548,24 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       async function readDraftState(){
-        try{
-          const res = await fetch("/api/draft", { cache:"no-store" });
-          if (res.ok){
+        const candidates = [];
+
+        async function tryApi(label, url){
+          try{
+            const res = await fetch(url, { cache:"no-store" });
+            if (!res.ok) return;
             const data = await res.json();
-            if (data && data.draft && Array.isArray(data.draft.picks)) return data.draft;
-          }
-        }catch(e){}
+            if (data && data.draft && Array.isArray(data.draft.picks)) {
+              candidates.push({
+                source: `${label} / ${data.storage || "api"}${data.configured === false ? " temporary" : ""}`,
+                configured: data.configured,
+                draft: data.draft
+              });
+            }
+          }catch(e){}
+        }
+
+        await tryApi("shared draft", "/api/draft?t=" + Date.now());
 
         const keys = [
           "custom-hockey-pool-v40-clean-live-draft",
@@ -2564,10 +2575,24 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         for (const key of keys){
           try{
             const parsed = JSON.parse(localStorage.getItem(key) || "null");
-            if (parsed && Array.isArray(parsed.picks)) return parsed;
+            if (parsed && Array.isArray(parsed.picks)) {
+              candidates.push({ source: `local browser: ${key}`, configured: null, draft: parsed });
+            }
           }catch(e){}
         }
-        return { owners: DEFAULT_OWNERS, picks: [] };
+
+        const best = candidates
+          .filter(c => c && c.draft && Array.isArray(c.draft.picks))
+          .sort((a,b) => (b.draft.picks.length - a.draft.picks.length))[0];
+
+        if (best) {
+          try { localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(best.draft)); } catch(e) {}
+          best.draft.__source = best.source;
+          best.draft.__configured = best.configured;
+          return best.draft;
+        }
+
+        return { owners: DEFAULT_OWNERS, picks: [], __source: "no saved draft found", __configured: null };
       }
 
       function normalizeName(s){
@@ -2712,7 +2737,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           const rows = Array.from(teams.values()).sort((a,b) => (b.total - a.total) || a.ownerName.localeCompare(b.ownerName));
 
           if (!picks.length) {
-            target.innerHTML = '<div class="clean-loading-card"><strong>No drafted players yet.</strong><span>Draft players first, then the playoff leaderboard will score them.</span></div>';
+            target.innerHTML = `<div class="clean-loading-card"><strong>No saved draft picks found.</strong><span>Draft source checked: ${esc(draft.__source || "unknown")}. If this is correct on desktop but empty on mobile, the shared draft API is not holding the saved picks for other devices yet.</span></div>`;
             return;
           }
 
@@ -2724,7 +2749,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
                 const sortedPlayers = row.players
                   .slice()
                   .sort((a,b) => (b.playoffPoints - a.playoffPoints) || (b.fantasyPoints - a.fantasyPoints) || a.name.localeCompare(b.name));
-                const topPlayers = sortedPlayers.filter(p => p.playoffPoints > 0).slice(0, 5);
+                const topPlayers = sortedPlayers.filter(p => p.playoffPoints > 0).slice(0, 12);
                 const playerHtml = topPlayers.length
                   ? topPlayers.map(p => `<span class="playoff-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.playoffPoints} pts <small>${p.goalieWins ? `${p.goalieWins} GW` : `${p.goals}G ${p.assists}A`}</small></span>`).join("")
                   : '<span class="muted">No playoff points yet</span>';
@@ -2745,6 +2770,27 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
                   </tr>`;
                 }).join("");
 
+                const mobileBreakdownCards = sortedPlayers.map(p => {
+                  const calc = p.goalieWins
+                    ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}`
+                    : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  return `<article class="mobile-playoff-player-card">
+                    <div class="mobile-playoff-player-head">
+                      <strong>${esc(p.name)}</strong>
+                      <b>${p.playoffPoints} pts</b>
+                    </div>
+                    <small>${esc(p.position)} • ${esc(p.nhlTeam)}</small>
+                    <div class="mobile-playoff-stat-grid">
+                      <span><em>G</em>${p.goals}</span>
+                      <span><em>A</em>${p.assists}</span>
+                      <span><em>GW</em>${p.goalieWins}</span>
+                      <span><em>NHL Pts</em>${p.regularPoints}</span>
+                      <span><em>Draft FPTS</em>${p.fantasyPoints}</span>
+                    </div>
+                    <p>${esc(calc)}</p>
+                  </article>`;
+                }).join("");
+
                 const detailId = `playoff-breakdown-${esc(row.ownerId)}`;
                 return `<tr class="playoff-summary-row">
                   <td><b>${i + 1}</b></td>
@@ -2759,6 +2805,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
                   <td colspan="7">
                     <div class="playoff-breakdown-panel">
                       <h3>${esc(row.ownerName)} playoff point breakdown</h3>
+                      <div class="mobile-playoff-breakdown-list">${mobileBreakdownCards || '<p class="muted">No drafted players.</p>'}</div>
                       <table class="playoff-breakdown-table">
                         <thead><tr><th>Player</th><th>G</th><th>A</th><th>GW</th><th>NHL Pts</th><th>Draft FPTS</th><th>Pool Pts</th><th>Calculation</th></tr></thead>
                         <tbody>${breakdownRows || '<tr><td colspan="8">No drafted players.</td></tr>'}</tbody>
@@ -2768,7 +2815,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
                 </tr>`;
               }).join("") + '</tbody>' +
             '</table>' +
-            `<p class="muted playoff-updated">Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
+            `<p class="muted playoff-updated">Draft picks found: ${esc(picks.length)} from ${esc(draft.__source || "unknown source")}. Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
         } catch(error) {
           console.error(error);
           target.innerHTML = `<div class="clean-loading-card error"><strong>Playoff leaderboard failed.</strong><span>${esc(error.message || error)}</span></div>`;
