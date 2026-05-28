@@ -10617,3 +10617,51 @@ button.danger{
   }
 }
 /* END V102 */
+
+
+/* V103 move desktop watermark beside player name, away from Draft/Wait button */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before,
+  section#draft #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before{
+    background-position:calc(54px + 48%) center!important;
+    background-size:86px 86px!important;
+    opacity:.14!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row .name-cell,
+  section#draft #cleanDraftBoard .desktop-player-row .name-cell{
+    position:relative!important;
+    overflow:hidden!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row .name-cell::after,
+  section#draft #cleanDraftBoard .desktop-player-row .name-cell::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    right:124px;
+    width:90px;
+    height:90px;
+    transform:translateY(-50%);
+    background-image:var(--team-logo);
+    background-position:center;
+    background-size:contain;
+    background-repeat:no-repeat;
+    opacity:.16;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row .name-cell > *,
+  section#draft #cleanDraftBoard .desktop-player-row .name-cell > *{
+    position:relative!important;
+    z-index:1!important;
+  }
+
+  /* Hide the full-row watermark underneath the button; name-cell gets its own watermark now. */
+  #draft.active #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before,
+  section#draft #cleanDraftBoard .desktop-player-row:not(.desktop-player-header)::before{
+    opacity:0!important;
+  }
+}
+/* END V103 */
