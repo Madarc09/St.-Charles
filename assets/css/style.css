@@ -9466,3 +9466,45 @@ body.lottery-running { overflow: hidden; }
     width:100%;
   }
 }
+
+
+/* V82 shared storage warning */
+.shared-storage-warning{
+  display:grid;
+  gap:4px;
+  margin:12px 0;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(180,35,24,.18);
+  border:1px solid rgba(255,88,88,.42);
+  color:#fff;
+}
+.shared-storage-warning strong{
+  color:#ffb4b4;
+}
+.shared-storage-warning span{
+  color:#ffe7e7;
+}
+.shared-storage-card code,
+.storage-steps code{
+  display:block;
+  padding:7px 9px;
+  margin:5px 0;
+  border-radius:8px;
+  background:#06101f;
+  color:#f5c35b;
+  border:1px solid rgba(245,195,91,.24);
+}
+.storage-steps{
+  display:grid;
+  gap:4px;
+}
+
+
+/* V83 static final draft workflow */
+.static-final-draft-card{
+  margin-bottom:16px;
+}
+#exportFinalDraftBtn{
+  border-color:rgba(92,214,164,.55);
+}

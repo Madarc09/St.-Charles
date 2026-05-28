@@ -1,0 +1,41 @@
+{
+  "locked": false,
+  "source": "data/final-draft.json",
+  "note": "Replace this file with an exported completed draft after the live draft is finished.",
+  "owners": [
+    {
+      "id": "nick",
+      "name": "Nick",
+      "teamName": "Nick"
+    },
+    {
+      "id": "chris",
+      "name": "Chris",
+      "teamName": "Chris"
+    },
+    {
+      "id": "andrew",
+      "name": "Andrew",
+      "teamName": "Andrew"
+    },
+    {
+      "id": "tyler",
+      "name": "Tyler",
+      "teamName": "Tyler"
+    },
+    {
+      "id": "scott",
+      "name": "Scott",
+      "teamName": "Scott"
+    }
+  ],
+  "draftOrder": [
+    "nick",
+    "chris",
+    "andrew",
+    "tyler",
+    "scott"
+  ],
+  "picks": [],
+  "updatedAt": ""
+}

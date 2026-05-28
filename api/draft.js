@@ -18,7 +18,7 @@ async function redisCommand(path) {
 
 async function getStoredDraft() {
   const { configured } = redisConfig();
-  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory' };
+  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
   const key = encodeURIComponent(STORAGE_KEY);
   const data = await redisCommand(`/get/${key}`);
   if (!data.result) return { configured: true, draft: null, storage: 'kv' };
@@ -33,7 +33,7 @@ async function setStoredDraft(draft) {
   const { configured } = redisConfig();
   if (!configured) {
     MEMORY_DRAFT = draft;
-    return { configured: false, storage: 'server-memory' };
+    return { configured: false, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
   }
   const key = encodeURIComponent(STORAGE_KEY);
   const payload = encodeURIComponent(JSON.stringify(draft));
@@ -45,7 +45,7 @@ async function clearStoredDraft() {
   const { configured } = redisConfig();
   if (!configured) {
     MEMORY_DRAFT = null;
-    return { configured: false, storage: 'server-memory' };
+    return { configured: false, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
   }
   await redisCommand(`/del/${encodeURIComponent(STORAGE_KEY)}`);
   return { configured: true, storage: 'kv' };
