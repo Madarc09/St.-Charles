@@ -10454,3 +10454,127 @@ button.danger{
   }
 }
 /* END V100 */
+
+
+/* V101: replace desktop table layout with true left-aligned grid */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard,
+  section#draft #cleanDraftBoard{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    transform:none!important;
+    overflow:visible!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-grid,
+  section#draft #cleanDraftBoard .desktop-player-grid{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row,
+  section#draft #cleanDraftBoard .desktop-player-row{
+    display:grid!important;
+    grid-template-columns:54px minmax(460px, 1.5fr) repeat(4, minmax(82px, .32fr))!important;
+    gap:0!important;
+    align-items:center!important;
+    width:100%!important;
+    margin:0 0 7px 0!important;
+    padding:8px 10px 8px 0!important;
+    box-sizing:border-box!important;
+    border-radius:13px!important;
+    background:rgba(255,255,255,.055)!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-header,
+  section#draft #cleanDraftBoard .desktop-player-header{
+    margin-bottom:6px!important;
+    padding-top:6px!important;
+    padding-bottom:6px!important;
+    background:rgba(0,0,0,.28)!important;
+    border-color:rgba(245,195,91,.22)!important;
+    color:#f5c35b!important;
+    text-transform:uppercase!important;
+    font-size:.75rem!important;
+    letter-spacing:.06em!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row > div,
+  section#draft #cleanDraftBoard .desktop-player-row > div{
+    min-width:0!important;
+    padding:0 8px!important;
+    text-align:right!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row .pic-cell,
+  section#draft #cleanDraftBoard .desktop-player-row .pic-cell{
+    padding-left:0!important;
+    padding-right:6px!important;
+    text-align:left!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-row .name-cell,
+  section#draft #cleanDraftBoard .desktop-player-row .name-cell{
+    text-align:left!important;
+    padding-left:0!important;
+  }
+
+  #draft.active #cleanDraftBoard .desktop-player-headshot,
+  section#draft #cleanDraftBoard .desktop-player-headshot{
+    width:42px!important;
+    height:42px!important;
+    margin:0!important;
+    display:block!important;
+  }
+
+  #draft.active #cleanDraftBoard .player-draft-line,
+  section#draft #cleanDraftBoard .player-draft-line{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 108px!important;
+    gap:10px!important;
+    align-items:center!important;
+    width:100%!important;
+  }
+
+  #draft.active #cleanDraftBoard .mobile-player-tools,
+  #draft.active #cleanDraftBoard .mobile-draft-board-list,
+  section#draft #cleanDraftBoard .mobile-player-tools,
+  section#draft #cleanDraftBoard .mobile-draft-board-list,
+  #draft.active #cleanDraftBoard .clean-player-table,
+  section#draft #cleanDraftBoard .clean-player-table{
+    display:none!important;
+  }
+
+  #draft.active,
+  section#draft,
+  section#draft #cleanDraftRoom,
+  section#draft .clean-draft-room{
+    overflow:visible!important;
+  }
+}
+
+@media(max-width:820px){
+  .desktop-player-grid{
+    display:none!important;
+  }
+}
+/* END V101 */

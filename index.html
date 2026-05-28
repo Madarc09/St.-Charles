@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V100 TABLE ITSELF LEFT -->
+  <!-- V101 DESKTOP GRID BOARD -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1695,41 +1695,9 @@
       }
 
       function alignDesktopDraftBoard(){
-        if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return;
-
-        const board = document.querySelector("#cleanDraftBoard");
-        const table = document.querySelector("#cleanDraftBoard .clean-player-table");
-        const anchor = document.querySelector("#cleanDraftOrderStrip span:first-child") || document.querySelector("#cleanDraftOrderStrip");
-
-        if (!board || !table || !anchor) return;
-
-        // Reset the ACTUAL TABLE before measuring. Older CSS centers the table inside the board.
-        table.style.setProperty("position", "relative", "important");
-        table.style.setProperty("left", "0px", "important");
-        table.style.setProperty("right", "auto", "important");
-        table.style.setProperty("margin-left", "0px", "important");
-        table.style.setProperty("margin-right", "0px", "important");
-        table.style.setProperty("transform", "none", "important");
-        table.style.setProperty("width", "100%", "important");
-        table.style.setProperty("max-width", "none", "important");
-
-        requestAnimationFrame(() => {
-          const tableLeft = Math.round(table.getBoundingClientRect().left);
-          const anchorLeft = Math.round(anchor.getBoundingClientRect().left);
-
-          // This is the real gap the user keeps seeing.
-          const shift = anchorLeft - tableLeft;
-          const extraWidth = shift < 0 ? Math.abs(shift) : 0;
-
-          table.style.setProperty("position", "relative", "important");
-          table.style.setProperty("transform", `translateX(${shift}px)`, "important");
-          table.style.setProperty("width", `calc(100% + ${extraWidth}px)`, "important");
-          table.style.setProperty("max-width", "none", "important");
-
-          board.dataset.tableLeftBefore = String(tableLeft);
-          board.dataset.anchorLeft = String(anchorLeft);
-          board.dataset.tableShift = String(shift);
-        });
+        // V101: desktop no longer uses the old centered table; it uses a left-aligned grid.
+        const grid = document.querySelector("#cleanDraftBoard .desktop-player-grid");
+        if (grid) grid.dataset.leftAligned = "true";
       }
 
       function showBoardLoading(message){
@@ -1851,22 +1819,22 @@
           <option value="TG" ${positionFilter==="TG"?"selected":""}>Team Goalie</option>
         </select>`;
 
-        const headers = goalieMode
-          ? `<tr><th class="headshot-col">Pic</th><th>${posSelect}</th><th>${sortHead("goalieWins","Wins")}</th><th>${sortHead("savePct","Save %")}</th><th>${sortHead("goalsAgainstAverage","GAA")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`
-          : `<tr><th class="headshot-col">Pic</th><th>${posSelect}</th><th>${sortHead("goals","Goals")}</th><th>${sortHead("assists","Assists")}</th><th>${sortHead("points","Pts")}</th><th>${sortHead("fantasyPoints","Fantasy Pts")}</th></tr>`;
+        const desktopHeaders = goalieMode
+          ? `<div class="desktop-player-row desktop-player-header"><div class="pic-cell">Pic</div><div class="name-cell">${posSelect}</div><div>${sortHead("goalieWins","Wins")}</div><div>${sortHead("savePct","Save %")}</div><div>${sortHead("goalsAgainstAverage","GAA")}</div><div>${sortHead("fantasyPoints","Fantasy Pts")}</div></div>`
+          : `<div class="desktop-player-row desktop-player-header"><div class="pic-cell">Pic</div><div class="name-cell">${posSelect}</div><div>${sortHead("goals","Goals")}</div><div>${sortHead("assists","Assists")}</div><div>${sortHead("points","Pts")}</div><div>${sortHead("fantasyPoints","Fantasy Pts")}</div></div>`;
 
         const rows = filteredPlayers().slice(0, 900).map(p => {
           const allowed = activeOwnerId ? canOwnerDraftPosition(activeOwnerId, p.position) : false;
           const disabled = (canPick && allowed) ? "" : "disabled";
           const text = !canPick ? "Wait" : (!allowed ? "Full" : "Draft");
-          return `<tr class="${p.position === "TG" ? "team-goalie-row" : ""} ${esc(teamClassName(p.nhlTeam))}" data-mobile-sign="${esc(p.id)}" style="--team-logo:url('${esc(teamLogoUrl(p.nhlTeam))}')">
-            <td class="desktop-headshot-cell"><img class="desktop-player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"></td>
-            <td class="player-draft-cell"><div class="player-draft-line compact-player-line"><div class="player-name-wrap"><strong>${esc(p.name)}</strong><div class="meta">${esc(displayPosition(p.position))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span>${text}</span></button></div></td>
-            <td>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</td>
-            <td>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</td>
-            <td>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</td>
-            <td><strong>${fp(p)}</strong></td>
-          </tr>`;
+          return `<div class="desktop-player-row ${p.position === "TG" ? "team-goalie-row" : ""} ${esc(teamClassName(p.nhlTeam))}" data-mobile-sign="${esc(p.id)}" style="--team-logo:url('${esc(teamLogoUrl(p.nhlTeam))}')">
+            <div class="pic-cell"><img class="desktop-player-headshot" src="${esc(playerImageUrl(p))}" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+            <div class="name-cell"><div class="player-draft-line compact-player-line"><div class="player-name-wrap"><strong>${esc(p.name)}</strong><div class="meta">${esc(displayPosition(p.position))} • ${esc(p.nhlTeam)} • Real NHL API</div></div><button type="button" class="draft-player-btn single-draft-btn contract-draft-btn clean-sign-btn" data-clean-sign="${esc(p.id)}" ${disabled}><span>${text}</span></button></div></div>
+            <div>${p.position === "TG" ? (p.goalieWins || 0) : (p.goals || 0)}</div>
+            <div>${p.position === "TG" ? (p.savePct || 0) : (p.assists || 0)}</div>
+            <div>${p.position === "TG" ? (p.goalsAgainstAverage || 0) : (p.points || 0)}</div>
+            <div><strong>${fp(p)}</strong></div>
+          </div>`;
         }).join("");
 
         const mobileTools = `<div class="mobile-player-tools">
@@ -1899,7 +1867,7 @@
           </article>`;
         }).join("");
 
-        board.innerHTML = `${mobileTools}<table class="draft-table clean-player-table ${goalieMode ? "goalie-board-mode" : "skater-board-mode"}"><thead>${headers}</thead><tbody>${rows}</tbody></table><div class="mobile-draft-board-list">${mobileCards}</div>`;
+        board.innerHTML = `${mobileTools}<div class="desktop-player-grid ${goalieMode ? "goalie-board-mode" : "skater-board-mode"}">${desktopHeaders}${rows}</div><div class="mobile-draft-board-list">${mobileCards}</div>`;
         alignDesktopDraftBoard();
       }
 
