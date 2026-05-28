@@ -10276,3 +10276,136 @@ button.danger{
   }
 }
 /* END V97 */
+
+
+/* V98 measured desktop-left alignment
+   The left edge is now set by JS measurement against pick #1 in the draft strip.
+   This neutralizes the older guessed left/translate rules. */
+@media(min-width:821px){
+  main.shell,
+  #draft.panel,
+  #draft.active,
+  section#draft,
+  section#draft .clean-draft-room,
+  section#draft #cleanDraftRoom,
+  section#draft #cleanDraftBoard{
+    overflow:visible!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard,
+  #draft.active #cleanDraftBoard,
+  section#draft #cleanDraftBoard{
+    left:auto!important;
+    right:auto!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:none!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    position:relative!important;
+    box-sizing:border-box!important;
+  }
+
+  body:has(section#draft.active) #cleanDraftBoard .clean-player-table,
+  #draft.active #cleanDraftBoard .clean-player-table,
+  section#draft #cleanDraftBoard .clean-player-table{
+    position:relative!important;
+    transform:none!important;
+    margin:0!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+  }
+
+  section#draft #cleanDraftBoard .mobile-draft-board-list,
+  section#draft #cleanDraftBoard .mobile-player-tools{
+    display:none!important;
+  }
+}
+/* END V98 */
+
+
+/* V99 FINAL HARD FIX: desktop draft board true-left */
+@media(min-width:821px){
+  /*
+    The board was still being centered by older max-width/table layout rules.
+    This version does not rely on the table's own normal position.
+    It shifts the board by a JS-calculated CSS variable based on the board's real
+    getBoundingClientRect().left and forces full viewport/table width.
+  */
+
+  #draft.active,
+  section#draft.active,
+  section#draft #cleanDraftRoom,
+  section#draft .clean-draft-room{
+    overflow:visible!important;
+  }
+
+  #draft.active #cleanDraftBoard,
+  section#draft #cleanDraftBoard{
+    position:relative!important;
+    display:block!important;
+    left:var(--desktop-board-shift, -306px)!important;
+    width:calc(100vw - 84px)!important;
+    max-width:calc(100vw - 84px)!important;
+    min-width:calc(100vw - 84px)!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    overflow:visible!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard > table.clean-player-table,
+  #draft.active #cleanDraftBoard .draft-table.clean-player-table,
+  section#draft #cleanDraftBoard > table.clean-player-table,
+  section#draft #cleanDraftBoard .draft-table.clean-player-table{
+    position:relative!important;
+    display:table!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    left:0!important;
+    right:auto!important;
+    transform:none!important;
+    table-layout:auto!important;
+    box-sizing:border-box!important;
+  }
+
+  #draft.active #cleanDraftBoard .clean-player-table .headshot-col,
+  #draft.active #cleanDraftBoard .clean-player-table .desktop-headshot-cell,
+  section#draft #cleanDraftBoard .clean-player-table .headshot-col,
+  section#draft #cleanDraftBoard .clean-player-table .desktop-headshot-cell{
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    padding-left:0!important;
+    padding-right:6px!important;
+    text-align:left!important;
+  }
+
+  #draft.active #cleanDraftBoard .clean-player-table .player-draft-cell,
+  section#draft #cleanDraftBoard .clean-player-table .player-draft-cell{
+    width:48%!important;
+    min-width:520px!important;
+  }
+
+  #draft.active #cleanDraftBoard .clean-player-table td:nth-child(n+3),
+  #draft.active #cleanDraftBoard .clean-player-table th:nth-child(n+3),
+  section#draft #cleanDraftBoard .clean-player-table td:nth-child(n+3),
+  section#draft #cleanDraftBoard .clean-player-table th:nth-child(n+3){
+    text-align:right!important;
+  }
+
+  #draft.active #cleanDraftBoard .mobile-draft-board-list,
+  #draft.active #cleanDraftBoard .mobile-player-tools,
+  section#draft #cleanDraftBoard .mobile-draft-board-list,
+  section#draft #cleanDraftBoard .mobile-player-tools{
+    display:none!important;
+  }
+}
+/* END V99 */

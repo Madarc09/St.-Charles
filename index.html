@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V97 HARD LEFT CONFIRM DRAFT -->
+  <!-- V99 ABSOLUTE DESKTOP BOARD LEFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1694,6 +1694,24 @@
         if (el) el.textContent = text;
       }
 
+      function alignDesktopDraftBoard(){
+        if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) return;
+
+        const board = document.querySelector("#cleanDraftBoard");
+        const table = document.querySelector("#cleanDraftBoard .clean-player-table");
+        if (!board || !table) return;
+
+        // The old CSS stack kept centering the board. This makes the table use the viewport,
+        // then offsets it from the board's current position so it starts at the real page-left.
+        const boardLeft = Math.round(board.getBoundingClientRect().left);
+        const desiredLeft = 42; // aligns with the left edge of the draft-room content/pick #1 area
+        const shift = desiredLeft - boardLeft;
+
+        board.style.setProperty("--desktop-board-shift", shift + "px");
+        board.dataset.boardLeft = String(boardLeft);
+        board.dataset.boardShift = String(shift);
+      }
+
       function showBoardLoading(message){
         const board = $("#cleanDraftBoard");
         if (board) board.innerHTML = `<div class="clean-loading-card"><strong>${esc(message || "Loading…")}</strong></div>`;
@@ -1862,6 +1880,7 @@
         }).join("");
 
         board.innerHTML = `${mobileTools}<table class="draft-table clean-player-table ${goalieMode ? "goalie-board-mode" : "skater-board-mode"}"><thead>${headers}</thead><tbody>${rows}</tbody></table><div class="mobile-draft-board-list">${mobileCards}</div>`;
+        alignDesktopDraftBoard();
       }
 
       function eligibleFor(ownerId, b){
@@ -2060,7 +2079,8 @@
 
       window.addEventListener("draft-tab-opened", () => setTimeout(startRoom, 25));
       window.addEventListener("load", () => setTimeout(startRoom, 250));
-      window.v91DraftRoom = { startRoom, pullPlayers, refreshRoom, resetLiveDraft };
+      window.addEventListener("resize", () => setTimeout(alignDesktopDraftBoard, 50));
+      window.v91DraftRoom = { startRoom, pullPlayers, refreshRoom, resetLiveDraft, alignDesktopDraftBoard };
     })();
   </script>
 
