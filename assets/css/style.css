@@ -9501,3 +9501,21 @@ body.lottery-running { overflow: hidden; }
     grid-template-columns:1fr;
   }
 }
+
+
+/* V86 shared API source */
+.shared-api-warning,
+.shared-api-note{
+  padding:8px 10px;
+  border-radius:10px;
+  margin-top:8px;
+}
+.shared-api-warning{
+  background:rgba(180,35,24,.16);
+  border:1px solid rgba(255,88,88,.35);
+  color:#ffe7e7;
+}
+.shared-api-note{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+}

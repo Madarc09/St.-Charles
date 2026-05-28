@@ -18,14 +18,14 @@ async function redisCommand(path) {
 
 async function getStoredDraft() {
   const { configured } = redisConfig();
-  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
+  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory', mode: 'temporary', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
   const key = encodeURIComponent(STORAGE_KEY);
   const data = await redisCommand(`/get/${key}`);
-  if (!data.result) return { configured: true, draft: null, storage: 'kv' };
+  if (!data.result) return { configured: true, draft: null, storage: 'kv', mode: 'persistent' };
   try {
-    return { configured: true, draft: typeof data.result === 'string' ? JSON.parse(data.result) : data.result, storage: 'kv' };
+    return { configured: true, draft: typeof data.result === 'string' ? JSON.parse(data.result) : data.result, storage: 'kv', mode: 'persistent' };
   } catch {
-    return { configured: true, draft: null, storage: 'kv' };
+    return { configured: true, draft: null, storage: 'kv', mode: 'persistent' };
   }
 }
 
