@@ -9376,3 +9376,31 @@ body.lottery-running { overflow: hidden; }
   background:rgba(255,255,255,.055);
   border:1px solid rgba(255,255,255,.08);
 }
+
+
+/* V80 publish shared draft controls */
+.home-sync-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
+}
+.home-sync-actions button{
+  min-height:38px;
+}
+#publishLocalDraftBtn{
+  border-color:rgba(245,195,91,.45);
+}
+.playoff-updated{
+  line-height:1.45;
+}
+@media(max-width:820px){
+  .home-sync-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    width:100%;
+  }
+  .home-sync-actions button{
+    width:100%;
+  }
+}

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V79 HOME SHARED DRAFT FIX -->
+  <!-- V80 PUBLISH SHARED DRAFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -33,7 +33,11 @@
             <h2>Pool standings</h2>
             <p class="muted">Playoff scoring: 2 pts per goal, 1 pt per assist, 5 pts per goalie/team-goalie win.</p>
           </div>
-          <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
+          <div class="home-sync-actions">
+            <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
+            <button id="publishLocalDraftBtn" type="button">Publish Local Draft to Shared</button>
+            <button id="pullSharedDraftBtn" type="button">Pull Shared Draft</button>
+          </div>
         </div>
         <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
           <div class="clean-loading-card">
@@ -47,7 +51,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V79 HOME SHARED DRAFT FIX</div>
+        <div class="v46-build-marker">V80 PUBLISH SHARED DRAFT</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -2302,6 +2306,50 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         if (run) run.style.display = "none";
         if (replay) replay.style.display = "inline-flex";
       }
+      async function publishLocalDraftToShared(){
+        const locals = getLocalDraftCandidates().sort((a,b) => b.count - a.count);
+        const best = locals[0];
+        if (!best || !best.draft || !Array.isArray(best.draft.picks) || !best.draft.picks.length) {
+          toast("No local draft picks found to publish.");
+          return;
+        }
+
+        const ok = window.confirm(`Publish ${best.count} local draft picks to shared draft state? Use this on the browser that has the full draft.`);
+        if (!ok) return;
+
+        try{
+          const res = await fetch("/api/draft", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(best.draft)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || "Shared draft publish failed.");
+          toast(`Published ${best.count} picks to shared draft.`);
+          renderPlayoffLeaderboard();
+        }catch(error){
+          console.error(error);
+          toast("Publish failed.");
+          const target = document.getElementById("leaderboardTable");
+          if (target) target.insertAdjacentHTML("afterbegin", `<div class="clean-loading-card error"><strong>Publish failed.</strong><span>${esc(error.message || error)}</span></div>`);
+        }
+      }
+
+      async function pullSharedDraftToLocal(){
+        const shared = await getSharedDraftCandidate();
+        if (!shared || !shared.draft) {
+          toast("No shared draft found.");
+          return;
+        }
+        try {
+          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(shared.draft));
+          toast(`Pulled ${shared.count} shared picks into this browser.`);
+          renderPlayoffLeaderboard();
+        } catch(error) {
+          toast("Could not save shared draft locally.");
+        }
+      }
+
       document.addEventListener("click", function(event){
         var run = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
         if (run) setTimeout(paintCompactLottery, 1800);
@@ -2547,26 +2595,8 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         setTimeout(() => t.classList.remove("show"), 2600);
       }
 
-      async function readDraftState(){
-        const candidates = [];
-
-        async function tryApi(label, url){
-          try{
-            const res = await fetch(url, { cache:"no-store" });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data && data.draft && Array.isArray(data.draft.picks)) {
-              candidates.push({
-                source: `${label} / ${data.storage || "api"}${data.configured === false ? " temporary" : ""}`,
-                configured: data.configured,
-                draft: data.draft
-              });
-            }
-          }catch(e){}
-        }
-
-        await tryApi("shared draft", "/api/draft?t=" + Date.now());
-
+      function getLocalDraftCandidates(){
+        const out = [];
         const keys = [
           "custom-hockey-pool-v40-clean-live-draft",
           "custom-hockey-pool-v38-official-snake",
@@ -2576,23 +2606,52 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           try{
             const parsed = JSON.parse(localStorage.getItem(key) || "null");
             if (parsed && Array.isArray(parsed.picks)) {
-              candidates.push({ source: `local browser: ${key}`, configured: null, draft: parsed });
+              out.push({ source: `local browser: ${key}`, draft: parsed, count: parsed.picks.length });
             }
           }catch(e){}
         }
+        return out;
+      }
+
+      async function getSharedDraftCandidate(){
+        try{
+          const res = await fetch("/api/draft?t=" + Date.now(), { cache:"no-store" });
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (data && data.draft && Array.isArray(data.draft.picks)) {
+            return {
+              source: `shared draft / ${data.storage || "api"}${data.configured === false ? " temporary" : ""}`,
+              configured: data.configured,
+              storage: data.storage || "api",
+              draft: data.draft,
+              count: data.draft.picks.length
+            };
+          }
+        }catch(e){}
+        return null;
+      }
+
+      async function readDraftState(){
+        const candidates = [];
+        const shared = await getSharedDraftCandidate();
+        if (shared) candidates.push(shared);
+        candidates.push(...getLocalDraftCandidates());
 
         const best = candidates
           .filter(c => c && c.draft && Array.isArray(c.draft.picks))
-          .sort((a,b) => (b.draft.picks.length - a.draft.picks.length))[0];
+          .sort((a,b) => (b.count - a.count))[0];
 
         if (best) {
           try { localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(best.draft)); } catch(e) {}
           best.draft.__source = best.source;
           best.draft.__configured = best.configured;
+          best.draft.__sharedCount = shared ? shared.count : 0;
+          best.draft.__localCount = Math.max(0, ...getLocalDraftCandidates().map(c => c.count));
+          best.draft.__allSources = candidates.map(c => `${c.source}: ${c.count}`).join(" | ");
           return best.draft;
         }
 
-        return { owners: DEFAULT_OWNERS, picks: [], __source: "no saved draft found", __configured: null };
+        return { owners: DEFAULT_OWNERS, picks: [], __source: "no saved draft found", __configured: null, __sharedCount: 0, __localCount: 0, __allSources: "none" };
       }
 
       function normalizeName(s){
@@ -2737,7 +2796,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           const rows = Array.from(teams.values()).sort((a,b) => (b.total - a.total) || a.ownerName.localeCompare(b.ownerName));
 
           if (!picks.length) {
-            target.innerHTML = `<div class="clean-loading-card"><strong>No saved draft picks found.</strong><span>Draft source checked: ${esc(draft.__source || "unknown")}. If this is correct on desktop but empty on mobile, the shared draft API is not holding the saved picks for other devices yet.</span></div>`;
+            target.innerHTML = `<div class="clean-loading-card"><strong>No saved draft picks found.</strong><span>Draft source checked: ${esc(draft.__source || "unknown")}. On the desktop/browser that has the full draft, press Publish Local Draft to Shared. Then press Pull Shared Draft on the phone.</span></div>`;
             return;
           }
 
@@ -2815,7 +2874,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
                 </tr>`;
               }).join("") + '</tbody>' +
             '</table>' +
-            `<p class="muted playoff-updated">Draft picks found: ${esc(picks.length)} from ${esc(draft.__source || "unknown source")}. Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
+            `<p class="muted playoff-updated">Draft picks found: ${esc(picks.length)} from ${esc(draft.__source || "unknown source")}. Shared picks: ${esc(draft.__sharedCount || 0)}. Best local picks: ${esc(draft.__localCount || 0)}. Sources checked: ${esc(draft.__allSources || "unknown")}. Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
         } catch(error) {
           console.error(error);
           target.innerHTML = `<div class="clean-loading-card error"><strong>Playoff leaderboard failed.</strong><span>${esc(error.message || error)}</span></div>`;
@@ -2829,6 +2888,20 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       document.addEventListener("click", function(event){
+        const publishBtn = event.target.closest && event.target.closest("#publishLocalDraftBtn");
+        if (publishBtn) {
+          event.preventDefault();
+          publishLocalDraftToShared();
+          return;
+        }
+
+        const pullBtn = event.target.closest && event.target.closest("#pullSharedDraftBtn");
+        if (pullBtn) {
+          event.preventDefault();
+          pullSharedDraftToLocal();
+          return;
+        }
+
         const toggle = event.target.closest && event.target.closest("[data-playoff-toggle]");
         if (toggle) {
           event.preventDefault();
