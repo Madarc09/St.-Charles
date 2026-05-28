@@ -62,7 +62,7 @@ module.exports = async function handler(req, res) {
 
   const season = cleanNumber(req.query.season, 20252026);
   const gameType = cleanNumber(req.query.gameType, 2);
-  const limit = Math.min(cleanNumber(req.query.limit, 1000), 1000);
+  const limit = Math.min(cleanNumber(req.query.limit, 400), 1000);
 
   const skaterUrls = [
     statUrl('skater', season, gameType, 'points', limit),

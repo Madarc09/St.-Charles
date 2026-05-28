@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V73 AUTO DRAFT LOGO FIX -->
+  <!-- V74 MORE PLAYERS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V73 AUTO DRAFT LOGO FIX</div>
+        <div class="v46-build-marker">V74 MORE PLAYERS</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -1006,8 +1006,8 @@
             payload = await res.json();
           } catch (proxyError) {
             // Direct NHL fallback for local testing.
-            var skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "points", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
-            var goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "wins", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
+            var skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "400", sort: "points", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
+            var goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "400", sort: "wins", dir: "desc", cayenneExp: "seasonId=" + season + " and gameTypeId=2" });
             var skaters = await fetch("https://api.nhle.com/stats/rest/en/skater/summary?" + skaterParams.toString()).then(function (r) { return r.json(); });
             var goalies = await fetch("https://api.nhle.com/stats/rest/en/goalie/summary?" + goalieParams.toString()).then(function (r) { return r.json(); });
             payload = { skaters: skaters.data || [], goalies: goalies.data || [] };
@@ -1042,7 +1042,7 @@
           var dir = sortDirection === "asc" ? 1 : -1;
           if (typeof av === "string") return av.localeCompare(String(bv)) * dir;
           return (av - bv) * dir || a.name.localeCompare(b.name);
-        }).slice(0, 150);
+        }).slice(0, 400);
       }
       async function loadDraftShared() {
         try {
@@ -1798,8 +1798,8 @@ const OWNERS = [
             payload = JSON.parse(text);
             if (payload.ok === false) throw new Error(payload.detail || payload.error || "NHL API route failed.");
           } catch (proxyError) {
-            const skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "points", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
-            const goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "1000", sort: "wins", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
+            const skaterParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "400", sort: "points", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
+            const goalieParams = new URLSearchParams({ isAggregate: "false", isGame: "false", start: "0", limit: "400", sort: "wins", dir: "desc", cayenneExp: `seasonId=${season} and gameTypeId=2` });
             const [skaters, goalies] = await Promise.all([
               fetch(`https://api.nhle.com/stats/rest/en/skater/summary?${skaterParams.toString()}`).then(r => r.json()),
               fetch(`https://api.nhle.com/stats/rest/en/goalie/summary?${goalieParams.toString()}`).then(r => r.json())
