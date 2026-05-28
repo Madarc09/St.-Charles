@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V76 PLAYOFF HOME LEADERBOARD -->
+  <!-- V77 EXPANDABLE PLAYOFF BREAKDOWN -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -47,7 +47,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V76 PLAYOFF HOME LEADERBOARD</div>
+        <div class="v46-build-marker">V77 EXPANDABLE PLAYOFF BREAKDOWN</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -2702,7 +2702,10 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
               goals,
               assists,
               goalieWins,
-              points
+              playoffPoints: points,
+              points,
+              regularPoints: Number(player.points || 0),
+              fantasyPoints: Number(player.fantasyPoints || 0)
             });
           });
 
@@ -2714,26 +2717,54 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           }
 
           target.innerHTML =
-            '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>Goalie win = 5</b></div>' +
-            '<table class="leaderboard playoff-leaderboard">' +
+            '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>Goalie win = 5</b>. Click a team name to see the player breakdown.</div>' +
+            '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard">' +
               '<thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>G</th><th>A</th><th>GW</th><th>Top playoff scorers</th></tr></thead>' +
               '<tbody>' + rows.map((row, i) => {
-                const topPlayers = row.players
-                  .filter(p => p.points > 0)
-                  .sort((a,b) => (b.points - a.points) || a.name.localeCompare(b.name))
-                  .slice(0, 5);
+                const sortedPlayers = row.players
+                  .slice()
+                  .sort((a,b) => (b.playoffPoints - a.playoffPoints) || (b.fantasyPoints - a.fantasyPoints) || a.name.localeCompare(b.name));
+                const topPlayers = sortedPlayers.filter(p => p.playoffPoints > 0).slice(0, 5);
                 const playerHtml = topPlayers.length
-                  ? topPlayers.map(p => `<span class="playoff-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.points} pts <small>${p.goalieWins ? `${p.goalieWins} GW` : `${p.goals}G ${p.assists}A`}</small></span>`).join("")
+                  ? topPlayers.map(p => `<span class="playoff-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.playoffPoints} pts <small>${p.goalieWins ? `${p.goalieWins} GW` : `${p.goals}G ${p.assists}A`}</small></span>`).join("")
                   : '<span class="muted">No playoff points yet</span>';
 
-                return `<tr>
+                const breakdownRows = sortedPlayers.map(p => {
+                  const calc = p.goalieWins
+                    ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}`
+                    : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  return `<tr>
+                    <td><strong>${esc(p.name)}</strong><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small></td>
+                    <td>${p.goals}</td>
+                    <td>${p.assists}</td>
+                    <td>${p.goalieWins}</td>
+                    <td>${p.regularPoints}</td>
+                    <td>${p.fantasyPoints}</td>
+                    <td class="total-cell">${p.playoffPoints}</td>
+                    <td>${esc(calc)}</td>
+                  </tr>`;
+                }).join("");
+
+                const detailId = `playoff-breakdown-${esc(row.ownerId)}`;
+                return `<tr class="playoff-summary-row">
                   <td><b>${i + 1}</b></td>
-                  <td><strong>${esc(row.ownerName)}</strong></td>
+                  <td><button type="button" class="playoff-team-toggle" data-playoff-toggle="${detailId}"><span>▸</span>${esc(row.ownerName)}</button></td>
                   <td class="total-cell">${row.total}</td>
                   <td>${row.goals}</td>
                   <td>${row.assists}</td>
                   <td>${row.goalieWins}</td>
                   <td><div class="playoff-player-list">${playerHtml}</div></td>
+                </tr>
+                <tr id="${detailId}" class="playoff-breakdown-row" hidden>
+                  <td colspan="7">
+                    <div class="playoff-breakdown-panel">
+                      <h3>${esc(row.ownerName)} playoff point breakdown</h3>
+                      <table class="playoff-breakdown-table">
+                        <thead><tr><th>Player</th><th>G</th><th>A</th><th>GW</th><th>NHL Pts</th><th>Draft FPTS</th><th>Pool Pts</th><th>Calculation</th></tr></thead>
+                        <tbody>${breakdownRows || '<tr><td colspan="8">No drafted players.</td></tr>'}</tbody>
+                      </table>
+                    </div>
+                  </td>
                 </tr>`;
               }).join("") + '</tbody>' +
             '</table>' +
@@ -2751,6 +2782,18 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       document.addEventListener("click", function(event){
+        const toggle = event.target.closest && event.target.closest("[data-playoff-toggle]");
+        if (toggle) {
+          event.preventDefault();
+          const row = document.getElementById(toggle.dataset.playoffToggle);
+          const icon = toggle.querySelector("span");
+          if (row) {
+            row.hidden = !row.hidden;
+            if (icon) icon.textContent = row.hidden ? "▸" : "▾";
+          }
+          return;
+        }
+
         const btn = event.target.closest && event.target.closest("#refreshStatsBtn2");
         if (!btn) return;
         event.preventDefault();

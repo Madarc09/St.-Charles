@@ -9205,3 +9205,74 @@ body.lottery-running { overflow: hidden; }
     font-size:1.1rem;
   }
 }
+
+
+/* V77 expandable playoff breakdown */
+.playoff-team-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font:inherit;
+  font-weight:1000;
+  cursor:pointer;
+  padding:0;
+  text-align:left;
+}
+.playoff-team-toggle span{
+  color:#f5c35b;
+  width:14px;
+}
+.playoff-breakdown-row td{
+  background:rgba(0,0,0,.24)!important;
+  border-radius:12px!important;
+  border:1px solid rgba(245,195,91,.18)!important;
+}
+.playoff-breakdown-panel{
+  display:grid;
+  gap:10px;
+}
+.playoff-breakdown-panel h3{
+  margin:0;
+  color:#f5c35b;
+}
+.playoff-breakdown-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.playoff-breakdown-table th{
+  color:#f5c35b;
+  text-align:left;
+  font-size:.74rem;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  padding:6px;
+}
+.playoff-breakdown-table td{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  border-radius:0!important;
+  padding:7px!important;
+  font-size:.82rem;
+}
+.playoff-breakdown-table td strong{
+  display:block;
+}
+.playoff-breakdown-table td small{
+  display:block;
+  color:#cbd7ea;
+  margin-top:2px;
+}
+@media(max-width:820px){
+  .playoff-breakdown-row td{
+    padding:7px!important;
+  }
+  .playoff-breakdown-table{
+    min-width:760px;
+  }
+  .playoff-breakdown-panel{
+    overflow-x:auto;
+  }
+}
