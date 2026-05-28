@@ -7986,3 +7986,538 @@ body.lottery-running { overflow: hidden; }
   .clean-player-table.goalie-board-mode td:nth-child(5)::before{content:"FPTS "!important;color:#f5c35b;}
 }
 /* END V69 ROSTER NEEDS BELOW + NO # COLUMN */
+
+
+/* ==========================================================
+   V70 ROSTER ONLY STICKY + MOBILE MATCHES DESKTOP
+   Easy revert: remove this section only.
+   Goals:
+   - ONLY Roster Needs follows while scrolling
+   - team selector/current pick/draft board stay at top normally
+   - mobile draft board is rebuilt as a desktop-style compact table
+   - removes broken card/header overlap behavior from older mobile layers
+   ========================================================== */
+
+/* Base: disable sticky behavior from older layers except roster needs */
+#draft .clean-draft-control-card,
+#draft .clean-draft-actions,
+.clean-player-table thead,
+.mobile-player-tools{
+  position:static!important;
+  top:auto!important;
+  z-index:auto!important;
+}
+
+#draft .roster-needs-topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:90!important;
+}
+
+/* Hide mobile-only card controls. Desktop table header is the source of truth. */
+.mobile-player-tools{
+  display:none!important;
+}
+
+/* Desktop unchanged except making sure only roster needs is sticky */
+@media(min-width:821px){
+  #draft .clean-draft-control-card,
+  #draft .clean-draft-actions{
+    position:static!important;
+    top:auto!important;
+    box-shadow:none!important;
+  }
+
+  #draft .roster-needs-topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:90!important;
+  }
+}
+
+/* MOBILE: rebuild from scratch as a compact desktop-style table */
+@media(max-width:820px){
+  html, body{
+    width:100%!important;
+    max-width:100%!important;
+    overflow-x:hidden!important;
+  }
+
+  *, *::before, *::after{
+    box-sizing:border-box!important;
+  }
+
+  main.shell,
+  .shell,
+  #draft.panel,
+  .clean-live-draft-shell,
+  .clean-draft-room,
+  .clean-draft-board{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+  }
+
+  main.shell{
+    padding:4px!important;
+  }
+
+  #draft.panel{
+    padding:3px!important;
+  }
+
+  .clean-draft-room{
+    display:grid!important;
+    gap:5px!important;
+  }
+
+  /* Top items are normal content, not sticky */
+  #draft .clean-draft-control-card,
+  #draft .clean-draft-actions,
+  .clean-draft-order-strip{
+    position:static!important;
+    top:auto!important;
+    z-index:auto!important;
+    width:100%!important;
+    max-width:100%!important;
+    box-shadow:none!important;
+  }
+
+  /* Only roster needs follows */
+  #draft .roster-needs-topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:95!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0 0 5px!important;
+    padding:4px!important;
+    border-radius:0 0 10px 10px!important;
+    background:rgba(7,21,43,.98)!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.42)!important;
+    backdrop-filter:blur(12px)!important;
+  }
+
+  /* Roster needs compact */
+  .needs-title,
+  .needs-title-swapped{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:1px!important;
+    padding:3px 5px!important;
+    margin:0 0 3px!important;
+    text-align:center!important;
+    border-radius:8px!important;
+  }
+
+  .needs-title .eyebrow,
+  .needs-heading-centered{
+    justify-self:center!important;
+    font-size:.50rem!important;
+    line-height:1!important;
+    letter-spacing:.08em!important;
+  }
+
+  .needs-title strong,
+  .needs-team-name{
+    justify-self:center!important;
+    font-size:.78rem!important;
+    line-height:1.05!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  .needs-grid,
+  .needs-grid-with-players{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:3px!important;
+  }
+
+  .needs-grid div{
+    min-width:0!important;
+    padding:3px!important;
+    border-radius:7px!important;
+  }
+
+  .needs-grid span{
+    font-size:.38rem!important;
+    line-height:1!important;
+  }
+
+  .needs-grid strong{
+    font-size:.88rem!important;
+    line-height:.9!important;
+  }
+
+  .needs-grid em{
+    font-size:.38rem!important;
+    line-height:1!important;
+  }
+
+  .needs-player-list,
+  .needs-empty{
+    display:none!important;
+  }
+
+  /* Compact top controls */
+  .clean-draft-control-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+    padding:5px!important;
+    border-radius:10px!important;
+    background:rgba(7,21,43,.86)!important;
+    border:1px solid rgba(245,195,91,.20)!important;
+  }
+
+  .clean-draft-as-control{
+    display:grid!important;
+    grid-template-columns:1fr 88px!important;
+    gap:5px!important;
+    align-items:end!important;
+    padding:5px!important;
+    border-radius:8px!important;
+  }
+
+  .clean-draft-as-control label{
+    grid-column:1/-1!important;
+    font-size:.48rem!important;
+    line-height:1!important;
+  }
+
+  #cleanDraftAsSelect,
+  .v46-pull-players-btn{
+    min-height:28px!important;
+    font-size:.56rem!important;
+    padding:2px 5px!important;
+    border-radius:7px!important;
+  }
+
+  .v46-pull-players-btn{
+    width:88px!important;
+    min-width:88px!important;
+    max-width:88px!important;
+  }
+
+  #v46PullHint{
+    display:none!important;
+  }
+
+  .clean-current-pick{
+    padding:5px!important;
+    border-radius:8px!important;
+    min-height:auto!important;
+  }
+
+  .clean-current-pick .label{
+    font-size:.46rem!important;
+    line-height:1!important;
+  }
+
+  .clean-current-pick strong{
+    font-size:.86rem!important;
+    line-height:1!important;
+  }
+
+  .clean-current-pick em{
+    font-size:.48rem!important;
+    line-height:1!important;
+  }
+
+  .clean-mini-draft-board-box{
+    padding:5px!important;
+    border-radius:8px!important;
+  }
+
+  .mini-draft-board-head{
+    margin-bottom:3px!important;
+  }
+
+  .mini-draft-board-head .label,
+  #cleanLastRefresh,
+  #cleanSyncStatus{
+    font-size:.46rem!important;
+    line-height:1!important;
+  }
+
+  .mini-draft-board-list{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3px!important;
+    max-height:86px!important;
+    overflow:auto!important;
+  }
+
+  .mini-pick{
+    display:grid!important;
+    grid-template-columns:16px 34px minmax(0,1fr) 16px!important;
+    gap:2px!important;
+    padding:2px 3px!important;
+    border-radius:6px!important;
+    min-width:0!important;
+    max-width:none!important;
+    width:100%!important;
+  }
+
+  .mini-pick b{
+    width:14px!important;
+    height:14px!important;
+    font-size:.44rem!important;
+  }
+
+  .mini-pick span,
+  .mini-pick strong,
+  .mini-pick em{
+    min-width:0!important;
+    font-size:.44rem!important;
+    line-height:1!important;
+  }
+
+  .clean-draft-actions-minimal,
+  .clean-draft-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:3px!important;
+    padding:3px!important;
+    border-radius:8px!important;
+  }
+
+  #cleanRefreshBtn{
+    width:100%!important;
+    min-height:26px!important;
+    font-size:.54rem!important;
+    border-radius:6px!important;
+  }
+
+  .clean-draft-order-strip{
+    display:flex!important;
+    gap:3px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 0!important;
+  }
+
+  .clean-draft-order-strip span{
+    flex:0 0 auto!important;
+    font-size:.46rem!important;
+    padding:2px 5px!important;
+  }
+
+  /* MOBILE PLAYER TABLE: mirror desktop layout, but compact */
+  .clean-player-table{
+    display:table!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    table-layout:fixed!important;
+    border-collapse:separate!important;
+    border-spacing:0 3px!important;
+    overflow:hidden!important;
+  }
+
+  .clean-player-table thead{
+    display:table-header-group!important;
+    position:static!important;
+    top:auto!important;
+    z-index:auto!important;
+    background:transparent!important;
+    border:0!important;
+    padding:0!important;
+    margin:0!important;
+  }
+
+  .clean-player-table thead tr{
+    display:table-row!important;
+  }
+
+  .clean-player-table th{
+    display:table-cell!important;
+    padding:2px 2px!important;
+    font-size:.46rem!important;
+    line-height:1!important;
+    text-align:center!important;
+    vertical-align:middle!important;
+    min-width:0!important;
+    white-space:normal!important;
+  }
+
+  .clean-player-table th:first-child{
+    width:auto!important;
+  }
+
+  .clean-player-table th:nth-child(2),
+  .clean-player-table th:nth-child(3),
+  .clean-player-table th:nth-child(4),
+  .clean-player-table th:nth-child(5){
+    width:38px!important;
+  }
+
+  .table-position-filter{
+    width:100%!important;
+    min-width:0!important;
+    min-height:22px!important;
+    padding:1px 3px!important;
+    border-radius:6px!important;
+    font-size:.44rem!important;
+  }
+
+  .stat-sort-header{
+    font-size:.42rem!important;
+    line-height:1!important;
+    white-space:normal!important;
+  }
+
+  .clean-player-table tbody{
+    display:table-row-group!important;
+  }
+
+  .clean-player-table tr,
+  .clean-player-table tr[data-mobile-sign]{
+    display:table-row!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+    border:0!important;
+  }
+
+  .clean-player-table td{
+    display:table-cell!important;
+    vertical-align:middle!important;
+    padding:2px 2px!important;
+    height:28px!important;
+    line-height:1!important;
+    font-size:.48rem!important;
+    min-width:0!important;
+    border:0!important;
+  }
+
+  .player-draft-cell{
+    width:auto!important;
+    max-width:100%!important;
+    min-width:0!important;
+    padding:2px 4px!important;
+    border-radius:8px 0 0 8px!important;
+  }
+
+  .player-draft-cell::before{
+    background-position:center, center!important;
+    background-size:100% 100%, auto 95%!important;
+    opacity:.30!important;
+  }
+
+  .player-draft-line{
+    display:grid!important;
+    grid-template-columns:22px minmax(0,1fr) 32px!important;
+    gap:3px!important;
+    align-items:center!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  .inline-player-headshot{
+    width:20px!important;
+    height:20px!important;
+    border-radius:50%!important;
+    object-fit:cover!important;
+    min-width:20px!important;
+  }
+
+  .team-goalie-row .inline-player-headshot{
+    padding:2px!important;
+    object-fit:contain!important;
+  }
+
+  .player-name-wrap{
+    min-width:0!important;
+  }
+
+  .player-draft-line strong{
+    display:block!important;
+    font-size:.52rem!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .player-draft-line .meta{
+    display:none!important;
+  }
+
+  .clean-sign-btn{
+    width:30px!important;
+    min-width:30px!important;
+    max-width:30px!important;
+    height:18px!important;
+    min-height:18px!important;
+    padding:1px!important;
+    border-radius:5px!important;
+    display:grid!important;
+    place-items:center!important;
+  }
+
+  .clean-sign-btn:not(:disabled) span:last-child{
+    font-size:0!important;
+  }
+
+  .clean-sign-btn:not(:disabled) span:last-child::after{
+    content:"D";
+    font-size:.46rem!important;
+    line-height:1!important;
+  }
+
+  .clean-sign-btn:disabled{
+    width:30px!important;
+    min-width:30px!important;
+    max-width:30px!important;
+    height:16px!important;
+    min-height:16px!important;
+    opacity:.66!important;
+  }
+
+  .clean-sign-btn:disabled span:last-child{
+    max-width:26px!important;
+    font-size:.28rem!important;
+    line-height:.9!important;
+    white-space:normal!important;
+  }
+
+  .clean-player-table td:nth-child(2),
+  .clean-player-table td:nth-child(3),
+  .clean-player-table td:nth-child(4),
+  .clean-player-table td:nth-child(5){
+    width:38px!important;
+    max-width:38px!important;
+    text-align:center!important;
+    padding:2px 1px!important;
+    font-size:.44rem!important;
+    background:rgba(255,255,255,.06)!important;
+  }
+
+  .clean-player-table td:nth-child(5){
+    border-radius:0 8px 8px 0!important;
+  }
+
+  .clean-player-table.skater-board-mode td:nth-child(2)::before,
+  .clean-player-table.skater-board-mode td:nth-child(3)::before,
+  .clean-player-table.skater-board-mode td:nth-child(4)::before,
+  .clean-player-table.skater-board-mode td:nth-child(5)::before,
+  .clean-player-table.goalie-board-mode td:nth-child(2)::before,
+  .clean-player-table.goalie-board-mode td:nth-child(3)::before,
+  .clean-player-table.goalie-board-mode td:nth-child(4)::before,
+  .clean-player-table.goalie-board-mode td:nth-child(5)::before{
+    content:""!important;
+  }
+
+  .clean-signed-log{
+    display:none!important;
+  }
+}
+/* END V70 ROSTER ONLY STICKY + MOBILE MATCHES DESKTOP */
