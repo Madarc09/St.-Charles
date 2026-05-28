@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V80 PUBLISH SHARED DRAFT -->
+  <!-- V81 DRAFT MEMORY DIAGNOSTICS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -37,6 +37,7 @@
             <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
             <button id="publishLocalDraftBtn" type="button">Publish Local Draft to Shared</button>
             <button id="pullSharedDraftBtn" type="button">Pull Shared Draft</button>
+            <button id="showDraftMemoryBtn" type="button">Show Draft Memory</button>
           </div>
         </div>
         <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
@@ -45,13 +46,14 @@
             <span>Press Pull Playoff Stats if it does not load automatically.</span>
           </div>
         </div>
+        <div id="draftMemoryPanel" class="draft-memory-panel" hidden></div>
       </article>
     </section>
 
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V80 PUBLISH SHARED DRAFT</div>
+        <div class="v46-build-marker">V81 DRAFT MEMORY DIAGNOSTICS</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -2306,15 +2308,126 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         if (run) run.style.display = "none";
         if (replay) replay.style.display = "inline-flex";
       }
+      function localStorageDraftAudit(){
+        const rows = [];
+        for (let i = 0; i < localStorage.length; i++){
+          const key = localStorage.key(i);
+          let value = "";
+          try { value = localStorage.getItem(key) || ""; } catch(e) {}
+          if (!value || (!value.includes("picks") && !value.includes("player") && !value.includes("draft"))) continue;
+
+          try{
+            const parsed = JSON.parse(value);
+            let count = 0;
+            let type = "";
+            if (parsed && Array.isArray(parsed.picks)) {
+              count = parsed.picks.length;
+              type = "draft.picks";
+            } else if (parsed && parsed.draft && Array.isArray(parsed.draft.picks)) {
+              count = parsed.draft.picks.length;
+              type = "draft wrapper";
+            } else if (Array.isArray(parsed)) {
+              count = parsed.length;
+              type = "array";
+            } else {
+              type = "json";
+            }
+            rows.push({ key, count, type, size: value.length, parsed });
+          }catch(e){
+            rows.push({ key, count: 0, type: "text", size: value.length, parsed: null });
+          }
+        }
+        return rows.sort((a,b) => (b.count - a.count) || (b.size - a.size));
+      }
+
+      function getBestAnyLocalDraft(){
+        const candidates = [];
+        localStorageDraftAudit().forEach(item => {
+          const parsed = item.parsed;
+          if (parsed && Array.isArray(parsed.picks)) candidates.push({ source: item.key, draft: parsed, count: parsed.picks.length });
+          if (parsed && parsed.draft && Array.isArray(parsed.draft.picks)) candidates.push({ source: item.key + " .draft", draft: parsed.draft, count: parsed.draft.picks.length });
+        });
+        return candidates.sort((a,b) => b.count - a.count)[0] || null;
+      }
+
+      function renderDraftMemoryPanel(){
+        const panel = document.getElementById("draftMemoryPanel");
+        if (!panel) return;
+        const audit = localStorageDraftAudit();
+        const best = getBestAnyLocalDraft();
+        const exportText = best ? JSON.stringify(best.draft) : "";
+
+        panel.hidden = false;
+        panel.innerHTML = `
+          <div class="draft-memory-card">
+            <h3>Draft Memory Diagnostic</h3>
+            <p class="muted">Desktop and phone do not share browser localStorage. This panel shows exactly what this browser has saved.</p>
+            <div class="memory-best-box">
+              <strong>Best local draft found:</strong>
+              <span>${best ? `${esc(best.count)} picks from ${esc(best.source)}` : "None"}</span>
+            </div>
+            <div class="draft-memory-actions">
+              <button id="copyBestDraftBtn" type="button" ${best ? "" : "disabled"}>Copy Best Draft JSON</button>
+              <button id="publishBestAnyDraftBtn" type="button" ${best ? "" : "disabled"}>Publish Best Local Draft</button>
+              <button id="importDraftJsonBtn" type="button">Import Draft JSON Below</button>
+            </div>
+            <textarea id="draftTransferBox" spellcheck="false" placeholder="Desktop: copy best draft JSON here. Phone: paste it here, then press Import Draft JSON.">${esc(exportText)}</textarea>
+            <table class="draft-memory-table">
+              <thead><tr><th>LocalStorage key</th><th>Detected</th><th>Picks/items</th><th>Size</th></tr></thead>
+              <tbody>
+                ${audit.length ? audit.map(r => `<tr><td>${esc(r.key)}</td><td>${esc(r.type)}</td><td>${esc(r.count)}</td><td>${esc(r.size)}</td></tr>`).join("") : '<tr><td colspan="4">No draft-like localStorage entries found.</td></tr>'}
+              </tbody>
+            </table>
+          </div>`;
+      }
+
+      async function publishBestAnyLocalDraft(){
+        const best = getBestAnyLocalDraft();
+        if (!best || !best.draft) {
+          toast("No local draft found to publish.");
+          return;
+        }
+        const ok = window.confirm(`Publish ${best.count} picks from ${best.source} to shared draft?`);
+        if (!ok) return;
+        const res = await fetch("/api/draft", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(best.draft)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || "Publish failed.");
+        localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(data.draft || best.draft));
+        toast(`Published ${best.count} picks to shared draft.`);
+        renderDraftMemoryPanel();
+        renderPlayoffLeaderboard();
+      }
+
+      function importDraftJsonFromBox(){
+        const box = document.getElementById("draftTransferBox");
+        if (!box) return;
+        try{
+          const parsed = JSON.parse(box.value || "{}");
+          const draft = parsed && parsed.draft && Array.isArray(parsed.draft.picks) ? parsed.draft : parsed;
+          if (!draft || !Array.isArray(draft.picks)) throw new Error("JSON does not contain a picks array.");
+          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(draft));
+          toast(`Imported ${draft.picks.length} picks into this browser.`);
+          renderDraftMemoryPanel();
+          renderPlayoffLeaderboard();
+        }catch(error){
+          toast("Import failed.");
+          alert("Import failed: " + (error.message || error));
+        }
+      }
+
       async function publishLocalDraftToShared(){
-        const locals = getLocalDraftCandidates().sort((a,b) => b.count - a.count);
-        const best = locals[0];
+        const best = getBestAnyLocalDraft() || getLocalDraftCandidates().sort((a,b) => b.count - a.count)[0];
         if (!best || !best.draft || !Array.isArray(best.draft.picks) || !best.draft.picks.length) {
           toast("No local draft picks found to publish.");
+          renderDraftMemoryPanel();
           return;
         }
 
-        const ok = window.confirm(`Publish ${best.count} local draft picks to shared draft state? Use this on the browser that has the full draft.`);
+        const ok = window.confirm(`Publish ${best.count} local draft picks from ${best.source} to shared draft state? Use this on the browser that has the full draft.`);
         if (!ok) return;
 
         try{
@@ -2888,6 +3001,47 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       document.addEventListener("click", function(event){
+        const memoryBtn = event.target.closest && event.target.closest("#showDraftMemoryBtn");
+        if (memoryBtn) {
+          event.preventDefault();
+          const panel = document.getElementById("draftMemoryPanel");
+          if (panel && !panel.hidden) {
+            panel.hidden = true;
+          } else {
+            renderDraftMemoryPanel();
+          }
+          return;
+        }
+
+        const copyBtn = event.target.closest && event.target.closest("#copyBestDraftBtn");
+        if (copyBtn) {
+          event.preventDefault();
+          const box = document.getElementById("draftTransferBox");
+          if (box) {
+            box.select();
+            document.execCommand("copy");
+            toast("Best draft JSON copied.");
+          }
+          return;
+        }
+
+        const publishBestBtn = event.target.closest && event.target.closest("#publishBestAnyDraftBtn");
+        if (publishBestBtn) {
+          event.preventDefault();
+          publishBestAnyLocalDraft().catch(error => {
+            console.error(error);
+            toast("Publish best draft failed.");
+          });
+          return;
+        }
+
+        const importBtn = event.target.closest && event.target.closest("#importDraftJsonBtn");
+        if (importBtn) {
+          event.preventDefault();
+          importDraftJsonFromBox();
+          return;
+        }
+
         const publishBtn = event.target.closest && event.target.closest("#publishLocalDraftBtn");
         if (publishBtn) {
           event.preventDefault();
