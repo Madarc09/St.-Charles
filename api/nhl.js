@@ -18,6 +18,30 @@ function statUrl(report, season, gameType, sort, limit) {
   return `${NHL_STATS_BASE}/${report}/summary?${params.toString()}`;
 }
 
+function statUrlWithExtraCayenne(report, season, gameType, sort, limit, extraCayenne) {
+  const params = new URLSearchParams({
+    isAggregate: 'false',
+    isGame: 'false',
+    start: '0',
+    limit: String(limit),
+    sort,
+    dir: 'desc',
+    cayenneExp: `seasonId=${season} and gameTypeId=${gameType} and ${extraCayenne}`
+  });
+  return `${NHL_STATS_BASE}/${report}/summary?${params.toString()}`;
+}
+
+function mergeUniquePlayers(lists) {
+  const map = new Map();
+  for (const list of lists) {
+    for (const row of Array.isArray(list) ? list : []) {
+      const id = row.playerId || row.skaterId || row.id || `${row.firstName || ''}-${row.lastName || ''}-${row.teamAbbrevs || row.teamAbbrev || ''}`;
+      if (!map.has(String(id))) map.set(String(id), row);
+    }
+  }
+  return Array.from(map.values());
+}
+
 async function getJson(url) {
   const response = await fetch(url, {
     headers: {
@@ -62,11 +86,17 @@ module.exports = async function handler(req, res) {
 
   const season = cleanNumber(req.query.season, 20252026);
   const gameType = cleanNumber(req.query.gameType, 2);
-  const limit = Math.min(cleanNumber(req.query.limit, 400), 1000);
+  const limit = Math.min(cleanNumber(req.query.limit, 900), 1000);
 
   const skaterUrls = [
     statUrl('skater', season, gameType, 'points', limit),
     statUrl('skater', season, gameType, 'goals', limit)
+  ];
+
+  const defenseUrls = [
+    statUrlWithExtraCayenne('skater', season, gameType, 'points', limit, 'positionCode="D"'),
+    statUrlWithExtraCayenne('skater', season, gameType, 'timeOnIcePerGame', limit, 'positionCode="D"'),
+    statUrlWithExtraCayenne('skater', season, gameType, 'shots', limit, 'positionCode="D"')
   ];
   const goalieUrls = [
     statUrl('goalie', season, gameType, 'wins', limit),
@@ -74,12 +104,15 @@ module.exports = async function handler(req, res) {
   ];
 
   try {
-    const [skaterResult, goalieResult] = await Promise.all([
+    const [skaterResult, defenseResult, goalieResult] = await Promise.all([
       firstWorking(skaterUrls),
+      firstWorking(defenseUrls),
       firstWorking(goalieUrls)
     ]);
 
-    const skaters = Array.isArray(skaterResult.data.data) ? skaterResult.data.data : [];
+    const skatersBase = Array.isArray(skaterResult.data.data) ? skaterResult.data.data : [];
+    const defenseExtra = Array.isArray(defenseResult.data.data) ? defenseResult.data.data : [];
+    const skaters = mergeUniquePlayers([skatersBase, defenseExtra]);
     const goalies = Array.isArray(goalieResult.data.data) ? goalieResult.data.data : [];
 
     return res.status(200).json({
@@ -89,7 +122,7 @@ module.exports = async function handler(req, res) {
       gameType: String(gameType),
       fetchedAt: new Date().toISOString(),
       counts: { skaters: skaters.length, goalies: goalies.length },
-      urls: { skaters: skaterResult.url, goalies: goalieResult.url },
+      urls: { skaters: skaterResult.url, defense: defenseResult.url, goalies: goalieResult.url },
       skaters,
       goalies
     });
