@@ -9794,3 +9794,88 @@ button.danger{
   }
 }
 /* END V92 desktop headshots + mobile nameplate refinement */
+
+
+/* V93 mobile duplicate-logo cleanup + desktop table left alignment */
+.clean-player-table{
+  width:100%!important;
+  table-layout:auto!important;
+}
+
+.clean-player-table th,
+.clean-player-table td{
+  text-align:left!important;
+}
+
+.clean-player-table .headshot-col{
+  width:52px!important;
+  min-width:52px!important;
+  max-width:52px!important;
+  text-align:left!important;
+  padding-left:8px!important;
+}
+
+.clean-player-table .desktop-headshot-cell{
+  width:52px!important;
+  min-width:52px!important;
+  max-width:52px!important;
+  text-align:left!important;
+  vertical-align:middle!important;
+  padding:4px 4px 4px 8px!important;
+}
+
+.desktop-player-headshot{
+  display:block!important;
+  margin:0!important;
+  width:42px!important;
+  height:42px!important;
+}
+
+.clean-player-table .player-draft-cell{
+  width:auto!important;
+  min-width:320px!important;
+}
+
+.clean-player-table .player-draft-line{
+  justify-content:space-between!important;
+  width:100%!important;
+}
+
+.clean-player-table td:nth-child(n+3),
+.clean-player-table th:nth-child(n+3){
+  text-align:right!important;
+  white-space:nowrap!important;
+}
+
+@media(max-width:820px){
+  .mobile-card-logo{
+    display:none!important;
+  }
+
+  .mobile-card-main{
+    grid-template-columns:minmax(0,1fr) 58px!important;
+    gap:5px!important;
+  }
+
+  .mobile-card-nameplate{
+    grid-column:1!important;
+    background:linear-gradient(90deg,rgba(0,0,0,.48),rgba(0,0,0,.18))!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+  }
+
+  .mobile-card-nameplate::before,
+  .mobile-card-nameplate::after{
+    display:none!important;
+    content:none!important;
+  }
+
+  .mobile-draft-btn{
+    grid-column:2!important;
+  }
+
+  .mobile-draft-player-card::before{
+    opacity:.16!important;
+    background-size:86px 86px!important;
+  }
+}
+/* END V93 */
