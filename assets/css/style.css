@@ -9112,3 +9112,96 @@ body.lottery-running { overflow: hidden; }
   }
 }
 /* END V73 AUTO DRAFT + MOBILE LOGO WATERMARK FIX */
+
+
+/* V76 Home playoff leaderboard */
+.playoff-leaderboard-wrap{
+  overflow:auto;
+}
+.playoff-scoring-note{
+  display:inline-flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:0 0 10px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(245,195,91,.12);
+  border:1px solid rgba(245,195,91,.28);
+  color:#e9f2ff;
+  font-size:.9rem;
+}
+.playoff-leaderboard{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 8px;
+}
+.playoff-leaderboard th{
+  color:#f5c35b;
+  text-align:left;
+  font-size:.82rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.playoff-leaderboard td{
+  padding:10px;
+  background:rgba(255,255,255,.055);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.playoff-leaderboard td:first-child{
+  border-radius:12px 0 0 12px;
+  border-left:1px solid rgba(255,255,255,.08);
+}
+.playoff-leaderboard td:last-child{
+  border-radius:0 12px 12px 0;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.playoff-leaderboard .total-cell{
+  color:#f5c35b;
+  font-size:1.4rem;
+  font-weight:1000;
+}
+.playoff-player-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.playoff-player-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border-radius:999px;
+  padding:5px 8px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.10);
+  color:#fff;
+  font-size:.78rem;
+}
+.playoff-player-chip small{
+  color:#cbd7ea;
+}
+.playoff-updated{
+  margin-top:10px;
+}
+@media(max-width:820px){
+  .playoff-scoring-note{
+    border-radius:12px;
+    font-size:.72rem;
+  }
+  .playoff-leaderboard th:nth-child(4),
+  .playoff-leaderboard th:nth-child(5),
+  .playoff-leaderboard th:nth-child(6),
+  .playoff-leaderboard td:nth-child(4),
+  .playoff-leaderboard td:nth-child(5),
+  .playoff-leaderboard td:nth-child(6){
+    display:none;
+  }
+  .playoff-leaderboard th,
+  .playoff-leaderboard td{
+    font-size:.72rem;
+    padding:7px;
+  }
+  .playoff-leaderboard .total-cell{
+    font-size:1.1rem;
+  }
+}

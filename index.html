@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V75 MORE DEFENSEMEN -->
+  <!-- V76 PLAYOFF HOME LEADERBOARD -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -29,20 +29,25 @@
       <article class="card home-leaderboard-card">
         <div class="section-head compact-head">
           <div>
-            <p class="eyebrow">Main Leaderboard</p>
+            <p class="eyebrow">Playoff Leaderboard</p>
             <h2>Pool standings</h2>
-            <p class="muted">This now lives on the main page and updates from your editable scoring rules.</p>
+            <p class="muted">Playoff scoring: 2 pts per goal, 1 pt per assist, 5 pts per goalie/team-goalie win.</p>
           </div>
-          <button class="primary" id="refreshStatsBtn2">Pull NHL Stats</button>
+          <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
         </div>
-        <div id="leaderboardTable" class="table-wrap"></div>
+        <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
+          <div class="clean-loading-card">
+            <strong>Playoff leaderboard loading…</strong>
+            <span>Press Pull Playoff Stats if it does not load automatically.</span>
+          </div>
+        </div>
       </article>
     </section>
 
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V75 MORE DEFENSEMEN</div>
+        <div class="v46-build-marker">V76 PLAYOFF HOME LEADERBOARD</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -2505,6 +2510,256 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
           return;
         }
       }, true);
+    })();
+  </script>
+
+
+  <script>
+    (function(){
+      const OWNER_ORDER = ["nick", "chris", "andrew", "tyler", "scott"];
+      const DEFAULT_OWNERS = [
+        { id:"nick", teamName:"Nick" },
+        { id:"chris", teamName:"Chris" },
+        { id:"andrew", teamName:"Andrew" },
+        { id:"tyler", teamName:"Tyler" },
+        { id:"scott", teamName:"Scott" }
+      ];
+
+      function esc(s){
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+          return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c];
+        });
+      }
+
+      function currentSeasonId(){
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const start = month >= 7 ? year : year - 1;
+        return String(start) + String(start + 1);
+      }
+
+      function toast(message){
+        const t = document.getElementById("toast");
+        if (!t) return;
+        t.textContent = message;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2600);
+      }
+
+      async function readDraftState(){
+        try{
+          const res = await fetch("/api/draft", { cache:"no-store" });
+          if (res.ok){
+            const data = await res.json();
+            if (data && data.draft && Array.isArray(data.draft.picks)) return data.draft;
+          }
+        }catch(e){}
+
+        const keys = [
+          "custom-hockey-pool-v40-clean-live-draft",
+          "custom-hockey-pool-v38-official-snake",
+          "custom-hockey-pool-active-draft"
+        ];
+        for (const key of keys){
+          try{
+            const parsed = JSON.parse(localStorage.getItem(key) || "null");
+            if (parsed && Array.isArray(parsed.picks)) return parsed;
+          }catch(e){}
+        }
+        return { owners: DEFAULT_OWNERS, picks: [] };
+      }
+
+      function normalizeName(s){
+        return String(s || "").toLowerCase().replace(/[^a-z0-9]/g,"");
+      }
+
+      function rowName(row){
+        const first = row.firstName && (row.firstName.default || row.firstName);
+        const last = row.lastName && (row.lastName.default || row.lastName);
+        return row.skaterFullName || row.playerFullName || row.goalieFullName || row.fullName || [first,last].filter(Boolean).join(" ");
+      }
+
+      function rowTeam(row){
+        return row.teamAbbrevs || row.teamAbbrev || row.team || row.teamName || "";
+      }
+
+      function buildSkaterMap(skaters){
+        const byId = new Map();
+        const byNameTeam = new Map();
+        (Array.isArray(skaters) ? skaters : []).forEach(row => {
+          const id = String(row.playerId || row.skaterId || row.id || "");
+          const name = rowName(row);
+          const team = rowTeam(row);
+          const goals = Number(row.goals || 0);
+          const assists = Number(row.assists || 0);
+          const playoffPts = (goals * 2) + assists;
+          const item = { id, name, team, goals, assists, playoffPts };
+          if (id) byId.set(id, item);
+          byNameTeam.set(normalizeName(name) + "|" + team, item);
+          byNameTeam.set(normalizeName(name), item);
+        });
+        return { byId, byNameTeam };
+      }
+
+      function buildTeamGoalieWins(goalies){
+        const teamWins = new Map();
+        (Array.isArray(goalies) ? goalies : []).forEach(row => {
+          const team = rowTeam(row);
+          if (!team) return;
+          teamWins.set(team, (teamWins.get(team) || 0) + Number(row.wins || row.goalieWins || 0));
+        });
+        return teamWins;
+      }
+
+      function findSkaterForPick(pick, maps){
+        const player = pick.player || {};
+        const rawId = String(player.id || "").replace(/\D/g, "");
+        if (rawId && maps.byId.has(rawId)) return maps.byId.get(rawId);
+        const name = player.name || "";
+        const team = player.nhlTeam || "";
+        return maps.byNameTeam.get(normalizeName(name) + "|" + team) || maps.byNameTeam.get(normalizeName(name)) || null;
+      }
+
+      function playerPositionLabel(player){
+        if (!player) return "";
+        return player.position === "TG" ? "Team Goalies" : (player.position || "");
+      }
+
+      async function renderPlayoffLeaderboard(){
+        const target = document.getElementById("leaderboardTable");
+        const button = document.getElementById("refreshStatsBtn2");
+        if (!target) return;
+
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Pulling Playoff Stats…";
+        }
+
+        target.innerHTML = '<div class="clean-loading-card"><strong>Pulling NHL playoff stats…</strong><span>Scoring goals, assists, and goalie wins.</span></div>';
+
+        try{
+          const draft = await readDraftState();
+          const owners = Array.isArray(draft.owners) && draft.owners.length ? draft.owners : DEFAULT_OWNERS;
+          const ownerMap = new Map(owners.map(o => [String(o.id), o]));
+          const picks = Array.isArray(draft.picks) ? draft.picks : [];
+
+          const season = currentSeasonId();
+          const res = await fetch(`/api/nhl?gameType=3&limit=900&season=${season}`, { cache:"no-store" });
+          const payload = await res.json();
+          if (!res.ok || !payload.ok) throw new Error(payload.error || "NHL playoff stat pull failed.");
+
+          const skaterMaps = buildSkaterMap(payload.skaters || []);
+          const teamGoalieWins = buildTeamGoalieWins(payload.goalies || []);
+
+          const teams = new Map();
+          owners.forEach(o => {
+            teams.set(String(o.id), {
+              ownerId: String(o.id),
+              ownerName: o.teamName || o.name || o.id,
+              total: 0,
+              goals: 0,
+              assists: 0,
+              goalieWins: 0,
+              players: []
+            });
+          });
+
+          picks.forEach(pick => {
+            const player = pick.player || {};
+            const ownerId = String(pick.ownerId || "");
+            if (!teams.has(ownerId)) {
+              const o = ownerMap.get(ownerId) || { teamName: pick.ownerName || ownerId };
+              teams.set(ownerId, { ownerId, ownerName: o.teamName || o.name || ownerId, total:0, goals:0, assists:0, goalieWins:0, players:[] });
+            }
+
+            const team = teams.get(ownerId);
+            let goals = 0;
+            let assists = 0;
+            let goalieWins = 0;
+            let points = 0;
+
+            if (player.position === "TG") {
+              goalieWins = Number(teamGoalieWins.get(player.nhlTeam) || 0);
+              points = goalieWins * 5;
+            } else {
+              const stat = findSkaterForPick(pick, skaterMaps);
+              if (stat) {
+                goals = Number(stat.goals || 0);
+                assists = Number(stat.assists || 0);
+                points = Number(stat.playoffPts || 0);
+              }
+            }
+
+            team.goals += goals;
+            team.assists += assists;
+            team.goalieWins += goalieWins;
+            team.total += points;
+            team.players.push({
+              name: player.name || "Unknown player",
+              position: playerPositionLabel(player),
+              nhlTeam: player.nhlTeam || "",
+              goals,
+              assists,
+              goalieWins,
+              points
+            });
+          });
+
+          const rows = Array.from(teams.values()).sort((a,b) => (b.total - a.total) || a.ownerName.localeCompare(b.ownerName));
+
+          if (!picks.length) {
+            target.innerHTML = '<div class="clean-loading-card"><strong>No drafted players yet.</strong><span>Draft players first, then the playoff leaderboard will score them.</span></div>';
+            return;
+          }
+
+          target.innerHTML =
+            '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>Goalie win = 5</b></div>' +
+            '<table class="leaderboard playoff-leaderboard">' +
+              '<thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>G</th><th>A</th><th>GW</th><th>Top playoff scorers</th></tr></thead>' +
+              '<tbody>' + rows.map((row, i) => {
+                const topPlayers = row.players
+                  .filter(p => p.points > 0)
+                  .sort((a,b) => (b.points - a.points) || a.name.localeCompare(b.name))
+                  .slice(0, 5);
+                const playerHtml = topPlayers.length
+                  ? topPlayers.map(p => `<span class="playoff-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.points} pts <small>${p.goalieWins ? `${p.goalieWins} GW` : `${p.goals}G ${p.assists}A`}</small></span>`).join("")
+                  : '<span class="muted">No playoff points yet</span>';
+
+                return `<tr>
+                  <td><b>${i + 1}</b></td>
+                  <td><strong>${esc(row.ownerName)}</strong></td>
+                  <td class="total-cell">${row.total}</td>
+                  <td>${row.goals}</td>
+                  <td>${row.assists}</td>
+                  <td>${row.goalieWins}</td>
+                  <td><div class="playoff-player-list">${playerHtml}</div></td>
+                </tr>`;
+              }).join("") + '</tbody>' +
+            '</table>' +
+            `<p class="muted playoff-updated">Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
+        } catch(error) {
+          console.error(error);
+          target.innerHTML = `<div class="clean-loading-card error"><strong>Playoff leaderboard failed.</strong><span>${esc(error.message || error)}</span></div>`;
+          toast("Playoff leaderboard failed.");
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = "Pull Playoff Stats";
+          }
+        }
+      }
+
+      document.addEventListener("click", function(event){
+        const btn = event.target.closest && event.target.closest("#refreshStatsBtn2");
+        if (!btn) return;
+        event.preventDefault();
+        renderPlayoffLeaderboard();
+      }, true);
+
+      window.addEventListener("load", function(){
+        setTimeout(renderPlayoffLeaderboard, 500);
+      });
     })();
   </script>
 
