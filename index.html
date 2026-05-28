@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V58 AUTO ENTER DRAFT -->
+  <!-- V59 MINI DRAFT BOARD -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V58 AUTO ENTER DRAFT</div>
+        <div class="v46-build-marker">V59 MINI DRAFT BOARD</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -82,10 +82,15 @@
             <em id="cleanPickDetails">Syncing draft state</em>
           </div>
 
-          <div class="clean-sync-box">
-            <span class="label">Live room status</span>
-            <strong id="cleanSyncStatus">Starting…</strong>
-            <em id="cleanLastRefresh">Refreshes automatically</em>
+          <div class="clean-sync-box clean-mini-draft-board-box">
+            <div class="mini-draft-board-head">
+              <span class="label">Draft Board</span>
+              <em id="cleanLastRefresh">Refreshes automatically</em>
+            </div>
+            <div id="miniDraftBoard" class="mini-draft-board-list">
+              <span class="empty">Waiting for picks…</span>
+            </div>
+            <small id="cleanSyncStatus">Starting…</small>
           </div>
         </div>
 
@@ -422,7 +427,7 @@
       var remG = Math.max(0, limits.G - (counts.G || 0));
 
       panel.innerHTML =
-        '<div class="needs-title"><span class="eyebrow">Roster Needs</span><strong>' + (ownerName || ownerId) + '</strong></div>' +
+        '<div class="needs-title needs-title-swapped"><strong class="needs-team-name">' + (ownerName || ownerId) + '</strong><span class="eyebrow needs-heading-centered">Roster Needs</span></div>' +
         '<div class="needs-grid">' +
           '<div class="' + (remF === 0 ? 'filled' : '') + '"><span>Forwards needed</span><strong>' + remF + '</strong><em>' + (counts.F || 0) + '/6 drafted</em></div>' +
           '<div class="' + (remD === 0 ? 'filled' : '') + '"><span>Defense needed</span><strong>' + remD + '</strong><em>' + (counts.D || 0) + '/4 drafted</em></div>' +
@@ -1894,6 +1899,20 @@ const OWNERS = [
           osc.stop(ctx.currentTime + 0.38);
         } catch (e) {}
       }
+      function renderMiniDraftBoard() {
+        const target = $("#miniDraftBoard");
+        if (!target || !draft) return;
+        const picks = Array.isArray(draft.picks) ? draft.picks : [];
+        if (!picks.length) {
+          target.innerHTML = '<span class="empty">Waiting for picks…</span>';
+          return;
+        }
+        target.innerHTML = picks.slice(-10).reverse().map(p => {
+          const pos = p.player?.position === "TG" ? "TG" : (p.player?.position || "");
+          return `<div class="mini-pick"><b>${esc(p.pickNumber)}</b><span>${esc(p.ownerName || p.ownerId)}</span><strong>${esc(p.player?.name || "")}</strong><em>${esc(pos)}</em></div>`;
+        }).join("");
+      }
+
       function renderOrderStrip() {
         const strip = $("#cleanDraftOrderStrip");
         if (!strip || !draft) return;
@@ -1922,6 +1941,7 @@ const OWNERS = [
         updateCurrentPickUI();
         window.renderRosterNeeds(draft, activeOwnerId, owner(activeOwnerId)?.teamName || activeOwnerId);
         renderOrderStrip();
+        renderMiniDraftBoard();
         const board = $("#cleanDraftBoard");
         if (!board) return;
         if (!activeOwnerId) {
@@ -2240,7 +2260,7 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
       }
 
       panel.innerHTML =
-        '<div class="needs-title"><span class="eyebrow">Roster Needs</span><strong>' + window.__draftEsc(ownerName || ownerId) + '</strong></div>' +
+        '<div class="needs-title needs-title-swapped"><strong class="needs-team-name">' + window.__draftEsc(ownerName || ownerId) + '</strong><span class="eyebrow needs-heading-centered">Roster Needs</span></div>' +
         '<div class="needs-grid needs-grid-with-players">' +
           '<div class="' + (remF === 0 ? 'filled' : '') + '"><span>Forwards needed</span><strong>' + remF + '</strong><em>' + f.length + '/6 drafted</em>' + playerList(f) + '</div>' +
           '<div class="' + (remD === 0 ? 'filled' : '') + '"><span>Defense needed</span><strong>' + remD + '</strong><em>' + d.length + '/4 drafted</em>' + playerList(d) + '</div>' +

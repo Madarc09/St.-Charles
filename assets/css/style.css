@@ -5764,3 +5764,128 @@ body.lottery-running { overflow: hidden; }
 .auto-enter-fallback .v46-build-marker{
   display:none;
 }
+
+
+/* V59 roster title swap + mini draft board */
+.needs-title-swapped{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  text-align:center;
+}
+.needs-title-swapped .needs-team-name{
+  grid-column:1;
+  justify-self:start;
+  text-align:left!important;
+}
+.needs-title-swapped .needs-heading-centered{
+  grid-column:2;
+  justify-self:center;
+  text-align:center!important;
+  color:#f5c35b;
+}
+.clean-mini-draft-board-box{
+  align-content:start!important;
+}
+.mini-draft-board-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:6px;
+}
+.mini-draft-board-head .label{
+  color:#f5c35b;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:.78rem;
+  font-weight:900;
+}
+.mini-draft-board-head em{
+  color:#cbd7ea;
+  font-style:normal;
+  font-size:.72rem;
+}
+.mini-draft-board-list{
+  display:grid;
+  gap:4px;
+  max-height:132px;
+  overflow:auto;
+  scrollbar-width:thin;
+}
+.mini-draft-board-list .empty{
+  color:#cbd7ea;
+  font-size:.85rem;
+}
+.mini-pick{
+  display:grid;
+  grid-template-columns:28px 62px 1fr 30px;
+  gap:5px;
+  align-items:center;
+  padding:5px 6px;
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+}
+.mini-pick b{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#f5c35b;
+  color:#160d04;
+  font-size:.72rem;
+}
+.mini-pick span{
+  color:#cbd7ea;
+  font-size:.72rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mini-pick strong{
+  color:#fff;
+  font-size:.76rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mini-pick em{
+  color:#f5c35b;
+  font-style:normal;
+  font-size:.68rem;
+  text-align:right;
+}
+#cleanSyncStatus{
+  display:block;
+  margin-top:5px;
+  color:#7f8ca3;
+  font-size:.68rem;
+}
+@media(max-width:820px){
+  .needs-title-swapped{
+    grid-template-columns:1fr!important;
+    gap:2px!important;
+  }
+  .needs-title-swapped .needs-team-name{
+    grid-column:1!important;
+    justify-self:center!important;
+    text-align:center!important;
+    order:2;
+  }
+  .needs-title-swapped .needs-heading-centered{
+    grid-column:1!important;
+    order:1;
+  }
+  .clean-mini-draft-board-box{
+    grid-column:1/-1!important;
+  }
+  .mini-draft-board-list{
+    max-height:96px;
+  }
+  .mini-pick{
+    grid-template-columns:26px 58px 1fr 28px;
+  }
+}
