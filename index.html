@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V83 STATIC FINAL DRAFT -->
+  <!-- V84 CLEAN HOME ROSTER SOURCE -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -33,17 +33,7 @@
             <h2>Pool standings</h2>
             <p class="muted">Playoff scoring: 2 pts per goal, 1 pt per assist, 5 pts per goalie/team-goalie win.</p>
           </div>
-          <div class="home-sync-actions">
-            <div class="home-sync-actions">
-            <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
-            <button id="exportFinalDraftBtn" type="button">Export Final Static Draft</button>
-            <button id="publishLocalDraftBtn" type="button">Publish Local Draft to Shared</button>
-            <button id="pullSharedDraftBtn" type="button">Pull Shared Draft</button>
-          </div>
-            <button id="publishLocalDraftBtn" type="button">Publish Local Draft to Shared</button>
-            <button id="pullSharedDraftBtn" type="button">Pull Shared Draft</button>
-            <button id="showDraftMemoryBtn" type="button">Show Draft Memory</button>
-          </div>
+          <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
         </div>
         <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
           <div class="clean-loading-card">
@@ -51,14 +41,13 @@
             <span>Press Pull Playoff Stats if it does not load automatically.</span>
           </div>
         </div>
-        <div id="draftMemoryPanel" class="draft-memory-panel" hidden></div>
       </article>
     </section>
 
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V83 STATIC FINAL DRAFT</div>
+        <div class="v46-build-marker">V84 CLEAN HOME ROSTER SOURCE</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -206,18 +195,7 @@
     </section>
 
     <section id="admin" class="panel">
-      <article class="card shared-storage-card static-final-draft-card">
-        <h3>Static Final Draft Workflow</h3>
-        <p class="muted">After the draft is complete, export <strong>final-draft.json</strong>, place it in <code>data/final-draft.json</code>, and redeploy. The Home playoff leaderboard will then use that locked static roster forever.</p>
-        <div class="storage-steps">
-          <strong>Final workflow:</strong>
-          <span>1. Finish the draft on the desktop/browser that has the full roster.</span>
-          <span>2. Home → Export Final Static Draft.</span>
-          <span>3. Replace <code>data/final-draft.json</code> in the site folder with the downloaded file.</span>
-          <span>4. Redeploy. Phones and desktops will now read the same static roster.</span>
-        </div>
-      </article>
-      <div class="section-head">
+<div class="section-head">
         <div>
           <p class="eyebrow">Admin</p>
           <h2>Backup, restore, and data tools</h2>
@@ -2279,466 +2257,6 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       function esc(s){
         return String(s == null ? "" : s).replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];});
       }
-      function getOwners(){
-        return [
-          { id:"nick", teamName:"Nick" },
-          { id:"chris", teamName:"Chris" },
-          { id:"andrew", teamName:"Andrew" },
-          { id:"tyler", teamName:"Tyler" },
-          { id:"scott", teamName:"Scott" }
-        ];
-      }
-      function getLotteryOrder(){
-        var keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
-        for (var i=0;i<keys.length;i++){
-          try{
-            var parsed = JSON.parse(localStorage.getItem(keys[i]) || "null");
-            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length){
-              return parsed.lotteryOrder.slice();
-            }
-          }catch(e){}
-        }
-        return null;
-      }
-      function paintCompactLottery(){
-        var box = document.getElementById("compactLotterySummary");
-        var status = document.getElementById("compactLotteryStatus");
-        var order = getLotteryOrder();
-        var owners = getOwners();
-        if (!box || !status) return;
-        if (!order || !order.length){
-          box.classList.remove("completed");
-          status.innerHTML = "LOTTERY NOT COMPLETED YET";
-          var run = document.getElementById("runLotteryBtn"); var replay = document.getElementById("replayLotteryBtn");
-          if (run) { run.style.display = "inline-flex"; run.textContent = "RUN LOTTERY"; }
-          if (replay) replay.style.display = "none";
-          return;
-        }
-        box.classList.add("completed");
-        var rows = order.map(function(id, i){
-          var owner = owners.find(function(o){ return o.id === id; }) || {teamName:id};
-          return '<span><b>'+(i+1)+'</b> '+esc(owner.teamName)+'</span>';
-        }).join("");
-        status.innerHTML = '<div class="compact-order-list">'+rows+'</div>';
-        var run = document.getElementById("runLotteryBtn"); var replay = document.getElementById("replayLotteryBtn");
-        if (run) run.style.display = "none";
-        if (replay) replay.style.display = "inline-flex";
-      }
-      function localStorageDraftAudit(){
-        const rows = [];
-        for (let i = 0; i < localStorage.length; i++){
-          const key = localStorage.key(i);
-          let value = "";
-          try { value = localStorage.getItem(key) || ""; } catch(e) {}
-          if (!value || (!value.includes("picks") && !value.includes("player") && !value.includes("draft"))) continue;
-
-          try{
-            const parsed = JSON.parse(value);
-            let count = 0;
-            let type = "";
-            if (parsed && Array.isArray(parsed.picks)) {
-              count = parsed.picks.length;
-              type = "draft.picks";
-            } else if (parsed && parsed.draft && Array.isArray(parsed.draft.picks)) {
-              count = parsed.draft.picks.length;
-              type = "draft wrapper";
-            } else if (Array.isArray(parsed)) {
-              count = parsed.length;
-              type = "array";
-            } else {
-              type = "json";
-            }
-            rows.push({ key, count, type, size: value.length, parsed });
-          }catch(e){
-            rows.push({ key, count: 0, type: "text", size: value.length, parsed: null });
-          }
-        }
-        return rows.sort((a,b) => (b.count - a.count) || (b.size - a.size));
-      }
-
-      function getBestAnyLocalDraft(){
-        const candidates = [];
-        localStorageDraftAudit().forEach(item => {
-          const parsed = item.parsed;
-          if (parsed && Array.isArray(parsed.picks)) candidates.push({ source: item.key, draft: parsed, count: parsed.picks.length });
-          if (parsed && parsed.draft && Array.isArray(parsed.draft.picks)) candidates.push({ source: item.key + " .draft", draft: parsed.draft, count: parsed.draft.picks.length });
-        });
-        return candidates.sort((a,b) => b.count - a.count)[0] || null;
-      }
-
-      function renderDraftMemoryPanel(){
-        const panel = document.getElementById("draftMemoryPanel");
-        if (!panel) return;
-        const audit = localStorageDraftAudit();
-        const best = getBestAnyLocalDraft();
-        const exportText = best ? JSON.stringify(best.draft) : "";
-
-        panel.hidden = false;
-        panel.innerHTML = `
-          <div class="draft-memory-card">
-            <h3>Draft Memory Diagnostic</h3>
-            <p class="muted">Desktop and phone do not share browser localStorage. This panel shows exactly what this browser has saved.</p>
-            <div class="memory-best-box">
-              <strong>Best local draft found:</strong>
-              <span>${best ? `${esc(best.count)} picks from ${esc(best.source)}` : "None"}</span>
-            </div>
-            <div class="draft-memory-actions">
-              <button id="copyBestDraftBtn" type="button" ${best ? "" : "disabled"}>Copy Best Draft JSON</button>
-              <button id="publishBestAnyDraftBtn" type="button" ${best ? "" : "disabled"}>Publish Best Local Draft</button>
-              <button id="importDraftJsonBtn" type="button">Import Draft JSON Below</button>
-            </div>
-            <textarea id="draftTransferBox" spellcheck="false" placeholder="Desktop: copy best draft JSON here. Phone: paste it here, then press Import Draft JSON.">${esc(exportText)}</textarea>
-            <table class="draft-memory-table">
-              <thead><tr><th>LocalStorage key</th><th>Detected</th><th>Picks/items</th><th>Size</th></tr></thead>
-              <tbody>
-                ${audit.length ? audit.map(r => `<tr><td>${esc(r.key)}</td><td>${esc(r.type)}</td><td>${esc(r.count)}</td><td>${esc(r.size)}</td></tr>`).join("") : '<tr><td colspan="4">No draft-like localStorage entries found.</td></tr>'}
-              </tbody>
-            </table>
-          </div>`;
-      }
-
-      async function publishBestAnyLocalDraft(){
-        const best = getBestAnyLocalDraft();
-        if (!best || !best.draft) {
-          toast("No local draft found to publish.");
-          return;
-        }
-        const ok = window.confirm(`Publish ${best.count} picks from ${best.source} to shared draft?`);
-        if (!ok) return;
-        const res = await fetch("/api/draft", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(best.draft)
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok) throw new Error(data.error || "Publish failed.");
-        localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(data.draft || best.draft));
-        toast(`Published ${best.count} picks to shared draft.`);
-        renderDraftMemoryPanel();
-        renderPlayoffLeaderboard();
-      }
-
-      function importDraftJsonFromBox(){
-        const box = document.getElementById("draftTransferBox");
-        if (!box) return;
-        try{
-          const parsed = JSON.parse(box.value || "{}");
-          const draft = parsed && parsed.draft && Array.isArray(parsed.draft.picks) ? parsed.draft : parsed;
-          if (!draft || !Array.isArray(draft.picks)) throw new Error("JSON does not contain a picks array.");
-          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(draft));
-          toast(`Imported ${draft.picks.length} picks into this browser.`);
-          renderDraftMemoryPanel();
-          renderPlayoffLeaderboard();
-        }catch(error){
-          toast("Import failed.");
-          alert("Import failed: " + (error.message || error));
-        }
-      }
-
-      function downloadJson(filename, data){
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 500);
-      }
-
-      async function exportFinalStaticDraft(){
-        const best = getBestAnyLocalDraft() || getLocalDraftCandidates().sort((a,b) => b.count - a.count)[0] || await getSharedDraftCandidate();
-        if (!best || !best.draft || !Array.isArray(best.draft.picks) || !best.draft.picks.length) {
-          toast("No completed draft found to export.");
-          return;
-        }
-
-        const finalDraft = {
-          ...best.draft,
-          locked: true,
-          source: "static final draft",
-          exportedAt: new Date().toISOString(),
-          note: "Official locked fantasy draft roster. The playoff leaderboard can read this static file.",
-          picks: best.draft.picks
-        };
-
-        downloadJson("final-draft.json", finalDraft);
-        toast(`Exported final-draft.json with ${finalDraft.picks.length} picks.`);
-      }
-
-      async function publishLocalDraftToShared(){
-        const best = getBestAnyLocalDraft() || getLocalDraftCandidates().sort((a,b) => b.count - a.count)[0];
-        if (!best || !best.draft || !Array.isArray(best.draft.picks) || !best.draft.picks.length) {
-          toast("No local draft picks found to publish.");
-          renderDraftMemoryPanel();
-          return;
-        }
-
-        const ok = window.confirm(`Publish ${best.count} local draft picks from ${best.source} to shared draft state? Use this on the browser that has the full draft.`);
-        if (!ok) return;
-
-        try{
-          const res = await fetch("/api/draft", {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify(best.draft)
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.ok) throw new Error(data.error || "Shared draft publish failed.");
-          toast(`Published ${best.count} picks to shared draft.`);
-          renderPlayoffLeaderboard();
-        }catch(error){
-          console.error(error);
-          toast("Publish failed.");
-          const target = document.getElementById("leaderboardTable");
-          if (target) target.insertAdjacentHTML("afterbegin", `<div class="clean-loading-card error"><strong>Publish failed.</strong><span>${esc(error.message || error)}</span></div>`);
-        }
-      }
-
-      async function pullSharedDraftToLocal(){
-        const shared = await getSharedDraftCandidate();
-        if (!shared || !shared.draft) {
-          toast("No shared draft found.");
-          return;
-        }
-        try {
-          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(shared.draft));
-          toast(`Pulled ${shared.count} shared picks into this browser.`);
-          renderPlayoffLeaderboard();
-        } catch(error) {
-          toast("Could not save shared draft locally.");
-        }
-      }
-
-      document.addEventListener("click", function(event){
-        var run = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn");
-        if (run) setTimeout(paintCompactLottery, 1800);
-      }, true);
-      window.addEventListener("storage", paintCompactLottery);
-      window.addEventListener("load", function(){
-        setTimeout(paintCompactLottery, 250);
-        setInterval(paintCompactLottery, 2500);
-      });
-    })();
-  </script>
-
-
-  <script>
-    // V52: roster cards and roster-needs player names come directly from live draft picks.
-    window.__draftOwners = [
-      { id: "nick", teamName: "Nick" },
-      { id: "chris", teamName: "Chris" },
-      { id: "andrew", teamName: "Andrew" },
-      { id: "tyler", teamName: "Tyler" },
-      { id: "scott", teamName: "Scott" }
-    ];
-
-    window.__draftEsc = function(s) {
-      return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) {
-        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
-      });
-    };
-
-    window.__draftPicksByOwner = function(draft, ownerId) {
-      var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
-      return picks.filter(function(p) { return String(p.ownerId) === String(ownerId); });
-    };
-
-    window.__draftPositionList = function(picks, bucket) {
-      return picks.filter(function(p) {
-        return window.__draftBucket(p.player && p.player.position) === bucket;
-      });
-    };
-
-    window.renderRosterNeeds = function(draft, ownerId, ownerName) {
-      var panel = document.getElementById("cleanRosterNeedsPanel");
-      if (!panel) return;
-      if (!ownerId) {
-        panel.innerHTML = '<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 6 forwards, 4 defense, 2 goalies</span></div>';
-        return;
-      }
-
-      var picks = window.__draftPicksByOwner(draft, ownerId);
-      var f = window.__draftPositionList(picks, "F");
-      var d = window.__draftPositionList(picks, "D");
-      var g = window.__draftPositionList(picks, "G");
-      var remF = Math.max(0, 6 - f.length);
-      var remD = Math.max(0, 4 - d.length);
-      var remG = Math.max(0, 2 - g.length);
-
-      function playerList(list) {
-        if (!list.length) return '<small class="needs-empty">No players yet</small>';
-        return '<ul class="needs-player-list">' + list.map(function(p) {
-          return '<li><b>' + window.__draftEsc(p.player && p.player.name) + '</b><span>' + window.__draftEsc((p.player && p.player.nhlTeam) || "") + '</span></li>';
-        }).join("") + '</ul>';
-      }
-
-      panel.innerHTML =
-        '<div class="needs-title needs-title-swapped"><strong class="needs-team-name">' + window.__draftEsc(ownerName || ownerId) + '</strong><span class="eyebrow needs-heading-centered">Roster Needs</span></div>' +
-        '<div class="needs-grid needs-grid-with-players">' +
-          '<div class="' + (remF === 0 ? 'filled' : '') + '"><span>Forwards needed</span><strong>' + remF + '</strong><em>' + f.length + '/6 drafted</em>' + playerList(f) + '</div>' +
-          '<div class="' + (remD === 0 ? 'filled' : '') + '"><span>Defense needed</span><strong>' + remD + '</strong><em>' + d.length + '/4 drafted</em>' + playerList(d) + '</div>' +
-          '<div class="' + (remG === 0 ? 'filled' : '') + '"><span>Goalies needed</span><strong>' + remG + '</strong><em>' + g.length + '/2 drafted</em>' + playerList(g) + '</div>' +
-        '</div>';
-    };
-
-    window.renderDraftRosters = function(draft) {
-      var target = document.getElementById("rosterCards");
-      if (!target) return;
-      var owners = window.__draftOwners;
-      var picks = draft && Array.isArray(draft.picks) ? draft.picks : [];
-      target.innerHTML = owners.map(function(owner) {
-        var mine = picks.filter(function(p) { return String(p.ownerId) === owner.id; });
-        var f = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "F"; });
-        var d = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "D"; });
-        var g = mine.filter(function(p) { return window.__draftBucket(p.player && p.player.position) === "G"; });
-
-        function section(title, list, max) {
-          return '<div class="roster-pos-section"><h4>' + title + ' <span>' + list.length + '/' + max + '</span></h4>' +
-            (list.length ? '<ol>' + list.map(function(p) {
-              return '<li><strong>' + window.__draftEsc(p.player && p.player.name) + '</strong><small>' + window.__draftEsc((p.player && p.player.position) || "") + ' • ' + window.__draftEsc((p.player && p.player.nhlTeam) || "") + ' • Pick ' + window.__draftEsc(p.pickNumber) + '</small></li>';
-            }).join("") + '</ol>' : '<p class="muted">No players yet.</p>') +
-          '</div>';
-        }
-
-        return '<article class="card roster-card live-roster-card">' +
-          '<div class="roster-card-head"><h3>' + window.__draftEsc(owner.teamName) + '</h3><span>' + mine.length + '/12</span></div>' +
-          section("Forwards", f, 6) +
-          section("Defense", d, 4) +
-          section("Goalies", g, 2) +
-        '</article>';
-      }).join("");
-    };
-
-    window.addEventListener("load", function() {
-      try {
-        var localDraft = JSON.parse(localStorage.getItem("custom-hockey-pool-v40-clean-live-draft") || "null");
-        if (localDraft) window.renderDraftRosters(localDraft);
-      } catch (e) {}
-    });
-  </script>
-
-
-  <script>
-    (function(){
-      const OWNER_IDS = ["nick", "chris", "andrew", "tyler", "scott"];
-      const OWNERS = OWNER_IDS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1), teamName: id[0].toUpperCase() + id.slice(1) }));
-
-      function toast(message) {
-        const t = document.getElementById("toast");
-        if (!t) return;
-        t.textContent = message;
-        t.classList.add("show");
-        setTimeout(() => t.classList.remove("show"), 2600);
-      }
-
-      function lotteryOrderFromStorage() {
-        const keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
-        for (const key of keys) {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(key) || "null");
-            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length === 5) return parsed.lotteryOrder.slice();
-          } catch(e) {}
-        }
-        return OWNER_IDS.slice();
-      }
-
-      function defaultDraftState() {
-        return {
-          owners: OWNERS,
-          draftOrder: lotteryOrderFromStorage(),
-          picks: [],
-          updatedAt: new Date().toISOString()
-        };
-      }
-
-      async function saveDraftState(draft) {
-        try {
-          localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(draft));
-        } catch(e) {}
-        try {
-          await fetch("/api/draft", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(draft)
-          });
-        } catch(e) {}
-        if (window.renderDraftRosters) window.renderDraftRosters(draft);
-        if (window.renderRosterNeeds) {
-          const active = localStorage.getItem("custom-hockey-pool-active-owner") || "";
-          const owner = OWNERS.find(o => o.id === active);
-          window.renderRosterNeeds(draft, active, owner ? owner.teamName : active);
-        }
-      }
-
-      function paintLotteryReset() {
-        const status = document.getElementById("compactLotteryStatus");
-        const results = document.getElementById("lotteryResults");
-        const lotteryStatus = document.getElementById("lotteryStatus");
-        const run = document.getElementById("runLotteryBtn");
-        const replay = document.getElementById("replayLotteryBtn");
-        const summary = document.getElementById("compactLotterySummary");
-        if (summary) summary.classList.remove("completed");
-        if (status) status.innerHTML = "LOTTERY NOT COMPLETED YET";
-        if (lotteryStatus) lotteryStatus.textContent = "LOTTERY NOT COMPLETED YET";
-        if (results) results.innerHTML = '<div class="lottery-not-complete">LOTTERY NOT COMPLETED YET</div>';
-        if (run) { run.style.display = "inline-flex"; run.textContent = "RUN LOTTERY"; }
-        if (replay) replay.style.display = "none";
-      }
-
-      async function resetLottery() {
-        if (!confirm("Reset the draft lottery? This clears the locked lottery order on this browser.")) return;
-        ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"].forEach(k => {
-          try { localStorage.removeItem(k); } catch(e) {}
-        });
-        paintLotteryReset();
-        const draft = defaultDraftState();
-        await saveDraftState(draft);
-        toast("Draft lottery reset.");
-      }
-
-      async function resetDraft() {
-        if (!confirm("Reset live draft picks? This clears all drafted players from the live draft.")) return;
-        const draft = defaultDraftState();
-        await saveDraftState(draft);
-        toast("Live draft picks reset.");
-      }
-
-      document.addEventListener("click", function(event){
-        const resetLotteryBtn = event.target.closest && event.target.closest("#adminResetLotteryBtn");
-        if (resetLotteryBtn) {
-          event.preventDefault();
-          resetLottery();
-          return;
-        }
-        const resetDraftBtn = event.target.closest && event.target.closest("#adminResetDraftBtn");
-        if (resetDraftBtn) {
-          event.preventDefault();
-          resetDraft();
-          return;
-        }
-      }, true);
-    })();
-  </script>
-
-
-  <script>
-    (function(){
-      const OWNER_ORDER = ["nick", "chris", "andrew", "tyler", "scott"];
-      const DEFAULT_OWNERS = [
-        { id:"nick", teamName:"Nick" },
-        { id:"chris", teamName:"Chris" },
-        { id:"andrew", teamName:"Andrew" },
-        { id:"tyler", teamName:"Tyler" },
-        { id:"scott", teamName:"Scott" }
-      ];
-
-      function esc(s){
-        return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
-          return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c];
-        });
-      }
 
       function currentSeasonId(){
         const now = new Date();
@@ -2756,101 +2274,96 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         setTimeout(() => t.classList.remove("show"), 2600);
       }
 
-      function getLocalDraftCandidates(){
-        const out = [];
-        const keys = [
-          "custom-hockey-pool-v40-clean-live-draft",
-          "custom-hockey-pool-v38-official-snake",
-          "custom-hockey-pool-active-draft"
-        ];
-        for (const key of keys){
+      const DEFAULT_OWNERS = [
+        { id:"nick", teamName:"Nick" },
+        { id:"chris", teamName:"Chris" },
+        { id:"andrew", teamName:"Andrew" },
+        { id:"tyler", teamName:"Tyler" },
+        { id:"scott", teamName:"Scott" }
+      ];
+
+      function getOwners(){
+        return DEFAULT_OWNERS;
+      }
+
+      function getLotteryOrder(){
+        var keys = ["custom-hockey-pool-v30-popout-emergency","custom-hockey-pool-v29-inline-emergency","custom-hockey-pool-v28-hard-bypass-fallback"];
+        for (var i=0;i<keys.length;i++){
           try{
-            const parsed = JSON.parse(localStorage.getItem(key) || "null");
-            if (parsed && Array.isArray(parsed.picks)) {
-              out.push({ source: `local browser: ${key}`, draft: parsed, count: parsed.picks.length });
+            var parsed = JSON.parse(localStorage.getItem(keys[i]) || "null");
+            if (parsed && Array.isArray(parsed.lotteryOrder) && parsed.lotteryOrder.length){
+              return parsed.lotteryOrder.slice();
             }
           }catch(e){}
         }
-        return out;
+        return getOwners().map(function(o){return o.id;});
       }
 
-      async function getStaticFinalDraftCandidate(){
-        try{
-          const res = await fetch("/data/final-draft.json?t=" + Date.now(), { cache:"no-store" });
-          if (!res.ok) return null;
-          const data = await res.json();
-          if (data && Array.isArray(data.picks)) {
-            return {
-              source: `static final draft: data/final-draft.json${data.locked ? " locked" : " placeholder"}`,
-              configured: true,
-              storage: "static-json",
-              warning: data.locked ? "" : "Static final draft file exists but is still a placeholder/not locked.",
-              draft: data,
-              count: data.picks.length
-            };
-          }
-        }catch(e){}
-        return null;
+      function renderCompactLottery(){
+        var status = document.getElementById("compactLotteryStatus");
+        if (!status) return;
+        var owners = getOwners();
+        var map = new Map(owners.map(function(o){return [o.id,o];}));
+        var order = getLotteryOrder();
+        var rows = order.map(function(id,idx){
+          var o = map.get(id) || {teamName:id};
+          return '<span><b>'+String(idx+1)+'</b>'+esc(o.teamName)+'</span>';
+        }).join("");
+        status.innerHTML = '<div class="compact-order-list">'+rows+'</div>';
+        var run = document.getElementById("runLotteryBtn"); var replay = document.getElementById("replayLotteryBtn");
+        if (run) run.style.display = "none";
+        if (replay) replay.style.display = "inline-flex";
       }
 
-      async function getSharedDraftCandidate(){
-        try{
-          const res = await fetch("/api/draft?t=" + Date.now(), { cache:"no-store" });
-          if (!res.ok) return null;
-          const data = await res.json();
-          if (data && data.draft && Array.isArray(data.draft.picks)) {
-            return {
-              source: `shared draft / ${data.storage || "api"}${data.configured === false ? " temporary" : ""}`,
-              configured: data.configured,
-              storage: data.storage || "api",
-              warning: data.warning || "",
-              draft: data.draft,
-              count: data.draft.picks.length
-            };
-          }
-        }catch(e){}
-        return null;
-      }
-
-      async function readDraftState(){
-        const candidates = [];
-        const staticFinal = await getStaticFinalDraftCandidate();
-        const shared = await getSharedDraftCandidate();
-
-        // Once the draft is locked as a static JSON file, it becomes the official source.
-        if (staticFinal && staticFinal.count > 0 && staticFinal.draft.locked) {
-          candidates.push(staticFinal);
+      async function readRosterDraftState(){
+        async function tryStaticFinal(){
+          try{
+            const res = await fetch("/data/final-draft.json?t=" + Date.now(), { cache:"no-store" });
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (data && data.locked && Array.isArray(data.picks) && data.picks.length) {
+              data.__source = "static final roster";
+              return data;
+            }
+          }catch(e){}
+          return null;
         }
 
-        if (shared) candidates.push(shared);
-
-        // If static exists but is not locked/empty, keep it as a visible source but don't let it beat real data.
-        if (staticFinal && !(staticFinal.count > 0 && staticFinal.draft.locked)) {
-          candidates.push(staticFinal);
+        async function trySharedDraft(){
+          try{
+            const res = await fetch("/api/draft?t=" + Date.now(), { cache:"no-store" });
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (data && data.draft && Array.isArray(data.draft.picks) && data.draft.picks.length) {
+              data.draft.__source = "shared roster/draft API";
+              return data.draft;
+            }
+          }catch(e){}
+          return null;
         }
 
-        candidates.push(...getLocalDraftCandidates());
-
-        const best = candidates
-          .filter(c => c && c.draft && Array.isArray(c.draft.picks))
-          .sort((a,b) => (b.count - a.count))[0];
-
-        if (best) {
-          try { localStorage.setItem("custom-hockey-pool-v40-clean-live-draft", JSON.stringify(best.draft)); } catch(e) {}
-          best.draft.__source = best.source;
-          best.draft.__configured = best.configured;
-          best.draft.__staticCount = staticFinal ? staticFinal.count : 0;
-          best.draft.__staticLocked = staticFinal ? Boolean(staticFinal.draft.locked) : false;
-          best.draft.__sharedCount = shared ? shared.count : 0;
-          best.draft.__sharedStorage = shared ? shared.storage : "none";
-          best.draft.__sharedConfigured = shared ? shared.configured : null;
-          best.draft.__sharedWarning = shared ? shared.warning : "";
-          best.draft.__localCount = Math.max(0, ...getLocalDraftCandidates().map(c => c.count));
-          best.draft.__allSources = candidates.map(c => `${c.source}: ${c.count}`).join(" | ");
-          return best.draft;
+        function tryLocalBackup(){
+          const keys = [
+            "custom-hockey-pool-v40-clean-live-draft",
+            "custom-hockey-pool-v38-official-snake",
+            "custom-hockey-pool-active-draft"
+          ];
+          let best = null;
+          keys.forEach(key => {
+            try{
+              const parsed = JSON.parse(localStorage.getItem(key) || "null");
+              if (parsed && Array.isArray(parsed.picks)) {
+                if (!best || parsed.picks.length > best.picks.length) {
+                  parsed.__source = "local browser roster backup: " + key;
+                  best = parsed;
+                }
+              }
+            }catch(e){}
+          });
+          return best;
         }
 
-        return { owners: DEFAULT_OWNERS, picks: [], __source: "no saved draft found", __configured: null, __staticCount: 0, __staticLocked: false, __sharedCount: 0, __sharedStorage: "none", __sharedConfigured: null, __sharedWarning: "", __localCount: 0, __allSources: "none" };
+        return (await tryStaticFinal()) || (await trySharedDraft()) || tryLocalBackup() || { owners: DEFAULT_OWNERS, picks: [], __source:"no roster/draft source found" };
       }
 
       function normalizeName(s){
@@ -2913,19 +2426,21 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
         const target = document.getElementById("leaderboardTable");
         const button = document.getElementById("refreshStatsBtn2");
         if (!target) return;
-
         if (button) {
           button.disabled = true;
           button.textContent = "Pulling Playoff Stats…";
         }
-
-        target.innerHTML = '<div class="clean-loading-card"><strong>Pulling NHL playoff stats…</strong><span>Scoring goals, assists, and goalie wins.</span></div>';
+        target.innerHTML = '<div class="clean-loading-card"><strong>Pulling NHL playoff stats…</strong><span>Reading roster source and scoring playoff stats.</span></div>';
 
         try{
-          const draft = await readDraftState();
+          const draft = await readRosterDraftState();
           const owners = Array.isArray(draft.owners) && draft.owners.length ? draft.owners : DEFAULT_OWNERS;
-          const ownerMap = new Map(owners.map(o => [String(o.id), o]));
           const picks = Array.isArray(draft.picks) ? draft.picks : [];
+
+          if (!picks.length) {
+            target.innerHTML = `<div class="clean-loading-card"><strong>No roster picks found.</strong><span>Home checked the locked final roster, then /api/draft, then local browser backup. Source: ${esc(draft.__source || "unknown")}.</span></div>`;
+            return;
+          }
 
           const season = currentSeasonId();
           const res = await fetch(`/api/nhl?gameType=3&limit=900&season=${season}`, { cache:"no-store" });
@@ -2937,30 +2452,18 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
 
           const teams = new Map();
           owners.forEach(o => {
-            teams.set(String(o.id), {
-              ownerId: String(o.id),
-              ownerName: o.teamName || o.name || o.id,
-              total: 0,
-              goals: 0,
-              assists: 0,
-              goalieWins: 0,
-              players: []
-            });
+            teams.set(String(o.id), { ownerId:String(o.id), ownerName:o.teamName || o.name || o.id, total:0, goals:0, assists:0, goalieWins:0, players:[] });
           });
 
           picks.forEach(pick => {
             const player = pick.player || {};
             const ownerId = String(pick.ownerId || "");
             if (!teams.has(ownerId)) {
-              const o = ownerMap.get(ownerId) || { teamName: pick.ownerName || ownerId };
-              teams.set(ownerId, { ownerId, ownerName: o.teamName || o.name || ownerId, total:0, goals:0, assists:0, goalieWins:0, players:[] });
+              teams.set(ownerId, { ownerId, ownerName:pick.ownerName || ownerId, total:0, goals:0, assists:0, goalieWins:0, players:[] });
             }
 
             const team = teams.get(ownerId);
-            let goals = 0;
-            let assists = 0;
-            let goalieWins = 0;
-            let points = 0;
+            let goals = 0, assists = 0, goalieWins = 0, points = 0;
 
             if (player.position === "TG") {
               goalieWins = Number(teamGoalieWins.get(player.nhlTeam) || 0);
@@ -2982,9 +2485,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
               name: player.name || "Unknown player",
               position: playerPositionLabel(player),
               nhlTeam: player.nhlTeam || "",
-              goals,
-              assists,
-              goalieWins,
+              goals, assists, goalieWins,
               playoffPoints: points,
               points,
               regularPoints: Number(player.points || 0),
@@ -2994,87 +2495,32 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
 
           const rows = Array.from(teams.values()).sort((a,b) => (b.total - a.total) || a.ownerName.localeCompare(b.ownerName));
 
-          if (!picks.length) {
-            target.innerHTML = `<div class="clean-loading-card"><strong>No saved draft picks found.</strong><span>Draft source checked: ${esc(draft.__source || "unknown")}. On the desktop/browser that has the full draft, press Publish Local Draft to Shared. Then press Pull Shared Draft on the phone.</span></div>`;
-            return;
-          }
-
           target.innerHTML =
             '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>Goalie win = 5</b>. Click a team name to see the player breakdown.</div>' +
             '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard">' +
               '<thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>G</th><th>A</th><th>GW</th><th>Top playoff scorers</th></tr></thead>' +
               '<tbody>' + rows.map((row, i) => {
-                const sortedPlayers = row.players
-                  .slice()
-                  .sort((a,b) => (b.playoffPoints - a.playoffPoints) || (b.fantasyPoints - a.fantasyPoints) || a.name.localeCompare(b.name));
+                const sortedPlayers = row.players.slice().sort((a,b) => (b.playoffPoints - a.playoffPoints) || (b.fantasyPoints - a.fantasyPoints) || a.name.localeCompare(b.name));
                 const topPlayers = sortedPlayers.filter(p => p.playoffPoints > 0).slice(0, 12);
                 const playerHtml = topPlayers.length
                   ? topPlayers.map(p => `<span class="playoff-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.playoffPoints} pts <small>${p.goalieWins ? `${p.goalieWins} GW` : `${p.goals}G ${p.assists}A`}</small></span>`).join("")
                   : '<span class="muted">No playoff points yet</span>';
 
                 const breakdownRows = sortedPlayers.map(p => {
-                  const calc = p.goalieWins
-                    ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}`
-                    : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
-                  return `<tr>
-                    <td><strong>${esc(p.name)}</strong><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small></td>
-                    <td>${p.goals}</td>
-                    <td>${p.assists}</td>
-                    <td>${p.goalieWins}</td>
-                    <td>${p.regularPoints}</td>
-                    <td>${p.fantasyPoints}</td>
-                    <td class="total-cell">${p.playoffPoints}</td>
-                    <td>${esc(calc)}</td>
-                  </tr>`;
+                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  return `<tr><td><strong>${esc(p.name)}</strong><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small></td><td>${p.goals}</td><td>${p.assists}</td><td>${p.goalieWins}</td><td>${p.regularPoints}</td><td>${p.fantasyPoints}</td><td class="total-cell">${p.playoffPoints}</td><td>${esc(calc)}</td></tr>`;
                 }).join("");
 
                 const mobileBreakdownCards = sortedPlayers.map(p => {
-                  const calc = p.goalieWins
-                    ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}`
-                    : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
-                  return `<article class="mobile-playoff-player-card">
-                    <div class="mobile-playoff-player-head">
-                      <strong>${esc(p.name)}</strong>
-                      <b>${p.playoffPoints} pts</b>
-                    </div>
-                    <small>${esc(p.position)} • ${esc(p.nhlTeam)}</small>
-                    <div class="mobile-playoff-stat-grid">
-                      <span><em>G</em>${p.goals}</span>
-                      <span><em>A</em>${p.assists}</span>
-                      <span><em>GW</em>${p.goalieWins}</span>
-                      <span><em>NHL Pts</em>${p.regularPoints}</span>
-                      <span><em>Draft FPTS</em>${p.fantasyPoints}</span>
-                    </div>
-                    <p>${esc(calc)}</p>
-                  </article>`;
+                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  return `<article class="mobile-playoff-player-card"><div class="mobile-playoff-player-head"><strong>${esc(p.name)}</strong><b>${p.playoffPoints} pts</b></div><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small><div class="mobile-playoff-stat-grid"><span><em>G</em>${p.goals}</span><span><em>A</em>${p.assists}</span><span><em>GW</em>${p.goalieWins}</span><span><em>NHL Pts</em>${p.regularPoints}</span><span><em>Draft FPTS</em>${p.fantasyPoints}</span></div><p>${esc(calc)}</p></article>`;
                 }).join("");
 
                 const detailId = `playoff-breakdown-${esc(row.ownerId)}`;
-                return `<tr class="playoff-summary-row">
-                  <td><b>${i + 1}</b></td>
-                  <td><button type="button" class="playoff-team-toggle" data-playoff-toggle="${detailId}"><span>▸</span>${esc(row.ownerName)}</button></td>
-                  <td class="total-cell">${row.total}</td>
-                  <td>${row.goals}</td>
-                  <td>${row.assists}</td>
-                  <td>${row.goalieWins}</td>
-                  <td><div class="playoff-player-list">${playerHtml}</div></td>
-                </tr>
-                <tr id="${detailId}" class="playoff-breakdown-row" hidden>
-                  <td colspan="7">
-                    <div class="playoff-breakdown-panel">
-                      <h3>${esc(row.ownerName)} playoff point breakdown</h3>
-                      <div class="mobile-playoff-breakdown-list">${mobileBreakdownCards || '<p class="muted">No drafted players.</p>'}</div>
-                      <table class="playoff-breakdown-table">
-                        <thead><tr><th>Player</th><th>G</th><th>A</th><th>GW</th><th>NHL Pts</th><th>Draft FPTS</th><th>Pool Pts</th><th>Calculation</th></tr></thead>
-                        <tbody>${breakdownRows || '<tr><td colspan="8">No drafted players.</td></tr>'}</tbody>
-                      </table>
-                    </div>
-                  </td>
-                </tr>`;
-              }).join("") + '</tbody>' +
-            '</table>' +
-            `${draft.__sharedConfigured === false ? '<div class="shared-storage-warning"><strong>Shared draft storage is NOT persistent.</strong><span>Vercel KV / Upstash is not connected, so phones may not see desktop draft results and data can disappear after deploys. Connect KV, then publish the full draft once.</span></div>' : ''}` +
-            `<p class="muted playoff-updated">Draft picks found: ${esc(picks.length)} from ${esc(draft.__source || "unknown source")}. Static picks: ${esc(draft.__staticCount || 0)}${draft.__staticLocked ? " locked" : ""}. Shared picks: ${esc(draft.__sharedCount || 0)}. Shared storage: ${esc(draft.__sharedStorage || "unknown")}. Best local picks: ${esc(draft.__localCount || 0)}. Sources checked: ${esc(draft.__allSources || "unknown")}. Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
+                return `<tr class="playoff-summary-row"><td><b>${i + 1}</b></td><td><button type="button" class="playoff-team-toggle" data-playoff-toggle="${detailId}"><span>▸</span>${esc(row.ownerName)}</button></td><td class="total-cell">${row.total}</td><td>${row.goals}</td><td>${row.assists}</td><td>${row.goalieWins}</td><td><div class="playoff-player-list">${playerHtml}</div></td></tr>
+                <tr id="${detailId}" class="playoff-breakdown-row" hidden><td colspan="7"><div class="playoff-breakdown-panel"><h3>${esc(row.ownerName)} playoff point breakdown</h3><div class="mobile-playoff-breakdown-list">${mobileBreakdownCards || '<p class="muted">No drafted players.</p>'}</div><table class="playoff-breakdown-table"><thead><tr><th>Player</th><th>G</th><th>A</th><th>GW</th><th>NHL Pts</th><th>Draft FPTS</th><th>Pool Pts</th><th>Calculation</th></tr></thead><tbody>${breakdownRows || '<tr><td colspan="8">No drafted players.</td></tr>'}</tbody></table></div></td></tr>`;
+              }).join("") + '</tbody></table>' +
+            `<p class="muted playoff-updated">Roster picks found: ${esc(picks.length)} from ${esc(draft.__source || "unknown source")}. Pulled NHL playoff stats for season ${esc(payload.season || season)}. Skaters: ${esc((payload.counts && payload.counts.skaters) || 0)}. Goalies: ${esc((payload.counts && payload.counts.goalies) || 0)}.</p>`;
         } catch(error) {
           console.error(error);
           target.innerHTML = `<div class="clean-loading-card error"><strong>Playoff leaderboard failed.</strong><span>${esc(error.message || error)}</span></div>`;
@@ -3088,68 +2534,6 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }
 
       document.addEventListener("click", function(event){
-        const memoryBtn = event.target.closest && event.target.closest("#showDraftMemoryBtn");
-        if (memoryBtn) {
-          event.preventDefault();
-          const panel = document.getElementById("draftMemoryPanel");
-          if (panel && !panel.hidden) {
-            panel.hidden = true;
-          } else {
-            renderDraftMemoryPanel();
-          }
-          return;
-        }
-
-        const copyBtn = event.target.closest && event.target.closest("#copyBestDraftBtn");
-        if (copyBtn) {
-          event.preventDefault();
-          const box = document.getElementById("draftTransferBox");
-          if (box) {
-            box.select();
-            document.execCommand("copy");
-            toast("Best draft JSON copied.");
-          }
-          return;
-        }
-
-        const publishBestBtn = event.target.closest && event.target.closest("#publishBestAnyDraftBtn");
-        if (publishBestBtn) {
-          event.preventDefault();
-          publishBestAnyLocalDraft().catch(error => {
-            console.error(error);
-            toast("Publish best draft failed.");
-          });
-          return;
-        }
-
-        const importBtn = event.target.closest && event.target.closest("#importDraftJsonBtn");
-        if (importBtn) {
-          event.preventDefault();
-          importDraftJsonFromBox();
-          return;
-        }
-
-        const exportFinalBtn = event.target.closest && event.target.closest("#exportFinalDraftBtn");
-        if (exportFinalBtn) {
-          event.preventDefault();
-          exportFinalStaticDraft();
-          return;
-        }
-
-        const publishBtn = event.target.closest && event.target.closest("#publishLocalDraftBtn");
-        if (publishBtn) {
-          event.preventDefault();
-          publishLocalDraftToShared();
-          return;
-        }
-
-        const pullBtn = event.target.closest && event.target.closest("#pullSharedDraftBtn");
-        if (pullBtn) {
-          event.preventDefault();
-          pullSharedDraftToLocal();
-          return;
-        }
-
         const toggle = event.target.closest && event.target.closest("[data-playoff-toggle]");
         if (toggle) {
           event.preventDefault();
@@ -3169,6 +2553,7 @@ const mobileRowSign = event.target.closest && event.target.closest("[data-mobile
       }, true);
 
       window.addEventListener("load", function(){
+        renderCompactLottery();
         setTimeout(renderPlayoffLeaderboard, 500);
       });
     })();
