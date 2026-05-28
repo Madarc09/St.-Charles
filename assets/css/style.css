@@ -10409,3 +10409,48 @@ button.danger{
   }
 }
 /* END V99 */
+
+
+/* V100 REAL FIX: move the table itself, not the wrapper */
+@media(min-width:821px){
+  #draft.active #cleanDraftBoard,
+  section#draft #cleanDraftBoard{
+    display:block!important;
+    overflow:visible!important;
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    transform:none!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+  }
+
+  #draft.active #cleanDraftBoard .clean-player-table,
+  section#draft #cleanDraftBoard .clean-player-table{
+    display:table!important;
+    table-layout:auto!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+    overflow:visible!important;
+  }
+
+  #draft.active #cleanDraftBoard .mobile-player-tools,
+  #draft.active #cleanDraftBoard .mobile-draft-board-list,
+  section#draft #cleanDraftBoard .mobile-player-tools,
+  section#draft #cleanDraftBoard .mobile-draft-board-list{
+    display:none!important;
+  }
+
+  #draft.active,
+  section#draft,
+  section#draft #cleanDraftRoom,
+  section#draft .clean-draft-room{
+    overflow:visible!important;
+  }
+}
+/* END V100 */

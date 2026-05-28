@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V99 ABSOLUTE DESKTOP BOARD LEFT -->
+  <!-- V100 TABLE ITSELF LEFT -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1699,17 +1699,37 @@
 
         const board = document.querySelector("#cleanDraftBoard");
         const table = document.querySelector("#cleanDraftBoard .clean-player-table");
-        if (!board || !table) return;
+        const anchor = document.querySelector("#cleanDraftOrderStrip span:first-child") || document.querySelector("#cleanDraftOrderStrip");
 
-        // The old CSS stack kept centering the board. This makes the table use the viewport,
-        // then offsets it from the board's current position so it starts at the real page-left.
-        const boardLeft = Math.round(board.getBoundingClientRect().left);
-        const desiredLeft = 42; // aligns with the left edge of the draft-room content/pick #1 area
-        const shift = desiredLeft - boardLeft;
+        if (!board || !table || !anchor) return;
 
-        board.style.setProperty("--desktop-board-shift", shift + "px");
-        board.dataset.boardLeft = String(boardLeft);
-        board.dataset.boardShift = String(shift);
+        // Reset the ACTUAL TABLE before measuring. Older CSS centers the table inside the board.
+        table.style.setProperty("position", "relative", "important");
+        table.style.setProperty("left", "0px", "important");
+        table.style.setProperty("right", "auto", "important");
+        table.style.setProperty("margin-left", "0px", "important");
+        table.style.setProperty("margin-right", "0px", "important");
+        table.style.setProperty("transform", "none", "important");
+        table.style.setProperty("width", "100%", "important");
+        table.style.setProperty("max-width", "none", "important");
+
+        requestAnimationFrame(() => {
+          const tableLeft = Math.round(table.getBoundingClientRect().left);
+          const anchorLeft = Math.round(anchor.getBoundingClientRect().left);
+
+          // This is the real gap the user keeps seeing.
+          const shift = anchorLeft - tableLeft;
+          const extraWidth = shift < 0 ? Math.abs(shift) : 0;
+
+          table.style.setProperty("position", "relative", "important");
+          table.style.setProperty("transform", `translateX(${shift}px)`, "important");
+          table.style.setProperty("width", `calc(100% + ${extraWidth}px)`, "important");
+          table.style.setProperty("max-width", "none", "important");
+
+          board.dataset.tableLeftBefore = String(tableLeft);
+          board.dataset.anchorLeft = String(anchorLeft);
+          board.dataset.tableShift = String(shift);
+        });
       }
 
       function showBoardLoading(message){
