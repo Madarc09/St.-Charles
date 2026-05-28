@@ -9686,3 +9686,9 @@ button.danger{
 
 
 /* V90 finish goalie auto-draft + admin wait fix */
+
+
+/* V91 restore team select + API persistence */
+.clean-loading-card.error{
+  border-color:rgba(255,88,88,.35);
+}
