@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V63 COMPACT COCKPIT LOGOS -->
+  <!-- V64 CENTERED WATERMARK NO BACK -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -42,7 +42,7 @@
     
     <section id="draft" class="panel clean-live-draft-shell">
       <div id="cleanDraftEntry" class="clean-draft-entry-screen auto-enter-fallback">
-        <div class="v46-build-marker">V63 COMPACT COCKPIT LOGOS</div>
+        <div class="v46-build-marker">V64 CENTERED WATERMARK NO BACK</div>
         <div class="clean-loading-card">
           <strong>Opening Draft Room…</strong>
           <span>If this does not open automatically, press below.</span>
@@ -58,8 +58,7 @@
               <span>Limits: 6 forwards, 4 defense, 2 goalies</span>
             </div>
           </div>
-          <button id="cleanExitDraftBtn" type="button">Back</button>
-        </div>
+</div>
 
         <div class="clean-draft-control-card">
           <div class="clean-control clean-draft-as-control">
@@ -2095,15 +2094,7 @@ const pull = event.target.closest && event.target.closest("#v46PullNhlPlayersBtn
           startRoom();
           return;
         }
-        const exit = event.target.closest && event.target.closest("#cleanExitDraftBtn");
-        if (exit) {
-          event.preventDefault();
-          $("#cleanDraftRoom").hidden = true;
-          $("#cleanDraftEntry").hidden = false;
-          document.title = "Hockey Pool";
-          return;
-        }
-        const mobileRowSign = event.target.closest && event.target.closest("tr[data-mobile-sign]");
+const mobileRowSign = event.target.closest && event.target.closest("tr[data-mobile-sign]");
         if (mobileRowSign && window.matchMedia && window.matchMedia("(max-width: 820px)").matches) {
           if (event.target.closest("select, button, a, input, textarea")) {
             // Let normal controls handle themselves.

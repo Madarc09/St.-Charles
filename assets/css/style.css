@@ -6848,3 +6848,266 @@ body.lottery-running { overflow: hidden; }
   }
 }
 /* END V63 COMPACT COCKPIT + LOGO WATERMARK FIX */
+
+
+/* ==========================================================
+   V64 CENTERED WATERMARK + NO BACK BUTTON + MOBILE DOWNSIZE
+   Easy revert: remove this section only.
+   ========================================================== */
+
+/* Back button is completely removed from markup; this also hides any cached/old copy */
+#cleanExitDraftBtn{
+  display:none!important;
+}
+
+/* Center the watermark and apply the team colors to the name plate */
+.player-draft-cell{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--team-a,rgba(11,31,61,.86)) 78%, #000 22%),
+      color-mix(in srgb,var(--team-b,rgba(0,0,0,.72)) 72%, #000 28%)
+    )!important;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
+}
+
+.player-draft-cell::before{
+  inset:0!important;
+  background-image:
+    linear-gradient(90deg,rgba(0,0,0,.60),rgba(0,0,0,.12),rgba(0,0,0,.60)),
+    var(--team-logo)!important;
+  background-repeat:no-repeat!important;
+  background-size:100% 100%, auto 124%!important;
+  background-position:center, center!important;
+  opacity:.36!important;
+  filter:saturate(1.25) contrast(1.12)!important;
+}
+
+.team-goalie-row .player-draft-cell::before{
+  background-size:100% 100%, auto 132%!important;
+  opacity:.44!important;
+}
+
+/* Keep text readable over color/logo */
+.player-draft-line strong,
+.player-draft-line .meta{
+  position:relative;
+  z-index:1;
+  text-shadow:0 2px 5px rgba(0,0,0,.78);
+}
+
+/* Desktop cockpit remains compact and the name plate carries the team color */
+@media(min-width:821px){
+  .clean-player-table .player-draft-cell{
+    padding:3px 8px!important;
+  }
+}
+
+/* Mobile: make it mirror compact desktop more closely and reduce the oversized feeling */
+@media(max-width:820px){
+  #draft.panel{
+    padding:4px!important;
+  }
+
+  .shell{
+    padding-left:4px!important;
+    padding-right:4px!important;
+  }
+
+  /* Smaller sticky cockpit */
+  #draft .roster-needs-topbar{
+    padding:4px!important;
+    margin:-4px -4px 3px!important;
+    border-radius:0 0 10px 10px!important;
+  }
+
+  #draft .clean-draft-control-card{
+    top:88px!important;
+    padding:5px!important;
+    gap:4px!important;
+    border-radius:10px!important;
+  }
+
+  #draft .clean-draft-actions{
+    top:242px!important;
+    padding:4px!important;
+    gap:4px!important;
+    border-radius:10px!important;
+  }
+
+  .needs-title-swapped{
+    padding:3px 5px!important;
+    margin-bottom:3px!important;
+  }
+
+  .needs-title-swapped .needs-team-name{
+    font-size:.86rem!important;
+  }
+
+  .needs-title-swapped .needs-heading-centered{
+    font-size:.58rem!important;
+  }
+
+  .needs-grid,
+  .needs-grid-with-players{
+    gap:3px!important;
+  }
+
+  .needs-grid div{
+    padding:3px!important;
+    border-radius:8px!important;
+  }
+
+  .needs-grid span{
+    font-size:.43rem!important;
+  }
+
+  .needs-grid strong{
+    font-size:1.04rem!important;
+  }
+
+  .needs-grid em{
+    font-size:.44rem!important;
+  }
+
+  .clean-current-pick,
+  .clean-sync-box,
+  .clean-draft-as-control{
+    padding:5px!important;
+    border-radius:9px!important;
+  }
+
+  .clean-current-pick strong,
+  .clean-sync-box strong{
+    font-size:.90rem!important;
+  }
+
+  .clean-current-pick .label,
+  .clean-sync-box .label,
+  .clean-control label{
+    font-size:.50rem!important;
+  }
+
+  .clean-current-pick em,
+  .clean-sync-box em{
+    font-size:.52rem!important;
+  }
+
+  #cleanDraftAsSelect,
+  .v46-pull-players-btn,
+  .clean-draft-actions select,
+  .clean-draft-actions button{
+    min-height:30px!important;
+    font-size:.62rem!important;
+    padding:3px 6px!important;
+  }
+
+  .mini-draft-board-list{
+    max-height:46px!important;
+  }
+
+  .mini-pick{
+    flex-basis:124px!important;
+    max-width:124px!important;
+    grid-template-columns:18px 36px 1fr 18px!important;
+    padding:2px 3px!important;
+    border-radius:7px!important;
+  }
+
+  .mini-pick b{
+    width:16px!important;
+    height:16px!important;
+    font-size:.52rem!important;
+  }
+
+  .mini-pick span,
+  .mini-pick strong,
+  .mini-pick em{
+    font-size:.52rem!important;
+  }
+
+  .clean-draft-order-strip span{
+    font-size:.56rem!important;
+    padding:3px 5px!important;
+  }
+
+  /* Smaller player rows */
+  .clean-player-table tbody{
+    gap:3px!important;
+  }
+
+  .clean-player-table tr[data-mobile-sign]{
+    grid-template-columns:30px 42px minmax(0,1fr)!important;
+    min-height:44px!important;
+    padding:4px!important;
+    column-gap:4px!important;
+    border-radius:10px!important;
+  }
+
+  .clean-player-table .rank-cell{
+    width:30px!important;
+    height:30px!important;
+    flex-basis:30px!important;
+  }
+
+  .player-draft-cell{
+    border-radius:8px!important;
+    padding:2px 5px!important;
+  }
+
+  .player-draft-cell::before{
+    background-size:100% 100%, auto 112%!important;
+    background-position:center, center!important;
+    opacity:.38!important;
+  }
+
+  .player-draft-line strong{
+    font-size:.70rem!important;
+  }
+
+  .player-draft-line .meta{
+    font-size:.50rem!important;
+  }
+
+  .clean-sign-btn{
+    width:40px!important;
+    min-width:40px!important;
+    max-width:40px!important;
+    height:28px!important;
+    min-height:28px!important;
+    border-radius:8px!important;
+  }
+
+  .clean-sign-btn:not(:disabled) span:last-child::after{
+    font-size:.56rem!important;
+  }
+
+  .clean-sign-btn:disabled{
+    width:40px!important;
+    min-width:40px!important;
+    max-width:40px!important;
+    height:22px!important;
+    min-height:22px!important;
+  }
+
+  .clean-sign-btn:disabled span:last-child{
+    max-width:34px!important;
+    font-size:.36rem!important;
+  }
+
+  .clean-player-table td:nth-child(3),
+  .clean-player-table td:nth-child(4),
+  .clean-player-table td:nth-child(5),
+  .clean-player-table td:nth-child(6),
+  .clean-player-table td:nth-child(7){
+    padding:1px 4px!important;
+    font-size:.46rem!important;
+    line-height:1.05!important;
+  }
+
+  .player-headshot{
+    width:100%!important;
+    height:100%!important;
+  }
+}
+/* END V64 CENTERED WATERMARK + NO BACK BUTTON + MOBILE DOWNSIZE */
