@@ -1,13 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V115 REPLAY BETTMAN SMOOTH TICKER -->
+  <!-- V116 REPLAY SAVE SCROLL FIXED -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+
+  <script>
+    // V116: replay button hard override. This is registered early and blocks the old lottery video handler.
+    document.addEventListener("click", function(event){
+      const replay = event.target.closest && event.target.closest("#replayLotteryBtn, [data-replay-live-lottery]");
+      if (!replay) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+      if (window.liveLottery && typeof window.liveLottery.replayCurrentLottery === "function") {
+        window.liveLottery.replayCurrentLottery();
+      } else {
+        window.__pendingLiveLotteryReplay = true;
+      }
+    }, true);
+  </script>
+
   <header class="hero hero-retro" aria-label="Hockey Pool late 90s basement header">
     <div class="hero-picture-wrap">
       <img class="hero-picture" src="assets/images/header-1998-basement-hangout.jpg" alt="Hockey Pool header showing a detailed 1998 basement hangout with hockey pool books, player cards, Nintendo 64, GoldenEye, pizza, CRT TV, jerseys, sticks, and late 90s memorabilia" />
@@ -831,7 +848,7 @@
       }
 
       document.addEventListener("click", function (event) {
-        var runBtn = event.target.closest && event.target.closest("#runLotteryBtn, #replayLotteryBtn, #popoutLotteryBtn");
+        var runBtn = event.target.closest && event.target.closest("#runLotteryBtn, #popoutLotteryBtn");
         if (runBtn) {
           event.preventDefault();
           event.stopPropagation();
@@ -2579,7 +2596,7 @@
       window.renderDraftRoomLottery = function(draft){
         // V114: old hook now only refreshes the live draft ticker.
         if (window.liveLottery && window.liveLottery.refreshLiveDraftTicker) {
-          window.liveLottery.refreshLiveDraftTicker();
+          window.liveLottery.refreshLiveDraftTicker(true);
         }
       };
 
@@ -2676,7 +2693,7 @@
         return seq;
       }
 
-      function renderLiveDraftTicker(draft){
+      function renderLiveDraftTicker(draft, force = false){
         const target = document.getElementById("draftRoomLotteryOrder");
         if (!target) return;
 
@@ -2716,8 +2733,11 @@
         const line = `<span class="ticker-label">Live Draft</span>${upcomingItems}<span class="ticker-divider">Recently Drafted</span>${pickedItems}`;
         const signature = `${pickIndex}|${order.join(",")}|${picks.slice(-8).map(p => p.pickNumber + ":" + (p.player && p.player.id)).join(",")}`;
 
-        // Do not rewrite the ticker every polling cycle. Rewriting restarts the animation and causes stutter.
-        if (signature === lastLiveTickerSignature && target.dataset.liveTickerReady === "1") return;
+        target.classList.add("live-marquee-track");
+        target.classList.remove("lottery-results-track");
+
+        // Do not rewrite every polling cycle. Rewriting restarts the marquee.
+        if (!force && signature === lastLiveTickerSignature && target.dataset.liveTickerReady === "1") return;
         lastLiveTickerSignature = signature;
         target.dataset.liveTickerReady = "1";
         target.innerHTML = `<span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span>`;
@@ -2728,10 +2748,10 @@
         refreshLiveDraftTicker();
       }
 
-      async function refreshLiveDraftTicker(){
+      async function refreshLiveDraftTicker(force = false){
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
-          if (draft) renderLiveDraftTicker(draft);
+          if (draft) renderLiveDraftTicker(draft, force);
         }
       }
 
@@ -2852,11 +2872,22 @@
         if (videoOnly || alreadyOfficial) {
           setSpeech("Replay complete. This was only a replay and did not change the pool.");
         } else {
-          setSpeech("The lottery is complete. Here is the official draft order. When you leave the lottery, the draft room will use this order.");
+          setSpeech("The lottery is complete. The draft order is now being saved for the live draft.");
         }
         showFinalBoard(order);
-        if (leave) leave.hidden = Boolean(videoOnly || alreadyOfficial);
-        if (alreadyOfficial) await refreshLiveDraftTicker();
+
+        if (videoOnly || alreadyOfficial) {
+          if (leave) leave.hidden = true;
+        } else {
+          await finalizeLottery();
+          setSpeech("The draft order is official. You can leave the lottery when you're ready.");
+          if (leave) {
+            leave.hidden = false;
+            leave.textContent = "Leave Lottery";
+          }
+        }
+
+        await refreshLiveDraftTicker(true);
         if (close) close.disabled = false;
       }
 
@@ -2866,18 +2897,23 @@
         await replayOrder(state.order, state.sessionId, { alreadyOfficial:Boolean(state.finalized), videoOnly:false });
       }
 
-      async function finalizeLotteryAndLeave(){
+      async function finalizeLottery(){
         const state = await postAction("finalize");
         const order = state && Array.isArray(state.order) ? state.order : [];
-        if (order.length) await refreshLiveDraftTicker();
-
+        if (order.length) {
+          await refreshLiveDraftTicker(true);
+        }
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
           if (draft) {
-            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
             if (window.renderDraftRosters) window.renderDraftRosters(draft);
           }
         }
+        return state;
+      }
+
+      async function finalizeLotteryAndLeave(){
+        await finalizeLottery();
         hideOverlay();
       }
 
@@ -2967,11 +3003,11 @@
         clearInterval(pollTimer);
         pollTimer = setInterval(async () => {
           await renderState(await loadState());
-          await refreshLiveDraftTicker();
+          await refreshLiveDraftTicker(true);
         }, 3500);
         setTimeout(async () => {
           await renderState(await loadState());
-          await refreshLiveDraftTicker();
+          await refreshLiveDraftTicker(true);
         }, 600);
       }
 
@@ -3020,26 +3056,10 @@
         }
       }, true);
 
-      window.addEventListener("load", startPolling);
+      window.addEventListener("load", () => { startPolling(); if (window.__pendingLiveLotteryReplay) { window.__pendingLiveLotteryReplay = false; replayCurrentLottery(); } });
       window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, loadState, renderState };
     })();
   </script>
-
-
-  <script>
-    // V115: Force every Replay Lottery click to use the rebuilt live-lottery reveal, not old popout/video code.
-    document.addEventListener("click", function(event){
-      const replay = event.target.closest && event.target.closest("#replayLotteryBtn, [data-replay-live-lottery]");
-      if (!replay) return;
-      if (window.liveLottery && typeof window.liveLottery.replayCurrentLottery === "function") {
-        event.preventDefault();
-        event.stopPropagation();
-        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-        window.liveLottery.replayCurrentLottery();
-      }
-    }, true);
-  </script>
-
-  <script type="module" src="assets/js/app.js"></script>
+<script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

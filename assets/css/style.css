@@ -12073,3 +12073,45 @@ button:not(.primary):not(.danger),
   to{ transform:translateX(-50%); }
 }
 /* END V115 */
+
+
+/* V116 hard replay/save/scroll fixes */
+#draftRoomLotteryOrder.live-marquee-track{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  gap:0!important;
+  width:max-content!important;
+  max-width:none!important;
+  min-width:max-content!important;
+  overflow:visible!important;
+  white-space:nowrap!important;
+  animation:v116LiveTickerScroll 38s linear infinite!important;
+  transform:translateX(0);
+  will-change:transform!important;
+}
+#draftRoomLotteryOrder.live-marquee-track:hover{
+  animation-play-state:paused!important;
+}
+#draftRoomLotteryOrder.live-marquee-track .ticker-loop{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  padding-right:22px!important;
+  white-space:nowrap!important;
+}
+#draftRoomLotteryOrder.live-marquee-track .ticker-pick,
+#draftRoomLotteryOrder.live-marquee-track .ticker-divider,
+#draftRoomLotteryOrder.live-marquee-track .ticker-label{
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+.ticker-window{
+  overflow:hidden!important;
+}
+@keyframes v116LiveTickerScroll{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+/* END V116 */
