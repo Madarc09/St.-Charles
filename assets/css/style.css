@@ -12394,3 +12394,230 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V118 */
+
+
+/* V119 two-ticker rebuild */
+.dual-ticker-stack{
+  display:grid!important;
+  grid-template-columns:1.35fr .65fr!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  width:100%!important;
+}
+#liveTickerShell.v119-scroll-ticker{
+  display:grid!important;
+  grid-template-columns:minmax(220px, 340px) minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:8px!important;
+  width:100%!important;
+  padding:4px!important;
+  border-radius:18px!important;
+  background:rgba(0,0,0,.30)!important;
+  border:1px solid rgba(245,195,91,.22)!important;
+  overflow:hidden!important;
+}
+.v119-ticker-window{
+  position:relative!important;
+  overflow:hidden!important;
+  width:100%!important;
+  min-width:0!important;
+  height:38px!important;
+  border-radius:999px!important;
+  background:rgba(0,0,0,.18)!important;
+}
+#draftRoomLotteryOrder.v119-ticker-track{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  overflow:hidden!important;
+  width:100%!important;
+  white-space:nowrap!important;
+  animation:none!important;
+  transform:none!important;
+}
+#liveTickerMover.v119-ticker-mover{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  height:100%!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  width:max-content!important;
+  min-width:max-content!important;
+  max-width:none!important;
+  white-space:nowrap!important;
+  will-change:transform!important;
+  transform:translate3d(0,0,0);
+  animation:none!important;
+}
+#liveTickerMover.v119-ticker-mover .ticker-loop{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  padding-right:28px!important;
+  white-space:nowrap!important;
+}
+#liveTickerMover.v119-ticker-mover .ticker-pick,
+#liveTickerMover.v119-ticker-mover .ticker-section-title{
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+#liveTickerMover.v119-ticker-mover .ticker-section-title{
+  display:inline-flex!important;
+  align-items:center!important;
+  padding:4px 10px!important;
+  border-radius:999px!important;
+  background:rgba(255,212,90,.14)!important;
+  border:1px solid rgba(255,212,90,.22)!important;
+  color:#ffd45a!important;
+  text-transform:uppercase!important;
+  letter-spacing:.12em!important;
+  font-size:.68rem!important;
+  font-weight:1000!important;
+}
+#liveTickerMover.v119-ticker-mover .ticker-pick{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  padding:4px 10px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  font-size:.78rem!important;
+  font-weight:900!important;
+}
+#liveTickerMover.v119-ticker-mover .ticker-pick b{
+  display:inline-grid!important;
+  place-items:center!important;
+  min-width:20px!important;
+  height:20px!important;
+  padding:0 5px!important;
+  border-radius:999px!important;
+  background:#ffd45a!important;
+  color:#07101d!important;
+  font-size:.68rem!important;
+  font-weight:1000!important;
+}
+
+/* Draft results flip ticker */
+.draft-results-flip-ticker{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  gap:8px!important;
+  align-items:center!important;
+  padding:4px!important;
+  border-radius:18px!important;
+  background:rgba(0,0,0,.30)!important;
+  border:1px solid rgba(111,231,255,.18)!important;
+  overflow:hidden!important;
+}
+.flip-ticker-title{
+  color:#bde7ff!important;
+  font-size:.68rem!important;
+  font-weight:1000!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+  padding:0 8px!important;
+  white-space:nowrap!important;
+}
+.draft-results-flip-board{
+  position:relative!important;
+  min-height:38px!important;
+  overflow:hidden!important;
+  border-radius:999px!important;
+  background:rgba(0,0,0,.18)!important;
+}
+.flip-pick-card{
+  position:absolute!important;
+  inset:0!important;
+  display:grid!important;
+  grid-template-columns:38px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:4px 10px!important;
+  border-radius:999px!important;
+  color:#fff!important;
+  opacity:0!important;
+  transform:rotateX(90deg)!important;
+  transition:opacity .28s ease, transform .28s ease!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+}
+.flip-pick-card.active{
+  opacity:1!important;
+  transform:rotateX(0deg)!important;
+}
+.flip-pick-card b{
+  display:grid!important;
+  place-items:center!important;
+  width:26px!important;
+  height:26px!important;
+  border-radius:50%!important;
+  background:#bde7ff!important;
+  color:#07101d!important;
+  font-size:.75rem!important;
+  font-weight:1000!important;
+}
+.flip-pick-card strong{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:.86rem!important;
+}
+.flip-pick-card em{
+  font-style:normal!important;
+  color:#bde7ff!important;
+  font-size:.72rem!important;
+  white-space:nowrap!important;
+}
+.flip-pick-card.tba{
+  opacity:0;
+}
+.flip-pick-card.tba.active{
+  opacity:.76!important;
+}
+.flip-pick-card.filled{
+  background:rgba(69,143,255,.16)!important;
+  border-color:rgba(111,231,255,.25)!important;
+}
+
+/* Desktop Draft button readability fix: match the solid Wait-button feel */
+@media(min-width:821px){
+  #cleanDraftBoard .clean-sign-btn:not(:disabled),
+  #cleanDraftBoard .draft-player-btn:not(:disabled),
+  #cleanDraftBoard .single-draft-btn:not(:disabled),
+  #cleanDraftBoard .contract-draft-btn:not(:disabled){
+    background:linear-gradient(180deg,rgba(236,242,247,.98),rgba(151,164,176,.98))!important;
+    color:#061018!important;
+    border:1px solid rgba(255,255,255,.58)!important;
+    box-shadow:0 4px 10px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.62)!important;
+    text-shadow:none!important;
+    font-weight:1000!important;
+    text-transform:uppercase!important;
+    letter-spacing:.04em!important;
+  }
+  #cleanDraftBoard .clean-sign-btn:not(:disabled):hover,
+  #cleanDraftBoard .draft-player-btn:not(:disabled):hover{
+    filter:brightness(1.08)!important;
+    transform:translateY(-1px)!important;
+  }
+}
+
+@media(max-width:900px){
+  .dual-ticker-stack{
+    grid-template-columns:1fr!important;
+  }
+}
+@media(max-width:820px){
+  #liveTickerShell.v119-scroll-ticker{
+    grid-template-columns:1fr!important;
+  }
+  .draft-results-flip-ticker{
+    grid-template-columns:1fr!important;
+  }
+}
+/* END V119 */

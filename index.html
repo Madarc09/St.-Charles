@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V118 JS SPORTS TICKER -->
+  <!-- V119 TWO TICKERS DRAFT BUTTON -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -73,13 +73,22 @@
             <span class="eyebrow">Draft Results</span>
             <div class="lottery-ticker-actions"><button id="runLiveLotteryBtn" class="replay-lottery-mini live-run-lottery-btn" type="button">Run Draft Lottery</button><button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button></div>
           </div>
-          <div id="liveTickerShell" class="live-ticker-shell v118-ticker-shell">
-            <div id="liveTickerFixed" class="live-ticker-fixed">Live Draft — Loading…</div>
-            <div class="live-ticker-window v118-ticker-window">
-              <div id="draftRoomLotteryOrder" class="draft-room-lottery-order v118-ticker-track">
-                <div id="liveTickerMover" class="v118-ticker-mover">
-                  <span class="ticker-loop"><span class="ticker-pick"><b>Loading</b><i></i>Draft room syncing…</span></span>
+          <div id="dualTickerStack" class="dual-ticker-stack">
+            <div id="liveTickerShell" class="live-ticker-shell v119-scroll-ticker">
+              <div id="liveTickerFixed" class="live-ticker-fixed">Live Draft — Loading…</div>
+              <div class="live-ticker-window v119-ticker-window">
+                <div id="draftRoomLotteryOrder" class="draft-room-lottery-order v119-ticker-track">
+                  <div id="liveTickerMover" class="v119-ticker-mover">
+                    <span class="ticker-loop"><span class="ticker-pick"><b>Loading</b><i></i>Draft room syncing…</span></span>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            <div id="draftResultsFlipTicker" class="draft-results-flip-ticker">
+              <div class="flip-ticker-title">Draft Results</div>
+              <div id="draftResultsFlipBoard" class="draft-results-flip-board">
+                <span class="flip-pick-card"><b>1</b><strong>TBA</strong><em>Waiting for first pick</em></span>
               </div>
             </div>
           </div>
@@ -2665,10 +2674,12 @@
       let tickerOffset = 0;
       let tickerLastTime = 0;
       let tickerAnimationId = 0;
+      let flipTickerIndex = 0;
+      let flipTickerTimer = 0;
 
       function startSportsTicker(){
         const mover = document.getElementById("liveTickerMover");
-        const windowEl = document.querySelector(".v118-ticker-window");
+        const windowEl = document.querySelector(".v119-ticker-window");
         if (!mover || !windowEl) return;
 
         cancelAnimationFrame(tickerAnimationId);
@@ -2736,6 +2747,7 @@
         const mover = document.getElementById("liveTickerMover");
         const track = document.getElementById("draftRoomLotteryOrder");
         const fixed = document.getElementById("liveTickerFixed");
+        const flipBoard = document.getElementById("draftResultsFlipBoard");
         if (!mover || !track) return;
 
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
@@ -2767,9 +2779,9 @@
           upcoming.push(ownerForPickIndex(i));
         }
 
-        const draftOrderItems = upcoming.map(item =>
-          `<span class="ticker-pick upcoming-pick"><b>${item.pickNumber}</b><i></i>${ownerName(item.ownerId)}</span>`
-        ).join("");
+        const draftOrderItems = upcoming.length
+          ? upcoming.map(item => `<span class="ticker-pick upcoming-pick"><b>${item.pickNumber}</b><i></i>${ownerName(item.ownerId)}</span>`).join("")
+          : `<span class="ticker-pick upcoming-pick"><b>DONE</b><i></i>Draft complete</span>`;
 
         const resultCount = Math.max(10, picks.length);
         const resultItems = [];
@@ -2778,22 +2790,51 @@
           if (pick && pick.player) {
             const player = pick.player.name || "Unknown Player";
             const owner = pick.ownerName || ownerName(pick.ownerId);
-            resultItems.push(`<span class="ticker-pick result-pick filled"><b>${i + 1}</b><i></i>${player} <em>${owner}</em></span>`);
+            resultItems.push(`<span class="flip-pick-card filled"><b>${i + 1}</b><strong>${player}</strong><em>${owner}</em></span>`);
           } else {
-            resultItems.push(`<span class="ticker-pick result-pick tba"><b>${i + 1}</b><i></i>TBA</span>`);
+            resultItems.push(`<span class="flip-pick-card tba"><b>${i + 1}</b><strong>TBA</strong><em>Waiting for pick ${i + 1}</em></span>`);
           }
         }
 
-        const line = `<span class="ticker-section-title">Next 10 Picks</span>${draftOrderItems}<span class="ticker-section-title">Draft Results</span>${resultItems.join("")}`;
+        const line = `<span class="ticker-section-title">Next 10 Picks</span>${draftOrderItems}`;
         const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && p.player.id || "")).join(",")}`;
 
         if (!force && signature === lastLiveTickerSignature && mover.dataset.rebuiltTickerReady === "1") return;
 
         lastLiveTickerSignature = signature;
         mover.dataset.rebuiltTickerReady = "1";
-        track.className = "draft-room-lottery-order v118-ticker-track";
+        track.className = "draft-room-lottery-order v119-ticker-track";
+        mover.className = "v119-ticker-mover";
         mover.innerHTML = `<span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span>`;
+
+        if (flipBoard) {
+          flipBoard.innerHTML = resultItems.join("");
+          startFlipTicker();
+        }
+
         requestAnimationFrame(startSportsTicker);
+      }
+
+      function startFlipTicker(){
+        const board = document.getElementById("draftResultsFlipBoard");
+        if (!board) return;
+        const cards = Array.from(board.querySelectorAll(".flip-pick-card"));
+        if (!cards.length) return;
+
+        clearInterval(flipTickerTimer);
+        flipTickerIndex = Math.min(flipTickerIndex, cards.length - 1);
+
+        function showCard(){
+          cards.forEach((card, idx) => {
+            card.classList.toggle("active", idx === flipTickerIndex);
+            card.classList.toggle("prev", idx < flipTickerIndex);
+            card.classList.toggle("next", idx > flipTickerIndex);
+          });
+          flipTickerIndex = (flipTickerIndex + 1) % cards.length;
+        }
+
+        showCard();
+        flipTickerTimer = setInterval(showCard, 2400);
       }
 
       function renderTickerFromOrder(order){
