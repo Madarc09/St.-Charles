@@ -14827,3 +14827,94 @@ button:not(.primary):not(.danger),
 .game-crt tr:hover td{background:rgba(59,130,246,.14);}
 .game-footer{position:relative;z-index:1;margin-top:1rem;color:#facc15;font-weight:1000;letter-spacing:.12em;}
 @media(max-width:900px){.concept-head{align-items:start;flex-direction:column}.concept-owner-switcher{justify-content:flex-start}.wall-room-bg{grid-template-columns:1fr}.cork-groups{grid-template-columns:1fr}.concept-shell{min-height:auto}.concept-player-card{min-height:158px}.game-crt{border-width:9px;padding:.7rem}.game-crt table{font-size:.78rem}.game-crt th:nth-child(5),.game-crt td:nth-child(5){display:none}}
+
+
+/* V146 walkable locker room roster test */
+.roster-test-tab,
+#rosterCardWall,
+#rosterCorkboard,
+#rosterDesk,
+#rosterCase,
+#rosterGame { display:none !important; }
+.walkable-locker-host { width:100%; display:block; }
+.walkable-room,
+.owner-stall-view,
+.walkable-empty-stall {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  background:#05070a;
+  box-shadow:0 24px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06);
+  min-height:720px;
+}
+.locker-room-bg {
+  min-height:720px;
+  position:relative;
+  padding:28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(91,139,201,.18), transparent 35%),
+    linear-gradient(180deg, #101722 0%, #07090e 55%, #030405 100%);
+}
+.locker-room-bg:before {
+  content:"";
+  position:absolute; inset:0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px) 0 0/80px 100%,
+    radial-gradient(circle at 10% 80%, rgba(233,94,41,.1), transparent 22%),
+    radial-gradient(circle at 88% 70%, rgba(57,119,190,.12), transparent 25%);
+  opacity:.8;
+  pointer-events:none;
+}
+.room-ceiling { position:absolute; left:0; right:0; top:0; height:90px; background:linear-gradient(180deg, rgba(0,0,0,.95), rgba(12,16,21,.35)); display:flex; justify-content:space-around; align-items:center; z-index:1; }
+.room-ceiling span { width:70px; height:16px; border-radius:999px; background:radial-gradient(circle, #fff5cf, #c18b4e 42%, rgba(0,0,0,.1) 70%); box-shadow:0 0 38px rgba(255,201,126,.42); opacity:.72; }
+.room-title-block { position:relative; z-index:2; max-width:780px; margin:28px auto 26px; text-align:center; }
+.room-title-block p { margin:0; color:#d59f54; text-transform:uppercase; letter-spacing:.22em; font-weight:900; }
+.room-title-block h3 { margin:6px 0; font-size:clamp(2.1rem,5vw,4.8rem); text-transform:uppercase; letter-spacing:.08em; color:#edf3ff; text-shadow:0 3px 0 #000, 0 0 22px rgba(65,138,255,.35); }
+.room-title-block small { display:block; color:rgba(238,243,250,.72); font-weight:700; }
+.locker-hall { position:relative; z-index:2; display:grid; grid-template-columns:repeat(5,minmax(150px,1fr)); gap:14px; max-width:1280px; margin:0 auto; perspective:1200px; }
+.walk-stall { min-height:430px; border:1px solid rgba(255,255,255,.13); border-radius:16px 16px 8px 8px; background:linear-gradient(180deg,#202b34 0%, #101820 45%, #080c11 100%); box-shadow:inset 0 0 40px rgba(0,0,0,.65), 0 25px 45px rgba(0,0,0,.45); color:#fff; padding:18px 14px; position:relative; overflow:hidden; cursor:pointer; transform:translateY(calc(var(--stall-index) * 3px)) rotateY(calc((2 - var(--stall-index)) * 2deg)); transition:transform .25s ease, filter .25s ease, border-color .25s ease; }
+.walk-stall:hover { transform:translateY(-8px) scale(1.02); border-color:rgba(255,255,255,.35); filter:brightness(1.12); }
+.walk-stall:before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(255,255,255,.07), transparent 22%, rgba(0,0,0,.4) 55%, rgba(255,255,255,.05)); pointer-events:none; }
+.walk-stall:after { content:""; position:absolute; left:22%; right:22%; bottom:92px; height:6px; border-radius:999px; background:rgba(255,255,255,.08); box-shadow:0 -180px 0 rgba(255,255,255,.07), 0 -195px 0 rgba(0,0,0,.35); }
+.stall-light { position:absolute; top:0; left:20%; right:20%; height:8px; border-radius:0 0 12px 12px; background:#ffcf8a; box-shadow:0 0 44px rgba(255,172,74,.55); opacity:.65; }
+.stall-name { display:block; margin-top:28px; padding:10px 8px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.35); border-radius:8px; font-size:clamp(1rem,1.9vw,1.55rem); text-transform:uppercase; letter-spacing:.12em; font-weight:1000; text-align:center; }
+.stall-number { display:block; margin-top:38px; font-size:clamp(3.6rem,8vw,7rem); font-weight:1000; line-height:.9; color:rgba(255,255,255,.16); text-align:center; }
+.stall-jersey { display:block; text-align:center; margin-top:16px; color:rgba(255,255,255,.8); font-weight:900; text-transform:uppercase; min-height:42px; }
+.stall-count { display:block; position:absolute; left:14px; right:14px; bottom:58px; text-align:center; color:#cbd7e7; font-weight:900; }
+.stall-action { display:block; position:absolute; left:18px; right:18px; bottom:18px; padding:10px; border-radius:999px; background:rgba(63,129,205,.24); border:1px solid rgba(120,178,255,.28); text-transform:uppercase; letter-spacing:.08em; font-weight:1000; text-align:center; }
+.walk-stall.is-locked { filter:saturate(.55) brightness(.76); cursor:pointer; }
+.walk-stall.is-locked .stall-action { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1); color:rgba(255,255,255,.56); }
+.room-floor { position:absolute; left:0; right:0; bottom:0; height:150px; z-index:1; display:flex; align-items:flex-end; justify-content:center; padding-bottom:24px; background:linear-gradient(180deg, transparent, rgba(0,0,0,.84)); color:rgba(255,255,255,.62); font-weight:900; text-transform:uppercase; letter-spacing:.12em; }
+.stall-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; background:linear-gradient(90deg, rgba(5,8,12,.96), rgba(21,30,42,.92)); border-bottom:1px solid rgba(255,255,255,.12); position:relative; z-index:5; }
+.walk-back { appearance:none; border:1px solid rgba(255,255,255,.16); color:#fff; background:rgba(255,255,255,.08); border-radius:999px; padding:10px 14px; font-weight:1000; cursor:pointer; }
+.walk-back:hover, .quick-stall-select button:hover { background:rgba(255,255,255,.16); }
+.stall-toolbar strong { display:block; color:#fff; font-size:1.05rem; text-transform:uppercase; letter-spacing:.08em; }
+.stall-toolbar span { display:block; color:rgba(232,238,247,.72); font-size:.82rem; font-weight:800; }
+.quick-stall-select { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+.quick-stall-select button { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:#dfe8f6; border-radius:999px; padding:8px 10px; font-weight:900; cursor:pointer; }
+.quick-stall-select button.active { background:#244c80; border-color:#7eb5ff; color:#fff; box-shadow:0 0 18px rgba(92,153,255,.25); }
+.stall-image-stage { position:relative; min-height:720px; background:#050607; display:flex; align-items:center; justify-content:center; }
+.owner-stall-img { width:100%; height:auto; display:block; object-fit:cover; }
+.live-roster-clipboard { position:absolute; right:7.5%; top:15.5%; width:min(25%, 360px); min-width:250px; max-height:66%; overflow:hidden; padding:40px 24px 24px; background:linear-gradient(180deg, rgba(245,237,217,.93), rgba(218,204,178,.92)); color:#1c1610; border-radius:8px; box-shadow:0 16px 35px rgba(0,0,0,.45), inset 0 0 30px rgba(84,54,24,.16); transform:rotate(.35deg); border:1px solid rgba(50,33,16,.35); }
+.clip-top { position:absolute; left:50%; top:0; width:42%; height:34px; transform:translateX(-50%); border-radius:0 0 18px 18px; background:linear-gradient(180deg,#1d2023,#050607); box-shadow:0 3px 0 rgba(255,255,255,.1), 0 8px 12px rgba(0,0,0,.25); }
+.live-roster-clipboard h4 { margin:0 0 10px; text-align:center; color:#111; text-transform:uppercase; letter-spacing:.08em; font-size:clamp(.95rem,1.8vw,1.35rem); }
+.live-roster-clipboard ol { margin:0; padding:0; list-style:none; display:grid; gap:2px; }
+.live-roster-clipboard li { display:grid; grid-template-columns:28px 1fr; gap:8px; border-bottom:1px solid rgba(32,22,12,.2); padding:3px 0; font-size:clamp(.62rem,1vw,.85rem); line-height:1.12; }
+.live-roster-clipboard li span { font-weight:1000; color:#4b3925; }
+.live-roster-clipboard li b { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.live-roster-clipboard li em { grid-column:2; color:#67533e; font-style:normal; font-size:.75em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.walkable-empty-stall { padding:50px; text-align:center; color:#fff; min-height:420px; }
+@media (max-width: 980px) {
+  .walkable-room, .owner-stall-view { min-height:auto; }
+  .locker-room-bg { min-height:auto; padding:18px 12px 90px; }
+  .locker-hall { grid-template-columns:1fr; }
+  .walk-stall { min-height:190px; transform:none !important; }
+  .stall-number { margin-top:15px; font-size:3.5rem; }
+  .stall-jersey { min-height:0; }
+  .stall-toolbar { flex-direction:column; align-items:stretch; }
+  .quick-stall-select { justify-content:flex-start; }
+  .stall-image-stage { min-height:auto; overflow-x:auto; justify-content:flex-start; }
+  .owner-stall-img { min-width:1050px; }
+  .live-roster-clipboard { position:absolute; right:auto; left:760px; top:150px; width:270px; min-width:270px; }
+}
