@@ -36,6 +36,11 @@
     <button class="tab active" data-tab="dashboard">Home</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
+    <button class="tab roster-test-tab" data-tab="rosterCardWall">Card Wall</button>
+    <button class="tab roster-test-tab" data-tab="rosterCorkboard">Corkboard</button>
+    <button class="tab roster-test-tab" data-tab="rosterDesk">GM Desk</button>
+    <button class="tab roster-test-tab" data-tab="rosterCase">Display Case</button>
+    <button class="tab roster-test-tab" data-tab="rosterGame">NHL 98</button>
     <button class="tab" data-tab="teams">Teams</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
     <button class="tab" data-tab="admin">Admin</button>
@@ -151,12 +156,33 @@
     <section id="rosters" class="panel">
       <div class="section-head">
         <div>
-          <p class="eyebrow">Rosters</p>
-          <h2>Teams and drafted players</h2>
+          <p class="eyebrow">Original Rosters</p>
+          <h2>Clean roster list</h2>
+          <p class="muted">Baseline roster view so we can compare the experimental versions against something simple.</p>
         </div>
       </div>
       <div id="rostersSourceStatus" class="official-source-status">Source: loading…</div>
       <div id="rosterCards" class="grid roster-grid"></div>
+    </section>
+
+    <section id="rosterCardWall" class="panel roster-concept-panel">
+      <div id="rosterCardWallHost" class="roster-concept-host"></div>
+    </section>
+
+    <section id="rosterCorkboard" class="panel roster-concept-panel">
+      <div id="rosterCorkboardHost" class="roster-concept-host"></div>
+    </section>
+
+    <section id="rosterDesk" class="panel roster-concept-panel">
+      <div id="rosterDeskHost" class="roster-concept-host"></div>
+    </section>
+
+    <section id="rosterCase" class="panel roster-concept-panel">
+      <div id="rosterCaseHost" class="roster-concept-host"></div>
+    </section>
+
+    <section id="rosterGame" class="panel roster-concept-panel">
+      <div id="rosterGameHost" class="roster-concept-host"></div>
     </section>
 
 
@@ -2579,6 +2605,132 @@
         </div>`;
       }
 
+      window.__rosterConceptState = window.__rosterConceptState || { ownerId: "nick" };
+
+      function conceptOwnerId(owners){
+        const state = window.__rosterConceptState;
+        if (!owners.some(o => String(o.id) === String(state.ownerId))) state.ownerId = owners[0] && owners[0].id || "nick";
+        return state.ownerId;
+      }
+
+      function conceptOwnerButtons(owners){
+        const active = conceptOwnerId(owners);
+        return `<div class="concept-owner-switcher">${owners.map(o => `<button type="button" class="concept-owner-btn ${String(o.id) === String(active) ? "active" : ""}" data-concept-owner="${esc(o.id)}">${esc(ownerName(o))}</button>`).join("")}</div>`;
+      }
+
+      function pickPlayer(pick){ return (pick && pick.player) ? pick.player : {}; }
+      function playerName(p){ return p.name || p.fullName || p.id || "Drafted Player"; }
+      function playerMeta(p){
+        const pos = p.position === "TG" ? "Team Goalies" : (p.position || "—");
+        const team = p.nhlTeam || p.team || "";
+        return `${pos}${team ? " • " + team : ""}`;
+      }
+      function ownerRosterFromDraft(draft, ownerId){
+        const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
+        return picks.filter(p => String(p.ownerId) === String(ownerId)).map(pickPlayer);
+      }
+      function groupRoster(players){
+        return {
+          F: players.filter(p => bucket(p.position) === "F"),
+          D: players.filter(p => bucket(p.position) === "D"),
+          G: players.filter(p => bucket(p.position) === "G")
+        };
+      }
+      function statLine(p){
+        const pos = String(p.position || "").toUpperCase();
+        if (pos === "G" || pos === "TG") return `${Number(p.goalieWins || p.wins || 0)} W • ${Number(p.goalieShutouts || p.shutouts || 0)} SO`;
+        return `${Number(p.goals || 0)} G • ${Number(p.assists || 0)} A • ${Number(p.points || 0)} PTS`;
+      }
+      function cardInitials(name){
+        return String(name || "?").split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join("").toUpperCase() || "?";
+      }
+      function miniPlayerCard(p, i, extraClass){
+        return `<article class="concept-player-card ${extraClass || ""}" style="--tilt:${((i % 7) - 3) * 1.2}deg">
+          <div class="concept-card-top"><span>${esc((p.position === "TG" ? "TG" : p.position) || "—")}</span><b>${esc(p.nhlTeam || p.team || "NHL")}</b></div>
+          <div class="concept-card-face"><span>${esc(cardInitials(playerName(p)))}</span></div>
+          <h4>${esc(playerName(p))}</h4>
+          <small>${esc(statLine(p))}</small>
+        </article>`;
+      }
+      function emptyRosterMessage(){ return `<div class="concept-empty"><strong>No drafted players yet.</strong><span>Auto-draft a full roster and this concept will fill in live.</span></div>`; }
+      function conceptShell(kind, title, subtitle, owner, owners, draft, body){
+        const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
+        const counts = owners.map(o => `${ownerName(o)} ${ownerRosterFromDraft(draft, o.id).length}`).join(" • ");
+        return `<div class="concept-shell concept-${kind}">
+          <div class="concept-topline"><span class="eyebrow">Roster concept test</span><em>${esc(picks.length)} total drafted players</em></div>
+          <div class="concept-head">
+            <div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p><small>${esc(counts)}</small></div>
+            ${conceptOwnerButtons(owners)}
+          </div>
+          <div class="concept-stage" data-owner="${esc(owner.id)}">${body}</div>
+        </div>`;
+      }
+      function renderCardWall(host, draft, owners){
+        const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
+        const roster = ownerRosterFromDraft(draft, owner.id);
+        const cards = roster.length ? roster.map((p,i)=>miniPlayerCard(p,i,"wall-card")).join("") : emptyRosterMessage();
+        host.innerHTML = conceptShell("card-wall", "Hockey Card Wall", "A basement wall of taped-up 90s player cards. This is probably the cleanest version for API player cards and full-roster spacing.", owner, owners, draft, `
+          <div class="wall-room-bg">
+            <aside class="wall-memorabilia"><b>${esc(ownerName(owner))}</b><span>Beckett</span><span>POGs</span><span>NHL 98</span><span>VHS</span></aside>
+            <section class="wall-card-grid">${cards}</section>
+          </div>`);
+      }
+      function renderCorkboard(host, draft, owners){
+        const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
+        const roster = ownerRosterFromDraft(draft, owner.id);
+        const g = groupRoster(roster);
+        const group = (label, arr) => `<section class="cork-group"><h3>${label} <small>${arr.length}</small></h3>${arr.length ? arr.map((p,i)=>miniPlayerCard(p,i,"pin-card")).join("") : `<div class="cork-empty-slot">Waiting for ${label}</div>`}</section>`;
+        host.innerHTML = conceptShell("corkboard", "Corkboard War Room", "A fantasy-GM basement board with pinned cards, notes, tape, and roster groups by position.", owner, owners, draft, `
+          <div class="corkboard-bg">
+            <div class="sticky-note main-note">${esc(ownerName(owner))}<br><small>KEEPERS? TRADE BAIT?</small></div>
+            <div class="cork-groups">${group("Forwards", g.F)}${group("Defense", g.D)}${group("Goalies", g.G)}</div>
+          </div>`);
+      }
+      function renderDesk(host, draft, owners){
+        const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
+        const roster = ownerRosterFromDraft(draft, owner.id);
+        const cards = roster.length ? roster.map((p,i)=>miniPlayerCard(p,i,"desk-card")).join("") : emptyRosterMessage();
+        host.innerHTML = conceptShell("desk", "GM Desk", "An old basement coffee-table/GM desk with roster cards spread over notes, pucks, magazines, and a draft sheet.", owner, owners, draft, `
+          <div class="desk-bg">
+            <div class="desk-props"><span class="mug">MUG</span><span class="puck-prop"></span><span class="vhs-prop">NHL 98</span><span class="sheet-prop">DRAFT SHEET</span></div>
+            <div class="desk-card-spread">${cards}</div>
+          </div>`);
+      }
+      function renderCase(host, draft, owners){
+        const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
+        const roster = ownerRosterFromDraft(draft, owner.id);
+        const g = groupRoster(roster);
+        const shelf = (label, arr) => `<div class="case-shelf"><h3>${label}</h3><div>${arr.length ? arr.map((p,i)=>miniPlayerCard(p,i,"case-card")).join("") : `<span class="case-empty">Empty shelf</span>`}</div></div>`;
+        host.innerHTML = conceptShell("case", "Roster Display Case", "A premium glass case: trophies up top, roster cards on shelves, and owner memorabilia around the edges.", owner, owners, draft, `
+          <div class="display-case-bg">
+            <div class="case-trophy-row"><span></span><span></span><span></span><b>${esc(ownerName(owner))}'s Case</b></div>
+            ${shelf("Forwards", g.F)}${shelf("Defense", g.D)}${shelf("Goalies", g.G)}
+          </div>`);
+      }
+      function renderGame(host, draft, owners){
+        const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
+        const roster = ownerRosterFromDraft(draft, owner.id);
+        const rows = roster.length ? roster.map((p,i)=>`<tr><td>${String(i+1).padStart(2,"0")}</td><td>${esc(playerName(p))}</td><td>${esc(p.position === "TG" ? "TG" : (p.position || "—"))}</td><td>${esc(p.nhlTeam || p.team || "")}</td><td>${esc(statLine(p))}</td></tr>`).join("") : `<tr><td colspan="5">NO PLAYERS DRAFTED YET</td></tr>`;
+        host.innerHTML = conceptShell("game", "NHL 98 Roster Screen", "A clean video-game style roster menu. Less realistic room, but it handles full rosters extremely well.", owner, owners, draft, `
+          <div class="game-screen-bg">
+            <div class="game-crt"><div class="game-title">${esc(ownerName(owner)).toUpperCase()} ROSTER</div><table><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>NHL</th><th>Stats</th></tr></thead><tbody>${rows}</tbody></table><div class="game-footer">PRESS START • ${esc(roster.length)} PLAYERS</div></div>
+          </div>`);
+      }
+      window.renderRosterConceptTabs = function(draft){
+        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
+        const map = [
+          ["rosterCardWallHost", renderCardWall],
+          ["rosterCorkboardHost", renderCorkboard],
+          ["rosterDeskHost", renderDesk],
+          ["rosterCaseHost", renderCase],
+          ["rosterGameHost", renderGame]
+        ];
+        map.forEach(([id, fn]) => { const host = document.getElementById(id); if (host) fn(host, draft || {}, owners); });
+        document.querySelectorAll("[data-concept-owner]").forEach(btn => {
+          btn.onclick = function(){ window.__rosterConceptState.ownerId = this.dataset.conceptOwner || (owners[0] && owners[0].id) || "nick"; window.renderRosterConceptTabs(draft || {}); };
+        });
+      };
+
       window.renderDraftRosters = function(draft){
         if (window.officialDraftApi && window.officialDraftApi.updateSourceStatus) window.officialDraftApi.updateSourceStatus(draft);
         const target = document.getElementById("rosterCards");
@@ -2587,166 +2739,19 @@
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
         const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
         const source = draft && draft.__source ? draft.__source : "draft state";
-        window.__rosterLockerRoom = window.__rosterLockerRoom || { open: owners[0] && owners[0].id || "nick" };
-        const room = window.__rosterLockerRoom;
-
-        const LOCKER_THEMES = {
-          nick: {
-            jersey: "SUNDIN", number: "13", accent:"leafs", sign:"NICK'S LOCKER",
-            shelf: ["Mats Sundin captain card", "POG tube", "Mighty Ducks goalie mask", "NHL 98 case", "Beckett Hockey"],
-            stickers: ["POG CHAMP", "Ducks Mask", "Sundin 13", "I ♥ 90s Hockey"],
-            books: ["Beckett Hockey", "NHL '98 Guide", "The Mighty Ducks VHS", "Slap Shot VHS", "Home Alone VHS"],
-            note: "Sundin shrine • POG stash • Mighty Ducks mask"
-          },
-          chris: {
-            jersey: "CHRIS", number: "88", accent:"red", sign:"CHRIS' LOCKER",
-            shelf: ["Mini cup", "old skate", "tape roll", "rookie cards"],
-            stickers: ["SNIPER", "Tape Job", "Road Win"],
-            books: ["Hockey News", "NHL Annual", "EA Sports Manual", "Wayne's World VHS"],
-            note: "Custom theme placeholder — ready for Chris details"
-          },
-          andrew: {
-            jersey: "ANDREW", number: "19", accent:"gold", sign:"ANDREW'S LOCKER",
-            shelf: ["division plaque", "lucky puck", "mini sticks", "card box"],
-            stickers: ["PLAYMAKER", "Card Show", "1998"],
-            books: ["Beckett Price Guide", "Hockey Pool Book", "NHL 99", "Happy Gilmore VHS"],
-            note: "Custom theme placeholder — ready for Andrew details"
-          },
-          tyler: {
-            jersey: "TYLER", number: "34", accent:"green", sign:"TYLER'S LOCKER",
-            shelf: ["goalie mask", "crease puck", "mini trophy", "VHS stack"],
-            stickers: ["GOALIE WALL", "OT Hero", "No Fear"],
-            books: ["Goalie World", "NHL 98", "Mighty Ducks 2 VHS", "Sports Illustrated"],
-            note: "Custom theme placeholder — ready for Tyler details"
-          },
-          scott: {
-            jersey: "SCOTT", number: "27", accent:"purple", sign:"SCOTT'S LOCKER",
-            shelf: ["champ mug", "signed puck", "card binder", "tape"],
-            stickers: ["GRINDER", "Basement League", "Pogs"],
-            books: ["The Hockey News", "Pool Notes", "NHLPA Cards", "Tommy Boy VHS"],
-            note: "Custom theme placeholder — ready for Scott details"
-          }
-        };
-
-        function ownerDisplay(owner){ return ownerName(owner); }
-        function getPlayer(p){ return (p && p.player) ? p.player : {}; }
+        const limits = { F:6, D:4, G:2 };
         function ownerPicks(ownerId){ return picks.filter(p => String(p.ownerId) === String(ownerId)); }
-        function themeFor(owner){
-          const key = String(owner.id || "").toLowerCase();
-          return LOCKER_THEMES[key] || { jersey: ownerDisplay(owner).toUpperCase(), number:"00", accent:"blue", sign: ownerDisplay(owner).toUpperCase() + "'S LOCKER", shelf:["pucks","tape","cards"], stickers:["90s Hockey"], books:["Hockey Pool Book","Beckett Hockey"], note:"Theme placeholder" };
+        function rowsFor(title, arr, limit){
+          return `<div class="roster-section"><h4>${esc(title)} <small>${arr.length}/${limit}</small></h4><div class="roster-player-list">${arr.length ? arr.map(playerLine).join("") : '<div class="roster-empty">No players yet</div>'}</div></div>`;
         }
-        function formatPosition(player){
-          if (player.position === "TG") return "Team Goalies";
-          if (player.position === "G") return "Goalie";
-          if (player.position === "D") return "Defense";
-          return "Forward";
-        }
-        function rosterPaper(owner){
+        target.className = "grid roster-grid clean-original-rosters";
+        target.innerHTML = owners.map(owner => {
           const mine = ownerPicks(owner.id);
-          const rows = mine.length ? mine.map((pick, idx) => {
-            const p = getPlayer(pick);
-            const nhl = p.nhlTeam || p.team || "";
-            return `<li><b>${esc(idx + 1)}.</b><span>${esc(p.name || "Unknown Player")}</span><em>${esc(formatPosition(p))}${nhl ? " • " + esc(nhl) : ""}</em></li>`;
-          }).join("") : `<li class="empty-roster-line"><span>No drafted players yet</span><em>Roster sheet will fill from the live draft/API.</em></li>`;
-          return `<div class="locker-roster-paper">
-            <div class="paper-tape tape-left"></div><div class="paper-tape tape-right"></div>
-            <h4>${esc(ownerDisplay(owner))}'s Roster</h4>
-            <ol>${rows}</ol>
-          </div>`;
-        }
-        function lockerDoor(owner, isOpen){
-          const theme = themeFor(owner);
-          const count = ownerPicks(owner.id).length;
-          return `<button type="button" class="hp-locker-door ${isOpen ? "is-open" : ""} theme-${esc(theme.accent)}" data-open-locker="${esc(owner.id)}" aria-label="Open ${esc(ownerDisplay(owner))}'s locker">
-            <span class="locker-door-shine"></span>
-            <span class="locker-vents vents-top"></span>
-            <span class="locker-nameplate">${esc(ownerDisplay(owner))}</span>
-            <span class="locker-logo">${esc(String(ownerDisplay(owner)).slice(0,1).toUpperCase())}</span>
-            <span class="locker-lock"></span>
-            <span class="locker-count">${esc(count)} players</span>
-            <span class="locker-vents vents-bottom"></span>
-          </button>`;
-        }
-        function trophyShelf(owner){
-          const count = Number((owner && (owner.championships || owner.trophies || owner.trophyCount)) || 0);
-          const trophies = count > 0 ? Array.from({ length: Math.min(count, 5) }, (_, i) => `<span class="mini-trophy trophy-${i+1}"><i></i></span>`).join("") : `<span class="empty-trophy-shelf">Trophy shelf</span>`;
-          return `<div class="locker-trophy-shelf">${trophies}</div>`;
-        }
-        function memorabiliaShelf(theme){
-          const items = (theme.shelf || []).slice(0,5).map((item, idx) => {
-            const lower = String(item).toLowerCase();
-            let cls = "misc";
-            if (lower.includes("mask")) cls = "mask";
-            else if (lower.includes("pog")) cls = "pogs";
-            else if (lower.includes("sundin") || lower.includes("card")) cls = "card";
-            else if (lower.includes("vhs") || lower.includes("nhl 98")) cls = "vhs";
-            else if (lower.includes("trophy") || lower.includes("cup")) cls = "trophy";
-            return `<span class="locker-prop prop-${esc(cls)} prop-${idx+1}" title="${esc(item)}"><i>${esc(item)}</i></span>`;
-          }).join("");
-          return `<div class="locker-memorabilia-shelf">${items}</div>`;
-        }
-        function jersey(theme){
-          return `<div class="hanging-jersey theme-${esc(theme.accent)}">
-            <span class="jersey-hanger"></span>
-            <div class="jersey-body"><b>${esc(theme.jersey)}</b><strong>${esc(theme.number)}</strong></div>
-            <span class="jersey-sleeve left"></span><span class="jersey-sleeve right"></span>
-          </div>`;
-        }
-        function bookStack(theme){
-          const books = (theme.books || []).slice(0,5).map((b, idx) => `<span class="locker-book book-${idx+1}">${esc(b)}</span>`).join("");
-          return `<div class="locker-books-stack">${books}</div>`;
-        }
-        function stickerBoard(theme){
-          const stickers = (theme.stickers || []).slice(0,5).map((s, idx) => `<span class="locker-sticker sticker-${idx+1}">${esc(s)}</span>`).join("");
-          return `<div class="locker-sticker-board">${stickers}</div>`;
-        }
-        function openLocker(owner){
-          const theme = themeFor(owner);
-          return `<div class="hp-open-locker theme-${esc(theme.accent)}">
-            <div class="locker-case">
-              <div class="locker-back-wall">
-                <div class="locker-top-sign">${esc(theme.sign)}</div>
-                ${trophyShelf(owner)}
-                ${memorabiliaShelf(theme)}
-                <div class="locker-main-zone">
-                  ${jersey(theme)}
-                  ${bookStack(theme)}
-                </div>
-                <div class="locker-floor"><span class="hockey-stick"></span><span class="tape-roll"></span><span class="loose-pucks"></span></div>
-              </div>
-              <div class="locker-open-door-panel">
-                ${rosterPaper(owner)}
-                ${stickerBoard(theme)}
-                <div class="locker-polaroids"><span></span><span></span></div>
-              </div>
-            </div>
-            <p class="locker-theme-note">${esc(theme.note)}</p>
-          </div>`;
-        }
-
-        if (!owners.some(o => String(o.id) === String(room.open))) room.open = owners[0] && owners[0].id || "nick";
-        const activeOwner = owners.find(o => String(o.id) === String(room.open)) || owners[0] || ROSTER_OWNERS[0];
-
-        target.className = "roster-locker-room-host";
-        target.innerHTML = `<div class="hp-locker-room-scene">
-          <div class="hp-locker-bg"></div>
-          <div class="hp-locker-vignette"></div>
-          <div class="hp-locker-room-head">
-            <span class="eyebrow">Roster Room Prototype • V142</span>
-            <h3>Click a locker to open that owner’s roster room</h3>
-            <p>Closed lockers across the basement wall. Each one opens into a custom 90s hockey locker with a trophy shelf, hanging jersey, memorabilia, and a taped roster sheet on the inside door.</p>
-            <small>Roster source: ${esc(source)} • Total picks: ${esc(picks.length)}</small>
-          </div>
-          <div class="hp-locker-bank" aria-label="Closed owner lockers">
-            ${owners.map(owner => lockerDoor(owner, String(owner.id) === String(room.open))).join("")}
-          </div>
-          <div class="hp-locker-display">${openLocker(activeOwner)}</div>
-        </div>`;
-
-        target.querySelectorAll("[data-open-locker]").forEach(btn => btn.addEventListener("click", () => {
-          room.open = btn.dataset.openLocker || (owners[0] && owners[0].id) || "nick";
-          window.renderDraftRosters(draft);
-        }));
+          const grouped = { F:[], D:[], G:[] };
+          mine.forEach(p => grouped[bucket((p.player || {}).position)].push(p));
+          return `<article class="card roster-card-clean"><div class="roster-card-head"><div><span class="eyebrow">${esc(source)}</span><h3>${esc(ownerName(owner))}</h3></div><b>${esc(mine.length)} players</b></div>${rowsFor("Forwards", grouped.F, limits.F)}${rowsFor("Defense", grouped.D, limits.D)}${rowsFor("Goalies", grouped.G, limits.G)}</article>`;
+        }).join("");
+        if (window.renderRosterConceptTabs) window.renderRosterConceptTabs(draft || {});
         renderDraftRoomLottery(draft || {});
       };
 
@@ -2779,7 +2784,7 @@
 
       document.addEventListener("click", function(event){
         const tab = event.target.closest && event.target.closest("[data-tab]");
-        if (tab && (tab.dataset.tab === "rosters" || tab.dataset.tab === "draft")) {
+        if (tab && (["rosters","draft","rosterCardWall","rosterCorkboard","rosterDesk","rosterCase","rosterGame"].includes(tab.dataset.tab))) {
           setTimeout(syncRosterTab, 100);
         }
       }, true);
