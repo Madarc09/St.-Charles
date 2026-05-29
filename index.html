@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V146 WALKABLE LOCKER ROOM ROSTERS -->
+  <!-- V147 WALKABLE LOCKER ROOM ALL STALLS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -3580,7 +3580,7 @@
   </script>
 <script type="module" src="assets/js/app.js"></script>
 <script type="module">
-  // V146 final override: walkable locker room hub + owner stall view.
+  // V147 final override: walkable locker room hub + all five owner stall views.
   (() => {
     const DEFAULT_OWNERS = [
       { id:'nick', name:'Nick', teamName:'Nick' },
@@ -3604,9 +3604,27 @@
         theme:'Flyers • Gears of War • gritty orange/black',
         ready:true
       },
-      tyler: { number:'13', jersey:'Sundin', theme:'Coming next', ready:false },
-      chris: { number:'93', jersey:'Gilmour', theme:'Coming next', ready:false },
-      scott: { number:'', jersey:'Custom stall', theme:'Coming next', ready:false }
+      tyler: {
+        image:'assets/images/locker-stall-tyler.png',
+        number:'13',
+        jersey:'Domi / Clark',
+        theme:'Leafs tough guys • GoldenEye 007',
+        ready:true
+      },
+      chris: {
+        image:'assets/images/locker-stall-chris.png',
+        number:'93',
+        jersey:'Vince Carter / Gilmour',
+        theme:'Raptors • Mario Kart • March Madness',
+        ready:true
+      },
+      scott: {
+        image:'assets/images/locker-stall-scott.png',
+        number:'???',
+        jersey:'Mystery Man',
+        theme:'International man of mystery • secret draft files',
+        ready:true
+      }
     };
     const room = window.__walkableLockerRoomState = window.__walkableLockerRoomState || { view:'hub', open:'nick', lastDraft:null };
     const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
@@ -3662,7 +3680,7 @@
             <div class="room-title-block">
               <p>Roster Room</p>
               <h3>Choose a stall</h3>
-              <small>Nick and Andrew are live test stalls. The others are placeholders until we create their images.</small>
+              <small>All five custom stalls are live. Pick an owner to walk up and view their roster clipboard.</small>
             </div>
             <div class="locker-hall">
               ${owners.map((owner, idx) => {
@@ -3674,12 +3692,12 @@
                   <span class="stall-number">${esc(stall.number || '—')}</span>
                   <span class="stall-jersey">${esc(stall.jersey || 'Future stall')}</span>
                   <span class="stall-count">${count} players</span>
-                  <span class="stall-action">${stall.ready ? 'Walk up' : 'Not built yet'}</span>
+                  <span class="stall-action">Walk up</span>
                 </button>`;
               }).join('')}
             </div>
             <div class="room-floor">
-              <span>Click a completed stall to zoom in</span>
+              <span>Click a stall to zoom in</span>
             </div>
           </div>
         </section>`;
