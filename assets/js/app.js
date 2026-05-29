@@ -1222,8 +1222,9 @@ function renderBinderShelf() {
     const total = ownerTotal(owner.id, state);
     const colors = ROSTER_ROOM_OWNER_COLORS[owner.id] || ['#334155', '#cbd5e1'];
     return `
-      <button class="binder-spine ${rosterRoomState.openBinder === owner.id ? 'active' : ''}" data-open-binder="${escapeHtml(owner.id)}" style="--binder-a:${colors[0]};--binder-b:${colors[1]};">
-        <span class="binder-rings"></span>
+      <button class="binder-spine binder-cover ${rosterRoomState.openBinder === owner.id ? 'active' : ''}" data-open-binder="${escapeHtml(owner.id)}" style="--binder-a:${colors[0]};--binder-b:${colors[1]};">
+        <span class="binder-cover-rings"></span>
+        <span class="binder-cover-window">HOCKEY CARDS</span>
         <strong>${escapeHtml(owner.teamName || owner.name)}</strong>
         <em>${roster.length} cards • ${total} pts</em>
       </button>`;
@@ -1232,8 +1233,9 @@ function renderBinderShelf() {
   return `
     <div class="binder-coffee-table" aria-label="Coffee table with hockey card binders">
       ${ownerBinders}
-      <button class="binder-spine all-teams ${rosterRoomState.openBinder === 'all' ? 'active' : ''}" data-open-binder="all">
-        <span class="binder-rings"></span>
+      <button class="binder-spine binder-cover all-teams ${rosterRoomState.openBinder === 'all' ? 'active' : ''}" data-open-binder="all">
+        <span class="binder-cover-rings"></span>
+        <span class="binder-cover-window">MASTER SET</span>
         <strong>League Binder</strong>
         <em>All teams • page turn test</em>
       </button>
@@ -1264,7 +1266,7 @@ function renderOwnerBinder(owner) {
 
 function renderLeagueBinder() {
   const all = rosterRoomAllPlayers();
-  const perPage = 6;
+  const perPage = 9;
   const pages = all.length ? chunkArray(all, perPage) : [[], [], [], [], []];
   const maxPage = Math.max(0, pages.length - 1);
   rosterRoomState.allPage = Math.min(rosterRoomState.allPage || 0, maxPage);
@@ -1327,9 +1329,9 @@ function renderRosters() {
       <div class="roster-room-bg"></div>
       <div class="roster-room-vignette"></div>
       <div class="roster-room-intro">
-        <span class="eyebrow">Roster Room Prototype</span>
-        <h3>1998 basement hockey-card binder room</h3>
-        <p>Pick a binder on the coffee table. Individual binders show one team. The sixth League Binder tests the page-turn version for every team together.</p>
+        <span class="eyebrow">Roster Room Prototype • V141</span>
+        <h3>Click a real binder on the coffee table</h3>
+        <p>The roster room now opens like an old hockey-card binder: hard cover, metal rings, clear plastic 9-card sleeves, glare, seams, and page-turn motion.</p>
       </div>
       ${renderBinderShelf()}
       <div class="binder-stage">

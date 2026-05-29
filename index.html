@@ -2627,16 +2627,18 @@
         function binderShelf(){
           const ownerBooks = owners.map((owner, idx) => {
             const mine = ownerPicks(owner.id);
-            return `<button type="button" class="binder-spine ${room.open === owner.id ? "active" : ""}" data-open-binder="${esc(owner.id)}">
-              <span class="binder-rings"></span>
+            return `<button type="button" class="binder-spine binder-cover ${room.open === owner.id ? "active" : ""}" data-open-binder="${esc(owner.id)}">
+              <span class="binder-cover-rings"></span>
+              <span class="binder-cover-window">HOCKEY CARDS</span>
               <strong>${esc(ownerDisplay(owner))}</strong>
               <em>${mine.length} cards</em>
             </button>`;
           }).join("");
           return `<div class="binder-coffee-table" aria-label="Coffee table with hockey card binders">
             ${ownerBooks}
-            <button type="button" class="binder-spine all-teams ${room.open === "all" ? "active" : ""}" data-open-binder="all">
-              <span class="binder-rings"></span>
+            <button type="button" class="binder-spine binder-cover all-teams ${room.open === "all" ? "active" : ""}" data-open-binder="all">
+              <span class="binder-cover-rings"></span>
+              <span class="binder-cover-window">MASTER SET</span>
               <strong>League Binder</strong>
               <em>${picks.length} total cards</em>
             </button>
@@ -2689,7 +2691,7 @@
         target.innerHTML = `<div class="roster-room-scene">
           <div class="roster-room-bg"></div>
           <div class="roster-room-vignette"></div>
-          <div class="roster-room-intro"><span class="eyebrow">Roster Room Prototype • V140</span><h3>1998 basement hockey-card binder room</h3><p>Pick a binder on the coffee table. Individual binders show one team. The sixth League Binder tests the page-turn version for every team together.</p><small>Roster source: ${esc(source)} • Total picks: ${esc(picks.length)}</small></div>
+          <div class="roster-room-intro"><span class="eyebrow">Roster Room Prototype • V141</span><h3>Click a real binder on the coffee table</h3><p>The roster room now opens like an old hockey-card binder: hard cover, metal rings, clear plastic 9-card sleeves, glare, seams, and page-turn motion.</p><small>Roster source: ${esc(source)} • Total picks: ${esc(picks.length)}</small></div>
           ${binderShelf()}
           <div class="binder-stage">${openContent}</div>
         </div>`;
