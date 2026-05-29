@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V128 STICKY TOP BOTTOM TICKERS -->
+  <!-- V129 NO LIVE TICKER KEEP BOTTOM RESULTS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -126,14 +126,6 @@
 
 
         <div class="clean-draft-topbar roster-needs-topbar">
-          <div id="stickyLiveDraftTicker" class="sticky-live-draft-ticker">
-            <div class="v120-ticker-row v120-live-row">
-              <div id="v120LiveFixed" class="v120-live-fixed">Live Draft — Loading…</div>
-              <div class="v120-marquee-window">
-                <div id="v120UpcomingMover" class="v120-marquee-mover">
-                  <span class="v120-ticker-item"><b>Loading</b> Draft room syncing…</span>
-                </div>
-          </div>
           <div id="cleanRosterNeedsPanel" class="clean-roster-needs-panel">
             <div class="needs-placeholder">
               <strong>Select a team to see roster needs.</strong>
@@ -2793,37 +2785,13 @@
       }
 
       function renderLiveDraftTicker(draft, force = false){
-        const fixed = document.getElementById("v120LiveFixed");
-        const mover = document.getElementById("v120UpcomingMover");
         const cardHost = document.getElementById("v126ResultsCardHost");
-        if (!fixed || !mover || !cardHost) return;
+        if (!cardHost) return;
 
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
         const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
         const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
-        const totalPicks = order.length * 12;
         const pickIndex = picks.length;
-
-        function ownerForPickIndex(i){
-          const round = Math.floor(i / order.length) + 1;
-          const slot = i % order.length;
-          const roundOrder = round % 2 === 1 ? order : order.slice().reverse();
-          return { ownerId: roundOrder[slot], pickNumber: i + 1, round };
-        }
-
-        const current = pickIndex < totalPicks ? ownerForPickIndex(pickIndex) : null;
-        fixed.innerHTML = current
-          ? `<span>Live Draft</span><strong>${ownerName(current.ownerId)} is on the clock</strong><em>Pick ${current.pickNumber}</em>`
-          : `<span>Live Draft</span><strong>Draft complete</strong>`;
-
-        const upcoming = [];
-        for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 10); i++) {
-          upcoming.push(ownerForPickIndex(i));
-        }
-
-        const upcomingLine = upcoming.length
-          ? upcoming.map(item => `<span class="v120-ticker-item"><b>${item.pickNumber}</b>${ownerName(item.ownerId)}</span>`).join("")
-          : `<span class="v120-ticker-item"><b>DONE</b>Draft complete</span>`;
 
         const resultCount = Math.max(10, picks.length);
         const newCards = [];
@@ -2870,106 +2838,15 @@
           }
         }
 
-        const upcomingSignature = `${pickIndex}|${order.join(",")}`;
         const resultsSignature = `${picks.length}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && (p.player.id || p.player.playerId || p.player.nhlId) || "")).join(",")}`;
-        const signature = `${upcomingSignature}|${resultsSignature}`;
+        const signature = `${pickIndex}|${order.join(",")}|${resultsSignature}`;
 
-        if (!force && signature === lastLiveTickerSignature && mover.dataset.v120Ready === "1") return;
+        if (!force && signature === lastLiveTickerSignature && cardHost.dataset.v129Ready === "1") return;
         lastLiveTickerSignature = signature;
-        mover.dataset.v120Ready = "1";
+        cardHost.dataset.v129Ready = "1";
 
-        mover.innerHTML = `<span class="v120-marquee-copy"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span><span class="v120-marquee-copy" aria-hidden="true"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span>`;
-
-        // V127: update the result-card data only. Do NOT restart the 5-second timer.
+        // Bottom Draft Results ticker only. No live/upcoming ticker is rendered in V129.
         setV127ResultsCards(newCards, resultsSignature);
-      }
-
-      function resultCardHtml(card){
-        if (!card) return "";
-        if (card.type === "filled") {
-          return `<div id="v126ResultsCard" class="v126-results-card filled ${safeHtml(card.teamClass)}" style="--team-logo:url('${safeHtml(card.logo)}')">
-            ${card.pic ? `<img class="v126-result-headshot" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
-            <span class="v126-result-main">
-              <strong>${safeHtml(card.player)}</strong>
-              <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>
-            </span>
-            <span class="v126-drafted-by"><small>Drafted by</small>${safeHtml(card.owner)}</span>
-          </div>`;
-        }
-
-        return `<div id="v126ResultsCard" class="v126-results-card tba">
-          <span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>
-          <span class="v126-result-main">
-            <strong>TBA</strong>
-            <em>${safeHtml(card.pos)}</em>
-          </span>
-          <span class="v126-drafted-by"><small>Drafted by</small>—</span>
-        </div>`;
-      }
-
-      function renderSingleResultCard(card){
-        const host = document.getElementById("v126ResultsCardHost");
-        if (!host || !card) return;
-        const state = window.__v127ResultsTicker;
-        if (state.lastRenderedKey === card.key && host.querySelector("#v126ResultsCard")) return;
-
-        host.innerHTML = resultCardHtml(card);
-        state.lastRenderedKey = card.key;
-
-        const rendered = document.getElementById("v126ResultsCard");
-        if (rendered) {
-          rendered.classList.remove("entering");
-          void rendered.offsetWidth;
-          rendered.classList.add("entering");
-        }
-      }
-
-      function setV127ResultsCards(cards, signature){
-        const state = window.__v127ResultsTicker;
-        if (!Array.isArray(cards) || !cards.length) return;
-
-        const oldCurrent = state.cards[state.index] || null;
-        const oldKey = oldCurrent && oldCurrent.key;
-
-        state.cards = cards;
-
-        // Keep the viewer's place when possible after data refresh.
-        if (oldKey) {
-          const sameIndex = cards.findIndex(card => card.key === oldKey);
-          if (sameIndex >= 0) state.index = sameIndex;
-          else if (state.index >= cards.length) state.index = 0;
-        } else if (state.index >= cards.length) {
-          state.index = 0;
-        }
-
-        resultsTickerSignature = signature;
-
-        if (!state.started) {
-          state.started = true;
-          startV127ResultsTicker();
-        } else if (!document.getElementById("v126ResultsCard")) {
-          renderSingleResultCard(state.cards[state.index] || state.cards[0]);
-        }
-      }
-
-      function startV127ResultsTicker(){
-        const state = window.__v127ResultsTicker;
-        if (state.intervalId) clearInterval(state.intervalId);
-
-        function tick(){
-          const currentState = window.__v127ResultsTicker;
-          if (!currentState.cards.length) return;
-
-          if (currentState.index >= currentState.cards.length) currentState.index = 0;
-
-          const card = currentState.cards[currentState.index];
-          renderSingleResultCard(card);
-
-          currentState.index = (currentState.index + 1) % currentState.cards.length;
-        }
-
-        tick();
-        state.intervalId = setInterval(tick, 5000);
       }
 
       function renderTickerFromOrder(order){
@@ -3317,7 +3194,6 @@
       }, true);
 
       window.addEventListener("load", () => { startPolling(); setTimeout(() => refreshLiveDraftTicker(true), 500); if (window.__pendingLiveLotteryReplay) { window.__pendingLiveLotteryReplay = false; replayCurrentLottery(); } });
-      window.addEventListener("resize", () => setTimeout(startSportsTicker, 150));
       window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, loadState, renderState };
     })();
   </script>
