@@ -13529,3 +13529,67 @@ button:not(.primary):not(.danger),
   to{ opacity:1; transform:translateY(0) rotateX(0) scale(1); }
 }
 /* END V131 */
+
+
+/* V132 owner watermark placeholders for Draft Results ticker
+   Future replacement image dimensions: 640 x 160 px transparent PNG.
+   Files live in: assets/images/owner-watermarks/
+   Names:
+   - nick-watermark.png
+   - chris-watermark.png
+   - andrew-watermark.png
+   - tyler-watermark.png
+   - scott-watermark.png
+*/
+@media(min-width:821px){
+  .v126-results-card{
+    grid-template-columns:54px minmax(260px, 1fr) 104px!important;
+    gap:8px!important;
+    padding:8px 16px 8px 12px!important;
+  }
+  .v126-drafted-by{
+    justify-items:start!important;
+    text-align:left!important;
+    max-width:104px!important;
+    transform:translateX(-18px)!important;
+  }
+  .v126-result-main{
+    padding-right:4px!important;
+  }
+}
+
+/* Owner watermark: larger, centered behind the name plate, but not on top of Drafted By */
+.v126-results-card::before{
+  background-image:var(--team-logo)!important;
+  background-position:62% center!important;
+  background-size:min(520px, 70%) auto!important;
+  opacity:.30!important;
+  filter:saturate(1.2) contrast(1.05)!important;
+}
+.v126-results-card.filled{
+  background:
+    linear-gradient(90deg,rgba(8,21,39,.96),rgba(3,8,16,.80) 54%,rgba(3,8,16,.96)),
+    radial-gradient(circle at 62% 50%,rgba(255,212,90,.08),transparent 54%)!important;
+}
+.v126-results-card.filled::after{
+  content:"";
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.05) 58%,rgba(0,0,0,.45) 100%)!important;
+  pointer-events:none!important;
+}
+.v126-results-card.filled > *{
+  z-index:2!important;
+}
+
+@media(max-width:820px){
+  .v126-results-card::before{
+    background-position:center!important;
+    background-size:330px auto!important;
+    opacity:.22!important;
+  }
+  .v126-drafted-by{
+    transform:none!important;
+  }
+}
+/* END V132 */

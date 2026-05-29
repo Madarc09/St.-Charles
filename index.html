@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V131 SETV127 FIX -->
+  <!-- V132 OWNER WATERMARKS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2791,6 +2791,18 @@
         return `team-${String(team || "na").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
       }
 
+      function safeOwnerWatermarkUrl(ownerId){
+        const id = String(ownerId || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+        const map = {
+          nick:"assets/images/owner-watermarks/nick-watermark.png",
+          chris:"assets/images/owner-watermarks/chris-watermark.png",
+          andrew:"assets/images/owner-watermarks/andrew-watermark.png",
+          tyler:"assets/images/owner-watermarks/tyler-watermark.png",
+          scott:"assets/images/owner-watermarks/scott-watermark.png"
+        };
+        return map[id] || "";
+      }
+
       function renderLiveDraftTicker(draft, force = false){
         const cardHost = document.getElementById("v126ResultsCardHost");
         if (!cardHost) return;
@@ -2813,7 +2825,7 @@
             const team = p.nhlTeam || p.teamAbbrev || "";
             const fantasy = safeFantasyPoints(p);
             const pic = safePlayerImageUrl(p);
-            const logo = safeTeamLogoUrl(team);
+            const logo = safeOwnerWatermarkUrl(pick.ownerId);
             const playerId = p.id || p.playerId || p.nhlId || "";
             newCards.push({
               key:`filled-${i + 1}-${playerId}-${player}`,
@@ -2821,6 +2833,7 @@
               pickNumber:i + 1,
               player,
               owner,
+              ownerId: pick.ownerId,
               pos,
               team,
               fantasy,
