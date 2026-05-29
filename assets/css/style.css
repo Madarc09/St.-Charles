@@ -13696,3 +13696,21 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V135 */
+
+
+/* V136 Team Goalie logo support in Draft Results ticker */
+.v126-result-headshot.v136-team-goalie-logo{
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:5px!important;
+  background:
+    radial-gradient(circle at center,rgba(255,255,255,.16),rgba(255,255,255,.04)),
+    rgba(0,0,0,.26)!important;
+  border-color:rgba(255,212,90,.38)!important;
+}
+@media(max-width:820px){
+  .v126-result-headshot.v136-team-goalie-logo{
+    padding:4px!important;
+  }
+}
+/* END V136 */

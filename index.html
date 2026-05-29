@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V135 ROUND PICK LEFT HEADER -->
+  <!-- V136 TEAM GOALIE LOGOS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2824,7 +2824,10 @@
             const pos = safeDisplayPosition(p.position || "");
             const team = p.nhlTeam || p.teamAbbrev || "";
             const fantasy = safeFantasyPoints(p);
-            const pic = safePlayerImageUrl(p);
+            const rawPosition = String(p.position || "").toUpperCase();
+            const isTeamGoalie = rawPosition === "TG" || (rawPosition === "G" && String(player).toLowerCase().includes("goalie"));
+            const pic = isTeamGoalie ? safeTeamLogoUrl(team) : safePlayerImageUrl(p);
+            const picType = isTeamGoalie ? "team-logo" : "headshot";
             const logo = safeOwnerWatermarkUrl(pick.ownerId);
             const playerId = p.id || p.playerId || p.nhlId || "";
             const roundNumber = Math.floor(i / Math.max(1, order.length)) + 1;
@@ -2842,6 +2845,7 @@
               team,
               fantasy,
               pic,
+              picType,
               logo,
               teamClass:safeTeamClassName(team)
             });
@@ -2882,7 +2886,7 @@
         if (card.type === "filled") {
           return `<div id="v126ResultsCard" class="v126-results-card filled ${safeHtml(card.teamClass)}" style="--team-logo:url('${safeHtml(card.logo)}')">
             ${card.logo ? `<img class="v133-owner-watermark-img" src="${safeHtml(card.logo)}" alt="" loading="lazy" aria-hidden="true">` : ""}
-            ${card.pic ? `<img class="v126-result-headshot" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
+            ${card.pic ? `<img class="v126-result-headshot ${card.picType === "team-logo" ? "v136-team-goalie-logo" : ""}" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
             <span class="v126-result-main">
               <strong>${safeHtml(card.player)}</strong>
               <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>
