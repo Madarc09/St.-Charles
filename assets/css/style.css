@@ -11253,3 +11253,217 @@ button:not(.primary):not(.danger),
 }
 
 /* END V107 */
+
+
+/* V108 Gary Bettman live lottery reveal */
+.gary-lottery-card{
+  width:min(820px,94vw)!important;
+}
+.gary-lottery-stage{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:16px;
+  align-items:center;
+  margin:12px 0 8px;
+}
+.gary-host{
+  display:grid;
+  justify-items:center;
+  gap:5px;
+  padding:10px;
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(0,0,0,.18));
+  border:1px solid rgba(255,212,90,.26);
+}
+.gary-host strong{
+  color:#ffd45a;
+  font-size:.8rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.gary-head{
+  position:relative;
+  width:82px;
+  height:74px;
+}
+.gary-face{
+  position:absolute;
+  inset:10px 13px 4px;
+  border-radius:46% 46% 44% 44%;
+  background:linear-gradient(180deg,#f2c6a9,#c9896f);
+  border:2px solid rgba(0,0,0,.38);
+  box-shadow:inset -7px -5px 0 rgba(0,0,0,.08);
+}
+.gary-hair{
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:2px;
+  height:28px;
+  border-radius:50% 50% 35% 35%;
+  background:linear-gradient(180deg,#d5d5d5,#747474);
+  z-index:2;
+}
+.gary-head::before,
+.gary-head::after{
+  content:"";
+  position:absolute;
+  top:33px;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#101010;
+  z-index:4;
+}
+.gary-head::before{ left:31px; }
+.gary-head::after{ right:31px; }
+.gary-mouth{
+  position:absolute;
+  left:34px;
+  bottom:18px;
+  width:16px;
+  height:7px;
+  border-radius:0 0 999px 999px;
+  background:#561f1f;
+  z-index:5;
+  animation:garyMouthTalk .34s infinite alternate;
+}
+.gary-body{
+  position:relative;
+  width:92px;
+  height:74px;
+  border-radius:44px 44px 28px 28px;
+  background:linear-gradient(180deg,#1d1d1d,#050505);
+  border:2px solid rgba(255,255,255,.14);
+}
+.gary-body::before{
+  content:"";
+  position:absolute;
+  left:31px;
+  top:0;
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:24px solid #f1f1f1;
+}
+.gary-tie{
+  position:absolute;
+  left:42px;
+  top:13px;
+  width:9px;
+  height:42px;
+  background:linear-gradient(180deg,#f5c35b,#ad6514);
+  clip-path:polygon(50% 0,100% 18%,72% 100%,28% 100%,0 18%);
+  z-index:2;
+}
+.gary-flipper{
+  position:absolute;
+  top:22px;
+  width:30px;
+  height:13px;
+  border-radius:999px;
+  background:#090909;
+}
+.gary-flipper.left{
+  left:-18px;
+  transform:rotate(26deg);
+}
+.gary-flipper.right{
+  right:-18px;
+  transform:rotate(-26deg);
+}
+.gary-speech-bubble{
+  position:relative;
+  min-height:92px;
+  display:flex;
+  align-items:center;
+  padding:16px 18px;
+  border-radius:20px;
+  background:#f8fbff;
+  color:#07101d;
+  font-weight:1000;
+  font-size:1.15rem;
+  line-height:1.22;
+  text-align:left;
+  box-shadow:0 12px 24px rgba(0,0,0,.28);
+}
+.gary-speech-bubble::before{
+  content:"";
+  position:absolute;
+  left:-16px;
+  top:42px;
+  border-top:12px solid transparent;
+  border-bottom:12px solid transparent;
+  border-right:18px solid #f8fbff;
+}
+@keyframes garyMouthTalk{
+  from{ height:4px; transform:scaleX(.75); }
+  to{ height:12px; transform:scaleX(1.08); }
+}
+.gary-reveal-board{
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.gary-reveal-board .feud-slot{
+  opacity:.38;
+  transform:none;
+  filter:grayscale(.9) brightness(.55);
+  background:linear-gradient(180deg,#202b38,#101620);
+  border-color:rgba(255,255,255,.16);
+  transition:opacity .3s ease, filter .3s ease, transform .3s ease, background .3s ease, border-color .3s ease;
+  animation:none!important;
+}
+.gary-reveal-board .feud-slot.hidden-slot span{
+  filter:blur(8px);
+  opacity:.08;
+}
+.gary-reveal-board .feud-slot.revealed{
+  opacity:1;
+  filter:none;
+  transform:scale(1.02);
+  background:linear-gradient(180deg,#164b93,#0a2453);
+  border-color:rgba(255,212,90,.72);
+  box-shadow:0 0 22px rgba(255,212,90,.18);
+}
+.gary-reveal-board .feud-slot.revealed span{
+  filter:none;
+  opacity:1;
+}
+.gary-reveal-board .feud-slot[data-pick="1"]{
+  order:4;
+}
+.gary-reveal-board .feud-slot[data-pick="2"]{
+  order:5;
+}
+.gary-reveal-board .feud-slot[data-pick="3"]{
+  order:3;
+}
+.gary-reveal-board .feud-slot[data-pick="4"]{
+  order:2;
+}
+.gary-reveal-board .feud-slot[data-pick="5"]{
+  order:1;
+}
+@media(max-width:820px){
+  .gary-lottery-stage{
+    grid-template-columns:1fr;
+  }
+  .gary-host{
+    max-width:180px;
+    margin:auto;
+  }
+  .gary-speech-bubble{
+    font-size:.95rem;
+    min-height:76px;
+  }
+  .gary-speech-bubble::before{
+    display:none;
+  }
+  .gary-reveal-board .feud-slot{
+    grid-template-columns:46px 1fr;
+    padding:9px 10px;
+  }
+  .gary-reveal-board .feud-slot span{
+    font-size:1.02rem;
+  }
+}
+/* END V108 */

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V107 LIVE LOTTERY CLEAN THEME -->
+  <!-- V108 GARY LIVE LOTTERY REVEAL -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -232,14 +232,30 @@
     </section>
   
     <div id="liveLotteryOverlay" class="live-lottery-overlay" hidden>
-      <div class="live-lottery-card">
+      <div class="live-lottery-card gary-lottery-card">
         <button id="closeLiveLotteryBtn" class="live-lottery-close" type="button">×</button>
         <p class="eyebrow">Live Draft Lottery</p>
         <h2 id="liveLotteryTitle">Waiting Room</h2>
+        <div class="gary-lottery-stage">
+          <div class="gary-host" aria-hidden="true">
+            <div class="gary-head">
+              <span class="gary-hair"></span>
+              <span class="gary-face"></span>
+              <span class="gary-mouth"></span>
+            </div>
+            <div class="gary-body">
+              <span class="gary-flipper left"></span>
+              <span class="gary-tie"></span>
+              <span class="gary-flipper right"></span>
+            </div>
+            <strong>Gary Bettman</strong>
+          </div>
+          <div id="garySpeechBubble" class="gary-speech-bubble">Waiting for the commissioner to run the lottery.</div>
+        </div>
         <p id="liveLotteryMessage" class="muted">Waiting for the commissioner to run the lottery.</p>
         <div id="liveLotteryJoined" class="live-lottery-joined"></div>
         <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
-        <div id="familyFeudBoard" class="family-feud-board" hidden></div>
+        <div id="familyFeudBoard" class="family-feud-board gary-reveal-board" hidden></div>
       </div>
     </div>
 
@@ -2678,6 +2694,26 @@
         const data = await res.json();
         return data && data.state ? data.state : { phase:"idle" };
       }
+      function ordinalWord(n){
+        return {1:"first",2:"second",3:"third",4:"fourth",5:"fifth"}[n] || String(n);
+      }
+      function setGarySpeech(text){
+        const bubble = document.getElementById("garySpeechBubble");
+        if (bubble) bubble.textContent = text;
+      }
+      function buildRevealSlots(order){
+        const board = document.getElementById("familyFeudBoard");
+        if (!board) return;
+        board.hidden = false;
+        board.innerHTML = [5,4,3,1,2].map(pickNo => {
+          const ownerId = order[pickNo - 1];
+          return `<div id="feudSlot${pickNo}" class="feud-slot hidden-slot" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(ownerId)}</span></div>`;
+        }).join("");
+      }
+      function revealPick(pickNo){
+        const slot = document.getElementById(`feudSlot${pickNo}`);
+        if (slot) slot.classList.add("revealed");
+      }
       function revealBoard(state){
         const board = document.getElementById("familyFeudBoard");
         const enterBtn = document.getElementById("enterLiveLotteryBtn");
@@ -2685,18 +2721,34 @@
         revealStartedFor = state.sessionId || "";
         showOverlay();
         if (enterBtn) enterBtn.hidden = true;
-        setText("liveLotteryTitle", "Survey Says...");
-        setText("liveLotteryMessage", "Draft lottery results are being revealed live.");
+        setText("liveLotteryTitle", "Draft Lottery Results");
+        setText("liveLotteryMessage", "Gary Bettman will reveal the draft lottery results live.");
         renderJoined(state);
-        board.hidden = false;
-        board.innerHTML = state.order.map((id, idx) => `<div class="feud-slot" style="--delay:${idx * .38}s"><b>${idx+1}</b><span>${ownerName(id)}</span></div>`).join("");
+        buildRevealSlots(state.order);
         renderTickerFromOrder(state.order);
-        setTimeout(() => postAction("complete").catch(()=>{}), 2400);
+
+        const sequence = [
+          { t: 0, pick: 5, speech: `I'm Gary Bettman... The fifth pick goes to... ${ownerName(state.order[4])}. Congrats, I'm Gary Bettman.` },
+          { t: 3000, pick: 4, speech: `And now on to the fourth pick... The fourth pick goes to... ${ownerName(state.order[3])}. Congrats, I'm Gary Bettman.` },
+          { t: 6000, pick: 3, speech: `And now on to the third pick... The third pick goes to... ${ownerName(state.order[2])}. Congrats, I'm Gary Bettman.` },
+          { t: 9000, pick: null, speech: `I'm Gary Bettman, we will now announce the winner of the draft lottery.` },
+          { t: 12000, pick: 1, speech: `Congrats, the winner of the lottery is... ${ownerName(state.order[0])}.` },
+          { t: 15000, pick: 2, speech: `Meaning the second pick will go to... ${ownerName(state.order[1])}. Good luck in the draft!` }
+        ];
+
+        sequence.forEach(step => {
+          setTimeout(() => {
+            setGarySpeech(step.speech);
+            if (step.pick) revealPick(step.pick);
+          }, step.t);
+        });
+
+        setTimeout(() => postAction("complete").catch(()=>{}), 17500);
         if (window.officialDraftApi && window.officialDraftApi.load) {
           setTimeout(() => window.officialDraftApi.load().then(d => {
             if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(d);
             if (window.renderDraftRosters) window.renderDraftRosters(d);
-          }).catch(()=>{}), 1200);
+          }).catch(()=>{}), 1400);
         }
       }
       async function renderState(state){
