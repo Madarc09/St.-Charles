@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V133 VISIBLE OWNER WATERMARKS -->
+  <!-- V134 ROUND PICK RESULTS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2827,10 +2827,14 @@
             const pic = safePlayerImageUrl(p);
             const logo = safeOwnerWatermarkUrl(pick.ownerId);
             const playerId = p.id || p.playerId || p.nhlId || "";
+            const roundNumber = Math.floor(i / Math.max(1, order.length)) + 1;
+            const pickInRound = (i % Math.max(1, order.length)) + 1;
             newCards.push({
               key:`filled-${i + 1}-${playerId}-${player}`,
               type:"filled",
               pickNumber:i + 1,
+              roundNumber,
+              pickInRound,
               player,
               owner,
               ownerId: pick.ownerId,
@@ -2842,10 +2846,14 @@
               teamClass:safeTeamClassName(team)
             });
           } else {
+            const roundNumber = Math.floor(i / Math.max(1, order.length)) + 1;
+            const pickInRound = (i % Math.max(1, order.length)) + 1;
             newCards.push({
               key:`tba-${i + 1}`,
               type:"tba",
               pickNumber:i + 1,
+              roundNumber,
+              pickInRound,
               player:"TBA",
               owner:"—",
               pos:`Waiting for pick ${i + 1}`,
@@ -2879,7 +2887,11 @@
               <strong>${safeHtml(card.player)}</strong>
               <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>
             </span>
-            <span class="v126-drafted-by"><small>Drafted by</small>${safeHtml(card.owner)}</span>
+            <span class="v126-drafted-by">
+              <small>Drafted by</small>
+              ${safeHtml(card.owner)}
+              <i class="v134-round-pick">R:${safeHtml(card.roundNumber || "")} P:${safeHtml(card.pickInRound || "")}</i>
+            </span>
           </div>`;
         }
 
@@ -2889,7 +2901,11 @@
             <strong>TBA</strong>
             <em>${safeHtml(card.pos || ("Waiting for pick " + card.pickNumber))}</em>
           </span>
-          <span class="v126-drafted-by"><small>Drafted by</small>—</span>
+          <span class="v126-drafted-by">
+            <small>Drafted by</small>
+            —
+            <i class="v134-round-pick">R:${safeHtml(card.roundNumber || "")} P:${safeHtml(card.pickInRound || "")}</i>
+          </span>
         </div>`;
       }
 
