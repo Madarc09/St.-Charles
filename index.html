@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V138 TEAM GOALIE LOGO ACTUAL -->
+  <!-- V145 FILLED ROSTER CONCEPT PAGES -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2629,6 +2629,26 @@
         const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
         return picks.filter(p => String(p.ownerId) === String(ownerId)).map(pickPlayer);
       }
+
+      function conceptSampleRoster(ownerId){
+        const base = {
+          nick: [
+            ["Auston Matthews","F","TOR",52,31,83],["William Nylander","F","TOR",40,58,98],["Mitch Marner","F","TOR",26,73,99],["Jason Robertson","F","DAL",35,45,80],["Brayden Point","F","TBL",44,38,82],["Tim Stützle","F","OTT",28,51,79],
+            ["Cale Makar","D","COL",21,69,90],["Quinn Hughes","D","VAN",17,75,92],["Rasmus Dahlin","D","BUF",18,47,65],["Evan Bouchard","D","EDM",18,64,82],
+            ["Toronto Goalies","TG","TOR",0,0,0],["Dallas Goalies","TG","DAL",0,0,0],["Matvei Michkov","F","PHI",24,34,58],["Macklin Celebrini","F","SJS",25,38,63],["Lane Hutson","D","MTL",8,48,56],["Connor Bedard","F","CHI",32,45,77],["Jake Sanderson","D","OTT",10,42,52],["Minnesota Goalies","TG","MIN",0,0,0]
+          ],
+          chris: [["Connor McDavid","F","EDM",35,92,127],["Leon Draisaitl","F","EDM",52,54,106],["David Pastrnak","F","BOS",47,63,110],["Jack Hughes","F","NJD",33,56,89],["Kyle Connor","F","WPG",41,49,90],["Sebastian Aho","F","CAR",36,53,89],["Adam Fox","D","NYR",14,58,72],["Miro Heiskanen","D","DAL",12,47,59],["Noah Dobson","D","NYI",10,60,70],["Victor Hedman","D","TBL",13,59,72],["Edmonton Goalies","TG","EDM",0,0,0],["Boston Goalies","TG","BOS",0,0,0],["Lucas Raymond","F","DET",31,46,77],["Cole Caufield","F","MTL",37,35,72],["Moritz Seider","D","DET",9,39,48],["Wyatt Johnston","F","DAL",33,42,75],["Luke Hughes","D","NJD",11,36,47],["Carolina Goalies","TG","CAR",0,0,0]],
+          andrew: [["Nathan MacKinnon","F","COL",51,89,140],["Nikita Kucherov","F","TBL",44,100,144],["Mikko Rantanen","F","COL",42,62,104],["Artemi Panarin","F","NYR",49,71,120],["Kirill Kaprizov","F","MIN",46,50,96],["Tage Thompson","F","BUF",38,38,76],["Roman Josi","D","NSH",23,62,85],["Josh Morrissey","D","WPG",12,57,69],["Dougie Hamilton","D","NJD",15,41,56],["Shea Theodore","D","VGK",10,42,52],["Colorado Goalies","TG","COL",0,0,0],["Vegas Goalies","TG","VGK",0,0,0],["Juraj Slafkovsky","F","MTL",26,40,66],["Dylan Guenther","F","UTA",30,35,65],["Brandt Clarke","D","LAK",8,34,42],["Alexis Lafreniere","F","NYR",31,31,62],["Olen Zellweger","D","ANA",7,31,38],["Winnipeg Goalies","TG","WPG",0,0,0]],
+          tyler: [["Brady Tkachuk","F","OTT",37,42,79],["Matthew Tkachuk","F","FLA",29,59,88],["Elias Pettersson","F","VAN",34,55,89],["Jake Guentzel","F","TBL",36,45,81],["Timo Meier","F","NJD",35,35,70],["Robert Thomas","F","STL",27,59,86],["Brock Faber","D","MIN",10,45,55],["Brent Burns","D","CAR",10,33,43],["MacKenzie Weegar","D","CGY",20,35,55],["Charlie McAvoy","D","BOS",12,42,54],["Florida Goalies","TG","FLA",0,0,0],["Ottawa Goalies","TG","OTT",0,0,0],["Logan Cooley","F","UTA",24,40,64],["Cutter Gauthier","F","ANA",24,28,52],["Simon Edvinsson","D","DET",7,25,32],["Shane Wright","F","SEA",22,31,53],["Thomas Harley","D","DAL",15,36,51],["Tampa Bay Goalies","TG","TBL",0,0,0]],
+          scott: [["Sidney Crosby","F","PIT",42,52,94],["Alex Ovechkin","F","WSH",42,30,72],["Steven Stamkos","F","NSH",40,41,81],["John Tavares","F","TOR",33,42,75],["Bo Horvat","F","NYI",34,35,69],["Ryan Nugent-Hopkins","F","EDM",24,55,79],["Erik Karlsson","D","PIT",11,45,56],["Morgan Rielly","D","TOR",9,49,58],["Kris Letang","D","PIT",10,40,50],["Drew Doughty","D","LAK",10,35,45],["Pittsburgh Goalies","TG","PIT",0,0,0],["NY Islanders Goalies","TG","NYI",0,0,0],["Zach Benson","F","BUF",17,30,47],["Will Smith","F","SJS",22,31,53],["David Reinbacher","D","MTL",5,24,29],["Marco Kasper","F","DET",18,24,42],["Pavel Mintyukov","D","ANA",8,36,44],["Washington Goalies","TG","WSH",0,0,0]]
+        };
+        return (base[ownerId] || base.nick).map((x, i) => ({ name:x[0], fullName:x[0], position:x[1], nhlTeam:x[2], goals:x[3], assists:x[4], points:x[5], id:`sample-${ownerId}-${i}` }));
+      }
+
+      function ownerConceptRoster(draft, ownerId){
+        const real = ownerRosterFromDraft(draft, ownerId);
+        return real.length ? real : conceptSampleRoster(ownerId);
+      }
       function groupRoster(players){
         return {
           F: players.filter(p => bucket(p.position) === "F"),
@@ -2655,9 +2675,10 @@
       function emptyRosterMessage(){ return `<div class="concept-empty"><strong>No drafted players yet.</strong><span>Auto-draft a full roster and this concept will fill in live.</span></div>`; }
       function conceptShell(kind, title, subtitle, owner, owners, draft, body){
         const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
-        const counts = owners.map(o => `${ownerName(o)} ${ownerRosterFromDraft(draft, o.id).length}`).join(" • ");
+        const usingSamples = !picks.length;
+        const counts = owners.map(o => `${ownerName(o)} ${ownerConceptRoster(draft, o.id).length}`).join(" • ");
         return `<div class="concept-shell concept-${kind}">
-          <div class="concept-topline"><span class="eyebrow">Roster concept test</span><em>${esc(picks.length)} total drafted players</em></div>
+          <div class="concept-topline"><span class="eyebrow">Roster concept test ${usingSamples ? "• sample full rosters for spacing" : "• live drafted rosters"}</span><em>${esc(picks.length)} real drafted players</em></div>
           <div class="concept-head">
             <div><h2>${esc(title)}</h2><p>${esc(subtitle)}</p><small>${esc(counts)}</small></div>
             ${conceptOwnerButtons(owners)}
@@ -2667,7 +2688,7 @@
       }
       function renderCardWall(host, draft, owners){
         const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
-        const roster = ownerRosterFromDraft(draft, owner.id);
+        const roster = ownerConceptRoster(draft, owner.id);
         const cards = roster.length ? roster.map((p,i)=>miniPlayerCard(p,i,"wall-card")).join("") : emptyRosterMessage();
         host.innerHTML = conceptShell("card-wall", "Hockey Card Wall", "A basement wall of taped-up 90s player cards. This is probably the cleanest version for API player cards and full-roster spacing.", owner, owners, draft, `
           <div class="wall-room-bg">
@@ -2677,7 +2698,7 @@
       }
       function renderCorkboard(host, draft, owners){
         const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
-        const roster = ownerRosterFromDraft(draft, owner.id);
+        const roster = ownerConceptRoster(draft, owner.id);
         const g = groupRoster(roster);
         const group = (label, arr) => `<section class="cork-group"><h3>${label} <small>${arr.length}</small></h3>${arr.length ? arr.map((p,i)=>miniPlayerCard(p,i,"pin-card")).join("") : `<div class="cork-empty-slot">Waiting for ${label}</div>`}</section>`;
         host.innerHTML = conceptShell("corkboard", "Corkboard War Room", "A fantasy-GM basement board with pinned cards, notes, tape, and roster groups by position.", owner, owners, draft, `
@@ -2688,7 +2709,7 @@
       }
       function renderDesk(host, draft, owners){
         const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
-        const roster = ownerRosterFromDraft(draft, owner.id);
+        const roster = ownerConceptRoster(draft, owner.id);
         const cards = roster.length ? roster.map((p,i)=>miniPlayerCard(p,i,"desk-card")).join("") : emptyRosterMessage();
         host.innerHTML = conceptShell("desk", "GM Desk", "An old basement coffee-table/GM desk with roster cards spread over notes, pucks, magazines, and a draft sheet.", owner, owners, draft, `
           <div class="desk-bg">
@@ -2698,7 +2719,7 @@
       }
       function renderCase(host, draft, owners){
         const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
-        const roster = ownerRosterFromDraft(draft, owner.id);
+        const roster = ownerConceptRoster(draft, owner.id);
         const g = groupRoster(roster);
         const shelf = (label, arr) => `<div class="case-shelf"><h3>${label}</h3><div>${arr.length ? arr.map((p,i)=>miniPlayerCard(p,i,"case-card")).join("") : `<span class="case-empty">Empty shelf</span>`}</div></div>`;
         host.innerHTML = conceptShell("case", "Roster Display Case", "A premium glass case: trophies up top, roster cards on shelves, and owner memorabilia around the edges.", owner, owners, draft, `
@@ -2709,7 +2730,7 @@
       }
       function renderGame(host, draft, owners){
         const owner = owners.find(o => String(o.id) === String(conceptOwnerId(owners))) || owners[0];
-        const roster = ownerRosterFromDraft(draft, owner.id);
+        const roster = ownerConceptRoster(draft, owner.id);
         const rows = roster.length ? roster.map((p,i)=>`<tr><td>${String(i+1).padStart(2,"0")}</td><td>${esc(playerName(p))}</td><td>${esc(p.position === "TG" ? "TG" : (p.position || "—"))}</td><td>${esc(p.nhlTeam || p.team || "")}</td><td>${esc(statLine(p))}</td></tr>`).join("") : `<tr><td colspan="5">NO PLAYERS DRAFTED YET</td></tr>`;
         host.innerHTML = conceptShell("game", "NHL 98 Roster Screen", "A clean video-game style roster menu. Less realistic room, but it handles full rosters extremely well.", owner, owners, draft, `
           <div class="game-screen-bg">
@@ -2774,11 +2795,18 @@
       };
 
       async function syncRosterTab(){
-        const draft = await getBestDraftForRosters();
-        if (window.renderDraftRosters) window.renderDraftRosters(draft);
+        try {
+          const draft = await getBestDraftForRosters();
+          if (window.renderDraftRosters) window.renderDraftRosters(draft);
+        } catch(e) {
+          const fallback = { owners: ROSTER_OWNERS, draftOrder: ROSTER_OWNERS.map(o=>o.id), picks: [], __source:"concept fallback" };
+          if (window.renderRosterConceptTabs) window.renderRosterConceptTabs(fallback);
+          if (window.renderDraftRosters) window.renderDraftRosters(fallback);
+        }
       }
 
       window.addEventListener("load", function(){
+        if (window.renderRosterConceptTabs) window.renderRosterConceptTabs({ owners: ROSTER_OWNERS, draftOrder: ROSTER_OWNERS.map(o=>o.id), picks: [], __source:"sample concept fill" });
         setTimeout(syncRosterTab, 350);
       });
 
