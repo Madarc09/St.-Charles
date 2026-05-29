@@ -1145,17 +1145,219 @@ function renderPickHistory() {
   $('#pickHistory').innerHTML = `<table><thead><tr><th>Pick</th><th>Owner</th><th>Player</th><th>Pos</th><th>NHL</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No picks yet.</td></tr>'}</tbody></table>`;
 }
 
-function renderRosters() {
-  $('#rosterCards').innerHTML = state.owners.map(owner => {
+const ROSTER_ROOM_OWNER_COLORS = {
+  nick: ['#1d4ed8', '#93c5fd'],
+  chris: ['#991b1b', '#fecaca'],
+  andrew: ['#166534', '#bbf7d0'],
+  tyler: ['#7c2d12', '#fed7aa'],
+  scott: ['#581c87', '#e9d5ff']
+};
+
+let rosterRoomState = { openBinder: null, allPage: 0, flipping: false };
+
+function getRosterRoomPlayer(ownerId, player) {
+  const current = state.stats.players.find(sp => String(sp.id) === String(player.id)) || {};
+  const merged = { ...player, ...current };
+  return {
+    ...merged,
+    poolPoints: fantasyPoints(merged, state.settings.scoring),
+    ownerId
+  };
+}
+
+function rosterRoomAllPlayers() {
+  const items = [];
+  state.owners.forEach(owner => {
+    (state.rosters[owner.id] || []).forEach(player => {
+      items.push({ owner, player: getRosterRoomPlayer(owner.id, player) });
+    });
+  });
+  return items;
+}
+
+function playerInitials(name) {
+  return String(name || '?')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0])
+    .join('')
+    .toUpperCase() || '?';
+}
+
+function renderHockeyCard(player, owner, index = 0) {
+  const safeName = escapeHtml(player.name || 'Empty Sleeve');
+  const safeTeam = escapeHtml(player.nhlTeam || 'NHL');
+  const pos = escapeHtml(player.position || '—');
+  const pts = Number(player.poolPoints || 0);
+  const isGoalie = String(player.position || '').toUpperCase() === 'G';
+  const statLine = isGoalie
+    ? `${Number(player.goalieWins || 0)} W • ${Number(player.goalieShutouts || 0)} SO`
+    : `${Number(player.goals || 0)} G • ${Number(player.assists || 0)} A • ${Number(player.points || 0)} PTS`;
+  const colors = ROSTER_ROOM_OWNER_COLORS[owner?.id] || ['#334155', '#cbd5e1'];
+  return `
+    <div class="binder-card hockey-player-card" style="--card-a:${colors[0]};--card-b:${colors[1]};" data-player-card="${escapeHtml(String(player.id || index))}">
+      <div class="card-shine"></div>
+      <div class="card-topline"><span>${pos}</span><strong>${safeTeam}</strong></div>
+      <div class="card-portrait"><span>${escapeHtml(playerInitials(player.name))}</span></div>
+      <h4>${safeName}</h4>
+      <div class="card-stat-line">${escapeHtml(statLine)}</div>
+      <div class="card-footer"><span>${pts} pool pts</span><small>${escapeHtml(owner?.teamName || owner?.name || '')}</small></div>
+      <button class="small-btn danger roster-card-remove" data-remove-player="${escapeHtml(owner?.id || '')}|${escapeHtml(String(player.id || ''))}" title="Remove player">×</button>
+    </div>`;
+}
+
+function renderEmptySleeves(count = 9) {
+  return Array.from({ length: count }, (_, i) => `
+    <div class="binder-card empty-sleeve">
+      <span class="sleeve-glare"></span>
+      <strong>Empty Sleeve</strong>
+      <small>Draft slot ${i + 1}</small>
+    </div>`).join('');
+}
+
+function renderBinderShelf() {
+  const ownerBinders = state.owners.map(owner => {
     const roster = state.rosters[owner.id] || [];
     const total = ownerTotal(owner.id, state);
-    const rows = roster.map(p => {
-      const current = state.stats.players.find(sp => String(sp.id) === String(p.id)) || p;
-      return `<div class="player-pill"><div><strong>${escapeHtml(p.name)}</strong><div class="meta">${p.position} • ${p.nhlTeam || ''} • ${fantasyPoints({ ...p, ...current }, state.settings.scoring)} pts</div></div><button class="small-btn danger" data-remove-player="${owner.id}|${p.id}">Remove</button></div>`;
-    }).join('');
-    return `<article class="card"><div class="owner-head"><div><span class="label">${escapeHtml(owner.name)}</span><h3>${escapeHtml(owner.teamName)}</h3></div><span class="badge">${total} pts</span></div>${rows || '<p class="muted">No players drafted yet.</p>'}</article>`;
+    const colors = ROSTER_ROOM_OWNER_COLORS[owner.id] || ['#334155', '#cbd5e1'];
+    return `
+      <button class="binder-spine ${rosterRoomState.openBinder === owner.id ? 'active' : ''}" data-open-binder="${escapeHtml(owner.id)}" style="--binder-a:${colors[0]};--binder-b:${colors[1]};">
+        <span class="binder-rings"></span>
+        <strong>${escapeHtml(owner.teamName || owner.name)}</strong>
+        <em>${roster.length} cards • ${total} pts</em>
+      </button>`;
   }).join('');
-  $$('[data-remove-player]').forEach(btn => btn.addEventListener('click', () => removePlayer(btn.dataset.removePlayer)));
+
+  return `
+    <div class="binder-coffee-table" aria-label="Coffee table with hockey card binders">
+      ${ownerBinders}
+      <button class="binder-spine all-teams ${rosterRoomState.openBinder === 'all' ? 'active' : ''}" data-open-binder="all">
+        <span class="binder-rings"></span>
+        <strong>League Binder</strong>
+        <em>All teams • page turn test</em>
+      </button>
+    </div>`;
+}
+
+function renderOwnerBinder(owner) {
+  const roster = (state.rosters[owner.id] || []).map(p => getRosterRoomPlayer(owner.id, p));
+  const cards = roster.length
+    ? roster.map((player, i) => renderHockeyCard(player, owner, i)).join('') + renderEmptySleeves(Math.max(0, 9 - roster.length))
+    : renderEmptySleeves(9);
+
+  return `
+    <div class="open-binder owner-binder-open">
+      <div class="binder-cover-edge"><span></span><span></span><span></span></div>
+      <div class="binder-page left-page">
+        <div class="binder-page-title">
+          <span class="eyebrow">${escapeHtml(owner.name)}'s binder</span>
+          <h3>${escapeHtml(owner.teamName || owner.name)}</h3>
+          <p>${roster.length ? 'Drafted players appear as hockey cards in plastic sleeves.' : 'No drafted players yet. Sleeves are ready for API-generated cards.'}</p>
+        </div>
+      </div>
+      <div class="binder-page right-page card-sleeve-grid">
+        ${cards}
+      </div>
+    </div>`;
+}
+
+function renderLeagueBinder() {
+  const all = rosterRoomAllPlayers();
+  const perPage = 6;
+  const pages = all.length ? chunkArray(all, perPage) : [[], [], [], [], []];
+  const maxPage = Math.max(0, pages.length - 1);
+  rosterRoomState.allPage = Math.min(rosterRoomState.allPage || 0, maxPage);
+  const pageItems = pages[rosterRoomState.allPage] || [];
+  const cards = pageItems.length
+    ? pageItems.map((item, i) => renderHockeyCard(item.player, item.owner, i)).join('') + renderEmptySleeves(Math.max(0, perPage - pageItems.length))
+    : renderEmptyLeagueDividers();
+
+  return `
+    <div class="open-binder league-binder-open ${rosterRoomState.flipping ? 'is-flipping' : ''}">
+      <div class="binder-cover-edge"><span></span><span></span><span></span></div>
+      <div class="binder-page left-page league-index-page">
+        <span class="eyebrow">Sixth book test</span>
+        <h3>League Binder</h3>
+        <p>One master binder for every drafted player. This is the version with page-turn controls and animation.</p>
+        <div class="league-index-list">
+          ${state.owners.map(owner => `<span>${escapeHtml(owner.teamName || owner.name)} <em>${(state.rosters[owner.id] || []).length}</em></span>`).join('')}
+        </div>
+      </div>
+      <div class="binder-page right-page page-turn-target">
+        <div class="page-turn-shadow"></div>
+        <div class="league-page-head">
+          <strong>Page ${rosterRoomState.allPage + 1}</strong>
+          <span>${all.length || 0} drafted cards total</span>
+        </div>
+        <div class="card-sleeve-grid league-card-grid">${cards}</div>
+        <div class="page-controls">
+          <button data-binder-page="prev" ${rosterRoomState.allPage <= 0 ? 'disabled' : ''}>← Previous page</button>
+          <button data-binder-page="next" ${rosterRoomState.allPage >= maxPage ? 'disabled' : ''}>Next page →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEmptyLeagueDividers() {
+  return state.owners.map((owner, i) => `
+    <div class="binder-card team-divider-card">
+      <span>${String(i + 1).padStart(2, '0')}</span>
+      <strong>${escapeHtml(owner.teamName || owner.name)}</strong>
+      <small>Waiting for drafted cards</small>
+    </div>`).join('') + renderEmptySleeves(Math.max(0, 6 - state.owners.length));
+}
+
+function chunkArray(items, size) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
+  return chunks;
+}
+
+function renderRosters() {
+  const target = $('#rosterCards');
+  if (!target) return;
+  const currentId = rosterRoomState.openBinder || 'all';
+  const currentOwner = state.owners.find(o => o.id === currentId);
+  const openContent = currentId === 'all' ? renderLeagueBinder() : renderOwnerBinder(currentOwner || state.owners[0]);
+
+  target.className = 'roster-room-host';
+  target.innerHTML = `
+    <section class="roster-room-scene">
+      <div class="roster-room-bg"></div>
+      <div class="roster-room-vignette"></div>
+      <div class="roster-room-intro">
+        <span class="eyebrow">Roster Room Prototype</span>
+        <h3>1998 basement hockey-card binder room</h3>
+        <p>Pick a binder on the coffee table. Individual binders show one team. The sixth League Binder tests the page-turn version for every team together.</p>
+      </div>
+      ${renderBinderShelf()}
+      <div class="binder-stage">
+        ${openContent}
+      </div>
+    </section>`;
+
+  $$('[data-open-binder]', target).forEach(btn => btn.addEventListener('click', () => {
+    rosterRoomState.openBinder = btn.dataset.openBinder;
+    rosterRoomState.flipping = false;
+    renderRosters();
+  }));
+
+  $$('[data-binder-page]', target).forEach(btn => btn.addEventListener('click', () => {
+    const direction = btn.dataset.binderPage === 'next' ? 1 : -1;
+    rosterRoomState.flipping = true;
+    renderRosters();
+    setTimeout(() => {
+      rosterRoomState.allPage = Math.max(0, rosterRoomState.allPage + direction);
+      rosterRoomState.flipping = false;
+      renderRosters();
+    }, 360);
+  }));
+
+  $$('[data-remove-player]', target).forEach(btn => btn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    removePlayer(btn.dataset.removePlayer);
+  }));
 }
 
 function removePlayer(value) {
