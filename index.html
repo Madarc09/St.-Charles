@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V105 MOBILE STICKY ROSTER NEEDS -->
+  <!-- V106 PRESENCE TICKER THEME -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -51,13 +51,15 @@
 
         <div id="draftRoomSourceStatus" class="official-source-status">Source: loading…</div>
 
-        <div id="draftRoomLotteryTop" class="draft-room-lottery-top">
+        <div id="draftRoomLotteryTop" class="draft-room-lottery-top draft-room-lottery-ticker">
           <div class="draft-room-lottery-head">
-            <span class="eyebrow">Draft Lottery</span>
-            <strong>Draft order</strong>
+            <span class="eyebrow">Draft Results</span>
+            <button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button>
           </div>
-          <div id="draftRoomLotteryOrder" class="draft-room-lottery-order">
-            Loading draft order…
+          <div class="ticker-window">
+            <div id="draftRoomLotteryOrder" class="draft-room-lottery-order ticker-track">
+              Loading draft order…
+            </div>
           </div>
         </div>
 
@@ -73,13 +75,13 @@
               <option value="tyler">Tyler</option>
               <option value="scott">Scott</option>
             </select>
-            <button id="v46PullNhlPlayersBtn" class="primary v46-pull-players-btn" type="button">PULL NHL PLAYERS</button>
-            <small id="v46PullHint">Select your team, then press this button.</small>
+            <button id="v46PullNhlPlayersBtn" class="primary v46-pull-players-btn" type="button">ENTER DRAFT ROOM</button>
+            <small id="v46PullHint">Select your team, then enter the draft room.</small>
           </div>
 
           <div class="clean-current-pick" id="cleanCurrentPickBox">
             <span class="label">Currently drafting</span>
-            <strong id="cleanCurrentlyDrafting">Loading…</strong>
+            <strong class="current-drafting-line"><span id="currentOnlineLight" class="presence-light offline" title="Offline"></span><span id="cleanCurrentlyDrafting">Loading…</span></strong>
             <em id="cleanPickDetails">Syncing draft state</em>
           </div>
 
@@ -107,11 +109,6 @@
 
         <div id="cleanOnClockBanner" class="clean-on-clock-banner" hidden>
           YOU ARE ON THE CLOCK
-        </div>
-
-        <div class="clean-draft-actions clean-draft-actions-minimal">
-          <button id="cleanRefreshBtn" type="button">Refresh Room</button>
-          <button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button>
         </div>
 
         <div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div>
@@ -207,7 +204,7 @@
           <h2>Backup, restore, and data tools</h2>
         </div>
       </div>
-      <div class="actions stack-sm"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button></div>
+      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button></div>
 <div class="grid two">
         <article class="card">
           <h3>Export / Import Pool File</h3>
@@ -1694,6 +1691,79 @@
         if (el) el.textContent = text;
       }
 
+      let presenceMap = {};
+      let presencePoll = null;
+      let heartbeatPoll = null;
+
+      async function sendPresence(){
+        if (!activeOwnerId) return;
+        try{
+          await fetch("/api/presence", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ ownerId: activeOwnerId })
+          });
+        }catch(e){}
+      }
+
+      async function loadPresence(){
+        try{
+          const res = await fetch("/api/presence?t=" + Date.now(), { cache:"no-store" });
+          const data = await res.json();
+          presenceMap = data && data.presence ? data.presence : {}; window.__presenceMap = presenceMap;
+        }catch(e){
+          presenceMap = {};
+        }
+      }
+
+      function updateCurrentPresenceLight(){
+        const pick = currentPick();
+        const light = document.getElementById("currentOnlineLight");
+        if (!light) return;
+        const online = Boolean(pick && presenceMap && presenceMap[pick.ownerId]);
+        light.classList.toggle("online", online);
+        light.classList.toggle("offline", !online);
+        light.title = online ? "Online drafting" : "Offline";
+      }
+
+      function startPresence(){
+        clearInterval(presencePoll);
+        clearInterval(heartbeatPoll);
+        sendPresence();
+        loadPresence().then(() => { updateCurrentPresenceLight(); renderDraftRoomLottery(draft); });
+        heartbeatPoll = setInterval(sendPresence, 15000);
+        presencePoll = setInterval(async () => {
+          await loadPresence();
+          updateCurrentPresenceLight();
+          renderDraftRoomLottery(draft);
+        }, 10000);
+      }
+
+      function updateMobileStickyRosterNeeds(){
+        if (!(window.matchMedia && window.matchMedia("(max-width: 820px)").matches)) {
+          document.body.classList.remove("mobile-roster-needs-fixed");
+          const ph = document.getElementById("mobileRosterNeedsSpacer");
+          if (ph) ph.style.height = "0px";
+          return;
+        }
+        const panel = document.getElementById("cleanRosterNeedsPanel");
+        const topbar = document.querySelector(".roster-needs-topbar");
+        if (!panel || !topbar) return;
+
+        let spacer = document.getElementById("mobileRosterNeedsSpacer");
+        if (!spacer) {
+          spacer = document.createElement("div");
+          spacer.id = "mobileRosterNeedsSpacer";
+          spacer.className = "mobile-roster-needs-spacer";
+          topbar.parentNode.insertBefore(spacer, topbar);
+        }
+
+        const start = spacer.getBoundingClientRect().top + window.scrollY;
+        const shouldFix = window.scrollY > start;
+        document.body.classList.toggle("mobile-roster-needs-fixed", shouldFix);
+        spacer.style.height = shouldFix ? (topbar.offsetHeight + "px") : "0px";
+      }
+
       function alignDesktopDraftBoard(){
         // V101: desktop no longer uses the old centered table; it uses a left-aligned grid.
         const grid = document.querySelector("#cleanDraftBoard .desktop-player-grid");
@@ -1794,6 +1864,7 @@
         const detailEl = $("#cleanPickDetails");
         if (currentEl) currentEl.textContent = currentName;
         if (detailEl) detailEl.textContent = pick ? `Pick ${pick.pickNumber} • Round ${pick.round}` : `${(draft.picks || []).length} picks complete`;
+        updateCurrentPresenceLight();
 
         const onClock = $("#cleanOnClockBanner");
         if (onClock) onClock.hidden = !(pick && String(pick.ownerId) === String(activeOwnerId));
@@ -1989,11 +2060,14 @@
           select.onchange = () => {
             activeOwnerId = select.value || "nick";
             localStorage.setItem("custom-hockey-pool-active-owner", activeOwnerId);
+            sendPresence();
             renderRoom();
           };
         }
         renderRoom();
         startPolling();
+        startPresence();
+        setTimeout(updateMobileStickyRosterNeeds, 100);
       }
 
       async function refreshRoom(){
@@ -2067,8 +2141,9 @@
 
       window.addEventListener("draft-tab-opened", () => setTimeout(startRoom, 25));
       window.addEventListener("load", () => setTimeout(startRoom, 250));
-      window.addEventListener("resize", () => setTimeout(alignDesktopDraftBoard, 50));
-      window.v91DraftRoom = { startRoom, pullPlayers, refreshRoom, resetLiveDraft, alignDesktopDraftBoard };
+      window.addEventListener("scroll", updateMobileStickyRosterNeeds, { passive:true });
+      window.addEventListener("resize", () => { setTimeout(alignDesktopDraftBoard, 50); setTimeout(updateMobileStickyRosterNeeds, 60); });
+      window.v91DraftRoom = { startRoom, pullPlayers, refreshRoom, resetLiveDraft, alignDesktopDraftBoard, updateMobileStickyRosterNeeds };
     })();
   </script>
 
@@ -2477,10 +2552,12 @@
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
         const map = new Map(owners.map(o => [String(o.id), o]));
         const order = (Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : lotteryOrderFromStorage()) || owners.map(o => o.id);
-        target.innerHTML = order.map((id, idx) => {
+        const items = order.map((id, idx) => {
           const o = map.get(String(id)) || { teamName: id };
-          return `<div class="draft-lottery-slot"><b>${idx + 1}</b><span>${esc(ownerName(o))}</span></div>`;
+          const online = window.__presenceMap && window.__presenceMap[String(id)];
+          return `<span class="ticker-pick"><b>${idx + 1}</b><i class="${online ? "online" : ""}"></i>${esc(ownerName(o))}</span>`;
         }).join("");
+        target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
       };
 
       async function syncRosterTab(){
