@@ -13153,3 +13153,37 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V123 */
+
+
+/* V124 stable 5-second Draft Results flip + On Deck excludes current drafter */
+.on-deck-chip.next-up{
+  background:rgba(111,231,255,.12)!important;
+  border-color:rgba(111,231,255,.34)!important;
+  box-shadow:0 0 18px rgba(111,231,255,.10)!important;
+}
+.on-deck-chip.current{
+  background:rgba(255,255,255,.06)!important;
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:none!important;
+}
+
+.v120-flip-card{
+  transition:opacity .42s ease, transform .42s ease!important;
+  transform-origin:center center!important;
+}
+.v120-flip-card.active{
+  opacity:1!important;
+  transform:rotateX(0deg)!important;
+  z-index:2!important;
+}
+.v120-flip-card:not(.active){
+  pointer-events:none!important;
+}
+.v120-flip-card.v121-namebar-card.active{
+  animation:v124FlipSettle .45s ease both!important;
+}
+@keyframes v124FlipSettle{
+  from{ transform:rotateX(75deg) scale(.98); opacity:.25; }
+  to{ transform:rotateX(0deg) scale(1); opacity:1; }
+}
+/* END V124 */

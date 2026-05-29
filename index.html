@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V123 ON DECK TICKER CLEANUP -->
+  <!-- V124 STABLE FLIP ON DECK -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1894,16 +1894,19 @@
       function renderOnDeck(){
         const box = $("#cleanOnDeckCircle");
         if (!box) return;
-        const pickNo = (draft?.picks || []).length + 1;
+        const currentPickNo = (draft?.picks || []).length + 1;
         const items = [];
-        for (let i=pickNo-1; i<Math.min(TOTAL_PICKS, pickNo + 2); i++){
+
+        // On Deck starts AFTER the current pick.
+        // If pick 1 is drafting, this shows picks 2, 3, and 4.
+        for (let i=currentPickNo; i<Math.min(TOTAL_PICKS, currentPickNo + 3); i++){
           const p = snakePick(i);
           if (!p) continue;
-          const idx = i - (pickNo - 1);
-          const label = idx === 0 ? "Now" : idx === 1 ? "Next" : "After";
-          items.push(`<span class="on-deck-chip ${idx===0 ? "current" : ""}"><b>${label}</b><strong>${esc(ownerName(p.ownerId))}</strong><em>Pick ${i+1}</em></span>`);
+          const idx = i - currentPickNo;
+          const label = idx === 0 ? "Next" : idx === 1 ? "After" : "Then";
+          items.push(`<span class="on-deck-chip ${idx===0 ? "next-up" : ""}"><b>${label}</b><strong>${esc(ownerName(p.ownerId))}</strong><em>Pick ${i+1}</em></span>`);
         }
-        box.innerHTML = items.length ? items.join("") : '<span class="empty">Draft complete.</span>';
+        box.innerHTML = items.length ? items.join("") : '<span class="empty">No one on deck.</span>';
       }
 
       function renderDraftOrderStrip(){
@@ -2685,6 +2688,8 @@
       let tickerAnimationId = 0;
       let flipTickerIndex = 0;
       let flipTickerTimer = 0;
+      let flipTickerSignature = "";
+      let flipTickerRunning = false;
       let skipLotteryReveal = false;
 
       function startSportsTicker(){
@@ -2843,32 +2848,60 @@
           }
         }
 
-        const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && (p.player.id || p.player.playerId || p.player.nhlId) || "")).join(",")}`;
+        const upcomingSignature = `${pickIndex}|${order.join(",")}`;
+        const resultsSignature = `${picks.length}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && (p.player.id || p.player.playerId || p.player.nhlId) || "")).join(",")}`;
+        const signature = `${upcomingSignature}|${resultsSignature}`;
+
         if (!force && signature === lastLiveTickerSignature && mover.dataset.v120Ready === "1") return;
         lastLiveTickerSignature = signature;
         mover.dataset.v120Ready = "1";
 
         mover.innerHTML = `<span class="v120-marquee-copy"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span><span class="v120-marquee-copy" aria-hidden="true"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span>`;
-        flipBoard.innerHTML = resultCards.join("");
-        startFlipTicker();
+
+        // Rebuild Draft Results only when the drafted-result data actually changes.
+        // Polling/refreshing the draft room will not reset the 5-second flip timer anymore.
+        if (force || resultsSignature !== flipTickerSignature || flipBoard.dataset.cardsReady !== "1") {
+          flipTickerSignature = resultsSignature;
+          flipBoard.dataset.cardsReady = "1";
+          flipBoard.innerHTML = resultCards.join("");
+          startFlipTicker(true);
+        }
       }
 
-      function startFlipTicker(){
+      function startFlipTicker(reset = false){
         const board = document.getElementById("v120FlipBoard");
         if (!board) return;
         const cards = Array.from(board.querySelectorAll(".v120-flip-card"));
         if (!cards.length) return;
 
-        clearInterval(flipTickerTimer);
-        flipTickerIndex = Math.min(flipTickerIndex, cards.length - 1);
+        if (reset) {
+          clearTimeout(flipTickerTimer);
+          flipTickerRunning = false;
+          flipTickerIndex = Math.min(flipTickerIndex, cards.length - 1);
+        }
+
+        if (flipTickerRunning) return;
+        flipTickerRunning = true;
 
         function showCard(){
-          cards.forEach((card, idx) => card.classList.toggle("active", idx === flipTickerIndex));
-          flipTickerIndex = (flipTickerIndex + 1) % cards.length;
+          const latestCards = Array.from(board.querySelectorAll(".v120-flip-card"));
+          if (!latestCards.length) {
+            flipTickerRunning = false;
+            return;
+          }
+
+          if (flipTickerIndex >= latestCards.length) flipTickerIndex = 0;
+
+          latestCards.forEach((card, idx) => {
+            card.classList.toggle("active", idx === flipTickerIndex);
+          });
+
+          flipTickerIndex = (flipTickerIndex + 1) % latestCards.length;
+          clearTimeout(flipTickerTimer);
+          flipTickerTimer = setTimeout(showCard, 5000);
         }
 
         showCard();
-        flipTickerTimer = setInterval(showCard, 3000);
       }
 
       function renderTickerFromOrder(order){
