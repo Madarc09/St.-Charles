@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V116 REPLAY SAVE SCROLL FIXED -->
+  <!-- V117 REBUILT LIVE DRAFT TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -73,9 +73,12 @@
             <span class="eyebrow">Draft Results</span>
             <div class="lottery-ticker-actions"><button id="runLiveLotteryBtn" class="replay-lottery-mini live-run-lottery-btn" type="button">Run Draft Lottery</button><button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button></div>
           </div>
-          <div class="ticker-window">
-            <div id="draftRoomLotteryOrder" class="draft-room-lottery-order ticker-track">
-              Loading draft order…
+          <div id="liveTickerShell" class="live-ticker-shell">
+            <div id="liveTickerFixed" class="live-ticker-fixed">Live Draft — Loading…</div>
+            <div class="live-ticker-window">
+              <div id="draftRoomLotteryOrder" class="draft-room-lottery-order rebuilt-live-ticker-track">
+                <span class="ticker-loop"><span class="ticker-pick"><b>Loading</b><i></i>Draft room syncing…</span></span>
+              </div>
             </div>
           </div>
         </div>
@@ -2694,8 +2697,9 @@
       }
 
       function renderLiveDraftTicker(draft, force = false){
-        const target = document.getElementById("draftRoomLotteryOrder");
-        if (!target) return;
+        const track = document.getElementById("draftRoomLotteryOrder");
+        const fixed = document.getElementById("liveTickerFixed");
+        if (!track) return;
 
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
         const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
@@ -2703,44 +2707,56 @@
         const totalPicks = order.length * 12;
         const pickIndex = picks.length;
 
-        const upcoming = [];
-        for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 5); i++) {
+        function ownerForPickIndex(i){
           const round = Math.floor(i / order.length) + 1;
           const slot = i % order.length;
           const roundOrder = round % 2 === 1 ? order : order.slice().reverse();
-          const ownerId = roundOrder[slot];
-          upcoming.push({ ownerId, pickNumber:i + 1, round });
+          return {
+            ownerId: roundOrder[slot],
+            pickNumber: i + 1,
+            round
+          };
         }
 
-        const picked = picks.slice(-8).reverse().map(p => ({
-          ownerId:p.ownerId,
-          ownerName:p.ownerName || ownerName(p.ownerId),
-          playerName:p.player && p.player.name ? p.player.name : "Unknown Player",
-          pickNumber:p.pickNumber
-        }));
+        const current = pickIndex < totalPicks ? ownerForPickIndex(pickIndex) : null;
+        if (fixed) {
+          fixed.innerHTML = current
+            ? `<span>Live Draft</span><strong>${ownerName(current.ownerId)} is on the clock</strong><em>Pick ${current.pickNumber}</em>`
+            : `<span>Live Draft</span><strong>Draft complete</strong>`;
+        }
 
-        const upcomingItems = upcoming.length
-          ? upcoming.map((item, idx) => {
-              const labels = ["ON THE CLOCK", "NEXT", "THIRD", "FOURTH", "FIFTH"];
-              return `<span class="ticker-pick live-upcoming ${idx === 0 ? "winner-pick" : idx === 1 ? "next-pick" : ""}"><b>${labels[idx]}</b><i></i>${ownerName(item.ownerId)} <em>Pick ${item.pickNumber}</em></span>`;
-            }).join("")
-          : `<span class="ticker-pick winner-pick"><b>DONE</b><i></i>Draft complete</span>`;
+        const upcoming = [];
+        for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 10); i++) {
+          upcoming.push(ownerForPickIndex(i));
+        }
 
-        const pickedItems = picked.length
-          ? picked.map(p => `<span class="ticker-pick live-picked"><b>PICKED</b><i></i>${p.playerName} <em>${p.ownerName}</em></span>`).join("")
-          : `<span class="ticker-pick live-picked empty-picked"><b>PICKS</b><i></i>Waiting for first selection</span>`;
+        const draftOrderItems = upcoming.map(item =>
+          `<span class="ticker-pick upcoming-pick"><b>${item.pickNumber}</b><i></i>${ownerName(item.ownerId)}</span>`
+        ).join("");
 
-        const line = `<span class="ticker-label">Live Draft</span>${upcomingItems}<span class="ticker-divider">Recently Drafted</span>${pickedItems}`;
-        const signature = `${pickIndex}|${order.join(",")}|${picks.slice(-8).map(p => p.pickNumber + ":" + (p.player && p.player.id)).join(",")}`;
+        const resultCount = Math.max(10, picks.length);
+        const resultItems = [];
+        for (let i = 0; i < resultCount; i++) {
+          const pick = picks[i];
+          if (pick && pick.player) {
+            const player = pick.player.name || "Unknown Player";
+            const owner = pick.ownerName || ownerName(pick.ownerId);
+            resultItems.push(`<span class="ticker-pick result-pick filled"><b>${i + 1}</b><i></i>${player} <em>${owner}</em></span>`);
+          } else {
+            resultItems.push(`<span class="ticker-pick result-pick tba"><b>${i + 1}</b><i></i>TBA</span>`);
+          }
+        }
 
-        target.classList.add("live-marquee-track");
-        target.classList.remove("lottery-results-track");
+        const line = `<span class="ticker-section-title">Next 10 Picks</span>${draftOrderItems}<span class="ticker-section-title">Draft Results</span>${resultItems.join("")}`;
+        const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && p.player.id || "")).join(",")}`;
 
-        // Do not rewrite every polling cycle. Rewriting restarts the marquee.
-        if (!force && signature === lastLiveTickerSignature && target.dataset.liveTickerReady === "1") return;
+        // Do not rewrite every poll. Rewriting restarts the marquee.
+        if (!force && signature === lastLiveTickerSignature && track.dataset.rebuiltTickerReady === "1") return;
+
         lastLiveTickerSignature = signature;
-        target.dataset.liveTickerReady = "1";
-        target.innerHTML = `<span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span>`;
+        track.dataset.rebuiltTickerReady = "1";
+        track.className = "draft-room-lottery-order rebuilt-live-ticker-track";
+        track.innerHTML = `<div class="ticker-marquee-inner"><span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span></div>`;
       }
 
       function renderTickerFromOrder(order){
