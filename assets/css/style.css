@@ -11911,3 +11911,104 @@ button:not(.primary):not(.danger),
   display:none!important;
 }
 /* END V113 */
+
+
+/* V114 live-only ticker, polished final board, rewritten host dialogue support */
+.ticker-track{
+  animation:none!important;
+  transform:none!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  scrollbar-width:thin;
+  scroll-behavior:smooth;
+}
+.ticker-track::-webkit-scrollbar{ height:6px; }
+.ticker-track::-webkit-scrollbar-thumb{
+  background:rgba(245,195,91,.35);
+  border-radius:999px;
+}
+.ticker-window{ overflow:hidden!important; }
+.ticker-pick{ flex:0 0 auto!important; }
+.ticker-divider{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  padding:3px 10px;
+  border-radius:999px;
+  color:#ffd45a;
+  background:rgba(255,212,90,.10);
+  border:1px solid rgba(255,212,90,.18);
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  font-size:.68rem;
+  font-weight:1000;
+}
+.live-picked{ opacity:.88; }
+.live-picked b{
+  background:#b7c0cc!important;
+  color:#07101d!important;
+}
+.empty-picked{ opacity:.65; }
+
+/* Polished final lottery board */
+.lottery-final-board{
+  gap:12px!important;
+  padding:12px!important;
+  border-radius:18px!important;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,212,90,.16),transparent 42%),
+    linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.42))!important;
+  border:1px solid rgba(255,212,90,.24)!important;
+  box-shadow:inset 0 0 24px rgba(255,212,90,.06)!important;
+}
+.final-pick{
+  position:relative!important;
+  overflow:hidden!important;
+  min-height:58px!important;
+  border-radius:15px!important;
+  background:linear-gradient(90deg,rgba(12,35,70,.98),rgba(5,13,28,.98))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 8px 18px rgba(0,0,0,.22)!important;
+}
+.final-pick::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  transform:translateX(-130%);
+  animation:finalSheen 3.6s ease-in-out infinite;
+  pointer-events:none;
+}
+.final-pick.winner{
+  background:linear-gradient(90deg,rgba(160,100,14,.98),rgba(15,38,75,.98))!important;
+  border-color:rgba(255,212,90,.82)!important;
+  box-shadow:0 0 26px rgba(255,212,90,.20),0 8px 20px rgba(0,0,0,.28)!important;
+}
+.final-pick.winner::before{
+  content:"LOTTERY WINNER";
+  position:absolute;
+  right:12px;
+  top:7px;
+  color:#ffe8a6;
+  font-size:.62rem;
+  letter-spacing:.14em;
+  font-weight:1000;
+  opacity:.85;
+}
+.final-pick b,
+.final-pick span{
+  position:relative!important;
+  z-index:1!important;
+}
+.final-pick b{
+  box-shadow:0 0 12px rgba(255,212,90,.25)!important;
+}
+.final-pick span{
+  letter-spacing:.03em!important;
+}
+@keyframes finalSheen{
+  0%,55%{ transform:translateX(-130%); }
+  100%{ transform:translateX(130%); }
+}
+/* END V114 */

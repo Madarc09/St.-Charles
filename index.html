@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V113 REPLAY VIDEO LIVE TICKER -->
+  <!-- V114 LIVE TICKER DIALOGUE FINAL BOARD -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2587,17 +2587,10 @@
       }
 
       window.renderDraftRoomLottery = function(draft){
-        const target = document.getElementById("draftRoomLotteryOrder");
-        if (!target) return;
-        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
-        const map = new Map(owners.map(o => [String(o.id), o]));
-        const order = (Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : lotteryOrderFromStorage()) || owners.map(o => o.id);
-        const items = order.map((id, idx) => {
-          const o = map.get(String(id)) || { teamName: id };
-          const online = window.__presenceMap && window.__presenceMap[String(id)];
-          return `<span class="ticker-pick"><b>${idx + 1}</b><i class="${online ? "online" : ""}"></i>${esc(ownerName(o))}</span>`;
-        }).join("");
-        target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
+        // V114: old hook now only refreshes the live draft ticker.
+        if (window.liveLottery && window.liveLottery.refreshLiveDraftTicker) {
+          window.liveLottery.refreshLiveDraftTicker();
+        }
       };
 
       async function syncRosterTab(){
@@ -2695,28 +2688,46 @@
       function renderLiveDraftTicker(draft){
         const target = document.getElementById("draftRoomLotteryOrder");
         if (!target) return;
-        const seq = ownerSequenceFromDraft(draft || {});
-        if (!seq.length) {
-          target.innerHTML = `<span class="ticker-label">Live Draft</span><span class="ticker-pick winner-pick"><b>DONE</b><i></i>Draft complete</span>`;
-          return;
+
+        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
+        const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
+        const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
+        const totalPicks = order.length * 12;
+        const pickIndex = picks.length;
+
+        const upcoming = [];
+        for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 5); i++) {
+          const round = Math.floor(i / order.length) + 1;
+          const slot = i % order.length;
+          const roundOrder = round % 2 === 1 ? order : order.slice().reverse();
+          const ownerId = roundOrder[slot];
+          upcoming.push({ ownerId, pickNumber:i + 1, round });
         }
-        const labels = ["ON THE CLOCK", "NEXT", "AFTER THAT"];
-        const items = seq.map((item, idx) => `<span class="ticker-pick ${idx === 0 ? "winner-pick" : idx === 1 ? "next-pick" : ""}"><b>${labels[idx]}</b><i></i>${ownerName(item.ownerId)} <em>Pick ${item.pickNumber}</em></span>`).join("");
-        target.innerHTML = `<span class="ticker-label">Live Draft</span>${items}${items}`;
+
+        const picked = picks.slice(-8).reverse().map(p => ({
+          ownerId:p.ownerId,
+          ownerName:p.ownerName || ownerName(p.ownerId),
+          playerName:p.player && p.player.name ? p.player.name : "Unknown Player",
+          pickNumber:p.pickNumber
+        }));
+
+        const upcomingItems = upcoming.length
+          ? upcoming.map((item, idx) => {
+              const labels = ["ON THE CLOCK", "NEXT", "THIRD", "FOURTH", "FIFTH"];
+              return `<span class="ticker-pick live-upcoming ${idx === 0 ? "winner-pick" : idx === 1 ? "next-pick" : ""}"><b>${labels[idx]}</b><i></i>${ownerName(item.ownerId)} <em>Pick ${item.pickNumber}</em></span>`;
+            }).join("")
+          : `<span class="ticker-pick winner-pick"><b>DONE</b><i></i>Draft complete</span>`;
+
+        const pickedItems = picked.length
+          ? picked.map(p => `<span class="ticker-pick live-picked"><b>PICKED</b><i></i>${p.playerName} <em>${p.ownerName}</em></span>`).join("")
+          : `<span class="ticker-pick live-picked empty-picked"><b>PICKS</b><i></i>Waiting for first selection</span>`;
+
+        target.innerHTML = `<span class="ticker-label">Live Draft</span>${upcomingItems}<span class="ticker-divider">Recently Drafted</span>${pickedItems}`;
       }
 
       function renderTickerFromOrder(order){
-        // Kept for reveal/replay display only. The normal ticker is live-draft tracking.
-        const target = document.getElementById("draftRoomLotteryOrder");
-        if (!target || !Array.isArray(order) || !order.length) return;
-        const winner = ownerName(order[0]);
-        const second = ownerName(order[1]);
-        const items = [
-          `<span class="ticker-pick winner-pick"><b>WINNER</b><i></i>${winner}</span>`,
-          `<span class="ticker-pick next-pick"><b>2</b><i></i>${second}</span>`,
-          ...order.slice(2).map((id, idx) => `<span class="ticker-pick"><b>${idx+3}</b><i></i>${ownerName(id)}</span>`)
-        ].join("");
-        target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
+        // V114: ticker is live-draft-only. Lottery results never write into it.
+        refreshLiveDraftTicker();
       }
 
       async function refreshLiveDraftTicker(){
@@ -2819,31 +2830,31 @@
         setText("liveLotteryMessage", "The lottery is now underway.");
 
         await revealSinglePick(5, order[4], {
-          intro:"Welcome to the live draft lottery. The fifth pick goes to...",
-          outro:`The fifth pick belongs to ${ownerName(order[4])}. We move now to the fourth pick.`
+          intro:"Good evening, managers. The lottery balls have settled, and the fifth pick is ready to be revealed...",
+          outro:`At number five, we have ${ownerName(order[4])}. The board is open, the tension is real, and we move to pick four.`
         });
         await revealSinglePick(4, order[3], {
-          intro:"The fourth pick goes to...",
-          outro:`The fourth pick belongs to ${ownerName(order[3])}. We move now to the third pick.`
+          intro:"The fourth selection is now on the board...",
+          outro:`The fourth pick belongs to ${ownerName(order[3])}. Three spots remain, and the top of the draft is getting interesting.`
         });
         await revealSinglePick(3, order[2], {
-          intro:"The third pick goes to...",
-          outro:`The third pick belongs to ${ownerName(order[2])}. Two teams remain. It is time to reveal the winner.`
+          intro:"Now revealing the third overall pick...",
+          outro:`The third pick goes to ${ownerName(order[2])}. That leaves two managers waiting, but only one lottery winner.`
         });
         await revealSinglePick(1, order[0], {
           winner:true,
-          intro:"And now, we will announce the winner of the draft lottery...",
+          intro:"And now, the moment everyone came for. The winner of the draft lottery is...",
           introDelay:2600,
           boardDelay:3200,
           revealedDelay:3600,
-          outro:`Congratulations. The winner of the draft lottery is ${ownerName(order[0])}.`,
+          outro:`The first overall pick belongs to ${ownerName(order[0])}. Congratulations — you are officially on the clock.`,
           outroDelay:2800
         });
 
         if (videoOnly || alreadyOfficial) {
           setSpeech("Replay complete. This was only a replay and did not change the pool.");
         } else {
-          setSpeech("The draft order is ready. Review the board, then leave the lottery to save it as official.");
+          setSpeech("The lottery is complete. Here is the official draft order. When you leave the lottery, the draft room will use this order.");
         }
         showFinalBoard(order);
         if (leave) leave.hidden = Boolean(videoOnly || alreadyOfficial);
@@ -3007,7 +3018,7 @@
       }, true);
 
       window.addEventListener("load", startPolling);
-      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, loadState, renderState };
+      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, loadState, renderState };
     })();
   </script>
 
