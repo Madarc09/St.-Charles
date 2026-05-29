@@ -12012,3 +12012,64 @@ button:not(.primary):not(.danger),
   100%{ transform:translateX(130%); }
 }
 /* END V114 */
+
+
+/* V115 Bettman host + smooth live ticker */
+.bettman-helper-host{
+  width:154px!important;
+}
+.bettman-photo-frame{
+  width:118px!important;
+  height:118px!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  border:2px solid rgba(255,212,90,.65)!important;
+  background:#05070a!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 0 18px rgba(255,212,90,.08)!important;
+}
+.bettman-host-photo{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center 28%!important;
+  display:block!important;
+  filter:contrast(1.05) brightness(1.03)!important;
+}
+.lottery-helper-host strong{
+  line-height:1.05!important;
+}
+
+/* Smooth marquee: no flicker because JS only rewrites when draft data changes */
+.ticker-window{
+  overflow:hidden!important;
+}
+.ticker-track{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  width:max-content!important;
+  max-width:none!important;
+  overflow:visible!important;
+  animation:liveTickerScroll 34s linear infinite!important;
+  will-change:transform!important;
+}
+.ticker-track:hover{
+  animation-play-state:paused!important;
+}
+.ticker-loop{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  padding-right:18px!important;
+}
+.ticker-pick,
+.ticker-divider,
+.ticker-label{
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+@keyframes liveTickerScroll{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+/* END V115 */

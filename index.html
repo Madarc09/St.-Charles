@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V114 LIVE TICKER DIALOGUE FINAL BOARD -->
+  <!-- V115 REPLAY BETTMAN SMOOTH TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -232,21 +232,11 @@
     </section>
   
     <div id="liveLotteryOverlay" class="live-lottery-overlay rebuilt-lottery-overlay" hidden>
-      <div class="lottery-helper-host" aria-hidden="true">
-        <div class="helper-penguin">
-          <div class="helper-penguin-head">
-            <span class="helper-eye left"></span>
-            <span class="helper-eye right"></span>
-            <span class="helper-beak"></span>
-          </div>
-          <div class="helper-penguin-body">
-            <span class="helper-belly"></span>
-            <span class="helper-wing left"></span>
-            <span class="helper-wing right"></span>
-            <span class="helper-tie"></span>
-          </div>
+      <div class="lottery-helper-host bettman-helper-host" aria-hidden="true">
+        <div class="bettman-photo-frame">
+          <img class="bettman-host-photo" src="https://media.d3.nhle.com/image/private/t_ratio16_9-size20/f_auto/prd/yuzzsoaekel3ipc2j0cb.jpg" alt="">
         </div>
-        <strong>Commissioner Penguin</strong>
+        <strong>Commissioner Bettman</strong>
       </div>
 
       <div class="lottery-speech" id="garySpeechBubble">
@@ -2648,6 +2638,7 @@
 
       let revealStartedFor = "";
       let pollTimer = null;
+      let lastLiveTickerSignature = "";
 
       function ownerName(id){
         const o = OWNERS.find(x => x.id === id);
@@ -2722,7 +2713,14 @@
           ? picked.map(p => `<span class="ticker-pick live-picked"><b>PICKED</b><i></i>${p.playerName} <em>${p.ownerName}</em></span>`).join("")
           : `<span class="ticker-pick live-picked empty-picked"><b>PICKS</b><i></i>Waiting for first selection</span>`;
 
-        target.innerHTML = `<span class="ticker-label">Live Draft</span>${upcomingItems}<span class="ticker-divider">Recently Drafted</span>${pickedItems}`;
+        const line = `<span class="ticker-label">Live Draft</span>${upcomingItems}<span class="ticker-divider">Recently Drafted</span>${pickedItems}`;
+        const signature = `${pickIndex}|${order.join(",")}|${picks.slice(-8).map(p => p.pickNumber + ":" + (p.player && p.player.id)).join(",")}`;
+
+        // Do not rewrite the ticker every polling cycle. Rewriting restarts the animation and causes stutter.
+        if (signature === lastLiveTickerSignature && target.dataset.liveTickerReady === "1") return;
+        lastLiveTickerSignature = signature;
+        target.dataset.liveTickerReady = "1";
+        target.innerHTML = `<span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span>`;
       }
 
       function renderTickerFromOrder(order){
@@ -2884,7 +2882,12 @@
       }
 
       async function replayCurrentLottery(){
-        // Replay is video-only. It should never change or save the pool.
+        // Replay is video-only and always uses the rebuilt reveal.
+        // First choice: official saved /api/draft order.
+        const oldOverlay = document.getElementById("lotteryPopoutOverlay");
+        if (oldOverlay) oldOverlay.classList.remove("show");
+        document.body.classList.remove("lottery-popout-open");
+
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
           if (draft && Array.isArray(draft.draftOrder) && draft.draftOrder.length) {
@@ -2915,7 +2918,7 @@
           if (leave) leave.hidden = true;
           setText("liveLotteryTitle", "Ready Check");
           setText("liveLotteryMessage", "The commissioner has started the live draft lottery. Confirm when you are ready.");
-          setSpeech("I'm Commissioner Penguin. The lottery will begin once every manager is ready.");
+          setSpeech("I'm Commissioner Bettman. The lottery will begin once every manager is ready.");
           renderJoined(state);
           return;
         }
@@ -2955,7 +2958,7 @@
           renderState(state);
           await sleep(400);
         }
-        setSpeech("I'm Commissioner Penguin. Confirming every manager for testing.");
+        setSpeech("I'm Commissioner Bettman. Confirming every manager for testing.");
         state = await postAction("confirmAll");
         renderState(state);
       }
@@ -3020,6 +3023,21 @@
       window.addEventListener("load", startPolling);
       window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, loadState, renderState };
     })();
+  </script>
+
+
+  <script>
+    // V115: Force every Replay Lottery click to use the rebuilt live-lottery reveal, not old popout/video code.
+    document.addEventListener("click", function(event){
+      const replay = event.target.closest && event.target.closest("#replayLotteryBtn, [data-replay-live-lottery]");
+      if (!replay) return;
+      if (window.liveLottery && typeof window.liveLottery.replayCurrentLottery === "function") {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+        window.liveLottery.replayCurrentLottery();
+      }
+    }, true);
   </script>
 
   <script type="module" src="assets/js/app.js"></script>
