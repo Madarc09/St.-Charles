@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V122 LIVE TICKER REVERT SYNC FIX -->
+  <!-- V123 ON DECK TICKER CLEANUP -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -114,13 +114,13 @@
             <em id="cleanPickDetails">Syncing draft state</em>
           </div>
 
-          <div class="clean-sync-box clean-mini-draft-board-box">
-            <div class="mini-draft-board-head">
-              <span class="label">Draft Board</span>
+          <div class="clean-sync-box clean-on-deck-box">
+            <div class="mini-draft-board-head on-deck-head">
+              <span class="label">On Deck</span>
               <em id="cleanLastRefresh">Refreshes automatically</em>
             </div>
-            <div id="miniDraftBoard" class="mini-draft-board-list">
-              <span class="empty">Waiting for picks…</span>
+            <div id="cleanOnDeckCircle" class="clean-on-deck-circle">
+              <span class="empty">Waiting for draft order…</span>
             </div>
             <small id="cleanSyncStatus">Starting…</small>
           </div>
@@ -1891,11 +1891,19 @@
         window.renderRosterNeeds(draft, activeOwnerId, ownerName(activeOwnerId));
       }
 
-      function renderMiniBoard(){
-        const mini = $("#miniDraftBoard");
-        if (!mini) return;
-        const recent = (draft?.picks || []).slice(-12).reverse();
-        mini.innerHTML = recent.length ? recent.map(p => `<div class="mini-pick"><b>${p.pickNumber}</b><span>${esc(p.ownerName || ownerName(p.ownerId))}</span><strong>${esc(p.player?.name || "")}</strong><em>${esc(displayPosition(p.player?.position))}</em></div>`).join("") : '<span class="empty">Waiting for picks…</span>';
+      function renderOnDeck(){
+        const box = $("#cleanOnDeckCircle");
+        if (!box) return;
+        const pickNo = (draft?.picks || []).length + 1;
+        const items = [];
+        for (let i=pickNo-1; i<Math.min(TOTAL_PICKS, pickNo + 2); i++){
+          const p = snakePick(i);
+          if (!p) continue;
+          const idx = i - (pickNo - 1);
+          const label = idx === 0 ? "Now" : idx === 1 ? "Next" : "After";
+          items.push(`<span class="on-deck-chip ${idx===0 ? "current" : ""}"><b>${label}</b><strong>${esc(ownerName(p.ownerId))}</strong><em>Pick ${i+1}</em></span>`);
+        }
+        box.innerHTML = items.length ? items.join("") : '<span class="empty">Draft complete.</span>';
       }
 
       function renderDraftOrderStrip(){
@@ -1930,7 +1938,7 @@
         if (onClock) onClock.hidden = !(pick && String(pick.ownerId) === String(activeOwnerId));
 
         renderRosterNeeds();
-        renderMiniBoard();
+        renderOnDeck();
         renderDraftOrderStrip();
 
         if (!playersLoaded) {
@@ -2072,6 +2080,7 @@
         await saveSharedDraft();
         toast(`Drafted ${player.name} to ${ownerName(activeOwnerId)}.`);
         renderRoom();
+        if (window.liveLottery && window.liveLottery.refreshLiveDraftTicker) await window.liveLottery.refreshLiveDraftTicker(true);
       }
 
       async function autoDraftEntireDraft(){
@@ -2095,6 +2104,7 @@
         }
         await saveSharedDraft();
         renderRoom();
+        if (window.liveLottery && window.liveLottery.refreshLiveDraftTicker) await window.liveLottery.refreshLiveDraftTicker(true);
         toast(stopped || `Auto drafted ${made} picks.`);
       }
 
@@ -2858,7 +2868,7 @@
         }
 
         showCard();
-        flipTickerTimer = setInterval(showCard, 2300);
+        flipTickerTimer = setInterval(showCard, 3000);
       }
 
       function renderTickerFromOrder(order){

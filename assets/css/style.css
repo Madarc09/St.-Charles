@@ -13062,3 +13062,94 @@ button:not(.primary):not(.danger),
   animation-duration:30s!important;
 }
 /* END V122 */
+
+
+/* V123 On Deck cleanup + mobile result ticker space fix */
+.clean-on-deck-box{
+  display:grid!important;
+  gap:8px!important;
+}
+.clean-on-deck-circle{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  overflow-x:auto!important;
+  padding:4px 2px 2px!important;
+}
+.on-deck-chip{
+  flex:1 0 0!important;
+  min-width:120px!important;
+  display:grid!important;
+  gap:2px!important;
+  align-content:center!important;
+  padding:8px 10px!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.06)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+}
+.on-deck-chip.current{
+  background:rgba(255,212,90,.14)!important;
+  border-color:rgba(255,212,90,.38)!important;
+  box-shadow:0 0 18px rgba(255,212,90,.10)!important;
+}
+.on-deck-chip b{
+  color:#ffd45a!important;
+  text-transform:uppercase!important;
+  letter-spacing:.10em!important;
+  font-size:.62rem!important;
+}
+.on-deck-chip strong{
+  font-size:.95rem!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.on-deck-chip em{
+  color:#bde7ff!important;
+  font-style:normal!important;
+  font-size:.70rem!important;
+}
+
+/* Give Draft Results namebar almost all the space, especially on mobile */
+.v120-results-row{
+  grid-template-columns:minmax(42px, .12fr) minmax(0, .88fr)!important;
+}
+.v120-results-title{
+  padding:0 4px!important;
+  font-size:.58rem!important;
+  letter-spacing:.12em!important;
+  writing-mode:horizontal-tb!important;
+}
+@media(max-width:820px){
+  .v120-results-row{
+    grid-template-columns:minmax(46px, 10%) minmax(0, 90%)!important;
+    gap:4px!important;
+  }
+  .v120-results-title{
+    font-size:.56rem!important;
+    padding:0 2px!important;
+    text-align:center!important;
+    line-height:1.05!important;
+    white-space:normal!important;
+  }
+  .v120-flip-card.v121-namebar-card{
+    grid-template-columns:42px minmax(0,1fr) 78px!important;
+    min-height:86px!important;
+    padding:6px!important;
+    gap:7px!important;
+  }
+  .v121-result-main strong{
+    font-size:.92rem!important;
+  }
+  .v121-result-main em{
+    font-size:.68rem!important;
+  }
+  .v121-drafted-by{
+    grid-column:auto!important;
+    justify-items:end!important;
+    text-align:right!important;
+    font-size:.70rem!important;
+  }
+}
+/* END V123 */
