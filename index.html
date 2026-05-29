@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V124 STABLE FLIP ON DECK -->
+  <!-- V126 SINGLE CARD RESULTS TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -83,10 +83,17 @@
               </div>
             </div>
 
-            <div class="v120-ticker-row v120-results-row">
-              <div class="v120-results-title">Draft Results</div>
-              <div id="v120FlipBoard" class="v120-flip-board">
-                <span class="v120-flip-card active"><b>1</b><strong>TBA</strong><em>Waiting for pick 1</em></span>
+            <div class="v120-ticker-row v126-results-row">
+              <div class="v126-results-title">Draft Results</div>
+              <div id="v126ResultsCardHost" class="v126-results-card-host">
+                <div id="v126ResultsCard" class="v126-results-card tba">
+                  <span class="v126-pick-num">1</span>
+                  <span class="v126-result-main">
+                    <strong>TBA</strong>
+                    <em>Waiting for pick 1</em>
+                  </span>
+                  <span class="v126-drafted-by"><small>Drafted by</small>—</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2686,10 +2693,11 @@
       let tickerOffset = 0;
       let tickerLastTime = 0;
       let tickerAnimationId = 0;
-      let flipTickerIndex = 0;
-      let flipTickerTimer = 0;
-      let flipTickerSignature = "";
-      let flipTickerRunning = false;
+      let resultsTickerIndex = 0;
+      let resultsTickerTimer = 0;
+      let resultsTickerSignature = "";
+      let resultsTickerRunId = 0;
+      let resultsTickerCards = [];
       let skipLotteryReveal = false;
 
       function startSportsTicker(){
@@ -2785,8 +2793,8 @@
       function renderLiveDraftTicker(draft, force = false){
         const fixed = document.getElementById("v120LiveFixed");
         const mover = document.getElementById("v120UpcomingMover");
-        const flipBoard = document.getElementById("v120FlipBoard");
-        if (!fixed || !mover || !flipBoard) return;
+        const cardHost = document.getElementById("v126ResultsCardHost");
+        if (!fixed || !mover || !cardHost) return;
 
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
         const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
@@ -2816,7 +2824,8 @@
           : `<span class="v120-ticker-item"><b>DONE</b>Draft complete</span>`;
 
         const resultCount = Math.max(10, picks.length);
-        const resultCards = [];
+        const newCards = [];
+
         for (let i = 0; i < resultCount; i++) {
           const pick = picks[i];
           if (pick && pick.player) {
@@ -2828,23 +2837,31 @@
             const fantasy = safeFantasyPoints(p);
             const pic = safePlayerImageUrl(p);
             const logo = safeTeamLogoUrl(team);
-            resultCards.push(`<span class="v120-flip-card v121-namebar-card filled ${safeHtml(safeTeamClassName(team))}" style="--team-logo:url('${safeHtml(logo)}')">
-              ${pic ? `<img class="v121-result-headshot" src="${safeHtml(pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v121-result-pick-num">${i + 1}</span>`}
-              <span class="v121-result-main">
-                <strong>${safeHtml(player)}</strong>
-                <em>${safeHtml(pos)}${team ? " • " + safeHtml(team) : ""} • ${safeHtml(fantasy)} FP</em>
-              </span>
-              <span class="v121-drafted-by"><small>Drafted by</small>${safeHtml(owner)}</span>
-            </span>`);
+            newCards.push({
+              type:"filled",
+              pickNumber:i + 1,
+              player,
+              owner,
+              pos,
+              team,
+              fantasy,
+              pic,
+              logo,
+              teamClass:safeTeamClassName(team)
+            });
           } else {
-            resultCards.push(`<span class="v120-flip-card v121-namebar-card tba">
-              <span class="v121-result-pick-num">${i + 1}</span>
-              <span class="v121-result-main">
-                <strong>TBA</strong>
-                <em>Waiting for pick ${i + 1}</em>
-              </span>
-              <span class="v121-drafted-by"><small>Drafted by</small>—</span>
-            </span>`);
+            newCards.push({
+              type:"tba",
+              pickNumber:i + 1,
+              player:"TBA",
+              owner:"—",
+              pos:`Waiting for pick ${i + 1}`,
+              team:"",
+              fantasy:"",
+              pic:"",
+              logo:"",
+              teamClass:"team-tba"
+            });
           }
         }
 
@@ -2858,50 +2875,76 @@
 
         mover.innerHTML = `<span class="v120-marquee-copy"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span><span class="v120-marquee-copy" aria-hidden="true"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span>`;
 
-        // Rebuild Draft Results only when the drafted-result data actually changes.
-        // Polling/refreshing the draft room will not reset the 5-second flip timer anymore.
-        if (force || resultsSignature !== flipTickerSignature || flipBoard.dataset.cardsReady !== "1") {
-          flipTickerSignature = resultsSignature;
-          flipBoard.dataset.cardsReady = "1";
-          flipBoard.innerHTML = resultCards.join("");
-          startFlipTicker(true);
+        if (force || resultsSignature !== resultsTickerSignature || !resultsTickerCards.length) {
+          resultsTickerSignature = resultsSignature;
+          resultsTickerCards = newCards;
+          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
+          startSingleCardResultsTicker(true);
         }
       }
 
-      function startFlipTicker(reset = false){
-        const board = document.getElementById("v120FlipBoard");
-        if (!board) return;
-        const cards = Array.from(board.querySelectorAll(".v120-flip-card"));
-        if (!cards.length) return;
+      function resultCardHtml(card){
+        if (!card) return "";
+        if (card.type === "filled") {
+          return `<div id="v126ResultsCard" class="v126-results-card filled ${safeHtml(card.teamClass)}" style="--team-logo:url('${safeHtml(card.logo)}')">
+            ${card.pic ? `<img class="v126-result-headshot" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
+            <span class="v126-result-main">
+              <strong>${safeHtml(card.player)}</strong>
+              <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>
+            </span>
+            <span class="v126-drafted-by"><small>Drafted by</small>${safeHtml(card.owner)}</span>
+          </div>`;
+        }
+
+        return `<div id="v126ResultsCard" class="v126-results-card tba">
+          <span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>
+          <span class="v126-result-main">
+            <strong>TBA</strong>
+            <em>${safeHtml(card.pos)}</em>
+          </span>
+          <span class="v126-drafted-by"><small>Drafted by</small>—</span>
+        </div>`;
+      }
+
+      function renderSingleResultCard(card){
+        const host = document.getElementById("v126ResultsCardHost");
+        if (!host || !card) return;
+        host.innerHTML = resultCardHtml(card);
+        const rendered = document.getElementById("v126ResultsCard");
+        if (rendered) {
+          rendered.classList.remove("entering");
+          void rendered.offsetWidth;
+          rendered.classList.add("entering");
+        }
+      }
+
+      function startSingleCardResultsTicker(reset = false){
+        const host = document.getElementById("v126ResultsCardHost");
+        if (!host || !resultsTickerCards.length) return;
 
         if (reset) {
-          clearTimeout(flipTickerTimer);
-          flipTickerRunning = false;
-          flipTickerIndex = Math.min(flipTickerIndex, cards.length - 1);
+          clearTimeout(resultsTickerTimer);
+          resultsTickerRunId++;
+          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
         }
 
-        if (flipTickerRunning) return;
-        flipTickerRunning = true;
+        const myRun = resultsTickerRunId;
 
-        function showCard(){
-          const latestCards = Array.from(board.querySelectorAll(".v120-flip-card"));
-          if (!latestCards.length) {
-            flipTickerRunning = false;
-            return;
-          }
+        function showNext(){
+          if (myRun !== resultsTickerRunId) return;
+          if (!resultsTickerCards.length) return;
 
-          if (flipTickerIndex >= latestCards.length) flipTickerIndex = 0;
+          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
 
-          latestCards.forEach((card, idx) => {
-            card.classList.toggle("active", idx === flipTickerIndex);
-          });
+          const card = resultsTickerCards[resultsTickerIndex];
+          renderSingleResultCard(card);
+          resultsTickerIndex = (resultsTickerIndex + 1) % resultsTickerCards.length;
 
-          flipTickerIndex = (flipTickerIndex + 1) % latestCards.length;
-          clearTimeout(flipTickerTimer);
-          flipTickerTimer = setTimeout(showCard, 5000);
+          clearTimeout(resultsTickerTimer);
+          resultsTickerTimer = setTimeout(showNext, 5000);
         }
 
-        showCard();
+        showNext();
       }
 
       function renderTickerFromOrder(order){
@@ -3176,7 +3219,7 @@
         clearInterval(pollTimer);
         pollTimer = setInterval(async () => {
           await renderState(await loadState());
-          await refreshLiveDraftTicker(true);
+          await refreshLiveDraftTicker(false);
         }, 3500);
         setTimeout(async () => {
           await renderState(await loadState());
