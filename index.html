@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V111 PENGUIN REPLAY LOTTERY FIX -->
+  <!-- V112 REBUILT PENGUIN LOTTERY -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -231,36 +231,42 @@
       </article>
     </section>
   
-    <div id="liveLotteryOverlay" class="live-lottery-overlay" hidden>
-      <div class="live-lottery-card gary-lottery-card">
+    <div id="liveLotteryOverlay" class="live-lottery-overlay rebuilt-lottery-overlay" hidden>
+      <div class="lottery-helper-host" aria-hidden="true">
+        <div class="helper-penguin">
+          <div class="helper-penguin-head">
+            <span class="helper-eye left"></span>
+            <span class="helper-eye right"></span>
+            <span class="helper-beak"></span>
+          </div>
+          <div class="helper-penguin-body">
+            <span class="helper-belly"></span>
+            <span class="helper-wing left"></span>
+            <span class="helper-wing right"></span>
+            <span class="helper-tie"></span>
+          </div>
+        </div>
+        <strong>Commissioner Penguin</strong>
+      </div>
+
+      <div class="lottery-speech" id="garySpeechBubble">
+        Welcome to the live draft lottery.
+      </div>
+
+      <div class="live-lottery-card rebuilt-lottery-card">
         <button id="closeLiveLotteryBtn" class="live-lottery-close" type="button">×</button>
         <p class="eyebrow">Live Draft Lottery</p>
         <h2 id="liveLotteryTitle">Waiting Room</h2>
-        <div class="gary-lottery-stage">
-          <div class="gary-host penguin-host" aria-hidden="true">
-            <div class="penguin-head">
-              <span class="penguin-eye left"></span>
-              <span class="penguin-eye right"></span>
-              <span class="penguin-beak"></span>
-              <span class="penguin-mouth"></span>
-            </div>
-            <div class="penguin-body">
-              <span class="penguin-belly"></span>
-              <span class="penguin-flipper left"></span>
-              <span class="penguin-flipper right"></span>
-              <span class="penguin-tie"></span>
-            </div>
-            <strong>Commissioner Penguin</strong>
-          </div>
-          <div id="garySpeechBubble" class="gary-speech-bubble">Waiting for the commissioner to run the lottery.</div>
-        </div>
         <p id="liveLotteryMessage" class="muted">Waiting for the commissioner to run the lottery.</p>
         <div id="liveLotteryJoined" class="live-lottery-joined"></div>
+
         <div class="live-lottery-button-row">
-          <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
+          <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">I’m Ready</button>
           <button id="testJoinAllLotteryBtn" class="test-lottery-btn" type="button">Confirm for all managers</button>
         </div>
-        <div id="familyFeudBoard" class="family-feud-board gary-reveal-board" hidden></div>
+
+        <div id="familyFeudBoard" class="family-feud-board rebuilt-reveal-board" hidden></div>
+        <button id="leaveLotteryBtn" class="primary leave-lottery-btn" type="button" hidden>Leave Lottery & Save Draft Order</button>
       </div>
     </div>
 
@@ -2637,7 +2643,7 @@
 
 
   <script>
-    // V107 live lottery controller.
+    // V112 rebuilt live lottery controller.
     (function(){
       const OWNERS = [
         { id:"nick", teamName:"Nick", name:"Nick" },
@@ -2646,7 +2652,7 @@
         { id:"tyler", teamName:"Tyler", name:"Tyler" },
         { id:"scott", teamName:"Scott", name:"Scott" }
       ];
-      let lastLotterySession = "";
+
       let revealStartedFor = "";
       let pollTimer = null;
 
@@ -2657,24 +2663,19 @@
       function activeOwnerId(){
         return localStorage.getItem("custom-hockey-pool-active-owner") || document.getElementById("cleanDraftAsSelect")?.value || "";
       }
-      function showOverlay(){
-        const el = document.getElementById("liveLotteryOverlay");
-        if (el) el.hidden = false;
-      }
-      function hideOverlay(){
-        const el = document.getElementById("liveLotteryOverlay");
-        if (el) el.hidden = true;
-      }
-      function setText(id, text){
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-      }
+      function showOverlay(){ const el = document.getElementById("liveLotteryOverlay"); if (el) el.hidden = false; }
+      function hideOverlay(){ const el = document.getElementById("liveLotteryOverlay"); if (el) el.hidden = true; }
+      function setText(id, text){ const el = document.getElementById(id); if (el) el.textContent = text; }
+      function setSpeech(text){ setText("garySpeechBubble", text); }
+      function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+
       function renderJoined(state){
         const target = document.getElementById("liveLotteryJoined");
         if (!target) return;
         const joined = new Set(state.joined || []);
         target.innerHTML = OWNERS.map(o => `<span class="${joined.has(o.id) ? "in" : ""}">${joined.has(o.id) ? "✓" : "○"} ${o.teamName}</span>`).join("");
       }
+
       function renderTickerFromOrder(order){
         const target = document.getElementById("draftRoomLotteryOrder");
         if (!target || !Array.isArray(order) || !order.length) return;
@@ -2687,6 +2688,7 @@
         ].join("");
         target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
       }
+
       async function loadState(){
         try{
           const res = await fetch("/api/live-lottery?t=" + Date.now(), { cache:"no-store" });
@@ -2696,6 +2698,7 @@
           return { phase:"idle" };
         }
       }
+
       async function postAction(action, extra){
         const res = await fetch("/api/live-lottery", {
           method:"POST",
@@ -2705,153 +2708,178 @@
         const data = await res.json();
         return data && data.state ? data.state : { phase:"idle" };
       }
-      function ordinalWord(n){
-        return {1:"first",2:"second",3:"third",4:"fourth",5:"fifth"}[n] || String(n);
+
+      function setRevealMode(mode){
+        const overlay = document.getElementById("liveLotteryOverlay");
+        if (!overlay) return;
+        overlay.classList.toggle("mode-ready", mode === "ready");
+        overlay.classList.toggle("mode-host", mode === "host");
+        overlay.classList.toggle("mode-board", mode === "board");
+        overlay.classList.toggle("mode-final", mode === "final");
       }
-      function setGarySpeech(text){
-        const bubble = document.getElementById("garySpeechBubble");
-        if (bubble) bubble.textContent = text;
-      }
-      function buildRevealSlots(order){
+
+      function showSingleBoard(pickNo, ownerId, winner){
         const board = document.getElementById("familyFeudBoard");
         if (!board) return;
         board.hidden = false;
-        board.innerHTML = [5,4,3,1,2].map(pickNo => {
-          const ownerId = order[pickNo - 1];
-          return `<div id="feudSlot${pickNo}" class="feud-slot hidden-slot" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(ownerId)}</span></div>`;
-        }).join("");
+        board.innerHTML = `
+          <div class="lottery-single-board ${winner ? "winner-board" : ""}">
+            <div class="board-label">${winner ? "Lottery Winner" : "Pick " + pickNo}</div>
+            <div class="board-hidden-name" id="singleRevealName">${ownerName(ownerId)}</div>
+          </div>`;
       }
-      function revealPick(pickNo){
-        const slot = document.getElementById(`feudSlot${pickNo}`);
-        if (slot) slot.classList.add("revealed");
+
+      async function revealSinglePick(pickNo, ownerId, options = {}){
+        setRevealMode("host");
+        setSpeech(options.intro || `The ${pickNo} pick goes to...`);
+        await sleep(options.introDelay || 2600);
+
+        setRevealMode("board");
+        showSingleBoard(pickNo, ownerId, options.winner);
+        await sleep(options.boardDelay || 3200);
+
+        const name = document.getElementById("singleRevealName");
+        if (name) name.classList.add("revealed");
+        await sleep(options.revealedDelay || 3600);
+
+        setRevealMode("host");
+        setSpeech(options.outro || `The pick belongs to ${ownerName(ownerId)}.`);
+        await sleep(options.outroDelay || 2800);
       }
-      function sleep(ms){
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
-      function setStage(mode){
-        const card = document.querySelector(".gary-lottery-card");
-        if (!card) return;
-        card.classList.toggle("board-takeover", mode === "board");
-        card.classList.toggle("host-takeover", mode !== "board");
-        card.classList.toggle("final-board", mode === "final");
-      }
-      async function showBoardReveal(pickNo, ownerId){
-        setStage("board");
-        const board = document.getElementById("familyFeudBoard");
-        if (!board) return;
-        board.hidden = false;
-        board.innerHTML = `<div id="feudSlot${pickNo}" class="feud-slot single-reveal-slot hidden-slot" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(ownerId)}</span></div>`;
-        await sleep(3000);
-        const slot = document.getElementById(`feudSlot${pickNo}`);
-        if (slot) slot.classList.add("revealed");
-        await sleep(3800);
-        setStage("host");
-      }
+
       function showFinalBoard(order){
         const board = document.getElementById("familyFeudBoard");
         if (!board) return;
-        setStage("final");
+        setRevealMode("final");
+        setText("liveLotteryTitle", "Final Draft Order");
+        setText("liveLotteryMessage", "The lottery reveal is complete.");
         board.hidden = false;
-        board.innerHTML = order.map((id, idx) => {
-          const pickNo = idx + 1;
-          return `<div class="feud-slot final-slot revealed" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(id)}</span></div>`;
-        }).join("");
+        board.innerHTML = `
+          <div class="lottery-final-board">
+            ${order.map((id, idx) => `<div class="final-pick ${idx === 0 ? "winner" : ""}"><b>${idx+1}</b><span>${ownerName(id)}</span></div>`).join("")}
+          </div>`;
+        const leave = document.getElementById("leaveLotteryBtn");
+        if (leave) leave.hidden = false;
       }
-      async function replayOrder(order, sessionId){
+
+      async function replayOrder(order, sessionId, alreadyOfficial = false){
         if (!Array.isArray(order) || order.length < 5) return;
         const enterBtn = document.getElementById("enterLiveLotteryBtn");
+        const testBtn = document.getElementById("testJoinAllLotteryBtn");
+        const leave = document.getElementById("leaveLotteryBtn");
+        const close = document.getElementById("closeLiveLotteryBtn");
+
         showOverlay();
-        setStage("host");
+        revealStartedFor = sessionId || "replay";
         if (enterBtn) enterBtn.hidden = true;
+        if (testBtn) testBtn.hidden = true;
+        if (leave) leave.hidden = true;
+        if (close) close.disabled = true;
+        renderJoined({ joined: OWNERS.map(o => o.id) });
         setText("liveLotteryTitle", "Draft Lottery Results");
-        setText("liveLotteryMessage", "The lottery results are being revealed.");
-        const joinedBox = document.getElementById("liveLotteryJoined");
-        if (joinedBox) joinedBox.innerHTML = "";
-        renderTickerFromOrder(order);
+        setText("liveLotteryMessage", "The lottery is now underway.");
 
-        const closeBtn = document.getElementById("closeLiveLotteryBtn");
-        if (closeBtn) closeBtn.disabled = true;
+        await revealSinglePick(5, order[4], {
+          intro:"Welcome to the live draft lottery. The fifth pick goes to...",
+          outro:`The fifth pick belongs to ${ownerName(order[4])}. We move now to the fourth pick.`
+        });
+        await revealSinglePick(4, order[3], {
+          intro:"The fourth pick goes to...",
+          outro:`The fourth pick belongs to ${ownerName(order[3])}. We move now to the third pick.`
+        });
+        await revealSinglePick(3, order[2], {
+          intro:"The third pick goes to...",
+          outro:`The third pick belongs to ${ownerName(order[2])}. Two teams remain. It is time to reveal the winner.`
+        });
+        await revealSinglePick(1, order[0], {
+          winner:true,
+          intro:"And now, we will announce the winner of the draft lottery...",
+          introDelay:3200,
+          boardDelay:4200,
+          outro:`Congratulations. The winner of the draft lottery is ${ownerName(order[0])}.`,
+          outroDelay:3600
+        });
 
-        const steps = [
-          { pick:5, intro:"The fifth pick goes to...", outro:`The fifth pick belongs to ${ownerName(order[4])}. Congratulations. Now, we move to the fourth pick.` },
-          { pick:4, intro:"The fourth pick goes to...", outro:`The fourth pick belongs to ${ownerName(order[3])}. Congratulations. Now, we move to the third pick.` },
-          { pick:3, intro:"The third pick goes to...", outro:`The third pick belongs to ${ownerName(order[2])}. Congratulations. The next reveal will determine the winner of the draft lottery.` },
-          { pick:1, intro:"And now, we will announce our winner...", outro:`Congratulations. The winner of the draft lottery is ${ownerName(order[0])}. Here is the final draft order.` }
-        ];
-
-        for (const step of steps) {
-          setStage("host");
-          setGarySpeech(`I'm Commissioner Penguin. ${step.intro}`);
-          await sleep(2600);
-          await showBoardReveal(step.pick, order[step.pick - 1]);
-          setGarySpeech(`I'm Commissioner Penguin. ${step.outro}`);
-          await sleep(step.pick === 1 ? 4200 : 3200);
-        }
-
+        setSpeech("The draft order is ready. Review the board, then leave the lottery to save it as official.");
         showFinalBoard(order);
-        setText("liveLotteryTitle", "Final Draft Order");
-        setGarySpeech("I'm Commissioner Penguin. The lottery is complete. Good luck in the draft.");
-        if (closeBtn) closeBtn.disabled = false;
+        if (alreadyOfficial) renderTickerFromOrder(order);
+        if (close) close.disabled = false;
       }
+
       async function revealBoard(state){
         if (!state || !Array.isArray(state.order)) return;
-        revealStartedFor = state.sessionId || "";
-        await replayOrder(state.order, state.sessionId);
+        if (revealStartedFor === state.sessionId) return;
+        await replayOrder(state.order, state.sessionId, Boolean(state.finalized));
+      }
 
-        await postAction("complete").catch(()=>{});
+      async function finalizeLotteryAndLeave(){
+        const state = await postAction("finalize");
+        const order = state && Array.isArray(state.order) ? state.order : [];
+        if (order.length) renderTickerFromOrder(order);
 
         if (window.officialDraftApi && window.officialDraftApi.load) {
-          const d = await window.officialDraftApi.load().catch(()=>null);
-          if (d) {
-            d.draftOrder = state.order;
-            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(d);
-            if (window.renderDraftRosters) window.renderDraftRosters(d);
+          const draft = await window.officialDraftApi.load().catch(()=>null);
+          if (draft) {
+            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
+            if (window.renderDraftRosters) window.renderDraftRosters(draft);
           }
         }
+        hideOverlay();
       }
+
       async function replayCurrentLottery(){
         let state = await loadState();
         if (state && Array.isArray(state.order) && state.order.length) {
-          await replayOrder(state.order, state.sessionId || "replay");
+          await replayOrder(state.order, state.sessionId || "replay", Boolean(state.finalized));
           return;
         }
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
           if (draft && Array.isArray(draft.draftOrder) && draft.draftOrder.length) {
-            await replayOrder(draft.draftOrder, "draft-replay");
+            await replayOrder(draft.draftOrder, "draft-replay", true);
           }
         }
       }
+
       async function renderState(state){
         if (!state) state = await loadState();
 
         if (state.phase === "waiting") {
           showOverlay();
+          setRevealMode("ready");
           const enterBtn = document.getElementById("enterLiveLotteryBtn");
+          const testBtn = document.getElementById("testJoinAllLotteryBtn");
+          const leave = document.getElementById("leaveLotteryBtn");
           const board = document.getElementById("familyFeudBoard");
           if (board) board.hidden = true;
           if (enterBtn) enterBtn.hidden = false;
-          setText("liveLotteryTitle", "Enter Lotto");
-          setText("liveLotteryMessage", "The commissioner has started the live draft lottery. Everyone must enter before the board reveals.");
+          if (testBtn) testBtn.hidden = false;
+          if (leave) leave.hidden = true;
+          setText("liveLotteryTitle", "Ready Check");
+          setText("liveLotteryMessage", "The commissioner has started the live draft lottery. Confirm when you are ready.");
+          setSpeech("I'm Commissioner Penguin. The lottery will begin once every manager is ready.");
           renderJoined(state);
           return;
         }
 
         if (state.phase === "revealing") {
-          if (revealStartedFor !== state.sessionId) revealBoard(state);
+          revealBoard(state);
           return;
         }
 
-        if ((state.phase === "complete" || state.phase === "idle") && Array.isArray(state.order) && state.order.length) {
+        if ((state.phase === "complete" || state.phase === "idle") && Array.isArray(state.order) && state.order.length && state.finalized) {
           renderTickerFromOrder(state.order);
         }
       }
+
       async function runLottery(){
-        const ok = confirm("Run the live draft lottery now? Everyone in the draft room will be prompted to Enter Lotto.");
+        const ok = confirm("Run the live draft lottery now? This clears the previous live lottery session.");
         if (!ok) return;
         const state = await postAction("start");
+        revealStartedFor = "";
         renderState(state);
       }
+
       async function enterLotto(){
         const ownerId = activeOwnerId();
         if (!ownerId) {
@@ -2867,19 +2895,16 @@
         if (state.phase !== "waiting") {
           state = await postAction("start");
           renderState(state);
-          await new Promise(resolve => setTimeout(resolve, 400));
+          await sleep(400);
         }
-
-        showOverlay();
-        setText("liveLotteryTitle", "Managers Confirmed");
-        setText("liveLotteryMessage", "Testing mode: confirming all five managers so the lottery can begin.");
-        setGarySpeech("I'm Gary Bettman. All managers have been confirmed. We are ready to begin the draft lottery.");
+        setSpeech("I'm Commissioner Penguin. Confirming every manager for testing.");
         state = await postAction("confirmAll");
         renderState(state);
       }
+
       function startPolling(){
         clearInterval(pollTimer);
-        pollTimer = setInterval(async () => renderState(await loadState()), 3000);
+        pollTimer = setInterval(async () => renderState(await loadState()), 3500);
         setTimeout(async () => renderState(await loadState()), 600);
       }
 
@@ -2892,7 +2917,6 @@
           replayCurrentLottery();
           return;
         }
-
         const run = event.target.closest && event.target.closest("#runLiveLotteryBtn");
         if (run) {
           event.preventDefault();
@@ -2915,7 +2939,12 @@
           testJoinAllLottery();
           return;
         }
-
+        const leave = event.target.closest && event.target.closest("#leaveLotteryBtn");
+        if (leave) {
+          event.preventDefault();
+          finalizeLotteryAndLeave();
+          return;
+        }
         const close = event.target.closest && event.target.closest("#closeLiveLotteryBtn");
         if (close) {
           event.preventDefault();
@@ -2925,10 +2954,9 @@
       }, true);
 
       window.addEventListener("load", startPolling);
-      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, loadState, renderState };
+      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, loadState, renderState };
     })();
   </script>
-
 
   <script type="module" src="assets/js/app.js"></script>
 </body>

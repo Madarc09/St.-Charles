@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
           state.phase = 'revealing';
           state.order = order;
           state.revealedAt = new Date().toISOString();
-          await setDraftOrder(order);
+          state.finalized = false;
         }
 
         const saved = await setState(state);
@@ -180,10 +180,22 @@ module.exports = async function handler(req, res) {
         state.phase = 'revealing';
         state.order = order;
         state.revealedAt = new Date().toISOString();
-        await setDraftOrder(order);
+        state.finalized = false;
 
         const saved = await setState(state);
         return res.status(200).json({ ok:true, ...saved });
+      }
+
+      if (action === 'finalize') {
+        if (Array.isArray(state.order) && state.order.length === OWNERS.length) {
+          await setDraftOrder(state.order);
+          state.phase = 'complete';
+          state.finalized = true;
+          state.finalizedAt = new Date().toISOString();
+          const saved = await setState(state);
+          return res.status(200).json({ ok:true, ...saved, finalized:true });
+        }
+        return res.status(400).json({ ok:false, error:'No lottery order to finalize' });
       }
 
       if (action === 'complete') {
