@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V109 TEST JOIN ALL LOTTERY -->
+  <!-- V110 CONFIRM ALL SLOW LOTTERY -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -204,7 +204,7 @@
           <h2>Backup, restore, and data tools</h2>
         </div>
       </div>
-      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button><button id="testJoinAllLotteryAdminBtn" type="button">Test Lottery: Enter Everyone</button></div>
+      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button><button id="testJoinAllLotteryAdminBtn" type="button">Test Lottery: Confirm Everyone</button></div>
 <div class="grid two">
         <article class="card">
           <h3>Export / Import Pool File</h3>
@@ -256,7 +256,7 @@
         <div id="liveLotteryJoined" class="live-lottery-joined"></div>
         <div class="live-lottery-button-row">
           <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
-          <button id="testJoinAllLotteryBtn" class="test-lottery-btn" type="button">Testing: Enter Everyone</button>
+          <button id="testJoinAllLotteryBtn" class="test-lottery-btn" type="button">Confirm for all managers</button>
         </div>
         <div id="familyFeudBoard" class="family-feud-board gary-reveal-board" hidden></div>
       </div>
@@ -2676,7 +2676,13 @@
       function renderTickerFromOrder(order){
         const target = document.getElementById("draftRoomLotteryOrder");
         if (!target || !Array.isArray(order) || !order.length) return;
-        const items = order.map((id, idx) => `<span class="ticker-pick"><b>${idx+1}</b><i></i>${ownerName(id)}</span>`).join("");
+        const winner = ownerName(order[0]);
+        const second = ownerName(order[1]);
+        const items = [
+          `<span class="ticker-pick winner-pick"><b>WINNER</b><i></i>${winner} is on the clock</span>`,
+          `<span class="ticker-pick next-pick"><b>NEXT</b><i></i>${second}</span>`,
+          ...order.slice(2).map((id, idx) => `<span class="ticker-pick"><b>${idx+3}</b><i></i>${ownerName(id)}</span>`)
+        ].join("");
         target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
       }
       async function loadState(){
@@ -2717,41 +2723,69 @@
         const slot = document.getElementById(`feudSlot${pickNo}`);
         if (slot) slot.classList.add("revealed");
       }
-      function revealBoard(state){
+      function sleep(ms){
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+      function setStage(mode){
+        const card = document.querySelector(".gary-lottery-card");
+        if (!card) return;
+        card.classList.toggle("board-takeover", mode === "board");
+        card.classList.toggle("host-takeover", mode !== "board");
+      }
+      async function showBoardReveal(pickNo, ownerId){
+        setStage("board");
+        const board = document.getElementById("familyFeudBoard");
+        if (!board) return;
+        board.hidden = false;
+        board.innerHTML = `<div id="feudSlot${pickNo}" class="feud-slot single-reveal-slot hidden-slot" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(ownerId)}</span></div>`;
+        await sleep(3000);
+        const slot = document.getElementById(`feudSlot${pickNo}`);
+        if (slot) slot.classList.add("revealed");
+        await sleep(2600);
+        setStage("host");
+      }
+      async function revealBoard(state){
         const board = document.getElementById("familyFeudBoard");
         const enterBtn = document.getElementById("enterLiveLotteryBtn");
         if (!board || !Array.isArray(state.order)) return;
         revealStartedFor = state.sessionId || "";
         showOverlay();
+        setStage("host");
         if (enterBtn) enterBtn.hidden = true;
         setText("liveLotteryTitle", "Draft Lottery Results");
         setText("liveLotteryMessage", "Gary Bettman will reveal the draft lottery results live.");
         renderJoined(state);
-        buildRevealSlots(state.order);
         renderTickerFromOrder(state.order);
 
-        const sequence = [
-          { t: 0, pick: 5, speech: `I'm Gary Bettman... The fifth pick goes to... ${ownerName(state.order[4])}. Congrats, I'm Gary Bettman.` },
-          { t: 3000, pick: 4, speech: `And now on to the fourth pick... The fourth pick goes to... ${ownerName(state.order[3])}. Congrats, I'm Gary Bettman.` },
-          { t: 6000, pick: 3, speech: `And now on to the third pick... The third pick goes to... ${ownerName(state.order[2])}. Congrats, I'm Gary Bettman.` },
-          { t: 9000, pick: null, speech: `I'm Gary Bettman, we will now announce the winner of the draft lottery.` },
-          { t: 12000, pick: 1, speech: `Congrats, the winner of the lottery is... ${ownerName(state.order[0])}.` },
-          { t: 15000, pick: 2, speech: `Meaning the second pick will go to... ${ownerName(state.order[1])}. Good luck in the draft!` }
+        const closeBtn = document.getElementById("closeLiveLotteryBtn");
+        if (closeBtn) closeBtn.disabled = true;
+
+        const steps = [
+          { pick:5, intro:"The fifth pick goes to...", outro:`The fifth pick belongs to ${ownerName(state.order[4])}. Congratulations. Now, we move to the fourth pick.` },
+          { pick:4, intro:"The fourth pick goes to...", outro:`The fourth pick belongs to ${ownerName(state.order[3])}. Congratulations. Now, we move to the third pick.` },
+          { pick:3, intro:"The third pick goes to...", outro:`The third pick belongs to ${ownerName(state.order[2])}. Congratulations. Now, it is time to reveal the winner of the draft lottery.` },
+          { pick:1, intro:"We will now announce the winner of the draft lottery...", outro:`Congratulations. The winner of the draft lottery is ${ownerName(state.order[0])}.` },
+          { pick:2, intro:"That means the second pick goes to...", outro:`The second pick belongs to ${ownerName(state.order[1])}. Good luck in the draft.` }
         ];
 
-        sequence.forEach(step => {
-          setTimeout(() => {
-            setGarySpeech(step.speech);
-            if (step.pick) revealPick(step.pick);
-          }, step.t);
-        });
+        for (const step of steps) {
+          setStage("host");
+          setGarySpeech(`I'm Gary Bettman. ${step.intro}`);
+          await sleep(2200);
+          await showBoardReveal(step.pick, state.order[step.pick - 1]);
+          setGarySpeech(`I'm Gary Bettman. ${step.outro}`);
+          await sleep(step.pick === 2 ? 3000 : 2400);
+        }
 
-        setTimeout(() => postAction("complete").catch(()=>{}), 17500);
+        if (closeBtn) closeBtn.disabled = false;
+        await postAction("complete").catch(()=>{});
+
         if (window.officialDraftApi && window.officialDraftApi.load) {
-          setTimeout(() => window.officialDraftApi.load().then(d => {
+          const d = await window.officialDraftApi.load().catch(()=>null);
+          if (d) {
             if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(d);
             if (window.renderDraftRosters) window.renderDraftRosters(d);
-          }).catch(()=>{}), 1400);
+          }
         }
       }
       async function renderState(state){
@@ -2798,29 +2832,16 @@
         let state = await loadState();
         if (state.phase !== "waiting") {
           state = await postAction("start");
+          renderState(state);
+          await new Promise(resolve => setTimeout(resolve, 400));
         }
 
         showOverlay();
-        setText("liveLotteryTitle", "Testing Live Lottery");
-        setText("liveLotteryMessage", "Simulating all five managers entering the lotto.");
-        renderJoined(state);
-
-        for (const owner of OWNERS) {
-          await new Promise(resolve => setTimeout(resolve, 300));
-          state = await postAction("join", { ownerId: owner.id });
-          renderState(state);
-        }
-
-        // After the final join, the API should switch to revealing and save draftOrder to /api/draft.
-        setTimeout(async () => {
-          const updated = await loadState();
-          renderState(updated);
-          if (window.officialDraftApi && window.officialDraftApi.load) {
-            const draft = await window.officialDraftApi.load();
-            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
-            if (window.renderDraftRosters) window.renderDraftRosters(draft);
-          }
-        }, 800);
+        setText("liveLotteryTitle", "Managers Confirmed");
+        setText("liveLotteryMessage", "Testing mode: confirming all five managers so the lottery can begin.");
+        setGarySpeech("I'm Gary Bettman. All managers have been confirmed. We are ready to begin the draft lottery.");
+        state = await postAction("confirmAll");
+        renderState(state);
       }
       function startPolling(){
         clearInterval(pollTimer);

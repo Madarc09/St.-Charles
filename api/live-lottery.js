@@ -159,6 +159,33 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok:true, ...saved });
       }
 
+      if (action === 'confirmAll') {
+        if (state.phase !== 'waiting') {
+          if (state.phase === 'idle' || !state.phase) {
+            state = {
+              phase: 'waiting',
+              sessionId: String(Date.now()),
+              requestedAt: new Date().toISOString(),
+              joined: [],
+              order: [],
+              owners: OWNERS
+            };
+          } else {
+            return res.status(200).json({ ok:true, configured, storage, state });
+          }
+        }
+
+        state.joined = OWNERS.map(o => o.id);
+        const order = shuffle(OWNERS.map(o => o.id));
+        state.phase = 'revealing';
+        state.order = order;
+        state.revealedAt = new Date().toISOString();
+        await setDraftOrder(order);
+
+        const saved = await setState(state);
+        return res.status(200).json({ ok:true, ...saved });
+      }
+
       if (action === 'complete') {
         if (state.phase === 'revealing') state.phase = 'complete';
         const saved = await setState(state);
