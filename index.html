@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V106 PRESENCE TICKER THEME -->
+  <!-- V107 LIVE LOTTERY CLEAN THEME -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -54,7 +54,7 @@
         <div id="draftRoomLotteryTop" class="draft-room-lottery-top draft-room-lottery-ticker">
           <div class="draft-room-lottery-head">
             <span class="eyebrow">Draft Results</span>
-            <button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button>
+            <div class="lottery-ticker-actions"><button id="runLiveLotteryBtn" class="replay-lottery-mini live-run-lottery-btn" type="button">Run Draft Lottery</button><button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button></div>
           </div>
           <div class="ticker-window">
             <div id="draftRoomLotteryOrder" class="draft-room-lottery-order ticker-track">
@@ -230,6 +230,19 @@
         <textarea id="rawJson" spellcheck="false"></textarea>
       </article>
     </section>
+  
+    <div id="liveLotteryOverlay" class="live-lottery-overlay" hidden>
+      <div class="live-lottery-card">
+        <button id="closeLiveLotteryBtn" class="live-lottery-close" type="button">×</button>
+        <p class="eyebrow">Live Draft Lottery</p>
+        <h2 id="liveLotteryTitle">Waiting Room</h2>
+        <p id="liveLotteryMessage" class="muted">Waiting for the commissioner to run the lottery.</p>
+        <div id="liveLotteryJoined" class="live-lottery-joined"></div>
+        <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
+        <div id="familyFeudBoard" class="family-feud-board" hidden></div>
+      </div>
+    </div>
+
   </main>
 
 
@@ -2597,6 +2610,165 @@
           } catch(e) {}
         }, 100);
       }, true);
+    })();
+  </script>
+
+
+
+  <script>
+    // V107 live lottery controller.
+    (function(){
+      const OWNERS = [
+        { id:"nick", teamName:"Nick", name:"Nick" },
+        { id:"chris", teamName:"Chris", name:"Chris" },
+        { id:"andrew", teamName:"Andrew", name:"Andrew" },
+        { id:"tyler", teamName:"Tyler", name:"Tyler" },
+        { id:"scott", teamName:"Scott", name:"Scott" }
+      ];
+      let lastLotterySession = "";
+      let revealStartedFor = "";
+      let pollTimer = null;
+
+      function ownerName(id){
+        const o = OWNERS.find(x => x.id === id);
+        return o ? (o.teamName || o.name || o.id) : id;
+      }
+      function activeOwnerId(){
+        return localStorage.getItem("custom-hockey-pool-active-owner") || document.getElementById("cleanDraftAsSelect")?.value || "";
+      }
+      function showOverlay(){
+        const el = document.getElementById("liveLotteryOverlay");
+        if (el) el.hidden = false;
+      }
+      function hideOverlay(){
+        const el = document.getElementById("liveLotteryOverlay");
+        if (el) el.hidden = true;
+      }
+      function setText(id, text){
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+      function renderJoined(state){
+        const target = document.getElementById("liveLotteryJoined");
+        if (!target) return;
+        const joined = new Set(state.joined || []);
+        target.innerHTML = OWNERS.map(o => `<span class="${joined.has(o.id) ? "in" : ""}">${joined.has(o.id) ? "✓" : "○"} ${o.teamName}</span>`).join("");
+      }
+      function renderTickerFromOrder(order){
+        const target = document.getElementById("draftRoomLotteryOrder");
+        if (!target || !Array.isArray(order) || !order.length) return;
+        const items = order.map((id, idx) => `<span class="ticker-pick"><b>${idx+1}</b><i></i>${ownerName(id)}</span>`).join("");
+        target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
+      }
+      async function loadState(){
+        try{
+          const res = await fetch("/api/live-lottery?t=" + Date.now(), { cache:"no-store" });
+          const data = await res.json();
+          return data && data.state ? data.state : { phase:"idle" };
+        }catch(e){
+          return { phase:"idle" };
+        }
+      }
+      async function postAction(action, extra){
+        const res = await fetch("/api/live-lottery", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ action, ...(extra || {}) })
+        });
+        const data = await res.json();
+        return data && data.state ? data.state : { phase:"idle" };
+      }
+      function revealBoard(state){
+        const board = document.getElementById("familyFeudBoard");
+        const enterBtn = document.getElementById("enterLiveLotteryBtn");
+        if (!board || !Array.isArray(state.order)) return;
+        revealStartedFor = state.sessionId || "";
+        showOverlay();
+        if (enterBtn) enterBtn.hidden = true;
+        setText("liveLotteryTitle", "Survey Says...");
+        setText("liveLotteryMessage", "Draft lottery results are being revealed live.");
+        renderJoined(state);
+        board.hidden = false;
+        board.innerHTML = state.order.map((id, idx) => `<div class="feud-slot" style="--delay:${idx * .38}s"><b>${idx+1}</b><span>${ownerName(id)}</span></div>`).join("");
+        renderTickerFromOrder(state.order);
+        setTimeout(() => postAction("complete").catch(()=>{}), 2400);
+        if (window.officialDraftApi && window.officialDraftApi.load) {
+          setTimeout(() => window.officialDraftApi.load().then(d => {
+            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(d);
+            if (window.renderDraftRosters) window.renderDraftRosters(d);
+          }).catch(()=>{}), 1200);
+        }
+      }
+      async function renderState(state){
+        if (!state) state = await loadState();
+
+        if (state.phase === "waiting") {
+          showOverlay();
+          const enterBtn = document.getElementById("enterLiveLotteryBtn");
+          const board = document.getElementById("familyFeudBoard");
+          if (board) board.hidden = true;
+          if (enterBtn) enterBtn.hidden = false;
+          setText("liveLotteryTitle", "Enter Lotto");
+          setText("liveLotteryMessage", "The commissioner has started the live draft lottery. Everyone must enter before the board reveals.");
+          renderJoined(state);
+          return;
+        }
+
+        if (state.phase === "revealing") {
+          if (revealStartedFor !== state.sessionId) revealBoard(state);
+          return;
+        }
+
+        if ((state.phase === "complete" || state.phase === "idle") && Array.isArray(state.order) && state.order.length) {
+          renderTickerFromOrder(state.order);
+        }
+      }
+      async function runLottery(){
+        const ok = confirm("Run the live draft lottery now? Everyone in the draft room will be prompted to Enter Lotto.");
+        if (!ok) return;
+        const state = await postAction("start");
+        renderState(state);
+      }
+      async function enterLotto(){
+        const ownerId = activeOwnerId();
+        if (!ownerId) {
+          alert("Select your name under 'You are drafting as' first.");
+          return;
+        }
+        const state = await postAction("join", { ownerId });
+        renderState(state);
+      }
+      function startPolling(){
+        clearInterval(pollTimer);
+        pollTimer = setInterval(async () => renderState(await loadState()), 3000);
+        setTimeout(async () => renderState(await loadState()), 600);
+      }
+
+      document.addEventListener("click", async function(event){
+        const run = event.target.closest && event.target.closest("#runLiveLotteryBtn");
+        if (run) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          runLottery();
+          return;
+        }
+        const enter = event.target.closest && event.target.closest("#enterLiveLotteryBtn");
+        if (enter) {
+          event.preventDefault();
+          enterLotto();
+          return;
+        }
+        const close = event.target.closest && event.target.closest("#closeLiveLotteryBtn");
+        if (close) {
+          event.preventDefault();
+          hideOverlay();
+          return;
+        }
+      }, true);
+
+      window.addEventListener("load", startPolling);
+      window.liveLottery = { runLottery, enterLotto, loadState, renderState };
     })();
   </script>
 
