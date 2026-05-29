@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V121 NAMEBAR RESULTS TICKER -->
+  <!-- V122 LIVE TICKER REVERT SYNC FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2717,6 +2717,56 @@
         return seq;
       }
 
+      function safeHtml(value){
+        return String(value ?? "").replace(/[&<>"']/g, ch => ({
+          "&":"&amp;",
+          "<":"&lt;",
+          ">":"&gt;",
+          '"':"&quot;",
+          "'":"&#39;"
+        }[ch]));
+      }
+
+      function safeDisplayPosition(pos){
+        if (pos === "F") return "Forward";
+        if (pos === "D") return "Defense";
+        if (pos === "TG") return "Team Goalie";
+        if (pos === "G") return "Goalie";
+        return pos || "";
+      }
+
+      function safeFantasyPoints(player){
+        if (!player) return 0;
+        if (typeof player.fantasyPoints === "number") return Math.round(player.fantasyPoints * 10) / 10;
+        const g = Number(player.goals || 0);
+        const a = Number(player.assists || 0);
+        const wins = Number(player.goalieWins || 0);
+        return (g * 2) + a + (wins * 5);
+      }
+
+      function safeTeamLogoUrl(team){
+        const map = {
+          ANA:"ana", BOS:"bos", BUF:"buf", CAR:"car", CBJ:"cbj", CGY:"cgy", CHI:"chi", COL:"col", DAL:"dal", DET:"det",
+          EDM:"edm", FLA:"fla", LAK:"lak", MIN:"min", MTL:"mtl", NJD:"njd", NSH:"nsh", NYI:"nyi", NYR:"nyr", OTT:"ott",
+          PHI:"phi", PIT:"pit", SEA:"sea", SJS:"sjs", STL:"stl", TBL:"tbl", TOR:"tor", UTA:"uta", VAN:"van", VGK:"vgk", WPG:"wpg", WSH:"wsh"
+        };
+        const abbr = String(team || "").toUpperCase();
+        const slug = map[abbr] || abbr.toLowerCase();
+        return `https://assets.nhle.com/logos/nhl/svg/${slug}_light.svg`;
+      }
+
+      function safePlayerImageUrl(player){
+        const id = player && (player.playerId || player.id || player.nhlId);
+        if (id && String(id).match(/^\d+$/)) {
+          return `https://assets.nhle.com/mugs/nhl/latest/${id}.png`;
+        }
+        return "";
+      }
+
+      function safeTeamClassName(team){
+        return `team-${String(team || "na").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      }
+
       function renderLiveDraftTicker(draft, force = false){
         const fixed = document.getElementById("v120LiveFixed");
         const mover = document.getElementById("v120UpcomingMover");
@@ -2755,21 +2805,21 @@
         for (let i = 0; i < resultCount; i++) {
           const pick = picks[i];
           if (pick && pick.player) {
-            const p = pick.player;
+            const p = pick.player || {};
             const player = p.name || "Unknown Player";
             const owner = pick.ownerName || ownerName(pick.ownerId);
-            const pos = displayPosition(p.position || "");
-            const team = p.nhlTeam || "";
-            const fantasy = typeof fp === "function" ? fp(p) : (p.fantasyPoints || 0);
-            const pic = playerImageUrl(p);
-            const logo = teamLogoUrl(team);
-            resultCards.push(`<span class="v120-flip-card v121-namebar-card filled ${esc(teamClassName(team))}" style="--team-logo:url('${esc(logo)}')">
-              <img class="v121-result-headshot" src="${esc(pic)}" alt="" loading="lazy" onerror="this.style.display='none'">
+            const pos = safeDisplayPosition(p.position || "");
+            const team = p.nhlTeam || p.teamAbbrev || "";
+            const fantasy = safeFantasyPoints(p);
+            const pic = safePlayerImageUrl(p);
+            const logo = safeTeamLogoUrl(team);
+            resultCards.push(`<span class="v120-flip-card v121-namebar-card filled ${safeHtml(safeTeamClassName(team))}" style="--team-logo:url('${safeHtml(logo)}')">
+              ${pic ? `<img class="v121-result-headshot" src="${safeHtml(pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v121-result-pick-num">${i + 1}</span>`}
               <span class="v121-result-main">
-                <strong>${esc(player)}</strong>
-                <em>${esc(pos)} • ${esc(team)} • ${fantasy} FP</em>
+                <strong>${safeHtml(player)}</strong>
+                <em>${safeHtml(pos)}${team ? " • " + safeHtml(team) : ""} • ${safeHtml(fantasy)} FP</em>
               </span>
-              <span class="v121-drafted-by"><small>Drafted by</small>${esc(owner)}</span>
+              <span class="v121-drafted-by"><small>Drafted by</small>${safeHtml(owner)}</span>
             </span>`);
           } else {
             resultCards.push(`<span class="v120-flip-card v121-namebar-card tba">
@@ -2783,7 +2833,7 @@
           }
         }
 
-        const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && p.player.id || "")).join(",")}`;
+        const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && (p.player.id || p.player.playerId || p.player.nhlId) || "")).join(",")}`;
         if (!force && signature === lastLiveTickerSignature && mover.dataset.v120Ready === "1") return;
         lastLiveTickerSignature = signature;
         mover.dataset.v120Ready = "1";
@@ -2817,9 +2867,13 @@
       }
 
       async function refreshLiveDraftTicker(force = false){
-        if (window.officialDraftApi && window.officialDraftApi.load) {
-          const draft = await window.officialDraftApi.load().catch(()=>null);
-          if (draft) renderLiveDraftTicker(draft, force);
+        try{
+          if (window.officialDraftApi && window.officialDraftApi.load) {
+            const draft = await window.officialDraftApi.load().catch(()=>null);
+            if (draft) renderLiveDraftTicker(draft, force);
+          }
+        }catch(error){
+          console.warn("Live ticker sync failed:", error);
         }
       }
 

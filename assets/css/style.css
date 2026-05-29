@@ -12898,7 +12898,7 @@ button:not(.primary):not(.danger),
 
 /* V121 slower upcoming ticker + drafted-player namebar flip cards */
 .v120-marquee-mover{
-  animation-duration:58s!important; /* slower sports-desk crawl */
+  animation-duration:30s!important; /* reverted to V120 live-draft crawl speed */
 }
 
 .v120-results-row{
@@ -13055,3 +13055,10 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V121 */
+
+
+/* V122 sync fix: live ticker reverted, drafted-player namebar ticker preserved */
+.v120-marquee-mover{
+  animation-duration:30s!important;
+}
+/* END V122 */
