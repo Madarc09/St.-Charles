@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V110 CONFIRM ALL SLOW LOTTERY -->
+  <!-- V111 PENGUIN REPLAY LOTTERY FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -237,18 +237,20 @@
         <p class="eyebrow">Live Draft Lottery</p>
         <h2 id="liveLotteryTitle">Waiting Room</h2>
         <div class="gary-lottery-stage">
-          <div class="gary-host" aria-hidden="true">
-            <div class="gary-head">
-              <span class="gary-hair"></span>
-              <span class="gary-face"></span>
-              <span class="gary-mouth"></span>
+          <div class="gary-host penguin-host" aria-hidden="true">
+            <div class="penguin-head">
+              <span class="penguin-eye left"></span>
+              <span class="penguin-eye right"></span>
+              <span class="penguin-beak"></span>
+              <span class="penguin-mouth"></span>
             </div>
-            <div class="gary-body">
-              <span class="gary-flipper left"></span>
-              <span class="gary-tie"></span>
-              <span class="gary-flipper right"></span>
+            <div class="penguin-body">
+              <span class="penguin-belly"></span>
+              <span class="penguin-flipper left"></span>
+              <span class="penguin-flipper right"></span>
+              <span class="penguin-tie"></span>
             </div>
-            <strong>Gary Bettman</strong>
+            <strong>Commissioner Penguin</strong>
           </div>
           <div id="garySpeechBubble" class="gary-speech-bubble">Waiting for the commissioner to run the lottery.</div>
         </div>
@@ -2731,6 +2733,7 @@
         if (!card) return;
         card.classList.toggle("board-takeover", mode === "board");
         card.classList.toggle("host-takeover", mode !== "board");
+        card.classList.toggle("final-board", mode === "final");
       }
       async function showBoardReveal(pickNo, ownerId){
         setStage("board");
@@ -2741,50 +2744,81 @@
         await sleep(3000);
         const slot = document.getElementById(`feudSlot${pickNo}`);
         if (slot) slot.classList.add("revealed");
-        await sleep(2600);
+        await sleep(3800);
         setStage("host");
       }
-      async function revealBoard(state){
+      function showFinalBoard(order){
         const board = document.getElementById("familyFeudBoard");
+        if (!board) return;
+        setStage("final");
+        board.hidden = false;
+        board.innerHTML = order.map((id, idx) => {
+          const pickNo = idx + 1;
+          return `<div class="feud-slot final-slot revealed" data-pick="${pickNo}"><b>${pickNo}</b><span>${ownerName(id)}</span></div>`;
+        }).join("");
+      }
+      async function replayOrder(order, sessionId){
+        if (!Array.isArray(order) || order.length < 5) return;
         const enterBtn = document.getElementById("enterLiveLotteryBtn");
-        if (!board || !Array.isArray(state.order)) return;
-        revealStartedFor = state.sessionId || "";
         showOverlay();
         setStage("host");
         if (enterBtn) enterBtn.hidden = true;
         setText("liveLotteryTitle", "Draft Lottery Results");
-        setText("liveLotteryMessage", "Gary Bettman will reveal the draft lottery results live.");
-        renderJoined(state);
-        renderTickerFromOrder(state.order);
+        setText("liveLotteryMessage", "The lottery results are being revealed.");
+        const joinedBox = document.getElementById("liveLotteryJoined");
+        if (joinedBox) joinedBox.innerHTML = "";
+        renderTickerFromOrder(order);
 
         const closeBtn = document.getElementById("closeLiveLotteryBtn");
         if (closeBtn) closeBtn.disabled = true;
 
         const steps = [
-          { pick:5, intro:"The fifth pick goes to...", outro:`The fifth pick belongs to ${ownerName(state.order[4])}. Congratulations. Now, we move to the fourth pick.` },
-          { pick:4, intro:"The fourth pick goes to...", outro:`The fourth pick belongs to ${ownerName(state.order[3])}. Congratulations. Now, we move to the third pick.` },
-          { pick:3, intro:"The third pick goes to...", outro:`The third pick belongs to ${ownerName(state.order[2])}. Congratulations. Now, it is time to reveal the winner of the draft lottery.` },
-          { pick:1, intro:"We will now announce the winner of the draft lottery...", outro:`Congratulations. The winner of the draft lottery is ${ownerName(state.order[0])}.` },
-          { pick:2, intro:"That means the second pick goes to...", outro:`The second pick belongs to ${ownerName(state.order[1])}. Good luck in the draft.` }
+          { pick:5, intro:"The fifth pick goes to...", outro:`The fifth pick belongs to ${ownerName(order[4])}. Congratulations. Now, we move to the fourth pick.` },
+          { pick:4, intro:"The fourth pick goes to...", outro:`The fourth pick belongs to ${ownerName(order[3])}. Congratulations. Now, we move to the third pick.` },
+          { pick:3, intro:"The third pick goes to...", outro:`The third pick belongs to ${ownerName(order[2])}. Congratulations. The next reveal will determine the winner of the draft lottery.` },
+          { pick:1, intro:"And now, we will announce our winner...", outro:`Congratulations. The winner of the draft lottery is ${ownerName(order[0])}. Here is the final draft order.` }
         ];
 
         for (const step of steps) {
           setStage("host");
-          setGarySpeech(`I'm Gary Bettman. ${step.intro}`);
-          await sleep(2200);
-          await showBoardReveal(step.pick, state.order[step.pick - 1]);
-          setGarySpeech(`I'm Gary Bettman. ${step.outro}`);
-          await sleep(step.pick === 2 ? 3000 : 2400);
+          setGarySpeech(`I'm Commissioner Penguin. ${step.intro}`);
+          await sleep(2600);
+          await showBoardReveal(step.pick, order[step.pick - 1]);
+          setGarySpeech(`I'm Commissioner Penguin. ${step.outro}`);
+          await sleep(step.pick === 1 ? 4200 : 3200);
         }
 
+        showFinalBoard(order);
+        setText("liveLotteryTitle", "Final Draft Order");
+        setGarySpeech("I'm Commissioner Penguin. The lottery is complete. Good luck in the draft.");
         if (closeBtn) closeBtn.disabled = false;
+      }
+      async function revealBoard(state){
+        if (!state || !Array.isArray(state.order)) return;
+        revealStartedFor = state.sessionId || "";
+        await replayOrder(state.order, state.sessionId);
+
         await postAction("complete").catch(()=>{});
 
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const d = await window.officialDraftApi.load().catch(()=>null);
           if (d) {
+            d.draftOrder = state.order;
             if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(d);
             if (window.renderDraftRosters) window.renderDraftRosters(d);
+          }
+        }
+      }
+      async function replayCurrentLottery(){
+        let state = await loadState();
+        if (state && Array.isArray(state.order) && state.order.length) {
+          await replayOrder(state.order, state.sessionId || "replay");
+          return;
+        }
+        if (window.officialDraftApi && window.officialDraftApi.load) {
+          const draft = await window.officialDraftApi.load().catch(()=>null);
+          if (draft && Array.isArray(draft.draftOrder) && draft.draftOrder.length) {
+            await replayOrder(draft.draftOrder, "draft-replay");
           }
         }
       }
@@ -2850,6 +2884,15 @@
       }
 
       document.addEventListener("click", async function(event){
+        const replay = event.target.closest && event.target.closest("#replayLotteryBtn");
+        if (replay) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          replayCurrentLottery();
+          return;
+        }
+
         const run = event.target.closest && event.target.closest("#runLiveLotteryBtn");
         if (run) {
           event.preventDefault();
@@ -2882,7 +2925,7 @@
       }, true);
 
       window.addEventListener("load", startPolling);
-      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, loadState, renderState };
+      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, loadState, renderState };
     })();
   </script>
 
