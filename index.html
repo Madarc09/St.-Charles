@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V127 ISOLATED RESULTS TICKER -->
+  <!-- V128 STICKY TOP BOTTOM TICKERS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -70,19 +70,10 @@
 
         <div id="draftRoomLotteryTop" class="draft-room-lottery-top draft-room-lottery-ticker">
           <div class="draft-room-lottery-head">
-            <span class="eyebrow">Draft Results</span>
+            <span class="eyebrow">Lottery Controls</span>
             <div class="lottery-ticker-actions"><button id="runLiveLotteryBtn" class="replay-lottery-mini live-run-lottery-btn" type="button">Run Draft Lottery</button><button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button></div>
           </div>
           <div id="v120TickerSystem" class="v120-ticker-system">
-            <div class="v120-ticker-row v120-live-row">
-              <div id="v120LiveFixed" class="v120-live-fixed">Live Draft — Loading…</div>
-              <div class="v120-marquee-window">
-                <div id="v120UpcomingMover" class="v120-marquee-mover">
-                  <span class="v120-ticker-item"><b>Loading</b> Draft room syncing…</span>
-                </div>
-              </div>
-            </div>
-
             <div class="v120-ticker-row v126-results-row">
               <div class="v126-results-title">Draft Results</div>
               <div id="v126ResultsCardHost" class="v126-results-card-host">
@@ -135,6 +126,14 @@
 
 
         <div class="clean-draft-topbar roster-needs-topbar">
+          <div id="stickyLiveDraftTicker" class="sticky-live-draft-ticker">
+            <div class="v120-ticker-row v120-live-row">
+              <div id="v120LiveFixed" class="v120-live-fixed">Live Draft — Loading…</div>
+              <div class="v120-marquee-window">
+                <div id="v120UpcomingMover" class="v120-marquee-mover">
+                  <span class="v120-ticker-item"><b>Loading</b> Draft room syncing…</span>
+                </div>
+          </div>
           <div id="cleanRosterNeedsPanel" class="clean-roster-needs-panel">
             <div class="needs-placeholder">
               <strong>Select a team to see roster needs.</strong>

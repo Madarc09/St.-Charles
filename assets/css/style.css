@@ -13395,3 +13395,71 @@ button:not(.primary):not(.danger),
   to{ opacity:1; transform:translateY(0) rotateX(0) scale(1); }
 }
 /* END V127 */
+
+
+/* V128 trial: live ticker sticks with roster needs; draft results freezes to bottom */
+.sticky-live-draft-ticker{
+  width:100%!important;
+  display:block!important;
+  margin-bottom:8px!important;
+}
+.roster-needs-topbar{
+  display:grid!important;
+  gap:8px!important;
+  align-items:stretch!important;
+}
+.roster-needs-topbar .v120-live-row{
+  width:100%!important;
+  margin:0!important;
+  grid-template-columns:minmax(220px, 340px) minmax(0,1fr)!important;
+}
+.roster-needs-topbar .v120-live-row .v120-marquee-window{
+  min-width:0!important;
+}
+
+.v120-ticker-system{
+  display:block!important;
+}
+.v120-ticker-system > .v126-results-row{
+  position:fixed!important;
+  left:10px!important;
+  right:10px!important;
+  bottom:10px!important;
+  z-index:950!important;
+  box-shadow:0 -10px 32px rgba(0,0,0,.58), 0 0 0 1px rgba(111,231,255,.12)!important;
+  backdrop-filter:blur(8px)!important;
+}
+#draft-room.panel.active{
+  padding-bottom:112px!important;
+}
+
+/* Let the bottom results bar feel intentional rather than floating randomly */
+.v126-results-row{
+  background:
+    linear-gradient(180deg,rgba(5,16,30,.94),rgba(2,6,12,.98))!important;
+}
+
+/* Keep the mobile sticky roster needs from covering too much while live ticker is attached */
+@media(max-width:820px){
+  body.mobile-roster-needs-fixed .roster-needs-topbar{
+    display:grid!important;
+    gap:6px!important;
+    max-height:54vh!important;
+    overflow:auto!important;
+  }
+  .roster-needs-topbar .v120-live-row{
+    grid-template-columns:1fr!important;
+  }
+  .sticky-live-draft-ticker{
+    margin-bottom:4px!important;
+  }
+  .v120-ticker-system > .v126-results-row{
+    left:6px!important;
+    right:6px!important;
+    bottom:6px!important;
+  }
+  #draft-room.panel.active{
+    padding-bottom:118px!important;
+  }
+}
+/* END V128 */
