@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V134 ROUND PICK RESULTS -->
+  <!-- V135 ROUND PICK LEFT HEADER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -75,7 +75,7 @@
           </div>
           <div id="v120TickerSystem" class="v120-ticker-system">
             <div class="v120-ticker-row v126-results-row">
-              <div class="v126-results-title">Draft Results</div>
+              <div class="v126-results-title v135-results-title">Draft Results<span id="v135RoundPickLabel" class="v135-round-pick-header">R:1 P:1</span></div>
               <div id="v126ResultsCardHost" class="v126-results-card-host">
                 <div id="v126ResultsCard" class="v126-results-card tba">
                   <span class="v126-pick-num">1</span>
@@ -2890,7 +2890,6 @@
             <span class="v126-drafted-by">
               <small>Drafted by</small>
               ${safeHtml(card.owner)}
-              <i class="v134-round-pick">R:${safeHtml(card.roundNumber || "")} P:${safeHtml(card.pickInRound || "")}</i>
             </span>
           </div>`;
         }
@@ -2904,14 +2903,17 @@
           <span class="v126-drafted-by">
             <small>Drafted by</small>
             —
-            <i class="v134-round-pick">R:${safeHtml(card.roundNumber || "")} P:${safeHtml(card.pickInRound || "")}</i>
           </span>
         </div>`;
       }
 
       function renderSingleResultCard(card){
         const host = document.getElementById("v126ResultsCardHost");
+        const roundPickLabel = document.getElementById("v135RoundPickLabel");
         if (!host || !card) return;
+        if (roundPickLabel) {
+          roundPickLabel.textContent = `R:${card.roundNumber || ""} P:${card.pickInRound || ""}`;
+        }
         const state = window.__v127ResultsTicker;
         if (state.lastRenderedKey === card.key && host.querySelector("#v126ResultsCard")) return;
 
