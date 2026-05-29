@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V130 RESULTS TICKER PICK SOURCE FIX -->
+  <!-- V131 SETV127 FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2854,6 +2854,93 @@
 
         // Bottom Draft Results ticker only. No live/upcoming ticker is rendered in V129.
         setV127ResultsCards(newCards, resultsSignature);
+      }
+
+      function resultCardHtml(card){
+        if (!card) return "";
+        if (card.type === "filled") {
+          return `<div id="v126ResultsCard" class="v126-results-card filled ${safeHtml(card.teamClass)}" style="--team-logo:url('${safeHtml(card.logo)}')">
+            ${card.pic ? `<img class="v126-result-headshot" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
+            <span class="v126-result-main">
+              <strong>${safeHtml(card.player)}</strong>
+              <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>
+            </span>
+            <span class="v126-drafted-by"><small>Drafted by</small>${safeHtml(card.owner)}</span>
+          </div>`;
+        }
+
+        return `<div id="v126ResultsCard" class="v126-results-card tba">
+          <span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>
+          <span class="v126-result-main">
+            <strong>TBA</strong>
+            <em>${safeHtml(card.pos || ("Waiting for pick " + card.pickNumber))}</em>
+          </span>
+          <span class="v126-drafted-by"><small>Drafted by</small>—</span>
+        </div>`;
+      }
+
+      function renderSingleResultCard(card){
+        const host = document.getElementById("v126ResultsCardHost");
+        if (!host || !card) return;
+        const state = window.__v127ResultsTicker;
+        if (state.lastRenderedKey === card.key && host.querySelector("#v126ResultsCard")) return;
+
+        host.innerHTML = resultCardHtml(card);
+        state.lastRenderedKey = card.key;
+
+        const rendered = document.getElementById("v126ResultsCard");
+        if (rendered) {
+          rendered.classList.remove("entering");
+          void rendered.offsetWidth;
+          rendered.classList.add("entering");
+        }
+      }
+
+      function setV127ResultsCards(cards, signature){
+        const state = window.__v127ResultsTicker;
+        if (!Array.isArray(cards) || !cards.length) return;
+
+        const oldCurrent = state.cards[state.index] || null;
+        const oldKey = oldCurrent && oldCurrent.key;
+
+        state.cards = cards;
+
+        if (oldKey) {
+          const sameIndex = cards.findIndex(card => card.key === oldKey);
+          if (sameIndex >= 0) state.index = sameIndex;
+          else if (state.index >= cards.length) state.index = 0;
+        } else if (state.index >= cards.length) {
+          state.index = 0;
+        }
+
+        resultsTickerSignature = signature;
+
+        if (!state.started) {
+          state.started = true;
+          startV127ResultsTicker();
+        } else if (!document.getElementById("v126ResultsCard")) {
+          renderSingleResultCard(state.cards[state.index] || state.cards[0]);
+        }
+      }
+
+      function startV127ResultsTicker(){
+        const state = window.__v127ResultsTicker;
+        if (state.intervalId) clearInterval(state.intervalId);
+
+        function tick(){
+          const currentState = window.__v127ResultsTicker;
+          if (!currentState.cards.length) return;
+
+          if (currentState.index >= currentState.cards.length) currentState.index = 0;
+
+          const card = currentState.cards[currentState.index];
+          renderSingleResultCard(card);
+
+          currentState.index = (currentState.index + 1) % currentState.cards.length;
+        }
+
+        tick();
+        state.intervalId = setInterval(tick, 5000);
       }
 
       function renderTickerFromOrder(order){

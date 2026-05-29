@@ -13518,3 +13518,14 @@ button:not(.primary):not(.danger),
 
 /* V130 pick-source fix: Draft Results ticker reads the same live draft object as the draft room */
 /* END V130 */
+
+
+/* V131 fix: restore missing isolated Draft Results ticker functions */
+.v126-results-card.entering{
+  animation:v131ResultCardIn .36s ease both!important;
+}
+@keyframes v131ResultCardIn{
+  from{ opacity:.25; transform:translateY(5px) rotateX(40deg) scale(.99); }
+  to{ opacity:1; transform:translateY(0) rotateX(0) scale(1); }
+}
+/* END V131 */
