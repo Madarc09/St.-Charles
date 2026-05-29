@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V136 TEAM GOALIE LOGOS -->
+  <!-- V137 TEAM GOALIE LOGO SAFE FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2779,6 +2779,23 @@
         return `https://assets.nhle.com/logos/nhl/svg/${slug}_light.svg`;
       }
 
+      function safeTeamAbbrFromPlayer(player){
+        const raw = String((player && (player.nhlTeam || player.teamAbbrev || player.team || player.abbrev)) || "").toUpperCase();
+        const valid = new Set(["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"]);
+        if (valid.has(raw)) return raw;
+
+        const name = String((player && player.name) || "").toUpperCase();
+        for (const abbr of valid) {
+          if (name.includes(abbr)) return abbr;
+        }
+        return "";
+      }
+
+      function safeTeamGoalieLogoUrl(player){
+        const abbr = safeTeamAbbrFromPlayer(player);
+        return abbr ? safeTeamLogoUrl(abbr) : "";
+      }
+
       function safePlayerImageUrl(player){
         const id = player && (player.playerId || player.id || player.nhlId);
         if (id && String(id).match(/^\d+$/)) {
@@ -2826,7 +2843,8 @@
             const fantasy = safeFantasyPoints(p);
             const rawPosition = String(p.position || "").toUpperCase();
             const isTeamGoalie = rawPosition === "TG" || (rawPosition === "G" && String(player).toLowerCase().includes("goalie"));
-            const pic = isTeamGoalie ? safeTeamLogoUrl(team) : safePlayerImageUrl(p);
+            const teamGoalieLogo = isTeamGoalie ? safeTeamGoalieLogoUrl(p) : "";
+            const pic = isTeamGoalie ? teamGoalieLogo : safePlayerImageUrl(p);
             const picType = isTeamGoalie ? "team-logo" : "headshot";
             const logo = safeOwnerWatermarkUrl(pick.ownerId);
             const playerId = p.id || p.playerId || p.nhlId || "";
@@ -2846,6 +2864,7 @@
               fantasy,
               pic,
               picType,
+              goalieFallback: isTeamGoalie ? (safeTeamAbbrFromPlayer(p) || "TG") : "",
               logo,
               teamClass:safeTeamClassName(team)
             });
@@ -2886,7 +2905,7 @@
         if (card.type === "filled") {
           return `<div id="v126ResultsCard" class="v126-results-card filled ${safeHtml(card.teamClass)}" style="--team-logo:url('${safeHtml(card.logo)}')">
             ${card.logo ? `<img class="v133-owner-watermark-img" src="${safeHtml(card.logo)}" alt="" loading="lazy" aria-hidden="true">` : ""}
-            ${card.pic ? `<img class="v126-result-headshot ${card.picType === "team-logo" ? "v136-team-goalie-logo" : ""}" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span class="v126-pick-num">${safeHtml(card.pickNumber)}</span>`}
+            ${card.pic ? `<img class="v126-result-headshot ${card.picType === "team-logo" ? "v136-team-goalie-logo" : ""}" src="${safeHtml(card.pic)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'v126-pick-num v137-tg-fallback',textContent:'${safeHtml(card.goalieFallback || card.pickNumber)}'}))">` : `<span class="v126-pick-num ${card.goalieFallback ? "v137-tg-fallback" : ""}">${safeHtml(card.goalieFallback || card.pickNumber)}</span>`}
             <span class="v126-result-main">
               <strong>${safeHtml(card.player)}</strong>
               <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • ${safeHtml(card.fantasy)} FP</em>

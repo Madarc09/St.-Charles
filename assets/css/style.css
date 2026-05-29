@@ -13714,3 +13714,20 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V136 */
+
+
+/* V137 safe Team Goalie image fallback */
+.v126-pick-num.v137-tg-fallback{
+  background:
+    radial-gradient(circle at center,rgba(255,255,255,.18),rgba(255,212,90,.10)),
+    rgba(0,0,0,.30)!important;
+  border-color:rgba(255,212,90,.42)!important;
+  color:#ffe7a3!important;
+  font-size:.82rem!important;
+  letter-spacing:.03em!important;
+}
+.v126-result-headshot.v136-team-goalie-logo{
+  min-width:48px!important;
+  min-height:48px!important;
+}
+/* END V137 */
