@@ -188,10 +188,12 @@ module.exports = async function handler(req, res) {
 
       if (action === 'finalize') {
         if (Array.isArray(state.order) && state.order.length === OWNERS.length) {
-          await setDraftOrder(state.order);
+          if (!state.finalized) {
+            await setDraftOrder(state.order);
+            state.finalizedAt = new Date().toISOString();
+          }
           state.phase = 'complete';
           state.finalized = true;
-          state.finalizedAt = new Date().toISOString();
           const saved = await setState(state);
           return res.status(200).json({ ok:true, ...saved, finalized:true });
         }

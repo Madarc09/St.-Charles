@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V112 REBUILT PENGUIN LOTTERY -->
+  <!-- V113 REPLAY VIDEO LIVE TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2676,17 +2676,54 @@
         target.innerHTML = OWNERS.map(o => `<span class="${joined.has(o.id) ? "in" : ""}">${joined.has(o.id) ? "✓" : "○"} ${o.teamName}</span>`).join("");
       }
 
+      function ownerSequenceFromDraft(draft){
+        const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
+        const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
+        const totalPicks = order.length * 12;
+        const pickIndex = Array.isArray(draft && draft.picks) ? draft.picks.length : 0;
+        const seq = [];
+        for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 3); i++) {
+          const round = Math.floor(i / order.length) + 1;
+          const slot = i % order.length;
+          const roundOrder = round % 2 === 1 ? order : order.slice().reverse();
+          const ownerId = roundOrder[slot];
+          seq.push({ ownerId, pickNumber:i + 1, round });
+        }
+        return seq;
+      }
+
+      function renderLiveDraftTicker(draft){
+        const target = document.getElementById("draftRoomLotteryOrder");
+        if (!target) return;
+        const seq = ownerSequenceFromDraft(draft || {});
+        if (!seq.length) {
+          target.innerHTML = `<span class="ticker-label">Live Draft</span><span class="ticker-pick winner-pick"><b>DONE</b><i></i>Draft complete</span>`;
+          return;
+        }
+        const labels = ["ON THE CLOCK", "NEXT", "AFTER THAT"];
+        const items = seq.map((item, idx) => `<span class="ticker-pick ${idx === 0 ? "winner-pick" : idx === 1 ? "next-pick" : ""}"><b>${labels[idx]}</b><i></i>${ownerName(item.ownerId)} <em>Pick ${item.pickNumber}</em></span>`).join("");
+        target.innerHTML = `<span class="ticker-label">Live Draft</span>${items}${items}`;
+      }
+
       function renderTickerFromOrder(order){
+        // Kept for reveal/replay display only. The normal ticker is live-draft tracking.
         const target = document.getElementById("draftRoomLotteryOrder");
         if (!target || !Array.isArray(order) || !order.length) return;
         const winner = ownerName(order[0]);
         const second = ownerName(order[1]);
         const items = [
-          `<span class="ticker-pick winner-pick"><b>WINNER</b><i></i>${winner} is on the clock</span>`,
-          `<span class="ticker-pick next-pick"><b>NEXT</b><i></i>${second}</span>`,
+          `<span class="ticker-pick winner-pick"><b>WINNER</b><i></i>${winner}</span>`,
+          `<span class="ticker-pick next-pick"><b>2</b><i></i>${second}</span>`,
           ...order.slice(2).map((id, idx) => `<span class="ticker-pick"><b>${idx+3}</b><i></i>${ownerName(id)}</span>`)
         ].join("");
         target.innerHTML = `<span class="ticker-label">Draft Results</span>${items}${items}`;
+      }
+
+      async function refreshLiveDraftTicker(){
+        if (window.officialDraftApi && window.officialDraftApi.load) {
+          const draft = await window.officialDraftApi.load().catch(()=>null);
+          if (draft) renderLiveDraftTicker(draft);
+        }
       }
 
       async function loadState(){
@@ -2762,8 +2799,10 @@
         if (leave) leave.hidden = false;
       }
 
-      async function replayOrder(order, sessionId, alreadyOfficial = false){
+      async function replayOrder(order, sessionId, options = {}){
         if (!Array.isArray(order) || order.length < 5) return;
+        const alreadyOfficial = Boolean(options.alreadyOfficial);
+        const videoOnly = Boolean(options.videoOnly);
         const enterBtn = document.getElementById("enterLiveLotteryBtn");
         const testBtn = document.getElementById("testJoinAllLotteryBtn");
         const leave = document.getElementById("leaveLotteryBtn");
@@ -2794,28 +2833,34 @@
         await revealSinglePick(1, order[0], {
           winner:true,
           intro:"And now, we will announce the winner of the draft lottery...",
-          introDelay:3200,
-          boardDelay:4200,
+          introDelay:2600,
+          boardDelay:3200,
+          revealedDelay:3600,
           outro:`Congratulations. The winner of the draft lottery is ${ownerName(order[0])}.`,
-          outroDelay:3600
+          outroDelay:2800
         });
 
-        setSpeech("The draft order is ready. Review the board, then leave the lottery to save it as official.");
+        if (videoOnly || alreadyOfficial) {
+          setSpeech("Replay complete. This was only a replay and did not change the pool.");
+        } else {
+          setSpeech("The draft order is ready. Review the board, then leave the lottery to save it as official.");
+        }
         showFinalBoard(order);
-        if (alreadyOfficial) renderTickerFromOrder(order);
+        if (leave) leave.hidden = Boolean(videoOnly || alreadyOfficial);
+        if (alreadyOfficial) await refreshLiveDraftTicker();
         if (close) close.disabled = false;
       }
 
       async function revealBoard(state){
         if (!state || !Array.isArray(state.order)) return;
         if (revealStartedFor === state.sessionId) return;
-        await replayOrder(state.order, state.sessionId, Boolean(state.finalized));
+        await replayOrder(state.order, state.sessionId, { alreadyOfficial:Boolean(state.finalized), videoOnly:false });
       }
 
       async function finalizeLotteryAndLeave(){
         const state = await postAction("finalize");
         const order = state && Array.isArray(state.order) ? state.order : [];
-        if (order.length) renderTickerFromOrder(order);
+        if (order.length) await refreshLiveDraftTicker();
 
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
@@ -2828,16 +2873,18 @@
       }
 
       async function replayCurrentLottery(){
-        let state = await loadState();
-        if (state && Array.isArray(state.order) && state.order.length) {
-          await replayOrder(state.order, state.sessionId || "replay", Boolean(state.finalized));
-          return;
-        }
+        // Replay is video-only. It should never change or save the pool.
         if (window.officialDraftApi && window.officialDraftApi.load) {
           const draft = await window.officialDraftApi.load().catch(()=>null);
           if (draft && Array.isArray(draft.draftOrder) && draft.draftOrder.length) {
-            await replayOrder(draft.draftOrder, "draft-replay", true);
+            await replayOrder(draft.draftOrder, "draft-replay", { alreadyOfficial:true, videoOnly:true });
+            return;
           }
+        }
+
+        let state = await loadState();
+        if (state && Array.isArray(state.order) && state.order.length) {
+          await replayOrder(state.order, state.sessionId || "replay", { alreadyOfficial:Boolean(state.finalized), videoOnly:true });
         }
       }
 
@@ -2868,7 +2915,7 @@
         }
 
         if ((state.phase === "complete" || state.phase === "idle") && Array.isArray(state.order) && state.order.length && state.finalized) {
-          renderTickerFromOrder(state.order);
+          refreshLiveDraftTicker();
         }
       }
 
@@ -2904,8 +2951,14 @@
 
       function startPolling(){
         clearInterval(pollTimer);
-        pollTimer = setInterval(async () => renderState(await loadState()), 3500);
-        setTimeout(async () => renderState(await loadState()), 600);
+        pollTimer = setInterval(async () => {
+          await renderState(await loadState());
+          await refreshLiveDraftTicker();
+        }, 3500);
+        setTimeout(async () => {
+          await renderState(await loadState());
+          await refreshLiveDraftTicker();
+        }, 600);
       }
 
       document.addEventListener("click", async function(event){

@@ -11891,3 +11891,23 @@ button:not(.primary):not(.danger),
   .board-hidden-name{ font-size:clamp(1.65rem,9vw,2.75rem)!important; }
 }
 /* END V112 */
+
+
+/* V113 replay is video-only + live draft ticker */
+.ticker-pick em{
+  font-style:normal;
+  opacity:.78;
+  font-size:.72em;
+  margin-left:4px;
+}
+.ticker-pick.winner-pick b,
+.ticker-pick.next-pick b{
+  width:auto!important;
+  min-width:auto!important;
+  padding:0 8px!important;
+  border-radius:999px!important;
+}
+.leave-lottery-btn[hidden]{
+  display:none!important;
+}
+/* END V113 */
