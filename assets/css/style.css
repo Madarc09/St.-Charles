@@ -11467,3 +11467,30 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V108 */
+
+
+/* V109 testing control for live lottery */
+.live-lottery-button-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin:12px 0;
+}
+.test-lottery-btn{
+  background:rgba(255,212,90,.16)!important;
+  border:1px solid rgba(255,212,90,.42)!important;
+  color:#ffe8a6!important;
+  font-weight:1000!important;
+}
+.admin-draft-actions #testJoinAllLotteryAdminBtn{
+  background:rgba(255,212,90,.12)!important;
+  border-color:rgba(255,212,90,.4)!important;
+  color:#ffe8a6!important;
+}
+@media(max-width:820px){
+  .live-lottery-button-row{
+    flex-direction:column;
+  }
+}
+/* END V109 */

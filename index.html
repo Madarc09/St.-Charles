@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V108 GARY LIVE LOTTERY REVEAL -->
+  <!-- V109 TEST JOIN ALL LOTTERY -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -204,7 +204,7 @@
           <h2>Backup, restore, and data tools</h2>
         </div>
       </div>
-      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button></div>
+      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button><button id="testJoinAllLotteryAdminBtn" type="button">Test Lottery: Enter Everyone</button></div>
 <div class="grid two">
         <article class="card">
           <h3>Export / Import Pool File</h3>
@@ -254,7 +254,10 @@
         </div>
         <p id="liveLotteryMessage" class="muted">Waiting for the commissioner to run the lottery.</p>
         <div id="liveLotteryJoined" class="live-lottery-joined"></div>
-        <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
+        <div class="live-lottery-button-row">
+          <button id="enterLiveLotteryBtn" class="primary live-enter-btn" type="button">Enter Lotto</button>
+          <button id="testJoinAllLotteryBtn" class="test-lottery-btn" type="button">Testing: Enter Everyone</button>
+        </div>
         <div id="familyFeudBoard" class="family-feud-board gary-reveal-board" hidden></div>
       </div>
     </div>
@@ -2790,6 +2793,35 @@
         const state = await postAction("join", { ownerId });
         renderState(state);
       }
+
+      async function testJoinAllLottery(){
+        let state = await loadState();
+        if (state.phase !== "waiting") {
+          state = await postAction("start");
+        }
+
+        showOverlay();
+        setText("liveLotteryTitle", "Testing Live Lottery");
+        setText("liveLotteryMessage", "Simulating all five managers entering the lotto.");
+        renderJoined(state);
+
+        for (const owner of OWNERS) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          state = await postAction("join", { ownerId: owner.id });
+          renderState(state);
+        }
+
+        // After the final join, the API should switch to revealing and save draftOrder to /api/draft.
+        setTimeout(async () => {
+          const updated = await loadState();
+          renderState(updated);
+          if (window.officialDraftApi && window.officialDraftApi.load) {
+            const draft = await window.officialDraftApi.load();
+            if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
+            if (window.renderDraftRosters) window.renderDraftRosters(draft);
+          }
+        }, 800);
+      }
       function startPolling(){
         clearInterval(pollTimer);
         pollTimer = setInterval(async () => renderState(await loadState()), 3000);
@@ -2811,6 +2843,15 @@
           enterLotto();
           return;
         }
+        const testAll = event.target.closest && event.target.closest("#testJoinAllLotteryBtn, #testJoinAllLotteryAdminBtn");
+        if (testAll) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+          testJoinAllLottery();
+          return;
+        }
+
         const close = event.target.closest && event.target.closest("#closeLiveLotteryBtn");
         if (close) {
           event.preventDefault();
@@ -2820,7 +2861,7 @@
       }, true);
 
       window.addEventListener("load", startPolling);
-      window.liveLottery = { runLottery, enterLotto, loadState, renderState };
+      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, loadState, renderState };
     })();
   </script>
 
