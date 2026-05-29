@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V119 TWO TICKERS DRAFT BUTTON -->
+  <!-- V120 CLEAN TICKERS SKIP BUTTON -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -73,22 +73,20 @@
             <span class="eyebrow">Draft Results</span>
             <div class="lottery-ticker-actions"><button id="runLiveLotteryBtn" class="replay-lottery-mini live-run-lottery-btn" type="button">Run Draft Lottery</button><button id="replayLotteryBtn" class="replay-lottery-mini" type="button">Replay Lottery</button></div>
           </div>
-          <div id="dualTickerStack" class="dual-ticker-stack">
-            <div id="liveTickerShell" class="live-ticker-shell v119-scroll-ticker">
-              <div id="liveTickerFixed" class="live-ticker-fixed">Live Draft — Loading…</div>
-              <div class="live-ticker-window v119-ticker-window">
-                <div id="draftRoomLotteryOrder" class="draft-room-lottery-order v119-ticker-track">
-                  <div id="liveTickerMover" class="v119-ticker-mover">
-                    <span class="ticker-loop"><span class="ticker-pick"><b>Loading</b><i></i>Draft room syncing…</span></span>
-                  </div>
+          <div id="v120TickerSystem" class="v120-ticker-system">
+            <div class="v120-ticker-row v120-live-row">
+              <div id="v120LiveFixed" class="v120-live-fixed">Live Draft — Loading…</div>
+              <div class="v120-marquee-window">
+                <div id="v120UpcomingMover" class="v120-marquee-mover">
+                  <span class="v120-ticker-item"><b>Loading</b> Draft room syncing…</span>
                 </div>
               </div>
             </div>
 
-            <div id="draftResultsFlipTicker" class="draft-results-flip-ticker">
-              <div class="flip-ticker-title">Draft Results</div>
-              <div id="draftResultsFlipBoard" class="draft-results-flip-board">
-                <span class="flip-pick-card"><b>1</b><strong>TBA</strong><em>Waiting for first pick</em></span>
+            <div class="v120-ticker-row v120-results-row">
+              <div class="v120-results-title">Draft Results</div>
+              <div id="v120FlipBoard" class="v120-flip-board">
+                <span class="v120-flip-card active"><b>1</b><strong>TBA</strong><em>Waiting for pick 1</em></span>
               </div>
             </div>
           </div>
@@ -276,6 +274,7 @@
 
       <div class="live-lottery-card rebuilt-lottery-card">
         <button id="closeLiveLotteryBtn" class="live-lottery-close" type="button">×</button>
+        <button id="skipLotteryRevealBtn" class="skip-lottery-reveal-btn" type="button" hidden>Skip to End</button>
         <p class="eyebrow">Live Draft Lottery</p>
         <h2 id="liveLotteryTitle">Waiting Room</h2>
         <p id="liveLotteryMessage" class="muted">Waiting for the commissioner to run the lottery.</p>
@@ -2676,36 +2675,11 @@
       let tickerAnimationId = 0;
       let flipTickerIndex = 0;
       let flipTickerTimer = 0;
+      let skipLotteryReveal = false;
 
       function startSportsTicker(){
-        const mover = document.getElementById("liveTickerMover");
-        const windowEl = document.querySelector(".v119-ticker-window");
-        if (!mover || !windowEl) return;
-
-        cancelAnimationFrame(tickerAnimationId);
-        tickerOffset = 0;
-        tickerLastTime = 0;
-
-        function step(now){
-          const moverWidth = mover.scrollWidth || 0;
-          if (!tickerLastTime) tickerLastTime = now;
-          const dt = Math.min(40, now - tickerLastTime);
-          tickerLastTime = now;
-
-          // Pixels per second. This is the actual sports-desk crawl speed.
-          const speed = 58;
-          tickerOffset -= (speed * dt) / 1000;
-
-          const half = moverWidth / 2;
-          if (half > 0 && Math.abs(tickerOffset) >= half) tickerOffset = 0;
-
-          mover.style.transform = `translate3d(${tickerOffset}px,0,0)`;
-          tickerAnimationId = requestAnimationFrame(step);
-        }
-
-        tickerAnimationId = requestAnimationFrame(step);
+        // V120: ticker movement is pure CSS on brand-new containers.
       }
-
 
       function ownerName(id){
         const o = OWNERS.find(x => x.id === id);
@@ -2744,11 +2718,10 @@
       }
 
       function renderLiveDraftTicker(draft, force = false){
-        const mover = document.getElementById("liveTickerMover");
-        const track = document.getElementById("draftRoomLotteryOrder");
-        const fixed = document.getElementById("liveTickerFixed");
-        const flipBoard = document.getElementById("draftResultsFlipBoard");
-        if (!mover || !track) return;
+        const fixed = document.getElementById("v120LiveFixed");
+        const mover = document.getElementById("v120UpcomingMover");
+        const flipBoard = document.getElementById("v120FlipBoard");
+        if (!fixed || !mover || !flipBoard) return;
 
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : OWNERS;
         const order = Array.isArray(draft && draft.draftOrder) && draft.draftOrder.length ? draft.draftOrder : owners.map(o => o.id);
@@ -2760,81 +2733,62 @@
           const round = Math.floor(i / order.length) + 1;
           const slot = i % order.length;
           const roundOrder = round % 2 === 1 ? order : order.slice().reverse();
-          return {
-            ownerId: roundOrder[slot],
-            pickNumber: i + 1,
-            round
-          };
+          return { ownerId: roundOrder[slot], pickNumber: i + 1, round };
         }
 
         const current = pickIndex < totalPicks ? ownerForPickIndex(pickIndex) : null;
-        if (fixed) {
-          fixed.innerHTML = current
-            ? `<span>Live Draft</span><strong>${ownerName(current.ownerId)} is on the clock</strong><em>Pick ${current.pickNumber}</em>`
-            : `<span>Live Draft</span><strong>Draft complete</strong>`;
-        }
+        fixed.innerHTML = current
+          ? `<span>Live Draft</span><strong>${ownerName(current.ownerId)} is on the clock</strong><em>Pick ${current.pickNumber}</em>`
+          : `<span>Live Draft</span><strong>Draft complete</strong>`;
 
         const upcoming = [];
         for (let i = pickIndex; i < Math.min(totalPicks, pickIndex + 10); i++) {
           upcoming.push(ownerForPickIndex(i));
         }
 
-        const draftOrderItems = upcoming.length
-          ? upcoming.map(item => `<span class="ticker-pick upcoming-pick"><b>${item.pickNumber}</b><i></i>${ownerName(item.ownerId)}</span>`).join("")
-          : `<span class="ticker-pick upcoming-pick"><b>DONE</b><i></i>Draft complete</span>`;
+        const upcomingLine = upcoming.length
+          ? upcoming.map(item => `<span class="v120-ticker-item"><b>${item.pickNumber}</b>${ownerName(item.ownerId)}</span>`).join("")
+          : `<span class="v120-ticker-item"><b>DONE</b>Draft complete</span>`;
 
         const resultCount = Math.max(10, picks.length);
-        const resultItems = [];
+        const resultCards = [];
         for (let i = 0; i < resultCount; i++) {
           const pick = picks[i];
           if (pick && pick.player) {
             const player = pick.player.name || "Unknown Player";
             const owner = pick.ownerName || ownerName(pick.ownerId);
-            resultItems.push(`<span class="flip-pick-card filled"><b>${i + 1}</b><strong>${player}</strong><em>${owner}</em></span>`);
+            resultCards.push(`<span class="v120-flip-card filled"><b>${i + 1}</b><strong>${player}</strong><em>${owner}</em></span>`);
           } else {
-            resultItems.push(`<span class="flip-pick-card tba"><b>${i + 1}</b><strong>TBA</strong><em>Waiting for pick ${i + 1}</em></span>`);
+            resultCards.push(`<span class="v120-flip-card tba"><b>${i + 1}</b><strong>TBA</strong><em>Waiting for pick ${i + 1}</em></span>`);
           }
         }
 
-        const line = `<span class="ticker-section-title">Next 10 Picks</span>${draftOrderItems}`;
         const signature = `${pickIndex}|${order.join(",")}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && p.player.id || "")).join(",")}`;
-
-        if (!force && signature === lastLiveTickerSignature && mover.dataset.rebuiltTickerReady === "1") return;
-
+        if (!force && signature === lastLiveTickerSignature && mover.dataset.v120Ready === "1") return;
         lastLiveTickerSignature = signature;
-        mover.dataset.rebuiltTickerReady = "1";
-        track.className = "draft-room-lottery-order v119-ticker-track";
-        mover.className = "v119-ticker-mover";
-        mover.innerHTML = `<span class="ticker-loop">${line}</span><span class="ticker-loop" aria-hidden="true">${line}</span>`;
+        mover.dataset.v120Ready = "1";
 
-        if (flipBoard) {
-          flipBoard.innerHTML = resultItems.join("");
-          startFlipTicker();
-        }
-
-        requestAnimationFrame(startSportsTicker);
+        mover.innerHTML = `<span class="v120-marquee-copy"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span><span class="v120-marquee-copy" aria-hidden="true"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span>`;
+        flipBoard.innerHTML = resultCards.join("");
+        startFlipTicker();
       }
 
       function startFlipTicker(){
-        const board = document.getElementById("draftResultsFlipBoard");
+        const board = document.getElementById("v120FlipBoard");
         if (!board) return;
-        const cards = Array.from(board.querySelectorAll(".flip-pick-card"));
+        const cards = Array.from(board.querySelectorAll(".v120-flip-card"));
         if (!cards.length) return;
 
         clearInterval(flipTickerTimer);
         flipTickerIndex = Math.min(flipTickerIndex, cards.length - 1);
 
         function showCard(){
-          cards.forEach((card, idx) => {
-            card.classList.toggle("active", idx === flipTickerIndex);
-            card.classList.toggle("prev", idx < flipTickerIndex);
-            card.classList.toggle("next", idx > flipTickerIndex);
-          });
+          cards.forEach((card, idx) => card.classList.toggle("active", idx === flipTickerIndex));
           flipTickerIndex = (flipTickerIndex + 1) % cards.length;
         }
 
         showCard();
-        flipTickerTimer = setInterval(showCard, 2400);
+        flipTickerTimer = setInterval(showCard, 2300);
       }
 
       function renderTickerFromOrder(order){
@@ -2890,17 +2844,21 @@
       }
 
       async function revealSinglePick(pickNo, ownerId, options = {}){
+        if (skipLotteryReveal) return;
         setRevealMode("host");
         setSpeech(options.intro || `The ${pickNo} pick goes to...`);
         await sleep(options.introDelay || 2600);
+        if (skipLotteryReveal) return;
 
         setRevealMode("board");
         showSingleBoard(pickNo, ownerId, options.winner);
         await sleep(options.boardDelay || 3200);
+        if (skipLotteryReveal) return;
 
         const name = document.getElementById("singleRevealName");
         if (name) name.classList.add("revealed");
         await sleep(options.revealedDelay || 3600);
+        if (skipLotteryReveal) return;
 
         setRevealMode("host");
         setSpeech(options.outro || `The pick belongs to ${ownerName(ownerId)}.`);
@@ -2930,13 +2888,16 @@
         const testBtn = document.getElementById("testJoinAllLotteryBtn");
         const leave = document.getElementById("leaveLotteryBtn");
         const close = document.getElementById("closeLiveLotteryBtn");
+        const skipBtn = document.getElementById("skipLotteryRevealBtn");
 
         showOverlay();
+        skipLotteryReveal = false;
         revealStartedFor = sessionId || "replay";
         if (enterBtn) enterBtn.hidden = true;
         if (testBtn) testBtn.hidden = true;
         if (leave) leave.hidden = true;
         if (close) close.disabled = true;
+        if (skipBtn) skipBtn.hidden = false;
         renderJoined({ joined: OWNERS.map(o => o.id) });
         setText("liveLotteryTitle", "Draft Lottery Results");
         setText("liveLotteryMessage", "The lottery is now underway.");
@@ -2982,6 +2943,7 @@
         }
 
         await refreshLiveDraftTicker(true);
+        if (skipBtn) skipBtn.hidden = true;
         if (close) close.disabled = false;
       }
 
@@ -3136,6 +3098,25 @@
           testJoinAllLottery();
           return;
         }
+        const skip = event.target.closest && event.target.closest("#skipLotteryRevealBtn");
+        if (skip) {
+          event.preventDefault();
+          skipLotteryReveal = true;
+          const state = await loadState();
+          if (state && Array.isArray(state.order) && state.order.length) {
+            showFinalBoard(state.order);
+            setSpeech("Skipped to the final board. The draft order is ready.");
+            const leaveBtn = document.getElementById("leaveLotteryBtn");
+            const skipBtn = document.getElementById("skipLotteryRevealBtn");
+            const closeBtn = document.getElementById("closeLiveLotteryBtn");
+            if (skipBtn) skipBtn.hidden = true;
+            if (leaveBtn) leaveBtn.hidden = false;
+            if (closeBtn) closeBtn.disabled = false;
+            if (!state.finalized) await finalizeLottery();
+          }
+          return;
+        }
+
         const leave = event.target.closest && event.target.closest("#leaveLotteryBtn");
         if (leave) {
           event.preventDefault();
