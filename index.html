@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V137 TEAM GOALIE LOGO SAFE FIX -->
+  <!-- V138 TEAM GOALIE LOGO ACTUAL -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2769,25 +2769,101 @@
       }
 
       function safeTeamLogoUrl(team){
-        const map = {
-          ANA:"ana", BOS:"bos", BUF:"buf", CAR:"car", CBJ:"cbj", CGY:"cgy", CHI:"chi", COL:"col", DAL:"dal", DET:"det",
-          EDM:"edm", FLA:"fla", LAK:"lak", MIN:"min", MTL:"mtl", NJD:"njd", NSH:"nsh", NYI:"nyi", NYR:"nyr", OTT:"ott",
-          PHI:"phi", PIT:"pit", SEA:"sea", SJS:"sjs", STL:"stl", TBL:"tbl", TOR:"tor", UTA:"uta", VAN:"van", VGK:"vgk", WPG:"wpg", WSH:"wsh"
+        const aliases = {
+          ARI:"UTA",
+          LA:"LAK",
+          LOSANGELES:"LAK",
+          MONTREAL:"MTL",
+          TAMPA:"TBL",
+          VEGAS:"VGK",
+          WASHINGTON:"WSH",
+          WINNIPEG:"WPG",
+          NEWJERSEY:"NJD",
+          NEWYORKI:"NYI",
+          NEWYORKR:"NYR",
+          SANJOSE:"SJS",
+          STLOUIS:"STL",
+          COLUMBUS:"CBJ",
+          CALGARY:"CGY"
         };
-        const abbr = String(team || "").toUpperCase();
-        const slug = map[abbr] || abbr.toLowerCase();
-        return `https://assets.nhle.com/logos/nhl/svg/${slug}_light.svg`;
+        let abbr = String(team || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        abbr = aliases[abbr] || abbr;
+        const valid = new Set(["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"]);
+        if (!valid.has(abbr)) return "";
+        // Same style as NHL player mugs: direct NHL asset URL, but for team logos.
+        return `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
       }
 
       function safeTeamAbbrFromPlayer(player){
-        const raw = String((player && (player.nhlTeam || player.teamAbbrev || player.team || player.abbrev)) || "").toUpperCase();
-        const valid = new Set(["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"]);
-        if (valid.has(raw)) return raw;
+        const valid = ["ANA","BOS","BUF","CAR","CBJ","CGY","CHI","COL","DAL","DET","EDM","FLA","LAK","MIN","MTL","NJD","NSH","NYI","NYR","OTT","PHI","PIT","SEA","SJS","STL","TBL","TOR","UTA","VAN","VGK","WPG","WSH"];
+        const validSet = new Set(valid);
 
-        const name = String((player && player.name) || "").toUpperCase();
-        for (const abbr of valid) {
-          if (name.includes(abbr)) return abbr;
+        const rawFields = [
+          player && player.nhlTeam,
+          player && player.teamAbbrev,
+          player && player.team,
+          player && player.abbrev,
+          player && player.triCode,
+          player && player.teamCode
+        ].map(v => String(v || "").toUpperCase().trim()).filter(Boolean);
+
+        for (const raw of rawFields) {
+          const cleaned = raw.replace(/[^A-Z0-9]/g, "");
+          if (validSet.has(cleaned)) return cleaned;
+          if (cleaned === "LA") return "LAK";
+          if (cleaned === "ARI") return "UTA";
         }
+
+        const source = [
+          player && player.name,
+          player && player.fullTeamName,
+          player && player.teamName,
+          player && player.nhlTeamName
+        ].map(v => String(v || "").toUpperCase()).join(" ");
+
+        const names = [
+          ["ANA", ["ANAHEIM","DUCKS"]],
+          ["BOS", ["BOSTON","BRUINS"]],
+          ["BUF", ["BUFFALO","SABRES"]],
+          ["CAR", ["CAROLINA","HURRICANES"]],
+          ["CBJ", ["COLUMBUS","BLUE JACKETS"]],
+          ["CGY", ["CALGARY","FLAMES"]],
+          ["CHI", ["CHICAGO","BLACKHAWKS"]],
+          ["COL", ["COLORADO","AVALANCHE"]],
+          ["DAL", ["DALLAS","STARS"]],
+          ["DET", ["DETROIT","RED WINGS"]],
+          ["EDM", ["EDMONTON","OILERS"]],
+          ["FLA", ["FLORIDA","PANTHERS"]],
+          ["LAK", ["LOS ANGELES","KINGS"]],
+          ["MIN", ["MINNESOTA","WILD"]],
+          ["MTL", ["MONTREAL","CANADIENS"]],
+          ["NJD", ["NEW JERSEY","DEVILS"]],
+          ["NSH", ["NASHVILLE","PREDATORS"]],
+          ["NYI", ["ISLANDERS"]],
+          ["NYR", ["RANGERS"]],
+          ["OTT", ["OTTAWA","SENATORS"]],
+          ["PHI", ["PHILADELPHIA","FLYERS"]],
+          ["PIT", ["PITTSBURGH","PENGUINS"]],
+          ["SEA", ["SEATTLE","KRAKEN"]],
+          ["SJS", ["SAN JOSE","SHARKS"]],
+          ["STL", ["ST LOUIS","BLUES"]],
+          ["TBL", ["TAMPA BAY","LIGHTNING"]],
+          ["TOR", ["TORONTO","MAPLE LEAFS"]],
+          ["UTA", ["UTAH","MAMMOTH","HOCKEY CLUB"]],
+          ["VAN", ["VANCOUVER","CANUCKS"]],
+          ["VGK", ["VEGAS","GOLDEN KNIGHTS"]],
+          ["WPG", ["WINNIPEG","JETS"]],
+          ["WSH", ["WASHINGTON","CAPITALS"]]
+        ];
+
+        for (const [abbr, tokens] of names) {
+          if (tokens.some(token => source.includes(token))) return abbr;
+        }
+
+        for (const abbr of valid) {
+          if (source.includes(abbr)) return abbr;
+        }
+
         return "";
       }
 
@@ -2842,9 +2918,12 @@
             const team = p.nhlTeam || p.teamAbbrev || "";
             const fantasy = safeFantasyPoints(p);
             const rawPosition = String(p.position || "").toUpperCase();
-            const isTeamGoalie = rawPosition === "TG" || (rawPosition === "G" && String(player).toLowerCase().includes("goalie"));
+            const rawId = String(p.id || p.playerId || p.nhlId || "").toLowerCase();
+            const lowerName = String(player || "").toLowerCase();
+            const isTeamGoalie = rawPosition === "TG" || rawPosition === "TEAM_GOALIE" || rawId.includes("team-goalie") || lowerName.includes("team goalie") || lowerName.includes("goalies");
             const teamGoalieLogo = isTeamGoalie ? safeTeamGoalieLogoUrl(p) : "";
             const pic = isTeamGoalie ? teamGoalieLogo : safePlayerImageUrl(p);
+            if (isTeamGoalie && !teamGoalieLogo) console.warn("Team Goalie logo not resolved:", p);
             const picType = isTeamGoalie ? "team-logo" : "headshot";
             const logo = safeOwnerWatermarkUrl(pick.ownerId);
             const playerId = p.id || p.playerId || p.nhlId || "";

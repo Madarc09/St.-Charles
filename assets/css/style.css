@@ -13731,3 +13731,20 @@ button:not(.primary):not(.danger),
   min-height:48px!important;
 }
 /* END V137 */
+
+
+/* V138 actual NHL team logos for Team Goalie result cards */
+.v126-result-headshot.v136-team-goalie-logo{
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:4px!important;
+  background:
+    radial-gradient(circle at center,rgba(255,255,255,.20),rgba(255,255,255,.04)),
+    rgba(0,0,0,.24)!important;
+  border-color:rgba(255,212,90,.50)!important;
+  filter:drop-shadow(0 0 8px rgba(255,255,255,.12))!important;
+}
+.v126-pick-num.v137-tg-fallback{
+  font-size:.78rem!important;
+}
+/* END V138 */
