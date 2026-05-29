@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V120 CLEAN TICKERS SKIP BUTTON -->
+  <!-- V121 NAMEBAR RESULTS TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2755,11 +2755,31 @@
         for (let i = 0; i < resultCount; i++) {
           const pick = picks[i];
           if (pick && pick.player) {
-            const player = pick.player.name || "Unknown Player";
+            const p = pick.player;
+            const player = p.name || "Unknown Player";
             const owner = pick.ownerName || ownerName(pick.ownerId);
-            resultCards.push(`<span class="v120-flip-card filled"><b>${i + 1}</b><strong>${player}</strong><em>${owner}</em></span>`);
+            const pos = displayPosition(p.position || "");
+            const team = p.nhlTeam || "";
+            const fantasy = typeof fp === "function" ? fp(p) : (p.fantasyPoints || 0);
+            const pic = playerImageUrl(p);
+            const logo = teamLogoUrl(team);
+            resultCards.push(`<span class="v120-flip-card v121-namebar-card filled ${esc(teamClassName(team))}" style="--team-logo:url('${esc(logo)}')">
+              <img class="v121-result-headshot" src="${esc(pic)}" alt="" loading="lazy" onerror="this.style.display='none'">
+              <span class="v121-result-main">
+                <strong>${esc(player)}</strong>
+                <em>${esc(pos)} • ${esc(team)} • ${fantasy} FP</em>
+              </span>
+              <span class="v121-drafted-by"><small>Drafted by</small>${esc(owner)}</span>
+            </span>`);
           } else {
-            resultCards.push(`<span class="v120-flip-card tba"><b>${i + 1}</b><strong>TBA</strong><em>Waiting for pick ${i + 1}</em></span>`);
+            resultCards.push(`<span class="v120-flip-card v121-namebar-card tba">
+              <span class="v121-result-pick-num">${i + 1}</span>
+              <span class="v121-result-main">
+                <strong>TBA</strong>
+                <em>Waiting for pick ${i + 1}</em>
+              </span>
+              <span class="v121-drafted-by"><small>Drafted by</small>—</span>
+            </span>`);
           }
         }
 
