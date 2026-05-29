@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V129 NO LIVE TICKER KEEP BOTTOM RESULTS -->
+  <!-- V130 RESULTS TICKER PICK SOURCE FIX -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -1727,6 +1727,7 @@
         if (!Array.isArray(draft.owners) || !draft.owners.length) draft.owners = OWNERS.slice();
         if (!Array.isArray(draft.draftOrder) || !draft.draftOrder.length) draft.draftOrder = draftOrder();
         if (!Array.isArray(draft.picks)) draft.picks = [];
+        window.__currentLiveDraft = draft;
         if (window.renderDraftRosters) window.renderDraftRosters(draft);
         if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
         return draft;
@@ -1735,8 +1736,10 @@
       async function saveSharedDraft(){
         draft.updatedAt = new Date().toISOString();
         if (window.officialDraftApi) draft = await window.officialDraftApi.save(draft);
+        window.__currentLiveDraft = draft;
         if (window.renderDraftRosters) window.renderDraftRosters(draft);
         if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
+        if (window.liveLottery && window.liveLottery.renderLiveDraftTicker) window.liveLottery.renderLiveDraftTicker(draft, true);
         return draft;
       }
 
@@ -1922,6 +1925,10 @@
 
       function renderRoom(){
         if (!draft) draft = defaultDraft();
+        window.__currentLiveDraft = draft;
+        if (window.liveLottery && window.liveLottery.renderLiveDraftTicker) {
+          window.liveLottery.renderLiveDraftTicker(draft, true);
+        }
         setSourceStatus();
 
         const select = $("#cleanDraftAsSelect");
@@ -2856,12 +2863,23 @@
 
       async function refreshLiveDraftTicker(force = false){
         try{
+          // Prefer the live draft room object. This is the draft the user is actually seeing.
+          // /api/draft can lag/fail briefly; using only it caused the bottom ticker to show TBA
+          // even when the draft room already had picks.
+          if (window.__currentLiveDraft && Array.isArray(window.__currentLiveDraft.picks)) {
+            renderLiveDraftTicker(window.__currentLiveDraft, force);
+            if ((window.__currentLiveDraft.picks || []).length) return;
+          }
+
           if (window.officialDraftApi && window.officialDraftApi.load) {
-            const draft = await window.officialDraftApi.load().catch(()=>null);
-            if (draft) renderLiveDraftTicker(draft, force);
+            const sharedDraft = await window.officialDraftApi.load().catch(()=>null);
+            if (sharedDraft) {
+              window.__currentLiveDraft = sharedDraft;
+              renderLiveDraftTicker(sharedDraft, force);
+            }
           }
         }catch(error){
-          console.warn("Live ticker sync failed:", error);
+          console.warn("Draft Results ticker sync failed:", error);
         }
       }
 
@@ -3194,7 +3212,7 @@
       }, true);
 
       window.addEventListener("load", () => { startPolling(); setTimeout(() => refreshLiveDraftTicker(true), 500); if (window.__pendingLiveLotteryReplay) { window.__pendingLiveLotteryReplay = false; replayCurrentLottery(); } });
-      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, loadState, renderState };
+      window.liveLottery = { runLottery, enterLotto, testJoinAllLottery, replayCurrentLottery, finalizeLotteryAndLeave, refreshLiveDraftTicker, renderLiveDraftTicker, loadState, renderState };
     })();
   </script>
 <script type="module" src="assets/js/app.js"></script>

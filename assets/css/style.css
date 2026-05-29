@@ -13514,3 +13514,7 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V129 */
+
+
+/* V130 pick-source fix: Draft Results ticker reads the same live draft object as the draft room */
+/* END V130 */
