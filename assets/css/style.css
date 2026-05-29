@@ -14662,3 +14662,95 @@ button:not(.primary):not(.danger),
 .locker-theme-note{margin:12px auto 0;text-align:center;color:rgba(255,238,200,.72);font-size:.86rem;}
 @media (max-width:900px){.hp-locker-room-scene{min-height:1460px}.hp-locker-bank{grid-template-columns:repeat(2,minmax(0,1fr));}.hp-locker-door{min-height:235px}.locker-case{grid-template-columns:1fr}.locker-open-door-panel{order:-1}.locker-main-zone{grid-template-columns:1fr}.locker-books-stack{max-width:220px;margin:0 auto 30px}.hp-locker-room-head{width:calc(100% - 24px);padding:14px}.hp-locker-display{width:calc(100% - 24px)}}
 @media (max-width:560px){.hp-locker-bank{width:calc(100% - 18px);padding:12px;gap:8px}.hp-locker-door{min-height:210px}.locker-nameplate{left:10%;right:10%;font-size:.75rem}.locker-logo{width:54px;height:54px;font-size:1.4rem;top:155px}.locker-case{min-height:0}.locker-back-wall{padding:18px 14px 24px}.jersey-body{width:190px;height:210px}.jersey-body strong{font-size:4.2rem}.locker-roster-paper{width:96%;font-size:.85rem}.hp-locker-room-scene{border-radius:16px;min-height:1520px}}
+
+/* V143 exact image-based interactive locker room */
+.roster-exact-host{display:block!important;width:100%;}
+.exact-locker-room{
+  position:relative;
+  width:100%;
+  max-width:1536px;
+  margin:0 auto 28px;
+  aspect-ratio:1536 / 1024;
+  overflow:hidden;
+  border-radius:22px;
+  background:#050607;
+  border:1px solid rgba(92,159,255,.28);
+  box-shadow:0 30px 90px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.exact-locker-room-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;user-select:none;pointer-events:none;}
+.exact-owner-title{
+  position:absolute;
+  left:5.1%; top:4.7%; width:31.6%; height:8.9%;
+  display:flex;align-items:center;
+  padding-left:1.5%;
+  color:#eee2ca;
+  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size:clamp(18px,3.55vw,58px);
+  letter-spacing:.035em;
+  text-transform:uppercase;
+  text-shadow:0 3px 2px rgba(0,0,0,.86), 0 0 12px rgba(0,0,0,.9);
+  background:linear-gradient(90deg, rgba(10,13,18,.82), rgba(10,13,18,.40) 70%, transparent);
+  border-radius:4px;
+  transform:rotate(-1deg);
+  pointer-events:none;
+}
+.exact-roster-paper{
+  position:absolute;
+  left:84.2%; top:26.2%; width:11.7%; height:26.8%;
+  padding:2.6% .72% .8%;
+  box-sizing:border-box;
+  background:linear-gradient(180deg, rgba(239,222,181,.96), rgba(205,179,129,.96));
+  color:#17110a;
+  font-family:'Courier New', monospace;
+  transform:rotate(-.8deg);
+  box-shadow:0 10px 22px rgba(0,0,0,.42), inset 0 0 18px rgba(105,73,31,.22);
+  overflow:hidden;
+  border:1px solid rgba(67,45,22,.28);
+}
+.exact-roster-paper h4{margin:0 0 4%;text-align:center;text-transform:uppercase;letter-spacing:.05em;font-size:clamp(6px,.68vw,11px);line-height:1.05;color:#24170b;}
+.exact-roster-paper ol{list-style:none;margin:0;padding:0;display:grid;gap:1px;}
+.exact-roster-paper li{display:grid;grid-template-columns:16px 1fr;column-gap:3px;border-bottom:1px solid rgba(35,22,9,.25);font-size:clamp(5px,.47vw,7.8px);line-height:1.1;min-height:8px;}
+.exact-roster-paper li span{font-weight:900;color:#3c2914;}
+.exact-roster-paper li b{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exact-roster-paper li em{grid-column:2;font-size:.82em;font-style:normal;color:rgba(31,21,12,.70);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exact-roster-paper .empty-line{grid-template-columns:1fr;text-align:center;margin-top:10%;border-bottom:0;}
+.exact-roster-paper .empty-line em{grid-column:1;white-space:normal;margin-top:4px;}
+.exact-roster-paper .paper-tape{position:absolute;top:-3%;width:34%;height:8%;background:rgba(234,218,173,.78);box-shadow:0 2px 5px rgba(0,0,0,.25);}
+.exact-roster-paper .tape-left{left:4%;transform:rotate(-9deg)}
+.exact-roster-paper .tape-right{right:4%;transform:rotate(8deg)}
+.exact-open-hint{
+  position:absolute;left:13.2%;top:14.9%;
+  color:#f4c64c;font-weight:1000;letter-spacing:.14em;text-transform:uppercase;
+  font-size:clamp(9px,1.05vw,16px);
+  text-shadow:0 2px 8px rgba(0,0,0,.9);
+  pointer-events:none;
+}
+.exact-locker-hotspot{
+  position:absolute;
+  top:17.0%; width:8.45%; height:55.3%;
+  border:0;background:transparent;color:transparent;cursor:pointer;
+  border-radius:7px;
+  transform-origin:left center;
+  transition:box-shadow .22s ease, background .22s ease, transform .22s ease, outline-color .22s ease;
+}
+.exact-locker-hotspot span{
+  position:absolute;left:14%;right:14%;top:24%;
+  padding:5px 2px;
+  color:rgba(255,226,169,.02);
+  border-radius:3px;
+  font-size:clamp(7px,.85vw,13px);
+  font-weight:1000;letter-spacing:.10em;text-transform:uppercase;
+  transition:color .2s ease, background .2s ease, text-shadow .2s ease;
+}
+.exact-locker-hotspot:hover{background:rgba(75,166,255,.055);box-shadow:inset 0 0 0 2px rgba(86,176,255,.65), 0 0 28px rgba(73,170,255,.22);transform:translateY(-.5%)}
+.exact-locker-hotspot:hover span,.exact-locker-hotspot.is-active span{color:#ffe2a2;background:rgba(0,0,0,.48);text-shadow:0 2px 8px rgba(0,0,0,.9);}
+.exact-locker-hotspot.is-active{box-shadow:inset 0 0 0 2px rgba(255,211,111,.70), 0 0 34px rgba(255,192,75,.22);background:rgba(255,204,95,.045);}
+.exact-locker-1{left:22.15%;}.exact-locker-2{left:30.52%;}.exact-locker-3{left:38.95%;}.exact-locker-4{left:47.26%;}.exact-locker-5{left:55.63%;}
+.exact-locker-room::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 52% 38%, transparent 0 58%, rgba(0,0,0,.32) 100%);}
+@media (max-width:760px){
+  .exact-locker-room{width:100vw;max-width:none;margin-left:50%;transform:translateX(-50%);border-radius:0;}
+  .exact-roster-paper{left:82.8%;top:25.6%;width:13.8%;height:29.2%;padding-top:3.8%;}
+  .exact-roster-paper li{font-size:5px;grid-template-columns:12px 1fr;}
+  .exact-owner-title{font-size:clamp(15px,6vw,34px);width:38%;}
+}
+.exact-data-source{position:absolute;left:74%;bottom:6.8%;font-size:clamp(5px,.55vw,8px);color:rgba(255,255,255,.18);text-transform:uppercase;letter-spacing:.08em;pointer-events:none;}

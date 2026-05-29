@@ -3574,5 +3574,95 @@
     })();
   </script>
 <script type="module" src="assets/js/app.js"></script>
+<script type="module">
+  // V143 final override: exact image-based locker room renderer.
+  (() => {
+    const DEFAULT_OWNERS = [
+      { id:'nick', name:'Nick', teamName:'Nick' },
+      { id:'chris', name:'Chris', teamName:'Chris' },
+      { id:'andrew', name:'Andrew', teamName:'Andrew' },
+      { id:'tyler', name:'Tyler', teamName:'Tyler' },
+      { id:'scott', name:'Scott', teamName:'Scott' }
+    ];
+    const room = window.__exactLockerRoomState = window.__exactLockerRoomState || { open:'nick', lastDraft:null };
+    const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    function getOwners(draft){
+      const owners = Array.isArray(draft?.owners) && draft.owners.length ? draft.owners : DEFAULT_OWNERS;
+      return owners.slice(0,5).map((o,i)=>({ id:String(o.id || DEFAULT_OWNERS[i]?.id || `owner-${i+1}`), name:o.name || o.teamName || DEFAULT_OWNERS[i]?.name || `Owner ${i+1}`, teamName:o.teamName || o.name || DEFAULT_OWNERS[i]?.teamName || `Owner ${i+1}` }));
+    }
+    function playerName(p){
+      const player = p?.player || p;
+      return player?.name || player?.fullName || player?.displayName || p?.playerName || p?.name || 'Drafted Player';
+    }
+    function playerMeta(p){
+      const player = p?.player || p;
+      const bits = [];
+      const pos = player?.position || player?.pos || player?.defaultPosition || p?.position;
+      const team = player?.team || player?.nhlTeam || player?.currentTeamAbbrev || p?.team || p?.nhlTeam;
+      if (pos) bits.push(pos);
+      if (team) bits.push(team);
+      return bits.join(' • ');
+    }
+    function groupPicks(draft, owners){
+      const by = Object.fromEntries(owners.map(o => [String(o.id), []]));
+      const directRosters = draft?.rosters;
+      if (directRosters && typeof directRosters === 'object') {
+        owners.forEach(o => {
+          const arr = directRosters[o.id];
+          if (Array.isArray(arr)) by[o.id] = arr;
+        });
+      }
+      const picks = Array.isArray(draft?.picks) ? draft.picks : Array.isArray(draft?.draft?.picks) ? draft.draft.picks : [];
+      picks.forEach((pick) => {
+        const ownerId = String(pick.ownerId || pick.owner?.id || pick.teamId || pick.managerId || pick.draftedBy || '');
+        if (ownerId && by[ownerId]) by[ownerId].push(pick.player || pick);
+      });
+      return by;
+    }
+    function renderExactLocker(draft = {}){
+      room.lastDraft = draft;
+      const target = document.getElementById('rosterCards');
+      if (!target) return;
+      const owners = getOwners(draft);
+      if (!owners.some(o => String(o.id) === String(room.open))) room.open = owners[0]?.id || 'nick';
+      const active = owners.find(o => String(o.id) === String(room.open)) || owners[0];
+      const rosters = groupPicks(draft, owners);
+      const roster = rosters[active.id] || [];
+      const source = draft?.configured === false ? 'temporary server memory' : (draft?.storage || draft?.mode || 'live roster data');
+      const rows = roster.length ? roster.slice(0,20).map((p,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><b>${esc(playerName(p))}</b>${playerMeta(p) ? `<em>${esc(playerMeta(p))}</em>` : ''}</li>`).join('') : `<li class="empty-line"><b>No drafted players yet</b><em>Draft picks will print here live.</em></li>`;
+      target.className = 'roster-exact-host';
+      target.innerHTML = `
+        <section class="exact-locker-room" aria-label="Interactive locker room roster page">
+          <img class="exact-locker-room-img" src="assets/images/roster-locker-room-exact.png" alt="1990s basement hockey locker room roster scene">
+          <div class="exact-owner-title">${esc(active.teamName || active.name)}'s Roster</div>
+          <div class="exact-roster-paper">
+            <div class="paper-tape tape-left"></div><div class="paper-tape tape-right"></div>
+            <h4>${esc(active.teamName || active.name)}'s Roster</h4>
+            <ol>${rows}</ol>
+          </div>
+          <div class="exact-open-hint">Select a locker</div>
+          <div class="exact-data-source">${esc(source)}</div>
+          ${owners.map((owner,idx)=>`<button class="exact-locker-hotspot exact-locker-${idx+1} ${String(owner.id) === String(active.id) ? 'is-active' : ''}" data-exact-locker="${esc(owner.id)}" aria-label="Open ${esc(owner.teamName || owner.name)} locker"><span>${esc(owner.teamName || owner.name)}</span></button>`).join('')}
+        </section>`;
+      target.querySelectorAll('[data-exact-locker]').forEach(btn => btn.addEventListener('click', () => {
+        room.open = btn.dataset.exactLocker || owners[0]?.id || 'nick';
+        renderExactLocker(room.lastDraft || draft || {});
+      }));
+    }
+    window.renderDraftRosters = renderExactLocker;
+    window.renderExactLockerRoom = renderExactLocker;
+    window.addEventListener('load', () => {
+      setTimeout(async () => {
+        try {
+          if (window.officialDraftApi && typeof window.officialDraftApi.load === 'function') {
+            renderExactLocker(await window.officialDraftApi.load());
+            return;
+          }
+        } catch(e) {}
+        renderExactLocker(room.lastDraft || {});
+      }, 900);
+    });
+  })();
+</script>
 </body>
 </html>

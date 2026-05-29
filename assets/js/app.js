@@ -1319,46 +1319,52 @@ function chunkArray(items, size) {
 function renderRosters() {
   const target = $('#rosterCards');
   if (!target) return;
-  const currentId = rosterRoomState.openBinder || 'all';
-  const currentOwner = state.owners.find(o => o.id === currentId);
-  const openContent = currentId === 'all' ? renderLeagueBinder() : renderOwnerBinder(currentOwner || state.owners[0]);
+  const owners = Array.isArray(state.owners) && state.owners.length ? state.owners : FINAL_OWNERS;
+  const currentId = rosterRoomState.openBinder || (owners[0] && owners[0].id) || 'nick';
+  const currentOwner = owners.find(o => String(o.id) === String(currentId)) || owners[0] || { id:'nick', name:'Nick', teamName:'Nick' };
+  const roster = state.rosters && Array.isArray(state.rosters[currentOwner.id]) ? state.rosters[currentOwner.id] : [];
 
-  target.className = 'roster-room-host';
+  function esc(v){ return escapeHtml(String(v ?? '')); }
+  function playerName(p){
+    if (!p) return 'Empty roster spot';
+    if (p.name) return p.name;
+    if (p.fullName) return p.fullName;
+    if (p.player && (p.player.name || p.player.fullName)) return p.player.name || p.player.fullName;
+    return String(p.id || p.playerId || 'Drafted Player');
+  }
+  function playerMeta(p){
+    if (!p) return '';
+    const bits = [];
+    const pos = p.position || p.pos || p.player?.position || p.player?.pos || p.defaultPosition;
+    const team = p.team || p.nhlTeam || p.player?.team || p.player?.nhlTeam;
+    if (pos) bits.push(pos);
+    if (team) bits.push(team);
+    return bits.join(' • ');
+  }
+  const rows = roster.length ? roster.slice(0, 20).map((p, i) => `
+    <li><span>${String(i + 1).padStart(2,'0')}</span><b>${esc(playerName(p))}</b>${playerMeta(p) ? `<em>${esc(playerMeta(p))}</em>` : ''}</li>`).join('') : `
+    <li class="empty-line"><b>No drafted players yet</b><em>Draft picks will print here live.</em></li>`;
+
+  target.className = 'roster-exact-host';
   target.innerHTML = `
-    <section class="roster-room-scene">
-      <div class="roster-room-bg"></div>
-      <div class="roster-room-vignette"></div>
-      <div class="roster-room-intro">
-        <span class="eyebrow">Roster Room Prototype • V141</span>
-        <h3>Click a real binder on the coffee table</h3>
-        <p>The roster room now opens like an old hockey-card binder: hard cover, metal rings, clear plastic 9-card sleeves, glare, seams, and page-turn motion.</p>
+    <section class="exact-locker-room" aria-label="Interactive locker room roster page">
+      <img class="exact-locker-room-img" src="assets/images/roster-locker-room-exact.png" alt="1990s basement hockey locker room roster scene">
+      <div class="exact-owner-title">${esc(currentOwner.teamName || currentOwner.name || currentOwner.id)}'s Roster</div>
+      <div class="exact-roster-paper">
+        <div class="paper-tape tape-left"></div><div class="paper-tape tape-right"></div>
+        <h4>${esc(currentOwner.teamName || currentOwner.name || currentOwner.id)}'s Roster</h4>
+        <ol>${rows}</ol>
       </div>
-      ${renderBinderShelf()}
-      <div class="binder-stage">
-        ${openContent}
-      </div>
+      <div class="exact-open-hint">Click a locker name to switch whose locker is open</div>
+      ${owners.slice(0,5).map((owner, idx) => `
+        <button class="exact-locker-hotspot exact-locker-${idx+1} ${String(owner.id) === String(currentOwner.id) ? 'is-active' : ''}" data-open-binder="${esc(owner.id)}" aria-label="Open ${esc(owner.teamName || owner.name || owner.id)} locker">
+          <span>${esc(owner.teamName || owner.name || owner.id)}</span>
+        </button>`).join('')}
     </section>`;
 
   $$('[data-open-binder]', target).forEach(btn => btn.addEventListener('click', () => {
     rosterRoomState.openBinder = btn.dataset.openBinder;
-    rosterRoomState.flipping = false;
     renderRosters();
-  }));
-
-  $$('[data-binder-page]', target).forEach(btn => btn.addEventListener('click', () => {
-    const direction = btn.dataset.binderPage === 'next' ? 1 : -1;
-    rosterRoomState.flipping = true;
-    renderRosters();
-    setTimeout(() => {
-      rosterRoomState.allPage = Math.max(0, rosterRoomState.allPage + direction);
-      rosterRoomState.flipping = false;
-      renderRosters();
-    }, 360);
-  }));
-
-  $$('[data-remove-player]', target).forEach(btn => btn.addEventListener('click', (event) => {
-    event.stopPropagation();
-    removePlayer(btn.dataset.removePlayer);
   }));
 }
 
