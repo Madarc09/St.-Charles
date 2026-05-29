@@ -2587,30 +2587,124 @@
         const owners = Array.isArray(draft && draft.owners) && draft.owners.length ? draft.owners : ROSTER_OWNERS;
         const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
         const source = draft && draft.__source ? draft.__source : "draft state";
+        window.__rosterBinderRoom = window.__rosterBinderRoom || { open: "all", page: 0, flipping: false };
+        const room = window.__rosterBinderRoom;
 
-        if (!picks.length) {
-          target.innerHTML = `<article class="card rosters-status-card">
-            <h3>No roster picks found yet</h3>
-            <p class="muted">The Rosters tab reads the same draft object as the Draft Room. Source checked: ${esc(source)}.</p>
-          </article>`;
-          renderDraftRoomLottery(draft || {});
-          return;
+        function ownerDisplay(owner){ return ownerName(owner); }
+        function getPlayer(p){ return (p && p.player) ? p.player : {}; }
+        function bucketFor(p){ return bucket(getPlayer(p).position); }
+        function ownerPicks(ownerId){ return picks.filter(p => String(p.ownerId) === String(ownerId)); }
+        function initials(name){ return String(name || "HP").split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join("").toUpperCase() || "HP"; }
+        function pointsFor(player){
+          const pos = player.position || "";
+          if (pos === "G" || pos === "TG") return Number(player.fantasyPoints || player.goalieWins || 0);
+          return Number(player.fantasyPoints || player.points || 0);
         }
-
-        target.innerHTML = owners.map(owner => {
-          const mine = picks.filter(p => String(p.ownerId) === String(owner.id));
-          const forwards = mine.filter(p => bucket(p.player && p.player.position) === "F");
-          const defense = mine.filter(p => bucket(p.player && p.player.position) === "D");
-          const goalies = mine.filter(p => bucket(p.player && p.player.position) === "G");
-          return `<article class="card roster-card live-roster-card">
-            <div class="roster-card-head"><h3>${esc(ownerName(owner))}</h3><span>${mine.length}/12</span></div>
-            ${section("Forwards", forwards, 6)}
-            ${section("Defense", defense, 4)}
-            ${section("Goalies", goalies, 2)}
-          </article>`;
-        }).join("") + `<article class="card rosters-status-card"><p class="muted">Roster source: ${esc(source)}. Total picks: ${esc(picks.length)}.</p></article>`;
-
-        renderDraftRoomLottery(draft);
+        function cardHtml(pick, index){
+          if (!pick) {
+            return `<div class="binder-card empty-sleeve"><span>EMPTY SLEEVE</span><em>Waiting for draft pick</em></div>`;
+          }
+          const player = getPlayer(pick);
+          const pos = player.position === "TG" ? "TEAM G" : (player.position || "—");
+          const nhl = player.nhlTeam || player.team || "NHL";
+          const statLine = (pos === "G" || pos === "TEAM G")
+            ? `${esc(player.goalieWins || 0)} W • ${esc(player.goalieShutouts || 0)} SO`
+            : `${esc(player.goals || 0)} G • ${esc(player.assists || 0)} A • ${esc(player.points || 0)} PTS`;
+          return `<div class="binder-card hockey-player-card">
+            <div class="card-shine"></div>
+            <div class="card-top"><span>${esc(nhl)}</span><b>${esc(pos)}</b></div>
+            <div class="card-player-art"><strong>${esc(initials(player.name))}</strong></div>
+            <div class="card-name">${esc(player.name || "Unknown Player")}</div>
+            <div class="card-stats"><span>${statLine}</span><strong>${esc(pointsFor(player))} FP</strong></div>
+            <div class="card-pick">Pick ${esc(pick.pickNumber || index + 1)}</div>
+          </div>`;
+        }
+        function sleeveGrid(list, minSlots){
+          const slots = list.slice();
+          while (slots.length < minSlots) slots.push(null);
+          return slots.map(cardHtml).join("");
+        }
+        function binderShelf(){
+          const ownerBooks = owners.map((owner, idx) => {
+            const mine = ownerPicks(owner.id);
+            return `<button type="button" class="binder-spine ${room.open === owner.id ? "active" : ""}" data-open-binder="${esc(owner.id)}">
+              <span class="binder-rings"></span>
+              <strong>${esc(ownerDisplay(owner))}</strong>
+              <em>${mine.length} cards</em>
+            </button>`;
+          }).join("");
+          return `<div class="binder-coffee-table" aria-label="Coffee table with hockey card binders">
+            ${ownerBooks}
+            <button type="button" class="binder-spine all-teams ${room.open === "all" ? "active" : ""}" data-open-binder="all">
+              <span class="binder-rings"></span>
+              <strong>League Binder</strong>
+              <em>${picks.length} total cards</em>
+            </button>
+          </div>`;
+        }
+        function ownerBinder(owner){
+          const mine = ownerPicks(owner.id);
+          const forwards = mine.filter(p => bucketFor(p) === "F");
+          const defense = mine.filter(p => bucketFor(p) === "D");
+          const goalies = mine.filter(p => bucketFor(p) === "G");
+          return `<div class="open-binder owner-binder-open">
+            <div class="binder-cover-edge"><span></span><span></span><span></span></div>
+            <div class="binder-page left-page">
+              <div class="binder-page-title"><span class="eyebrow">${esc(ownerDisplay(owner))}'s binder</span><h3>${esc(mine.length)}/12 Drafted</h3><p>Old-school hockey card sleeves sorted by roster type.</p></div>
+              <div class="binder-roster-totals"><div><b>${forwards.length}</b><span>Forwards</span></div><div><b>${defense.length}</b><span>Defense</span></div><div><b>${goalies.length}</b><span>Goalies</span></div></div>
+            </div>
+            <div class="binder-page right-page card-sleeve-grid">${sleeveGrid(mine, 12)}</div>
+          </div>`;
+        }
+        function leagueBinder(){
+          const byOwner = owners.map(owner => ({ owner, picks: ownerPicks(owner.id) }));
+          const cards = [];
+          byOwner.forEach(group => {
+            cards.push({ divider: true, owner: group.owner, count: group.picks.length });
+            group.picks.forEach(p => cards.push({ pick: p }));
+          });
+          if (!cards.some(x => x.pick)) {
+            owners.forEach(owner => cards.push({ divider:true, owner, count:0 }));
+          }
+          const perPage = 9;
+          const maxPage = Math.max(0, Math.ceil(cards.length / perPage) - 1);
+          room.page = Math.max(0, Math.min(room.page || 0, maxPage));
+          const slice = cards.slice(room.page * perPage, room.page * perPage + perPage);
+          while (slice.length < perPage) slice.push({ empty: true });
+          const pageCards = slice.map((item, idx) => {
+            if (item.divider) return `<div class="binder-card team-divider-card"><strong>${esc(ownerDisplay(item.owner))}</strong><span>${esc(item.count)} cards</span></div>`;
+            if (item.pick) return cardHtml(item.pick, idx);
+            return cardHtml(null, idx);
+          }).join("");
+          return `<div class="open-binder league-binder-open ${room.flipping ? "is-flipping" : ""}">
+            <div class="binder-cover-edge"><span></span><span></span><span></span></div>
+            <div class="binder-page left-page league-index-page"><span class="eyebrow">Sixth Book Test</span><h3>League Binder</h3><p>One master binder for every drafted player. Use the buttons to test the animated page-turn idea.</p><div class="binder-page-count">Page ${room.page + 1} of ${maxPage + 1}</div></div>
+            <div class="binder-page right-page page-turn-target"><div class="card-sleeve-grid league-grid">${pageCards}</div><div class="binder-page-controls"><button type="button" data-binder-page="prev" ${room.page <= 0 ? "disabled" : ""}>← Previous page</button><button type="button" data-binder-page="next" ${room.page >= maxPage ? "disabled" : ""}>Next page →</button></div></div>
+          </div>`;
+        }
+        if (room.open !== "all" && !owners.some(o => String(o.id) === String(room.open))) room.open = "all";
+        const currentOwner = owners.find(o => String(o.id) === String(room.open));
+        const openContent = room.open === "all" ? leagueBinder() : ownerBinder(currentOwner || owners[0]);
+        target.className = "roster-room-host";
+        target.innerHTML = `<div class="roster-room-scene">
+          <div class="roster-room-bg"></div>
+          <div class="roster-room-vignette"></div>
+          <div class="roster-room-intro"><span class="eyebrow">Roster Room Prototype • V140</span><h3>1998 basement hockey-card binder room</h3><p>Pick a binder on the coffee table. Individual binders show one team. The sixth League Binder tests the page-turn version for every team together.</p><small>Roster source: ${esc(source)} • Total picks: ${esc(picks.length)}</small></div>
+          ${binderShelf()}
+          <div class="binder-stage">${openContent}</div>
+        </div>`;
+        target.querySelectorAll("[data-open-binder]").forEach(btn => btn.addEventListener("click", () => {
+          room.open = btn.dataset.openBinder || "all";
+          room.page = 0;
+          window.renderDraftRosters(draft);
+        }));
+        target.querySelectorAll("[data-binder-page]").forEach(btn => btn.addEventListener("click", () => {
+          room.page += btn.dataset.binderPage === "next" ? 1 : -1;
+          room.flipping = true;
+          window.renderDraftRosters(draft);
+          setTimeout(() => { room.flipping = false; window.renderDraftRosters(draft); }, 430);
+        }));
+        renderDraftRoomLottery(draft || {});
       };
 
       function lotteryOrderFromStorage(){
