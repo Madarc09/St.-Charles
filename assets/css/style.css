@@ -13381,3 +13381,17 @@ button:not(.primary):not(.danger),
   }
 }
 /* END V126 */
+
+
+/* V127 isolated result ticker: one global JS interval, no CSS card cycling */
+.v126-results-card-host{
+  contain:layout paint!important;
+}
+.v126-results-card.entering{
+  animation:v127ResultCardIn .36s ease both!important;
+}
+@keyframes v127ResultCardIn{
+  from{ opacity:.25; transform:translateY(5px) rotateX(40deg) scale(.99); }
+  to{ opacity:1; transform:translateY(0) rotateX(0) scale(1); }
+}
+/* END V127 */

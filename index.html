@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- V126 SINGLE CARD RESULTS TICKER -->
+  <!-- V127 ISOLATED RESULTS TICKER -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
@@ -2693,11 +2693,14 @@
       let tickerOffset = 0;
       let tickerLastTime = 0;
       let tickerAnimationId = 0;
-      let resultsTickerIndex = 0;
-      let resultsTickerTimer = 0;
       let resultsTickerSignature = "";
-      let resultsTickerRunId = 0;
-      let resultsTickerCards = [];
+      window.__v127ResultsTicker = window.__v127ResultsTicker || {
+        cards: [],
+        index: 0,
+        intervalId: 0,
+        lastRenderedKey: "",
+        started: false
+      };
       let skipLotteryReveal = false;
 
       function startSportsTicker(){
@@ -2837,7 +2840,9 @@
             const fantasy = safeFantasyPoints(p);
             const pic = safePlayerImageUrl(p);
             const logo = safeTeamLogoUrl(team);
+            const playerId = p.id || p.playerId || p.nhlId || "";
             newCards.push({
+              key:`filled-${i + 1}-${playerId}-${player}`,
               type:"filled",
               pickNumber:i + 1,
               player,
@@ -2851,6 +2856,7 @@
             });
           } else {
             newCards.push({
+              key:`tba-${i + 1}`,
               type:"tba",
               pickNumber:i + 1,
               player:"TBA",
@@ -2875,12 +2881,8 @@
 
         mover.innerHTML = `<span class="v120-marquee-copy"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span><span class="v120-marquee-copy" aria-hidden="true"><span class="v120-section-title">Next 10 Picks</span>${upcomingLine}</span>`;
 
-        if (force || resultsSignature !== resultsTickerSignature || !resultsTickerCards.length) {
-          resultsTickerSignature = resultsSignature;
-          resultsTickerCards = newCards;
-          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
-          startSingleCardResultsTicker(true);
-        }
+        // V127: update the result-card data only. Do NOT restart the 5-second timer.
+        setV127ResultsCards(newCards, resultsSignature);
       }
 
       function resultCardHtml(card){
@@ -2909,7 +2911,12 @@
       function renderSingleResultCard(card){
         const host = document.getElementById("v126ResultsCardHost");
         if (!host || !card) return;
+        const state = window.__v127ResultsTicker;
+        if (state.lastRenderedKey === card.key && host.querySelector("#v126ResultsCard")) return;
+
         host.innerHTML = resultCardHtml(card);
+        state.lastRenderedKey = card.key;
+
         const rendered = document.getElementById("v126ResultsCard");
         if (rendered) {
           rendered.classList.remove("entering");
@@ -2918,33 +2925,52 @@
         }
       }
 
-      function startSingleCardResultsTicker(reset = false){
-        const host = document.getElementById("v126ResultsCardHost");
-        if (!host || !resultsTickerCards.length) return;
+      function setV127ResultsCards(cards, signature){
+        const state = window.__v127ResultsTicker;
+        if (!Array.isArray(cards) || !cards.length) return;
 
-        if (reset) {
-          clearTimeout(resultsTickerTimer);
-          resultsTickerRunId++;
-          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
+        const oldCurrent = state.cards[state.index] || null;
+        const oldKey = oldCurrent && oldCurrent.key;
+
+        state.cards = cards;
+
+        // Keep the viewer's place when possible after data refresh.
+        if (oldKey) {
+          const sameIndex = cards.findIndex(card => card.key === oldKey);
+          if (sameIndex >= 0) state.index = sameIndex;
+          else if (state.index >= cards.length) state.index = 0;
+        } else if (state.index >= cards.length) {
+          state.index = 0;
         }
 
-        const myRun = resultsTickerRunId;
+        resultsTickerSignature = signature;
 
-        function showNext(){
-          if (myRun !== resultsTickerRunId) return;
-          if (!resultsTickerCards.length) return;
+        if (!state.started) {
+          state.started = true;
+          startV127ResultsTicker();
+        } else if (!document.getElementById("v126ResultsCard")) {
+          renderSingleResultCard(state.cards[state.index] || state.cards[0]);
+        }
+      }
 
-          if (resultsTickerIndex >= resultsTickerCards.length) resultsTickerIndex = 0;
+      function startV127ResultsTicker(){
+        const state = window.__v127ResultsTicker;
+        if (state.intervalId) clearInterval(state.intervalId);
 
-          const card = resultsTickerCards[resultsTickerIndex];
+        function tick(){
+          const currentState = window.__v127ResultsTicker;
+          if (!currentState.cards.length) return;
+
+          if (currentState.index >= currentState.cards.length) currentState.index = 0;
+
+          const card = currentState.cards[currentState.index];
           renderSingleResultCard(card);
-          resultsTickerIndex = (resultsTickerIndex + 1) % resultsTickerCards.length;
 
-          clearTimeout(resultsTickerTimer);
-          resultsTickerTimer = setTimeout(showNext, 5000);
+          currentState.index = (currentState.index + 1) % currentState.cards.length;
         }
 
-        showNext();
+        tick();
+        state.intervalId = setInterval(tick, 5000);
       }
 
       function renderTickerFromOrder(order){
