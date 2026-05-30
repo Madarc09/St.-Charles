@@ -38,6 +38,7 @@
 
   <nav class="tabs" aria-label="Main navigation">
     <button class="tab active" data-tab="dashboard">Home</button>
+    <button class="tab" data-tab="homeEditor">Home Page Editor</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
     <button class="tab" data-tab="previousSeason">Previous Season</button>
@@ -51,9 +52,9 @@
       <article class="card home-leaderboard-card">
         <div class="section-head compact-head">
           <div>
-            <p class="eyebrow">2025-2026 Season Leaderboard</p>
-            <h2>Last season standings</h2>
-            <p class="muted">Pool scoring: Skaters — 2 pts per goal, 1 per assist, 5 per SHG/GWG. Goalies — 2 per win, 5 per assist, 10 per goal, 5 per shutout.</p>
+            <p class="eyebrow">Basement Bar League</p>
+            <h2>League standings</h2>
+            <p class="muted">Choose a leaderboard environment in the Home Page Editor.</p>
           </div>
           <button class="primary" id="refreshStatsBtn2">Pull 2025-26 Stats</button>
         </div>
@@ -64,6 +65,20 @@
             <span>Pulling the 2025-26 regular-season stats and calculating pool standings.</span>
           </div>
         </div>
+      </article>
+    </section>
+
+    <section id="homeEditor" class="panel home-editor-panel">
+      <article class="card home-editor-card">
+        <div class="section-head compact-head">
+          <div>
+            <p class="eyebrow">Home Page Editor</p>
+            <h2>Leaderboard template lab</h2>
+            <p class="muted">Ten different display environments using the same standings data. Pick one to preview it on the Home page.</p>
+          </div>
+        </div>
+        <div id="homeTemplatePicker" class="home-template-picker"></div>
+        <div id="homeTemplatePreview" class="home-template-preview"></div>
       </article>
     </section>
 
@@ -4260,6 +4275,90 @@
 })();
 </script>
 
+
+
+<style id="v158-home-template-lab-style">
+  /* Remove old block-message feel from the home page */
+  #dashboard .season-arena-banner,
+  #dashboard .season-leaderboard-note{display:none!important;}
+  #dashboard .compact-head{display:none!important;}
+  #dashboard .home-leaderboard-card{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;}
+  #homeRosterSourceStatus{display:none!important;}
+  #leaderboardTable{background:transparent!important;border:0!important;padding:0!important;overflow:visible!important;}
+
+  .home-template-picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0 18px;}
+  .template-choice{border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px;background:linear-gradient(135deg,rgba(12,19,32,.92),rgba(2,7,14,.92));color:#eaf5ff;cursor:pointer;text-align:left;box-shadow:0 12px 28px rgba(0,0,0,.25);}
+  .template-choice strong{display:block;color:#fff;font-size:.95rem}.template-choice span{display:block;color:#aec2da;font-size:.76rem;margin-top:4px;line-height:1.25}.template-choice.active{outline:2px solid rgba(111,190,255,.88);box-shadow:0 0 0 4px rgba(111,190,255,.15),0 15px 36px rgba(0,0,0,.34)}
+  .home-template-preview{margin-top:10px;}
+
+  .lb-env{position:relative;border-radius:26px;overflow:hidden;margin:0 auto 18px;min-height:520px;border:1px solid rgba(255,255,255,.16);box-shadow:0 28px 80px rgba(0,0,0,.55);background:#05070b;color:#f5fbff;}
+  .lb-env::before,.lb-env::after{content:"";position:absolute;pointer-events:none;inset:0}.lb-env-content{position:relative;z-index:2;padding:30px;}.lb-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}.lb-title h2{margin:0;color:#fff;letter-spacing:.03em}.lb-title p{margin:4px 0 0;color:#bad0e7;font-size:.82rem}.lb-badge{font-weight:1000;font-size:.75rem;letter-spacing:.11em;text-transform:uppercase;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.08);white-space:nowrap}
+  .lb-board{overflow:auto;border-radius:18px}.lb-table{width:100%;border-collapse:separate;border-spacing:0 7px;min-width:800px}.lb-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:#9fb9d4;text-align:center;padding:5px 7px;white-space:nowrap}.lb-table th:nth-child(2){text-align:left}.lb-sort{all:unset;cursor:pointer;color:inherit;font:inherit;font-weight:1000}.lb-sort:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}.lb-row{background:rgba(8,18,32,.86);box-shadow:0 8px 24px rgba(0,0,0,.18)}.lb-row td{padding:8px 7px;text-align:center;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);font-size:.8rem;white-space:nowrap}.lb-row td:first-child{border-left:1px solid rgba(255,255,255,.07);border-radius:12px 0 0 12px}.lb-row td:last-child{border-right:1px solid rgba(255,255,255,.07);border-radius:0 12px 12px 0}.lb-row td:nth-child(2){text-align:left}.lb-rank{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-weight:1000;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.17)}.lb-rank.gold{background:linear-gradient(135deg,#d39b20,#fff0a9);color:#211500}.lb-rank.silver{background:linear-gradient(135deg,#aab6c8,#fff);color:#111923}.lb-rank.bronze{background:linear-gradient(135deg,#96541e,#ffd2a3);color:#180900}.lb-team-btn{all:unset;cursor:pointer;font-weight:1000;color:#fff;display:inline-flex;gap:7px;align-items:center}.lb-team-btn i{font-style:normal;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.22);font-size:.65rem;background:rgba(255,255,255,.1)}.lb-total{font-weight:1000;color:#fff;font-size:.93rem}.lb-detail[hidden]{display:none!important}.lb-detail>td{padding:0 6px 10px!important}.lb-roster-mini{border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(0,0,0,.42);padding:8px;max-height:255px;overflow:auto}.lb-roster-mini h3{margin:0 0 5px;font-size:.78rem;text-transform:uppercase;letter-spacing:.09em}.lb-roster-mini table{width:100%;border-collapse:collapse;table-layout:fixed}.lb-roster-mini th,.lb-roster-mini td{padding:3px 4px!important;border-radius:0!important;border:0!important;border-top:1px solid rgba(255,255,255,.08)!important;font-size:.62rem!important;text-align:center!important;line-height:1.05;white-space:nowrap}.lb-roster-mini th:first-child,.lb-roster-mini td:first-child{text-align:left!important;width:32%;white-space:normal}.lb-player-name{font-weight:950;color:#fff;display:block}.lb-player-meta{display:block;color:#9fb1c6;font-size:.52rem;margin-top:1px}.lb-note{font-size:.7rem;color:#98aec8;margin-top:8px;text-align:right}
+
+  /* 10 distinct environments */
+  .tpl-chalkboard{background:radial-gradient(circle at 50% 0%,rgba(255,232,170,.11),transparent 35%),linear-gradient(135deg,#162115,#060906)}.tpl-chalkboard::before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.026) 0 1px,transparent 1px 7px),radial-gradient(circle at 12% 18%,rgba(255,255,255,.05),transparent 15%)}.tpl-chalkboard .lb-env-content{padding:42px;background:linear-gradient(90deg,rgba(73,42,18,.45),transparent 6%,transparent 94%,rgba(73,42,18,.45)),linear-gradient(180deg,rgba(73,42,18,.45),transparent 8%,transparent 92%,rgba(73,42,18,.45))}.tpl-chalkboard .lb-title h2{font-family:Georgia,serif;text-shadow:0 0 10px rgba(255,255,255,.25)}.tpl-chalkboard .lb-row{background:rgba(11,32,17,.82)}
+  .tpl-jumbotron{background:radial-gradient(circle at 50% 0%,rgba(64,129,255,.28),transparent 42%),linear-gradient(180deg,#071426,#020407)}.tpl-jumbotron::before{background:linear-gradient(90deg,rgba(255,255,255,.03) 50%,transparent 50%),linear-gradient(0deg,rgba(255,255,255,.03) 50%,transparent 50%);background-size:8px 8px;opacity:.65}.tpl-jumbotron .lb-env-content{padding:26px}.tpl-jumbotron .lb-board{background:linear-gradient(180deg,#081e39,#020a15);border:8px solid #1b2a3f;box-shadow:inset 0 0 30px rgba(70,170,255,.22),0 0 45px rgba(32,109,220,.24)}.tpl-jumbotron .lb-title{border:1px solid rgba(255,255,255,.18);padding:13px 15px;border-radius:18px;background:rgba(0,0,0,.32)}
+  .tpl-arcade{background:radial-gradient(circle at 50% 30%,rgba(255,57,196,.24),transparent 38%),linear-gradient(135deg,#12021f,#020308)}.tpl-arcade::before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 4px);opacity:.18}.tpl-arcade .lb-env-content{padding:34px}.tpl-arcade .lb-board{border:10px solid #1d162a;background:#03070d;box-shadow:0 0 0 3px rgba(255,255,255,.08), inset 0 0 38px rgba(0,255,201,.16)}.tpl-arcade .lb-title h2,.tpl-arcade .lb-total{color:#a7fffb;text-shadow:0 0 10px rgba(0,255,220,.45)}.tpl-arcade .lb-row{background:rgba(16,6,34,.9)}
+  .tpl-lockertv{background:linear-gradient(90deg,#211a12,#090909 18%,#090909 82%,#221910)}.tpl-lockertv::before{background:linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 100%;opacity:.85}.tpl-lockertv .lb-env-content{padding:40px}.tpl-lockertv .lb-board{background:linear-gradient(180deg,#06080a,#020304);border:12px solid #2e2e31;border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.55),inset 0 0 22px rgba(88,132,255,.18)}.tpl-lockertv .lb-title{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.11);border-radius:18px;padding:12px}
+  .tpl-newspaper{background:linear-gradient(135deg,#e1d3b4,#9d8c69);color:#18130a}.tpl-newspaper::before{background:repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0 1px,transparent 1px 4px);opacity:.45}.tpl-newspaper .lb-title h2,.tpl-newspaper .lb-title p,.tpl-newspaper .lb-badge{color:#21170a}.tpl-newspaper .lb-board{background:rgba(255,247,224,.72);border:1px solid rgba(0,0,0,.28);box-shadow:inset 0 0 0 3px rgba(0,0,0,.05)}.tpl-newspaper .lb-table th{color:#3a2a13}.tpl-newspaper .lb-row{background:rgba(255,252,238,.88);color:#1b140a}.tpl-newspaper .lb-team-btn,.tpl-newspaper .lb-total,.tpl-newspaper .lb-player-name{color:#1b140a}.tpl-newspaper .lb-roster-mini{background:rgba(255,252,238,.7);color:#1b140a}
+  .tpl-warroom{background:radial-gradient(circle at 20% 15%,rgba(197,61,48,.18),transparent 30%),linear-gradient(135deg,#24190d,#050403)}.tpl-warroom::before{background:linear-gradient(60deg,transparent 48%,rgba(255,48,48,.16) 49%,transparent 50%),linear-gradient(-35deg,transparent 48%,rgba(255,215,122,.10) 49%,transparent 50%);background-size:190px 130px}.tpl-warroom .lb-board{background:rgba(31,19,9,.76);border:1px solid rgba(255,214,129,.22)}.tpl-warroom .lb-row{background:rgba(57,34,15,.86)}
+  .tpl-scoreclock{background:linear-gradient(135deg,#090909,#19140b)}.tpl-scoreclock::before{background:radial-gradient(circle at 50% 0%,rgba(255,188,56,.22),transparent 38%)}.tpl-scoreclock .lb-board{border:13px solid #2d2410;background:#080807;box-shadow:inset 0 0 35px rgba(255,191,54,.13)}.tpl-scoreclock .lb-title h2,.tpl-scoreclock .lb-total{color:#ffcf62;text-shadow:0 0 12px rgba(255,194,62,.48)}.tpl-scoreclock .lb-row{background:rgba(35,23,5,.88)}
+  .tpl-vhs{background:linear-gradient(135deg,#101018,#06060b)}.tpl-vhs::before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 5px),linear-gradient(90deg,rgba(255,0,0,.08),rgba(0,255,255,.08));opacity:.35}.tpl-vhs .lb-board{border:2px solid rgba(255,255,255,.18);background:rgba(2,4,8,.9);filter:saturate(.92)}.tpl-vhs .lb-title h2::before{content:"PLAY  ▶  ";font-size:.75em;color:#dfefff}.tpl-vhs .lb-row{background:rgba(15,19,31,.92)}
+  .tpl-cardbinder{background:linear-gradient(135deg,#1b2230,#05070a)}.tpl-cardbinder::before{background:linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:33.33% 33.33%;opacity:.5}.tpl-cardbinder .lb-board{background:rgba(220,235,255,.10);border:1px solid rgba(235,245,255,.22);box-shadow:inset 0 0 22px rgba(255,255,255,.07)}.tpl-cardbinder .lb-row{background:linear-gradient(135deg,rgba(16,33,56,.9),rgba(7,12,20,.92));}
+  .tpl-bracket{background:radial-gradient(circle at 50% 0%,rgba(103,191,255,.16),transparent 36%),linear-gradient(135deg,#0c1020,#020306)}.tpl-bracket::before{background:linear-gradient(90deg,transparent 0 48%,rgba(255,255,255,.08) 49% 51%,transparent 52% 100%),linear-gradient(0deg,transparent 0 48%,rgba(255,255,255,.06) 49% 51%,transparent 52% 100%);background-size:120px 80px;opacity:.45}.tpl-bracket .lb-row{background:rgba(12,23,43,.88)}.tpl-bracket .lb-board{border:1px solid rgba(137,201,255,.24);background:rgba(5,12,23,.7)}
+
+  @media(max-width:760px){.lb-env{border-radius:18px;min-height:0}.lb-env-content{padding:14px!important}.lb-title{align-items:flex-start;gap:8px;flex-direction:column;margin-bottom:8px}.lb-title h2{font-size:1.05rem}.lb-title p{font-size:.68rem}.lb-badge{font-size:.62rem;padding:5px 8px}.lb-board{max-width:100%;overflow:auto}.lb-table{min-width:680px;border-spacing:0 5px}.lb-table th{font-size:.55rem;padding:4px}.lb-row td{font-size:.64rem;padding:6px 4px}.lb-roster-mini{max-height:230px}.lb-roster-mini th,.lb-roster-mini td{font-size:.54rem!important;padding:3px!important}.home-template-picker{grid-template-columns:1fr}.template-choice{padding:10px}}
+</style>
+
+<script id="v158-home-template-lab-script">
+(function(){
+  const TEMPLATES=[
+    ['chalkboard','Sports Bar Chalkboard','Standings written into the basement bar wall.'],
+    ['jumbotron','Arena Jumbotron','Big scoreboard hanging over the room.'],
+    ['arcade','Arcade High Scores','CRT glow and retro high-score energy.'],
+    ['lockertv','Locker Room TV','Standings playing on a screen inside the locker room.'],
+    ['newspaper','Morning Sports Page','Old newspaper standings column.'],
+    ['warroom','Draft War Room','Corkboard/string conspiracy board.'],
+    ['scoreclock','Beer League Score Clock','Old rink scoreboard / clock panel.'],
+    ['vhs','VHS Tape Overlay','Recorded-off-TV stat screen.'],
+    ['cardbinder','Hockey Card Binder','Plastic sleeve / trading-card page feel.'],
+    ['bracket','March Madness Board','Bracket-room scoreboard style.']
+  ];
+  let activeTemplate=localStorage.getItem('bb_home_template')||'jumbotron';
+  let sortKey='total', sortDir='desc', openOwner=null;
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function num(v){const n=Number(v||0);return Number.isFinite(n)?n:0;}
+  function getRows(){const d=window.__lastSeasonApiDiagnostics; if(!d||!Array.isArray(d.rows)) return []; return d.rows.map(r=>({...r,players:Array.isArray(r.players)?r.players:[]}));}
+  function sortRows(rows){return rows.slice().sort((a,b)=>{let av=a[sortKey],bv=b[sortKey]; if(sortKey==='ownerName'){av=String(av||'');bv=String(bv||''); return sortDir==='asc'?av.localeCompare(bv):bv.localeCompare(av);} av=num(av);bv=num(bv); return sortDir==='asc'?av-bv:bv-av;});}
+  function rankClass(i){return i===0?'gold':i===1?'silver':i===2?'bronze':'';}
+  function sortBtn(k,l){return `<button class="lb-sort" data-v158-sort="${k}">${l}${sortKey===k?(sortDir==='asc'?' ↑':' ↓'):''}</button>`;}
+  function rosterRows(row){return row.players.map(p=>`<tr><td><span class="lb-player-name">${esc(p.name)}</span><span class="lb-player-meta">${esc(p.position||p.type||'')} • ${esc(p.nhlTeam||'')}</span></td><td>${p.type==='goalie'||p.position==='G'?'G':'S'}</td><td>${num(p.goals)}</td><td>${num(p.assists)}</td><td>${num(p.shortHandedGoals)}</td><td>${num(p.gameWinningGoals)}</td><td>${num(p.goalieWins)}</td><td>${num(p.goalieShutouts)}</td><td>${num(p.goalieAssists||((p.type==='goalie'||p.position==='G')?p.assists:0))}</td><td>${num(p.goalieGoals||((p.type==='goalie'||p.position==='G')?p.goals:0))}</td><td><b>${num(p.fpts)}</b></td></tr>`).join('')||'<tr><td colspan="11">No roster players.</td></tr>';}
+  function boardHtml(template, targetPrefix){const rows=sortRows(getRows()); const tpl=TEMPLATES.find(t=>t[0]===template)||TEMPLATES[0]; return `<div class="lb-env tpl-${esc(template)}"><div class="lb-env-content"><div class="lb-title"><div><h2>${esc(tpl[1])}</h2><p>2025-2026 standings using pool scoring. Tap a team for the compact full roster.</p></div><div class="lb-badge">G A SHG GWG W SO GA GG</div></div><div class="lb-board"><table class="lb-table"><thead><tr><th>${sortBtn('rank','Rank')}</th><th>${sortBtn('ownerName','Team')}</th><th>${sortBtn('total','FPTS')}</th><th>${sortBtn('goals','G')}</th><th>${sortBtn('assists','A')}</th><th>${sortBtn('shortHandedGoals','SHG')}</th><th>${sortBtn('gameWinningGoals','GWG')}</th><th>${sortBtn('goalieWins','W')}</th><th>${sortBtn('goalieShutouts','SO')}</th><th>${sortBtn('goalieAssists','GA')}</th><th>${sortBtn('goalieGoals','GG')}</th></tr></thead><tbody>${rows.map((r,i)=>{const id=`${targetPrefix}-${r.ownerId}`; const open=openOwner===id; return `<tr class="lb-row"><td><span class="lb-rank ${rankClass(i)}">${i+1}</span></td><td><button type="button" class="lb-team-btn" data-v158-toggle="${id}"><i>${open?'▾':'▸'}</i>${esc(r.ownerName)}</button></td><td><span class="lb-total">${num(r.total)}</span></td><td>${num(r.goals)}</td><td>${num(r.assists)}</td><td>${num(r.shortHandedGoals)}</td><td>${num(r.gameWinningGoals)}</td><td>${num(r.goalieWins)}</td><td>${num(r.goalieShutouts)}</td><td>${num(r.goalieAssists)}</td><td>${num(r.goalieGoals)}</td></tr><tr id="${id}" class="lb-detail" ${open?'':'hidden'}><td colspan="11"><div class="lb-roster-mini"><h3>${esc(r.ownerName)} roster performance</h3><table><thead><tr><th>Player</th><th>T</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th><th>W</th><th>SO</th><th>GA</th><th>GG</th><th>FPTS</th></tr></thead><tbody>${rosterRows(r)}</tbody></table></div></td></tr>`}).join('')}</tbody></table></div><div class="lb-note">Template: ${esc(tpl[1])}</div></div></div>`;}
+  function renderHome(){const host=document.getElementById('leaderboardTable'); if(!host) return; if(!getRows().length){host.innerHTML='<div class="clean-loading-card"><strong>Standings loading…</strong><span>Waiting for 2025-2026 stats.</span></div>'; return;} host.innerHTML=boardHtml(activeTemplate,'home-v158');}
+  function renderEditor(){const picker=document.getElementById('homeTemplatePicker'); const preview=document.getElementById('homeTemplatePreview'); if(!picker||!preview) return; picker.innerHTML=TEMPLATES.map(t=>`<button type="button" class="template-choice ${t[0]===activeTemplate?'active':''}" data-template-choice="${t[0]}"><strong>${esc(t[1])}</strong><span>${esc(t[2])}</span></button>`).join(''); preview.innerHTML=getRows().length?boardHtml(activeTemplate,'editor-v158'):'<div class="clean-loading-card"><strong>Standings loading…</strong><span>The templates will populate once the stats load.</span></div>';}
+  function renderAllV158(){renderHome();renderEditor();}
+  function moveAdminControls(){
+    const draftActions=document.getElementById('draftRoomLotteryTop');
+    const admin=document.querySelector('.admin-draft-actions');
+    if(admin && !document.getElementById('adminLotteryControlsBox')){
+      const box=document.createElement('div');box.id='adminLotteryControlsBox';box.className='actions stack-sm admin-lottery-actions';box.innerHTML='<strong style="color:#fff;align-self:center;margin-right:8px">Lottery Controls</strong>';
+      const run=document.getElementById('runLiveLotteryBtn'); const replay=document.getElementById('replayLotteryBtn');
+      if(run) box.appendChild(run); if(replay) box.appendChild(replay);
+      admin.appendChild(box);
+    }
+    if(draftActions){const head=draftActions.querySelector('.draft-room-lottery-head'); if(head) head.remove();}
+    document.getElementById('restoreFinalOwnersBtn')?.remove();
+    document.getElementById('loadSampleOwnersBtn')?.remove();
+  }
+  document.addEventListener('click',e=>{
+    const choice=e.target.closest?.('[data-template-choice]'); if(choice){activeTemplate=choice.dataset.templateChoice;localStorage.setItem('bb_home_template',activeTemplate);openOwner=null;renderAllV158();return;}
+    const sort=e.target.closest?.('[data-v158-sort]'); if(sort){const k=sort.dataset.v158Sort;if(sortKey===k)sortDir=sortDir==='asc'?'desc':'asc';else{sortKey=k;sortDir=k==='ownerName'?'asc':'desc';}renderAllV158();return;}
+    const toggle=e.target.closest?.('[data-v158-toggle]'); if(toggle){openOwner=openOwner===toggle.dataset.v158Toggle?null:toggle.dataset.v158Toggle;renderAllV158();return;}
+  },true);
+  function boot(){moveAdminControls();renderAllV158();}
+  window.addEventListener('load',()=>{let last=''; let tries=0; const timer=setInterval(()=>{moveAdminControls(); const sig=JSON.stringify((window.__lastSeasonApiDiagnostics||{}).rows||[]); if(sig!==last){last=sig; renderAllV158();} if(++tries>80) clearInterval(timer);},600); setTimeout(boot,400); setTimeout(boot,2200);});
+})();
+</script>
 </body>
 </html>
 
