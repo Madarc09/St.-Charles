@@ -3946,6 +3946,10 @@
     }
     function renderWalkableLocker(draft = {}){
       room.lastDraft = draft;
+      if (room.view !== 'stall' && typeof window.__renderExactTrophyLobby === 'function') {
+        window.__renderExactTrophyLobby(draft);
+        return;
+      }
       const target = document.getElementById('rosterCards');
       if (!target) return;
       const owners = getOwners(draft);
@@ -4427,6 +4431,18 @@
   @media(max-width:760px){#rosters .official-source-status{margin-top:10px}.trophy-lobby{min-height:560px;border-radius:20px}.trophy-lobby-title{padding-top:22px;letter-spacing:.22em}.trophy-lobby-title small{font-size:.62rem;letter-spacing:.08em;padding:0 18px}.trophy-door-ring{height:360px}.trophy-door{width:158px;height:260px;margin-left:-79px;top:48px}.trophy-door-left{transform:translateX(-150px) translateZ(-85px) rotateY(25deg) scale(.72)}.trophy-door-center{transform:translateX(0) translateZ(45px) scale(1.02)}.trophy-door-right{transform:translateX(150px) translateZ(-85px) rotateY(-25deg) scale(.72)}.trophy-door-hidden-left{transform:translateX(-280px) translateZ(-180px) rotateY(42deg) scale(.55);opacity:0}.trophy-door-hidden-right{transform:translateX(280px) translateZ(-180px) rotateY(-42deg) scale(.55);opacity:0}.door-nameplate{font-size:.88rem;left:10px;right:10px;height:36px;letter-spacing:.1em}.door-panel-lines{left:25px;right:25px;top:74px;bottom:58px}.door-meta{bottom:31px}.door-meta b{font-size:1.2rem}.door-meta em{font-size:.58rem}.door-enter-hint{font-size:.55rem}.lobby-arrow{width:50px;height:50px;border-radius:15px;font-size:2.7rem;top:54%}.lobby-arrow-left{left:10px}.lobby-arrow-right{right:10px}.lobby-control-deck{bottom:14px;grid-template-columns:1fr;gap:8px;min-width:calc(100% - 30px);text-align:center}.lobby-enter{justify-self:stretch}.lobby-control-deck>span{display:none}}
 </style>
 
+
+<style id="v164-literal-lobby-cleanup-style">
+  /* V164: make Trophy Room lobby be the uploaded PNG only. */
+  #rosters > .section-head, #rostersSourceStatus{display:none!important;}
+  #rosters.panel{padding-top:0!important;}
+  #rosters #rosterCards{display:block!important;margin-top:0!important;}
+  #rosters .exact-lobby-host{padding:0!important;margin:0!important;}
+  #rosters .exact-lobby-shell{max-width:1536px!important;width:100%!important;aspect-ratio:1536/1024!important;border-radius:0!important;border:none!important;background:#000!important;box-shadow:none!important;}
+  #rosters .exact-lobby-scene{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;}
+  #rosters .trophy-lobby{display:none!important;}
+  @media(max-width:760px){#rosters.panel{padding-left:0!important;padding-right:0!important;}#rosters .exact-lobby-shell{width:100vw!important;margin-left:50%!important;transform:translateX(-50%)!important;}}
+</style>
 </body>
 </html>
 
@@ -4509,8 +4525,19 @@
     shell?.addEventListener('pointerdown',e=>{start=e.clientX; shell.setPointerCapture?.(e.pointerId);});
     shell?.addEventListener('pointerup',e=>{if(start==null)return;const dx=e.clientX-start;start=null;if(Math.abs(dx)>46){setFocusByStep(dx>0?-1:1);enter(owners[focusIndex].id,shell);}});
   }
+  window.__renderExactTrophyLobby = renderExactLobby;
   window.renderDraftRosters=renderExactLobby;
   window.renderWalkableLockerRoom=renderExactLobby;
-  window.addEventListener('load',()=>setTimeout(async()=>{try{if(window.officialDraftApi?.load){renderExactLobby(await window.officialDraftApi.load());return;}}catch(e){}renderExactLobby(window.__exactLobbyDraft||{});},1200));
+  window.addEventListener('load',()=>setTimeout(async()=>{try{if(window.officialDraftApi?.load){renderExactLobby(await window.officialDraftApi.load());return;}}catch(e){}renderExactLobby(window.__exactLobbyDraft||{});},120));
+
+  const target=document.getElementById('rosterCards');
+  if(target){
+    const observer=new MutationObserver(()=>{
+      if(!target.querySelector('.exact-lobby-shell') && target.querySelector('.trophy-lobby') && !(document.querySelector('#rosters')?.classList.contains('stall-open'))) {
+        setTimeout(()=>renderExactLobby(window.__exactLobbyDraft||{}),0);
+      }
+    });
+    observer.observe(target,{childList:true,subtree:false});
+  }
 })();
 </script>
