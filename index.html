@@ -4262,3 +4262,152 @@
 
 </body>
 </html>
+
+<style id="v157-compact-home-roster-dropdown-fix">
+  /* Fix: older mobile standings CSS hid every breakdown row with !important. */
+  .season-rankings-board .season-breakdown-row:not([hidden]){
+    display:table-row!important;
+  }
+  .season-rankings-board .season-breakdown-row[hidden]{
+    display:none!important;
+  }
+
+  /* Compact expanded roster: show the whole 12-man roster without taking over the page. */
+  #dashboard .season-breakdown-panel{
+    padding:8px 10px!important;
+    border-radius:12px!important;
+    max-height:320px;
+    overflow:auto;
+    background:linear-gradient(135deg,rgba(3,10,20,.92),rgba(10,19,31,.86))!important;
+  }
+  #dashboard .season-breakdown-panel h3{
+    margin:0 0 5px!important;
+    font-size:.82rem!important;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:#dff0ff!important;
+  }
+  #dashboard .season-breakdown-table-wrap{
+    overflow:visible!important;
+  }
+  #dashboard .season-compact-roster{
+    min-width:0!important;
+    width:100%!important;
+    table-layout:fixed;
+    border-collapse:collapse!important;
+  }
+  #dashboard .season-compact-roster th,
+  #dashboard .season-compact-roster td{
+    padding:3px 4px!important;
+    font-size:.64rem!important;
+    line-height:1.05!important;
+    white-space:nowrap;
+  }
+  #dashboard .season-compact-roster th:first-child,
+  #dashboard .season-compact-roster td:first-child{
+    width:33%;
+    white-space:normal;
+  }
+  #dashboard .season-compact-roster th:nth-child(2),
+  #dashboard .season-compact-roster td:nth-child(2){width:5%;}
+  #dashboard .season-compact-roster th:nth-child(n+3),
+  #dashboard .season-compact-roster td:nth-child(n+3){width:6%;}
+  #dashboard .season-compact-roster th:last-child,
+  #dashboard .season-compact-roster td:last-child{
+    display:none!important; /* hide long calculation column on the home page only */
+  }
+  #dashboard .season-player-name{
+    font-size:.68rem!important;
+    line-height:1.05!important;
+  }
+  #dashboard .season-player-source{
+    font-size:.54rem!important;
+    line-height:1!important;
+    opacity:.72;
+  }
+  #dashboard .season-breakdown-row td{
+    padding:0 4px 7px!important;
+  }
+
+  /* Make the main standings denser but still readable. */
+  #dashboard .season-rankings-board{border-spacing:0 6px!important;}
+  #dashboard .season-rankings-board .season-summary-row td{
+    padding:7px 5px!important;
+    font-size:.78rem;
+  }
+  #dashboard .season-rank-badge{width:25px;height:25px;font-size:.78rem;}
+  #dashboard .season-total-chip{font-size:.9rem!important;}
+  #dashboard .season-team-toggle{font-size:.86rem!important;}
+  #dashboard .season-team-toggle span{width:18px;height:18px;font-size:.7rem;}
+
+  @media(max-width:760px){
+    .season-rankings-board .season-breakdown-row:not([hidden]){
+      display:block!important;
+      width:100%!important;
+    }
+    #dashboard .season-breakdown-panel{
+      max-height:260px;
+      padding:7px!important;
+      margin-top:-3px;
+    }
+    #dashboard .season-compact-roster th,
+    #dashboard .season-compact-roster td{
+      padding:2px 2px!important;
+      font-size:.55rem!important;
+    }
+    #dashboard .season-player-name{font-size:.58rem!important;}
+    #dashboard .season-player-source{font-size:.48rem!important;}
+    #dashboard .season-compact-roster th:first-child,
+    #dashboard .season-compact-roster td:first-child{width:31%;}
+    #dashboard .season-compact-roster th:nth-child(2),
+    #dashboard .season-compact-roster td:nth-child(2){display:none!important;}
+    #dashboard .season-compact-roster th:nth-child(n+3),
+    #dashboard .season-compact-roster td:nth-child(n+3){width:auto;}
+    #dashboard .season-rankings-board .season-summary-row{
+      grid-template-columns:28px minmax(78px,1fr) repeat(3,minmax(34px,.45fr))!important;
+      gap:4px!important;
+      padding:7px!important;
+    }
+    #dashboard .season-rankings-board .season-summary-row td{
+      font-size:.62rem!important;
+    }
+    #dashboard .season-rankings-board .season-summary-row td::before{font-size:.46rem!important;}
+    #dashboard .season-team-toggle{font-size:.72rem!important;gap:4px!important;}
+    #dashboard .season-team-toggle span{width:16px;height:16px;font-size:.62rem;}
+    #dashboard .season-rank-badge{width:22px;height:22px;font-size:.68rem;}
+    #dashboard .season-total-chip{font-size:.76rem!important;}
+    #dashboard .season-leaderboard-note{font-size:.64rem!important;padding:8px!important;}
+    #dashboard .season-arena-banner{padding:8px!important;margin:8px 0!important;}
+    #dashboard .season-arena-logo{width:34px;height:34px;font-size:1.05rem;}
+    #dashboard .season-arena-banner strong{font-size:.78rem!important;}
+    #dashboard .season-arena-banner span{font-size:.62rem!important;}
+  }
+</style>
+
+<script id="v157-home-roster-dropdown-hardening">
+(function(){
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('#dashboard [data-season-toggle]');
+    if(!btn) return;
+    var id = btn.getAttribute('data-season-toggle');
+    var row = id && document.getElementById(id);
+    if(!row) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var willOpen = row.hasAttribute('hidden');
+    document.querySelectorAll('#dashboard .season-breakdown-row').forEach(function(r){
+      if(r !== row) r.setAttribute('hidden','');
+    });
+    document.querySelectorAll('#dashboard .season-team-toggle span').forEach(function(s){s.textContent='▸';});
+    if(willOpen){
+      row.removeAttribute('hidden');
+      var icon = btn.querySelector('span');
+      if(icon) icon.textContent='▾';
+    }else{
+      row.setAttribute('hidden','');
+      var icon2 = btn.querySelector('span');
+      if(icon2) icon2.textContent='▸';
+    }
+  }, true);
+})();
+</script>
