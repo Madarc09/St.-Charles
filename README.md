@@ -86,3 +86,17 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Added in-photo navigation buttons:
   - four other owner rooms
   - Trophy Room Lobby
+
+
+## v174 direct verified fix
+- Directly replaced the actual renderStall function that still contained:
+  - "Back to locker room"
+  - "'s Stall"
+  - stall-toolbar
+  - quick-stall-select
+  - roster <ol> list that caused the visible 1-5 numbers
+- Verified those literal strings/classes are no longer present in index.html.
+- Owner stall view now renders only:
+  - static room photo
+  - four other owner buttons
+  - Trophy Room Lobby button

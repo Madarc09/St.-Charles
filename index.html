@@ -49,6 +49,138 @@
   }
 </style>
 
+
+<style id="v174-photo-only-final-css">
+  /* v174: final direct fix. The real renderStall function now outputs only the photo + buttons. */
+
+  .v174-photo-only-host {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .v174-photo-only-stall {
+    width: min(100%, 1360px);
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #020304 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .v174-stall-stage {
+    position: relative !important;
+    width: 100%;
+    background: #020304;
+    overflow: hidden;
+    line-height: 0;
+  }
+
+  .v174-stall-img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    background: #020304;
+  }
+
+  .v174-stall-nav {
+    position: absolute;
+    right: clamp(16px, 2.1vw, 32px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    width: clamp(120px, 12.5vw, 172px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, .9vw, 13px);
+    line-height: normal;
+  }
+
+  .v174-stall-btn {
+    appearance: none;
+    min-height: clamp(36px, 4vw, 50px);
+    padding: 8px 10px;
+    border-radius: 11px;
+    border: 1px solid rgba(103, 190, 255, .82);
+    cursor: pointer;
+    color: #ecf8ff;
+    font-weight: 950;
+    font-size: clamp(10px, 1vw, 13px);
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,.9);
+    background:
+      linear-gradient(180deg, rgba(35,112,190,.78), rgba(6,20,38,.92)),
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,.22), transparent 58%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.24),
+      inset 0 -13px 22px rgba(0,0,0,.42),
+      0 0 18px rgba(35,145,255,.22),
+      0 8px 20px rgba(0,0,0,.35);
+    transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+  }
+
+  .v174-stall-btn:hover,
+  .v174-stall-btn:focus-visible {
+    transform: translateX(-4px);
+    border-color: rgba(255, 222, 120, .95);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.28),
+      0 0 28px rgba(255,210,90,.28),
+      0 10px 24px rgba(0,0,0,.45);
+    outline: none;
+  }
+
+  .v174-lobby-btn {
+    color: #ffe8aa;
+    border-color: rgba(255,208,95,.82);
+    background:
+      linear-gradient(180deg, rgba(110,76,22,.82), rgba(26,15,5,.94)),
+      radial-gradient(circle at 50% 0%, rgba(255,230,150,.28), transparent 58%);
+  }
+
+  @media (max-width: 760px) {
+    .v174-stall-stage {
+      min-height: 620px;
+    }
+
+    .v174-stall-img {
+      width: 180% !important;
+      height: 100% !important;
+      min-height: 620px !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      transform: translateX(-24%);
+    }
+
+    .v174-stall-nav {
+      right: 10px;
+      left: 10px;
+      bottom: 12px;
+      top: auto;
+      transform: none;
+      width: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .v174-stall-btn {
+      min-height: 38px;
+      font-size: 10px;
+      letter-spacing: .08em;
+      padding: 7px 8px;
+      border-radius: 10px;
+    }
+
+    .v174-lobby-btn {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -3940,38 +4072,20 @@
     }
     function renderStall(target, owners, rosters, active){
       const stall = STALLS[active.id] || STALLS.nick;
-      const roster = rosters[active.id] || [];
-      const source = room.lastDraft?.configured === false ? 'temporary server memory' : (room.lastDraft?.storage || room.lastDraft?.mode || 'draft roster data');
-      target.className = 'walkable-locker-host';
-      if (!stall.ready) {
-        target.innerHTML = `
-          <section class="walkable-empty-stall">
-            <button class="walk-back" data-locker-back>← Back to locker room</button>
-            <h3>${esc(active.teamName || active.name)} stall is not built yet</h3>
-            <p>We still need to create this owner’s custom locker-room image.</p>
-          </section>`;
-      } else {
-        target.innerHTML = `
-          <section class="owner-stall-view owner-${esc(active.id)}" aria-label="${esc(active.teamName || active.name)} roster stall">
-            <div class="stall-toolbar">
-              <button class="walk-back" data-locker-back>← Back to locker room</button>
-              <div>
-                <strong>${esc(active.teamName || active.name)}'s Stall</strong>
-                <span>${esc(stall.theme)} • ${roster.length} players • ${esc(source)}</span>
-              </div>
-              <div class="quick-stall-select">
-                ${owners.map(o=>`<button data-walk-stall="${esc(o.id)}" class="${o.id === active.id ? 'active' : ''}">${esc(o.teamName || o.name)}</button>`).join('')}
-              </div>
-            </div>
-            <div class="stall-image-stage">
-              <img class="owner-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} custom hockey locker stall">
-              
-                <h4>${esc(active.teamName || active.name)}'s Roster</h4>
-                <ol>${rosterRows(roster)}</ol>
-              </div>
-            </div>
-          </section>`;
-      }
+      target.className = 'walkable-locker-host v174-photo-only-host';
+
+      const navOwners = owners.filter(o => o.id !== active.id);
+      target.innerHTML = `
+        <section class="owner-stall-view owner-${esc(active.id)} v174-photo-only-stall" aria-label="${esc(active.teamName || active.name)} roster room">
+          <div class="v174-stall-stage">
+            <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} roster room">
+            <nav class="v174-stall-nav" aria-label="Roster room navigation">
+              ${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
+              <button type="button" class="v174-stall-btn v174-lobby-btn" data-locker-back>Trophy Room Lobby</button>
+            </nav>
+          </div>
+        </section>`;
+
       target.querySelectorAll('[data-locker-back]').forEach(btn => btn.addEventListener('click', () => {
         room.view = 'hub';
         renderWalkableLocker(room.lastDraft || {});
