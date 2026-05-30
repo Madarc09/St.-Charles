@@ -4430,74 +4430,84 @@
 </body>
 </html>
 
-<style id="v162-exact-lobby-image-style">
-  /* V162: use the actual generated Trophy Room lobby image as the scene, not CSS-drawn doors. */
-  .exact-lobby-shell{position:relative;width:100%;min-height:650px;border-radius:30px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.12);box-shadow:0 36px 90px rgba(0,0,0,.75);isolation:isolate;}
-  .exact-lobby-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--lobby-focus,50%) 50%;transition:object-position .72s cubic-bezier(.2,.86,.22,1),transform .72s cubic-bezier(.2,.86,.22,1),filter .45s ease;transform:scale(1.02);filter:contrast(1.03) saturate(1.02);}
-  .exact-lobby-shell.is-entering .exact-lobby-scene{transform:scale(1.34);filter:brightness(.72) blur(2px);}
-  .exact-lobby-shell:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,transparent 34%,rgba(0,0,0,.3) 72%,rgba(0,0,0,.68) 100%);z-index:2;pointer-events:none;}
-  .exact-lobby-shell:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.78),transparent 19%,transparent 81%,rgba(0,0,0,.78));z-index:3;pointer-events:none;}
-  .exact-lobby-hotzone{position:absolute;z-index:8;border:0;background:transparent;cursor:pointer;color:transparent;}
-  .exact-lobby-hotzone.center{left:36%;right:36%;top:28%;bottom:22%;}
-  .exact-lobby-hotzone.left{left:6%;width:28%;top:30%;bottom:22%;}
-  .exact-lobby-hotzone.right{right:6%;width:28%;top:30%;bottom:22%;}
-  .exact-lobby-help{position:absolute;z-index:10;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:10px 14px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(0,0,0,.58);box-shadow:0 18px 50px rgba(0,0,0,.55);backdrop-filter:blur(5px);}
-  .exact-lobby-help span{font-size:.68rem;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.62);white-space:nowrap;}
-  .exact-lobby-dots{display:flex;gap:8px;align-items:center;}
-  .exact-lobby-dots button{width:10px;height:10px;border-radius:50%;border:0;background:rgba(255,255,255,.34);cursor:pointer;padding:0;}
-  .exact-lobby-dots button.active{background:#f4c64b;box-shadow:0 0 16px rgba(244,198,75,.86);}
-  .exact-lobby-enter{border:1px solid rgba(255,221,120,.44);background:linear-gradient(180deg,rgba(255,210,87,.18),rgba(255,210,87,.06));color:#fff;border-radius:12px;padding:9px 12px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;white-space:nowrap;}
-  .exact-lobby-arrow{position:absolute;z-index:11;top:50%;transform:translateY(-50%);width:72px;height:72px;border-radius:22px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.48);color:#fff;font-size:4rem;line-height:.8;display:flex;align-items:center;justify-content:center;box-shadow:0 18px 45px rgba(0,0,0,.55);cursor:pointer;backdrop-filter:blur(4px);}
-  .exact-lobby-arrow:hover{border-color:rgba(255,220,110,.5);box-shadow:0 0 28px rgba(255,200,80,.18),0 18px 45px rgba(0,0,0,.55);}
-  .exact-lobby-arrow.prev{left:32px}.exact-lobby-arrow.next{right:32px}
-  .exact-enter-flash{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:#000;opacity:0;pointer-events:none;transition:opacity .38s ease;}
-  .exact-enter-flash:before{content:"";width:52vmin;height:52vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,226,145,.88),rgba(255,226,145,.18) 30%,transparent 62%);filter:blur(5px);transform:scale(.2);transition:transform .55s cubic-bezier(.18,.8,.18,1);}
-  .exact-lobby-shell.is-entering .exact-enter-flash{opacity:1;}.exact-lobby-shell.is-entering .exact-enter-flash:before{transform:scale(2.8);}
-  .exact-lobby-note{position:absolute;z-index:9;left:22px;top:18px;display:none;padding:7px 10px;border-radius:10px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.14);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.64);}
-  @media(max-width:760px){.exact-lobby-shell{min-height:560px;border-radius:20px;margin-inline:-8px}.exact-lobby-scene{object-position:var(--lobby-focus,50%) 50%;transform:scale(1.12)}.exact-lobby-arrow{width:48px;height:48px;border-radius:15px;font-size:2.7rem;top:52%;}.exact-lobby-arrow.prev{left:8px}.exact-lobby-arrow.next{right:8px}.exact-lobby-help{bottom:12px;left:12px;right:12px;transform:none;display:grid;grid-template-columns:1fr;gap:8px;text-align:center;padding:9px}.exact-lobby-help span{font-size:.56rem;white-space:normal}.exact-lobby-dots{justify-content:center}.exact-lobby-enter{font-size:.6rem;padding:8px 10px}.exact-lobby-hotzone.left{left:0;width:33%}.exact-lobby-hotzone.right{right:0;width:33%}.exact-lobby-hotzone.center{left:33%;right:33%;}}
+<style id="v163-literal-trophy-lobby-style">
+  /* V163: literal lobby. The uploaded PNG is the scene; no CSS-built doors, no visible UI overlay. */
+  #rosters > .section-head{display:none!important;}
+  #rostersSourceStatus{display:none!important;}
+  .exact-lobby-host{display:block!important;width:100%;}
+  .exact-lobby-shell{position:relative;width:100%;max-width:1536px;margin:0 auto;border-radius:0;overflow:hidden;background:#000;box-shadow:0 30px 90px rgba(0,0,0,.8);isolation:isolate;aspect-ratio:3/2;}
+  .exact-lobby-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;transform:none!important;filter:none!important;transition:transform .72s cubic-bezier(.2,.85,.2,1),filter .42s ease;}
+  .exact-lobby-shell.is-entering .exact-lobby-scene{transform:scale(1.34)!important;filter:brightness(.55) blur(1.5px)!important;}
+  .exact-lobby-hotzone{position:absolute;z-index:8;border:0;background:transparent;color:transparent;cursor:pointer;padding:0;outline:none;}
+  .exact-lobby-hotzone:focus-visible{outline:2px solid rgba(255,215,120,.65);outline-offset:2px;border-radius:8px;}
+  /* Door hit zones based on the exact uploaded image. */
+  .exact-lobby-hotzone.scott{left:1.6%;top:24%;width:13.2%;height:56%;}
+  .exact-lobby-hotzone.chris{left:20.2%;top:33%;width:14.2%;height:42%;}
+  .exact-lobby-hotzone.nick{left:42.8%;top:33%;width:15.2%;height:43%;}
+  .exact-lobby-hotzone.tyler{left:67.4%;top:33%;width:14.2%;height:43%;}
+  .exact-lobby-hotzone.andrew{right:1.7%;top:24%;width:13.2%;height:56%;}
+  /* Invisible arrow hit zones over the arrows that already exist inside the image. */
+  .exact-lobby-hotzone.prev{left:5.8%;bottom:9.7%;width:11.0%;height:7.3%;}
+  .exact-lobby-hotzone.next{right:6.0%;bottom:9.7%;width:11.0%;height:7.3%;}
+  .exact-enter-flash{position:absolute;inset:0;z-index:20;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--enter-x,50%) var(--enter-y,48%),rgba(255,230,145,.88),rgba(255,230,145,.12) 16%,rgba(0,0,0,.95) 54%,#000 100%);transition:opacity .36s ease;}
+  .exact-lobby-shell.is-entering .exact-enter-flash{opacity:1;}
+  @media(max-width:760px){
+    .exact-lobby-shell{width:calc(100vw - 18px);margin-inline:-3px;border-radius:0;aspect-ratio:3/2;}
+    #rosters.panel{padding-left:8px;padding-right:8px;}
+  }
 </style>
-<script id="v162-exact-lobby-image-script">
+<script id="v163-literal-trophy-lobby-script">
 (function(){
   const owners=[
-    {id:'scott',label:'Scott',focus:6},
-    {id:'chris',label:'Chris',focus:25},
-    {id:'nick',label:'Nick',focus:50},
-    {id:'tyler',label:'Tyler',focus:73},
-    {id:'andrew',label:'Andrew',focus:95}
+    {id:'scott',label:'Scott'},
+    {id:'chris',label:'Chris'},
+    {id:'nick',label:'Nick'},
+    {id:'tyler',label:'Tyler'},
+    {id:'andrew',label:'Andrew'}
   ];
-  let focusId='nick';
-  function idx(){return Math.max(0,owners.findIndex(o=>o.id===focusId));}
-  function rotate(step,draft){const i=idx();focusId=owners[(i+step+owners.length)%owners.length].id;renderExactLobby(draft||window.__exactLobbyDraft||{});}
-  function enter(id){
+  let focusIndex=2;
+  function ownerById(id){return owners.find(o=>o.id===id)||owners[2];}
+  function setFocusByStep(step){focusIndex=(focusIndex+step+owners.length)%owners.length;}
+  function enter(id, sourceEl){
+    const owner=ownerById(id||owners[focusIndex].id);
+    focusIndex=Math.max(0,owners.findIndex(o=>o.id===owner.id));
     const target=document.getElementById('rosterCards');
     const shell=target && target.querySelector('.exact-lobby-shell');
-    if(shell) shell.classList.add('is-entering');
-    setTimeout(()=>{ if(typeof window.openRosterStall==='function') window.openRosterStall(id||focusId); },560);
+    if(shell){
+      if(sourceEl){
+        const r=sourceEl.getBoundingClientRect();
+        const sr=shell.getBoundingClientRect();
+        const x=((r.left+r.width/2-sr.left)/sr.width*100).toFixed(1)+'%';
+        const y=((r.top+r.height/2-sr.top)/sr.height*100).toFixed(1)+'%';
+        shell.style.setProperty('--enter-x',x);
+        shell.style.setProperty('--enter-y',y);
+      }
+      shell.classList.add('is-entering');
+    }
+    setTimeout(()=>{ if(typeof window.openRosterStall==='function') window.openRosterStall(owner.id); },560);
   }
   function renderExactLobby(draft){
     window.__exactLobbyDraft=draft||{};
     const target=document.getElementById('rosterCards');
     if(!target) return;
-    const current=owners[idx()]||owners[2];
     target.className='walkable-locker-host trophy-lobby-host exact-lobby-host';
-    target.innerHTML=`<section class="exact-lobby-shell" style="--lobby-focus:${current.focus}%" aria-label="Trophy Room locker lobby">
-      <img class="exact-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=162" alt="Dark circular Trophy Room lobby with glowing locker room doors">
-      <button class="exact-lobby-hotzone left" data-exact-prev aria-label="Rotate left">left</button>
-      <button class="exact-lobby-hotzone center" data-exact-enter aria-label="Enter ${current.label}'s locker room">enter</button>
-      <button class="exact-lobby-hotzone right" data-exact-next aria-label="Rotate right">right</button>
-      <button class="exact-lobby-arrow prev" data-exact-prev aria-label="Previous door">‹</button>
-      <button class="exact-lobby-arrow next" data-exact-next aria-label="Next door">›</button>
-      <div class="exact-lobby-help"><span>Swipe or use arrows to rotate • tap center door to enter</span><div class="exact-lobby-dots">${owners.map(o=>`<button class="${o.id===focusId?'active':''}" data-exact-dot="${o.id}" aria-label="Show ${o.label}'s door"></button>`).join('')}</div><button class="exact-lobby-enter" data-exact-enter>Enter ${current.label}'s room</button></div>
+    target.innerHTML=`<section class="exact-lobby-shell" aria-label="Trophy Room locker lobby">
+      <img class="exact-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=163" alt="Dark circular Trophy Room lobby with glowing doors">
+      <button class="exact-lobby-hotzone scott" data-enter-door="scott" aria-label="Enter Scott's locker room">Scott</button>
+      <button class="exact-lobby-hotzone chris" data-enter-door="chris" aria-label="Enter Chris's locker room">Chris</button>
+      <button class="exact-lobby-hotzone nick" data-enter-door="nick" aria-label="Enter Nick's locker room">Nick</button>
+      <button class="exact-lobby-hotzone tyler" data-enter-door="tyler" aria-label="Enter Tyler's locker room">Tyler</button>
+      <button class="exact-lobby-hotzone andrew" data-enter-door="andrew" aria-label="Enter Andrew's locker room">Andrew</button>
+      <button class="exact-lobby-hotzone prev" data-rotate-step="-1" aria-label="Rotate left">Previous</button>
+      <button class="exact-lobby-hotzone next" data-rotate-step="1" aria-label="Rotate right">Next</button>
       <div class="exact-enter-flash" aria-hidden="true"></div>
     </section>`;
-    target.querySelectorAll('[data-exact-prev]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();rotate(-1,draft);}));
-    target.querySelectorAll('[data-exact-next]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();rotate(1,draft);}));
-    target.querySelectorAll('[data-exact-enter]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();enter(focusId);}));
-    target.querySelectorAll('[data-exact-dot]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();focusId=b.dataset.exactDot||focusId;renderExactLobby(draft);}));
+    target.querySelectorAll('[data-enter-door]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();enter(b.dataset.enterDoor,b);}));
+    target.querySelectorAll('[data-rotate-step]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();setFocusByStep(parseInt(b.dataset.rotateStep||'1',10));enter(owners[focusIndex].id,b);}));
     const shell=target.querySelector('.exact-lobby-shell');
     let start=null;
     shell?.addEventListener('pointerdown',e=>{start=e.clientX; shell.setPointerCapture?.(e.pointerId);});
-    shell?.addEventListener('pointerup',e=>{if(start==null)return;const dx=e.clientX-start;start=null;if(Math.abs(dx)>40)rotate(dx>0?-1:1,draft);});
+    shell?.addEventListener('pointerup',e=>{if(start==null)return;const dx=e.clientX-start;start=null;if(Math.abs(dx)>46){setFocusByStep(dx>0?-1:1);enter(owners[focusIndex].id,shell);}});
   }
   window.renderDraftRosters=renderExactLobby;
   window.renderWalkableLockerRoom=renderExactLobby;
