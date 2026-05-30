@@ -1,7 +1,7 @@
 import { currentSeasonId, fetchNhlStats } from './nhl-api.js';
 import { fantasyPoints, ownerTotal } from './scoring.js';
 
-const STORAGE_KEY = 'custom-hockey-pool-v29-inline-lottery';
+const STORAGE_KEY = 'custom-hockey-pool-v30-last-year-rosters';
 let globalLotteryStorageConfigured = false;
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -86,6 +86,7 @@ async function init() {
   }
   normalizeStateForDraftTesting();
   forceFinalOwners();
+  seedDefaultRostersIfEmpty();
   applyLotteryFromUrl();
   await loadGlobalLottery();
   if (!state.settings.seasonId) state.settings.seasonId = currentSeasonId();
@@ -134,6 +135,29 @@ function normalizeStateForDraftTesting() {
   state.draftBoard.draftOrder = state.draftBoard.draftOrder.filter(id => state.owners.some(o => String(o.id) === String(id)));
   state.owners.forEach(o => { if (!state.draftBoard.draftOrder.includes(o.id)) state.draftBoard.draftOrder.push(o.id); });
   state.draftBoard.lotteryResult = state.draftBoard.lotteryResult.filter(r => state.owners.some(o => String(o.id) === String(typeof r === 'string' ? r : r.id)));
+}
+
+function seedDefaultRostersIfEmpty() {
+  const defaultRosters = defaults?.rosters || {};
+  const owners = Array.isArray(state?.owners) ? state.owners : [];
+  const currentCount = owners.reduce((sum, owner) => sum + ((state.rosters?.[owner.id] || []).length), 0);
+  const defaultCount = Object.values(defaultRosters).reduce((sum, roster) => sum + (Array.isArray(roster) ? roster.length : 0), 0);
+  if (currentCount === 0 && defaultCount > 0) {
+    state.rosters = structuredClone(defaultRosters);
+    state.draftBoard = state.draftBoard || { currentPick: 1, draftOrder: [], picks: [] };
+    state.draftBoard.picks = [];
+    let pickNo = 1;
+    owners.forEach(owner => {
+      (state.rosters[owner.id] || []).forEach(player => {
+        state.draftBoard.picks.push({
+          pick: pickNo++,
+          ownerId: owner.id,
+          player: minimalPlayer(player),
+          timestamp: 'last-year-static-roster'
+        });
+      });
+    });
+  }
 }
 
 function save() {

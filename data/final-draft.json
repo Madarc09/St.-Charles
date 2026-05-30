@@ -1,7 +1,7 @@
 {
-  "locked": false,
-  "source": "data/final-draft.json",
-  "note": "Replace this file with an exported completed draft after the live draft is finished.",
+  "locked": true,
+  "source": "screenshots from 2025-2026 previous season rosters",
+  "note": "Static last-year rosters loaded from OnlinePools screenshots for spacing/testing.",
   "owners": [
     {
       "id": "nick",
@@ -36,6 +36,1047 @@
     "tyler",
     "scott"
   ],
-  "picks": [],
-  "updatedAt": ""
+  "picks": [
+    {
+      "pick": 1,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-matthews-2025",
+        "name": "Auston Matthews",
+        "position": "F",
+        "nhlTeam": "TOR",
+        "type": "skater",
+        "goals": 27,
+        "assists": 26,
+        "points": 53,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 2,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-crosby-2025",
+        "name": "Sidney Crosby",
+        "position": "F",
+        "nhlTeam": "PIT",
+        "type": "skater",
+        "goals": 29,
+        "assists": 45,
+        "points": 74,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 3,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-scheifele-2025",
+        "name": "Mark Scheifele",
+        "position": "F",
+        "nhlTeam": "WPG",
+        "type": "skater",
+        "goals": 36,
+        "assists": 67,
+        "points": 103,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 6
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 4,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-aho-2025",
+        "name": "Sebastian Aho",
+        "position": "F",
+        "nhlTeam": "CAR",
+        "type": "skater",
+        "goals": 27,
+        "assists": 53,
+        "points": 80,
+        "shortHandedGoals": 2,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 5,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-celebrini-2025",
+        "name": "Macklin Celebrini",
+        "position": "F",
+        "nhlTeam": "SJS",
+        "type": "skater",
+        "goals": 45,
+        "assists": 70,
+        "points": 115,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 6,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-bedard-2025",
+        "name": "Connor Bedard",
+        "position": "F",
+        "nhlTeam": "CHI",
+        "type": "skater",
+        "goals": 30,
+        "assists": 45,
+        "points": 75,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 7,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-makar-2025",
+        "name": "Cale Makar",
+        "position": "D",
+        "nhlTeam": "COL",
+        "type": "skater",
+        "goals": 20,
+        "assists": 59,
+        "points": 79,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 8,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-josi-2025",
+        "name": "Roman Josi",
+        "position": "D",
+        "nhlTeam": "NSH",
+        "type": "skater",
+        "goals": 13,
+        "assists": 42,
+        "points": 55,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 9,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-sanderson-2025",
+        "name": "Jake Sanderson",
+        "position": "D",
+        "nhlTeam": "OTT",
+        "type": "skater",
+        "goals": 14,
+        "assists": 40,
+        "points": 54,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 10,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-dobson-2025",
+        "name": "Noah Dobson",
+        "position": "D",
+        "nhlTeam": "MTL",
+        "type": "skater",
+        "goals": 12,
+        "assists": 35,
+        "points": 47,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 11,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-comrie-2025",
+        "name": "Eric Comrie",
+        "position": "G",
+        "nhlTeam": "WPG",
+        "type": "goalie",
+        "goalieWins": 12,
+        "goalieAssists": 0,
+        "goalieGoals": 0,
+        "goalieShutouts": 0,
+        "goals": 0,
+        "assists": 0,
+        "points": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 12,
+      "ownerId": "nick",
+      "player": {
+        "id": "nick-hellebuyck-2025",
+        "name": "Connor Hellebuyck",
+        "position": "G",
+        "nhlTeam": "WPG",
+        "type": "goalie",
+        "goalieWins": 23,
+        "goalieAssists": 0,
+        "goalieGoals": 0,
+        "goalieShutouts": 0,
+        "goals": 0,
+        "assists": 0,
+        "points": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 13,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-kucherov-2025",
+        "name": "Nikita Kucherov",
+        "position": "F",
+        "nhlTeam": "TBL",
+        "type": "skater",
+        "goals": 44,
+        "assists": 86,
+        "points": 130,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 8
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 14,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-kaprizov-2025",
+        "name": "Kirill Kaprizov",
+        "position": "F",
+        "nhlTeam": "MIN",
+        "type": "skater",
+        "goals": 45,
+        "assists": 44,
+        "points": 89,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 7
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 15,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-rantanen-2025",
+        "name": "Mikko Rantanen",
+        "position": "F",
+        "nhlTeam": "DAL",
+        "type": "skater",
+        "goals": 22,
+        "assists": 55,
+        "points": 77,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 16,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-point-2025",
+        "name": "Brayden Point",
+        "position": "F",
+        "nhlTeam": "TBL",
+        "type": "skater",
+        "goals": 18,
+        "assists": 32,
+        "points": 50,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 17,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-robertson-2025",
+        "name": "Jason Robertson",
+        "position": "F",
+        "nhlTeam": "DAL",
+        "type": "skater",
+        "goals": 45,
+        "assists": 51,
+        "points": 96,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 9
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 18,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-stutzle-2025",
+        "name": "Tim St\u00fctzle",
+        "position": "F",
+        "nhlTeam": "OTT",
+        "type": "skater",
+        "goals": 34,
+        "assists": 49,
+        "points": 83,
+        "shortHandedGoals": 2,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 19,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-qhughes-2025",
+        "name": "Quinn Hughes",
+        "position": "D",
+        "nhlTeam": "VAN",
+        "type": "skater",
+        "goals": 7,
+        "assists": 69,
+        "points": 76,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 20,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-bouchard-2025",
+        "name": "Evan Bouchard",
+        "position": "D",
+        "nhlTeam": "EDM",
+        "type": "skater",
+        "goals": 21,
+        "assists": 74,
+        "points": 95,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 21,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-fox-2025",
+        "name": "Adam Fox",
+        "position": "D",
+        "nhlTeam": "NYR",
+        "type": "skater",
+        "goals": 9,
+        "assists": 44,
+        "points": 53,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 22,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-montour-2025",
+        "name": "Brandon Montour",
+        "position": "D",
+        "nhlTeam": "SEA",
+        "type": "skater",
+        "goals": 11,
+        "assists": 21,
+        "points": 32,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 23,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-bobrovsky-2025",
+        "name": "Sergei Bobrovsky",
+        "position": "G",
+        "nhlTeam": "FLA",
+        "type": "goalie",
+        "goalieWins": 27,
+        "goalieAssists": 1,
+        "goalieGoals": 0,
+        "goalieShutouts": 4,
+        "goals": 0,
+        "assists": 1,
+        "points": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 24,
+      "ownerId": "chris",
+      "player": {
+        "id": "chris-tarasov-2025",
+        "name": "Daniil Tarasov",
+        "position": "G",
+        "nhlTeam": "FLA",
+        "type": "goalie",
+        "goalieWins": 13,
+        "goalieAssists": 0,
+        "goalieGoals": 0,
+        "goalieShutouts": 0,
+        "goals": 0,
+        "assists": 0,
+        "points": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 25,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-mackinnon-2025",
+        "name": "Nathan MacKinnon",
+        "position": "F",
+        "nhlTeam": "COL",
+        "type": "skater",
+        "goals": 53,
+        "assists": 74,
+        "points": 127,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 7
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 26,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-marner-2025",
+        "name": "Mitch Marner",
+        "position": "F",
+        "nhlTeam": "VGK",
+        "type": "skater",
+        "goals": 24,
+        "assists": 56,
+        "points": 80,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 2
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 27,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-suzuki-2025",
+        "name": "Nick Suzuki",
+        "position": "F",
+        "nhlTeam": "MTL",
+        "type": "skater",
+        "goals": 29,
+        "assists": 72,
+        "points": 101,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 2
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 28,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-thompson-2025",
+        "name": "Tage Thompson",
+        "position": "F",
+        "nhlTeam": "BUF",
+        "type": "skater",
+        "goals": 40,
+        "assists": 41,
+        "points": 81,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 29,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-panarin-2025",
+        "name": "Artemi Panarin",
+        "position": "F",
+        "nhlTeam": "NYR",
+        "type": "skater",
+        "goals": 28,
+        "assists": 56,
+        "points": 84,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 30,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-necas-2025",
+        "name": "Martin Ne\u010das",
+        "position": "F",
+        "nhlTeam": "COL",
+        "type": "skater",
+        "goals": 38,
+        "assists": 62,
+        "points": 100,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 31,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-werenski-2025",
+        "name": "Zach Werenski",
+        "position": "D",
+        "nhlTeam": "CBJ",
+        "type": "skater",
+        "goals": 22,
+        "assists": 59,
+        "points": 81,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 2
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 32,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-hutson-2025",
+        "name": "Lane Hutson",
+        "position": "D",
+        "nhlTeam": "MTL",
+        "type": "skater",
+        "goals": 12,
+        "assists": 66,
+        "points": 78,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 33,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-dahlin-2025",
+        "name": "Rasmus Dahlin",
+        "position": "D",
+        "nhlTeam": "BUF",
+        "type": "skater",
+        "goals": 19,
+        "assists": 55,
+        "points": 74,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 34,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-lacombe-2025",
+        "name": "Jackson LaCombe",
+        "position": "D",
+        "nhlTeam": "ANA",
+        "type": "skater",
+        "goals": 10,
+        "assists": 48,
+        "points": 58,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 35,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-hill-2025",
+        "name": "Adin Hill",
+        "position": "G",
+        "nhlTeam": "VGK",
+        "type": "goalie",
+        "goalieWins": 10,
+        "goalieAssists": 1,
+        "goalieGoals": 0,
+        "goalieShutouts": 1,
+        "goals": 0,
+        "assists": 1,
+        "points": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 36,
+      "ownerId": "andrew",
+      "player": {
+        "id": "andrew-schmid-2025",
+        "name": "Akira Schmid",
+        "position": "G",
+        "nhlTeam": "VGK",
+        "type": "goalie",
+        "goalieWins": 16,
+        "goalieAssists": 1,
+        "goalieGoals": 0,
+        "goalieShutouts": 2,
+        "goals": 0,
+        "assists": 1,
+        "points": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 37,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-draisaitl-2025",
+        "name": "Leon Draisaitl",
+        "position": "F",
+        "nhlTeam": "EDM",
+        "type": "skater",
+        "goals": 35,
+        "assists": 62,
+        "points": 97,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 38,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-pastrnak-2025",
+        "name": "David Pastrnak",
+        "position": "F",
+        "nhlTeam": "BOS",
+        "type": "skater",
+        "goals": 29,
+        "assists": 71,
+        "points": 100,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 39,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-jhughes-2025",
+        "name": "Jack Hughes",
+        "position": "F",
+        "nhlTeam": "NJD",
+        "type": "skater",
+        "goals": 27,
+        "assists": 50,
+        "points": 77,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 40,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-eichel-2025",
+        "name": "Jack Eichel",
+        "position": "F",
+        "nhlTeam": "VGK",
+        "type": "skater",
+        "goals": 27,
+        "assists": 63,
+        "points": 90,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 6
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 41,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-keller-2025",
+        "name": "Clayton Keller",
+        "position": "F",
+        "nhlTeam": "UTA",
+        "type": "skater",
+        "goals": 26,
+        "assists": 62,
+        "points": 88,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 6
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 42,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-tavares-2025",
+        "name": "John Tavares",
+        "position": "F",
+        "nhlTeam": "TOR",
+        "type": "skater",
+        "goals": 31,
+        "assists": 40,
+        "points": 71,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 43,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-chychrun-2025",
+        "name": "Jakob Chychrun",
+        "position": "D",
+        "nhlTeam": "WAS",
+        "type": "skater",
+        "goals": 26,
+        "assists": 34,
+        "points": 60,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 8
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 44,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-harley-2025",
+        "name": "Thomas Harley",
+        "position": "D",
+        "nhlTeam": "DAL",
+        "type": "skater",
+        "goals": 6,
+        "assists": 30,
+        "points": 36,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 45,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-parayko-2025",
+        "name": "Colton Parayko",
+        "position": "D",
+        "nhlTeam": "STL",
+        "type": "skater",
+        "goals": 4,
+        "assists": 14,
+        "points": 18,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 46,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-sergachev-2025",
+        "name": "Mikhail Sergachev",
+        "position": "D",
+        "nhlTeam": "UTA",
+        "type": "skater",
+        "goals": 10,
+        "assists": 49,
+        "points": 59,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 47,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-woll-2025",
+        "name": "Joseph Woll",
+        "position": "G",
+        "nhlTeam": "TOR",
+        "type": "goalie",
+        "goalieWins": 15,
+        "goalieAssists": 1,
+        "goalieGoals": 0,
+        "goalieShutouts": 2,
+        "goals": 0,
+        "assists": 1,
+        "points": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 48,
+      "ownerId": "tyler",
+      "player": {
+        "id": "tyler-stolarz-2025",
+        "name": "Anthony Stolarz",
+        "position": "G",
+        "nhlTeam": "TOR",
+        "type": "goalie",
+        "goalieWins": 10,
+        "goalieAssists": 0,
+        "goalieGoals": 0,
+        "goalieShutouts": 0,
+        "goals": 0,
+        "assists": 0,
+        "points": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 49,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-mcdavid-2025",
+        "name": "Connor McDavid",
+        "position": "F",
+        "nhlTeam": "EDM",
+        "type": "skater",
+        "goals": 48,
+        "assists": 90,
+        "points": 138,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 50,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-nylander-2025",
+        "name": "William Nylander",
+        "position": "F",
+        "nhlTeam": "TOR",
+        "type": "skater",
+        "goals": 30,
+        "assists": 49,
+        "points": 79,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 4
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 51,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-connor-2025",
+        "name": "Kyle Connor",
+        "position": "F",
+        "nhlTeam": "WPG",
+        "type": "skater",
+        "goals": 39,
+        "assists": 53,
+        "points": 92,
+        "shortHandedGoals": 2,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 52,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-hagel-2025",
+        "name": "Brandon Hagel",
+        "position": "F",
+        "nhlTeam": "TBL",
+        "type": "skater",
+        "goals": 36,
+        "assists": 38,
+        "points": 74,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 6
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 53,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-reinhart-2025",
+        "name": "Sam Reinhart",
+        "position": "F",
+        "nhlTeam": "FLA",
+        "type": "skater",
+        "goals": 29,
+        "assists": 32,
+        "points": 61,
+        "shortHandedGoals": 3,
+        "gameWinningGoals": 6
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 54,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-guentzel-2025",
+        "name": "Jake Guentzel",
+        "position": "F",
+        "nhlTeam": "TBL",
+        "type": "skater",
+        "goals": 38,
+        "assists": 50,
+        "points": 88,
+        "shortHandedGoals": 2,
+        "gameWinningGoals": 5
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 55,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-morrissey-2025",
+        "name": "Josh Morrissey",
+        "position": "D",
+        "nhlTeam": "WPG",
+        "type": "skater",
+        "goals": 14,
+        "assists": 41,
+        "points": 55,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 2
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 56,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-hedman-2025",
+        "name": "Victor Hedman",
+        "position": "D",
+        "nhlTeam": "TBL",
+        "type": "skater",
+        "goals": 1,
+        "assists": 16,
+        "points": 17,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 57,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-seider-2025",
+        "name": "Moritz Seider",
+        "position": "D",
+        "nhlTeam": "DET",
+        "type": "skater",
+        "goals": 10,
+        "assists": 50,
+        "points": 60,
+        "shortHandedGoals": 0,
+        "gameWinningGoals": 2
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 58,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-heiskanen-2025",
+        "name": "Miro Heiskanen",
+        "position": "D",
+        "nhlTeam": "DAL",
+        "type": "skater",
+        "goals": 9,
+        "assists": 54,
+        "points": 63,
+        "shortHandedGoals": 1,
+        "gameWinningGoals": 3
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 59,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-oettinger-2025",
+        "name": "Jake Oettinger",
+        "position": "G",
+        "nhlTeam": "DAL",
+        "type": "goalie",
+        "goalieWins": 35,
+        "goalieAssists": 1,
+        "goalieGoals": 0,
+        "goalieShutouts": 4,
+        "goals": 0,
+        "assists": 1,
+        "points": 1
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    },
+    {
+      "pick": 60,
+      "ownerId": "scott",
+      "player": {
+        "id": "scott-desmith-2025",
+        "name": "Casey DeSmith",
+        "position": "G",
+        "nhlTeam": "DAL",
+        "type": "goalie",
+        "goalieWins": 15,
+        "goalieAssists": 0,
+        "goalieGoals": 0,
+        "goalieShutouts": 1,
+        "goals": 0,
+        "assists": 0,
+        "points": 0
+      },
+      "timestamp": "2025-04-17T04:00:00.000Z"
+    }
+  ],
+  "updatedAt": "2026-05-30T00:00:00.000Z"
 }
