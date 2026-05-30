@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hockey Pool 1998 Basement Draft Room</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+
+<style id="v154-season-diagnostics-style">
+.season-unmatched-warning{margin-top:10px;padding:10px 12px;border:1px solid rgba(255,80,80,.45);background:rgba(120,0,0,.22);border-radius:12px;color:#ffd8d8;line-height:1.45}.season-unmatched-ok{margin-top:10px;padding:8px 10px;border:1px solid rgba(120,255,180,.32);background:rgba(0,100,45,.18);border-radius:12px;color:#d9ffe6}.season-source-badge{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.12)}
+</style>
 </head>
 <body>
 
@@ -250,7 +254,7 @@
           <h2>Backup, restore, and data tools</h2>
         </div>
       </div>
-      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button><button id="testJoinAllLotteryAdminBtn" type="button">Test Lottery: Confirm Everyone</button></div>
+      <div class="actions stack-sm admin-draft-actions"><button id="resetLiveDraftBtn" class="danger" type="button">Reset Shared Draft</button><button id="cleanAutoDraftBtn" class="primary" type="button">Auto Draft Entire Draft</button><button id="saveSeasonHistoryBtn" class="primary" type="button">Save Rosters to History</button><button id="testJoinAllLotteryAdminBtn" type="button">Test Lottery: Confirm Everyone</button></div>
 <div class="grid two">
         <article class="card">
           <h3>Export / Import Pool File</h3>
@@ -1661,6 +1665,67 @@
         return new Set((draft?.picks || []).map(p => String(p.player?.id || "")));
       }
 
+      function lastYearStaticRosters(){
+        return (window.__lastYearStaticRosters && typeof window.__lastYearStaticRosters === "object") ? window.__lastYearStaticRosters : {};
+      }
+
+      function hasFullStaticSeasonRosters(){
+        const rosters = lastYearStaticRosters();
+        return OWNERS.every(o => Array.isArray(rosters[o.id]) && rosters[o.id].length >= 12);
+      }
+
+      function staticSeasonPicks(){
+        const rosters = lastYearStaticRosters();
+        let pickNumber = 1;
+        const picks = [];
+        OWNERS.forEach(ownerObj => {
+          (rosters[ownerObj.id] || []).forEach((player, index) => {
+            const b = bucket(player.position);
+            picks.push({
+              pickNumber: pickNumber++,
+              round: Math.floor(index / 5) + 1,
+              slot: (index % 5) + 1,
+              ownerId: ownerObj.id,
+              ownerName: ownerObj.teamName || ownerObj.name || ownerObj.id,
+              timestamp: "2026-04-17T04:00:00.000Z",
+              source: "previousSeasonStaticRoster",
+              player: Object.assign({
+                id: String(player.id || (ownerObj.id + "-" + String(player.name || "player").toLowerCase().replace(/[^a-z0-9]+/g,"-"))),
+                name: player.name || "Player",
+                position: player.position || (player.type === "goalie" ? "G" : "F"),
+                nhlTeam: player.nhlTeam || "",
+                fantasyPoints: fp(player)
+              }, player, { fantasyPoints: fp(player) })
+            });
+          });
+        });
+        return picks;
+      }
+
+      function applyStaticSeasonLockIfNeeded(){
+        if (!draft) return;
+        if (!hasFullStaticSeasonRosters()) return;
+        if (Array.isArray(draft.picks) && draft.picks.length > 0) return;
+        draft.picks = staticSeasonPicks();
+        draft.draftClosed = true;
+        draft.__seasonLockedRecord = "2025-2026 Regular Season";
+        draft.__fromStaticSeasonRecord = true;
+        draft.updatedAt = new Date().toISOString();
+      }
+
+      function isDraftClosed(){
+        if (!draft) return false;
+        if (draft.draftClosed || draft.__seasonLockedRecord) return true;
+        return Array.isArray(draft.picks) && draft.picks.length >= TOTAL_PICKS;
+      }
+
+      function showDraftClosed(message){
+        const board = $("#cleanDraftBoard");
+        if (!board) return;
+        const label = message || "Rosters full. Draft closed.";
+        board.innerHTML = `<div class="clean-loading-card draft-closed-card"><strong>${esc(label)}</strong><span>All five rosters already have 10 skaters and 2 goalies. Players already on a roster are treated as unavailable so duplicates cannot be drafted.</span><button id="saveSeasonHistoryBtnInline" class="primary" type="button">Save Rosters to History</button></div>`;
+      }
+
       function rosterCounts(ownerId){
         const counts = { F:0, D:0, G:0 };
         (draft?.picks || []).forEach(p => {
@@ -1767,6 +1832,7 @@
         if (!Array.isArray(draft.owners) || !draft.owners.length) draft.owners = OWNERS.slice();
         if (!Array.isArray(draft.draftOrder) || !draft.draftOrder.length) draft.draftOrder = draftOrder();
         if (!Array.isArray(draft.picks)) draft.picks = [];
+        applyStaticSeasonLockIfNeeded();
         window.__currentLiveDraft = draft;
         if (window.renderDraftRosters) window.renderDraftRosters(draft);
         if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(draft);
@@ -1882,6 +1948,8 @@
       }
 
       async function pullPlayers(){
+        if (!draft) await loadSharedDraft();
+        if (isDraftClosed()) { showDraftClosed("Rosters full. Draft closed."); return toast("Rosters full. Draft closed."); }
         if (playersLoading) return;
         playersLoading = true;
         showBoardLoading("Pulling real NHL player board…");
@@ -1988,6 +2056,11 @@
         renderRosterNeeds();
         renderOnDeck();
         renderDraftOrderStrip();
+
+        if (isDraftClosed()) {
+          showDraftClosed("Rosters full. Draft closed.");
+          return;
+        }
 
         if (!playersLoaded) {
           showBoardLoading("Select your team, then press PULL NHL PLAYERS.");
@@ -2114,8 +2187,9 @@
 
       async function signPlayer(id){
         await loadSharedDraft();
+        if (isDraftClosed()) return toast("Rosters full. Draft closed.");
         const pick = currentPick();
-        if (!pick) return toast("Draft complete.");
+        if (!pick) return toast("Rosters full. Draft closed.");
         if (String(pick.ownerId) !== String(activeOwnerId)) return toast(`It is ${ownerName(pick.ownerId)}'s pick. Select that team to draft for them.`);
         const player = players.find(p => String(p.id) === String(id));
         if (!player) return toast("Player not found. Pull NHL players again.");
@@ -2133,6 +2207,7 @@
 
       async function autoDraftEntireDraft(){
         await loadSharedDraft();
+        if (isDraftClosed()) { showDraftClosed("Rosters full. Draft closed."); return toast("Rosters full. Draft closed."); }
         if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
         if (!confirm("Auto draft the entire remaining draft?")) return;
         let made = 0;
@@ -3845,6 +3920,11 @@
   })();
 </script>
 
+
+<style id="v153-draft-closed-history-style">
+  .draft-closed-card{border-color:rgba(255,195,82,.35)!important;background:linear-gradient(135deg,rgba(70,45,9,.86),rgba(6,12,22,.9))!important;text-align:center;gap:10px}
+  .draft-closed-card strong{font-size:1.35rem;color:#fff}.draft-closed-card span{display:block;max-width:680px;margin:0 auto;color:#f3dfb6}.history-save-note{margin-top:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.06);color:#dcecff}
+</style>
 <style id="v152-season-leaderboard-style">
   .season-leaderboard-note{margin:12px 0 14px;padding:12px 14px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(5,12,22,.72);color:#dcecff;font-size:.92rem;line-height:1.45}
   .season-leaderboard-note b{color:#fff}.season-source-badge{display:inline-flex;gap:6px;align-items:center;margin-left:8px;padding:3px 8px;border-radius:999px;background:rgba(58,160,255,.15);border:1px solid rgba(58,160,255,.3);font-size:.78rem;color:#bfe2ff}
@@ -3852,6 +3932,70 @@
   .season-breakdown-panel{padding:14px;border-radius:16px;background:rgba(3,8,15,.78);border:1px solid rgba(255,255,255,.12)}.season-breakdown-panel h3{margin:0 0 10px}.season-breakdown-table{width:100%;border-collapse:collapse}.season-breakdown-table th,.season-breakdown-table td{padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}.season-breakdown-table small{display:block;opacity:.7;margin-top:2px}.season-team-toggle{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;color:inherit;font:inherit;font-weight:800;cursor:pointer}.season-updated{margin-top:12px}.mobile-season-breakdown-list{display:none}
   @media(max-width:760px){.season-leaderboard-wrap{overflow:visible}.season-leaderboard{display:block}.season-leaderboard thead{display:none}.season-leaderboard tbody,.season-leaderboard tr,.season-leaderboard td{display:block;width:100%}.season-leaderboard .season-summary-row{margin:0 0 12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(5,12,22,.78)}.season-leaderboard .season-summary-row td{border:0;padding:4px 0}.season-breakdown-row td{padding:0!important}.season-breakdown-table{display:none}.mobile-season-breakdown-list{display:grid;gap:10px}.mobile-season-player-card{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:rgba(255,255,255,.06)}.mobile-season-player-head{display:flex;justify-content:space-between;gap:10px}.mobile-season-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.mobile-season-stat-grid span{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px;text-align:center}.mobile-season-stat-grid em{display:block;font-style:normal;font-size:.68rem;opacity:.7}.season-player-list{margin-top:8px}.previous-season-card .section-head{gap:12px}}
 </style>
+
+<script id="v153-save-rosters-to-history">
+(function(){
+  "use strict";
+  const KEY = "custom-hockey-pool-season-history";
+  const OWNERS = [
+    { id:"nick", name:"Nick" }, { id:"chris", name:"Chris" }, { id:"andrew", name:"Andrew" }, { id:"tyler", name:"Tyler" }, { id:"scott", name:"Scott" }
+  ];
+  function toast(message){ const t=document.getElementById("toast"); if(!t) return alert(message); t.textContent=message; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+  function readHistory(){ try { return JSON.parse(localStorage.getItem(KEY) || "[]") || []; } catch(e){ return []; } }
+  function writeHistory(items){ try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e){} }
+  function staticRosters(){ return window.__lastYearStaticRosters && typeof window.__lastYearStaticRosters === "object" ? window.__lastYearStaticRosters : {}; }
+  function rosterRecordFromCurrentDraft(){
+    const draft = window.__currentLiveDraft || null;
+    const grouped = {};
+    OWNERS.forEach(o => grouped[o.id] = []);
+    if (draft && Array.isArray(draft.picks) && draft.picks.length) {
+      draft.picks.forEach(p => { const ownerId=String(p.ownerId||"").toLowerCase(); if(!grouped[ownerId]) grouped[ownerId]=[]; if(p.player) grouped[ownerId].push(p.player); });
+    }
+    const hasAny = Object.values(grouped).some(list => list.length);
+    if (hasAny) return grouped;
+    return staticRosters();
+  }
+  function saveCurrentSeasonToHistory(){
+    const rosters = rosterRecordFromCurrentDraft();
+    const count = Object.values(rosters).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0);
+    if (!count) return toast("No rosters found to save yet.");
+    const seasonId = "2025-2026";
+    const record = {
+      id: seasonId + "-regular-season",
+      seasonId,
+      label: "2025-2026 Regular Season",
+      savedAt: new Date().toISOString(),
+      rosterCount: count,
+      scoring: { skaterGoals:2, skaterAssists:1, skaterShortHandedGoals:5, skaterGameWinningGoals:5, goalieWins:2, goalieAssists:5, goalieGoals:10, goalieShutouts:5 },
+      rosters
+    };
+    const history = readHistory().filter(item => item.id !== record.id);
+    history.unshift(record);
+    writeHistory(history);
+    window.__savedSeasonHistory = history;
+    updateHistoryNote();
+    toast("Saved rosters to Previous Season history.");
+  }
+  function updateHistoryNote(){
+    const history = readHistory();
+    const host = document.getElementById("previousSeasonStatus") || document.getElementById("homeRosterSourceStatus");
+    if (!host) return;
+    let note = document.getElementById("seasonHistorySaveNote");
+    if (!note) { note = document.createElement("div"); note.id="seasonHistorySaveNote"; note.className="history-save-note"; host.insertAdjacentElement("afterend", note); }
+    if (history.length) note.textContent = "Saved season history records in this browser: " + history.map(h => h.label || h.seasonId).join(", ");
+    else note.textContent = "No season history records saved in this browser yet.";
+  }
+  document.addEventListener("click", function(event){
+    const btn = event.target.closest && event.target.closest("#saveSeasonHistoryBtn, #saveSeasonHistoryBtnInline");
+    if (!btn) return;
+    event.preventDefault();
+    saveCurrentSeasonToHistory();
+  }, true);
+  window.addEventListener("load", () => setTimeout(updateHistoryNote, 700));
+  window.hockeyPoolSeasonHistory = { saveCurrentSeasonToHistory, readHistory };
+})();
+</script>
+
 <script id="v152-previous-season-leaderboard">
 (function(){
   const SEASON_ID = '20252026';
@@ -3920,12 +4064,14 @@
     const owners = FALLBACK_OWNERS;
     const maps = payload ? makeApiMaps(payload) : { skaters:new Map(), goalies:new Map() };
     let apiHits = 0, totalPlayers = 0;
+    const unmatched = [];
     const rows = owners.map(owner => {
       const roster = Array.isArray(rosters[owner.id]) ? rosters[owner.id] : [];
       const players = roster.map(base => {
         totalPlayers++;
         const api = payload ? findApi(base, maps) : null;
         if (api) apiHits++;
+        else if (payload) unmatched.push({ ownerId: owner.id, ownerName: ownerName(owner), name: base.name, position: base.position || base.type || '', nhlTeam: base.nhlTeam || '' });
         const merged = { ...base, ...(api || {}), source: api ? 'NHL API' : 'saved roster' };
         const fpts = fantasy(merged);
         return { ...merged, fpts, calculation: calcLine(merged) + ` = ${fpts}` };
@@ -3934,15 +4080,19 @@
       const goaliePts = players.filter(p => p.type === 'goalie' || p.position === 'G').reduce((s,p)=>s+p.fpts,0);
       return { ownerId:owner.id, ownerName:ownerName(owner), players, total:players.reduce((s,p)=>s+p.fpts,0), skaterPts, goaliePts };
     }).sort((a,b)=>b.total-a.total || a.ownerName.localeCompare(b.ownerName));
-    return { rows, apiHits, totalPlayers };
+    return { rows, apiHits, totalPlayers, unmatched };
   }
   function renderTable(targetId, statusId, payload, error){
     const target = document.getElementById(targetId); if (!target) return;
     const status = statusId ? document.getElementById(statusId) : null;
-    const { rows, apiHits, totalPlayers } = buildRows(payload || null);
+    const { rows, apiHits, totalPlayers, unmatched } = buildRows(payload || null);
+    window.__lastSeasonApiDiagnostics = { rows, apiHits, totalPlayers, unmatched, season: SEASON_ID, usedApi: !!payload && !error };
     const usedApi = !!payload && !error;
     if (status) status.textContent = usedApi ? `Source: NHL API regular season ${SEASON_ID} + saved 2025-26 roster list` : `Source: saved 2025-26 roster list fallback${error ? ' — API error: '+(error.message || error) : ''}`;
-    const note = `<div class="season-leaderboard-note"><b>2025-2026 Regular Season Leaderboard</b><span class="season-source-badge">${usedApi ? 'NHL API pulled' : 'Saved fallback'}</span><br>Scoring: skaters — G 2, A 1, SHG 5, GWG 5. Goalies — W 2, A 5, G 10, SO 5. ${usedApi ? `Matched ${apiHits}/${totalPlayers} roster players from the NHL API; unmatched players use the saved roster values from the screenshots.` : `Showing saved screenshot values until the NHL API pull succeeds.`}</div>`;
+    const unmatchedHtml = usedApi && unmatched.length
+      ? `<div class="season-unmatched-warning"><b>API unmatched players (${unmatched.length}):</b> ${unmatched.map(p => `${esc(p.ownerName)} — ${esc(p.name)} (${esc(p.position)} ${esc(p.nhlTeam)})`).join('; ')}. These are using saved screenshot values until their NHL API match is fixed.</div>`
+      : usedApi ? `<div class="season-unmatched-ok"><b>API check:</b> all ${totalPlayers} roster players matched.</div>` : '';
+    const note = `<div class="season-leaderboard-note"><b>2025-2026 Regular Season Leaderboard</b><span class="season-source-badge">${usedApi ? 'NHL API pulled' : 'Saved fallback'}</span><br>Scoring: skaters — G 2, A 1, SHG 5, GWG 5. Goalies — W 2, A 5, G 10, SO 5. ${usedApi ? `Matched ${apiHits}/${totalPlayers} roster players from the NHL API.` : `Showing saved screenshot values until the NHL API pull succeeds.`}${unmatchedHtml}</div>`;
     target.innerHTML = note +
       '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard season-leaderboard"><thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>Skaters</th><th>Goalies</th><th>Top scorers</th></tr></thead><tbody>' +
       rows.map((row,i)=>{
