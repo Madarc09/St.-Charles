@@ -10,6 +10,45 @@
 <style id="v154-season-diagnostics-style">
 .season-unmatched-warning{margin-top:10px;padding:10px 12px;border:1px solid rgba(255,80,80,.45);background:rgba(120,0,0,.22);border-radius:12px;color:#ffd8d8;line-height:1.45}.season-unmatched-ok{margin-top:10px;padding:8px 10px;border:1px solid rgba(120,255,180,.32);background:rgba(0,100,45,.18);border-radius:12px;color:#d9ffe6}.season-source-badge{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.12)}
 </style>
+
+<style id="v169-hide-static-room-clipboard">
+  /* v169: roster names are now printed directly into the static room images.
+     Hide the old live clipboard/roster overlay on all owner room views. */
+  .locker-roster-overlay,
+  .locker-room-roster-overlay,
+  .roster-clipboard-overlay,
+  .roster-clipboard,
+  .locker-clipboard,
+  .stall-roster-card,
+  .stall-roster-sheet,
+  .owner-room-roster-card,
+  .owner-room-roster-sheet,
+  .walkable-roster-sheet,
+  .live-roster-clipboard,
+  .mobile-roster-sheet,
+  [data-role="roster-clipboard"],
+  [data-roster-overlay="true"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* If the room layout had a separate image + clipboard grid, let the image use the full width. */
+  .locker-room-detail,
+  .locker-stall-detail,
+  .owner-room-detail,
+  .walkable-locker-detail {
+    grid-template-columns: 1fr !important;
+  }
+
+  .locker-room-image-wrap,
+  .locker-stall-image-wrap,
+  .owner-room-image-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+</style>
+
 </head>
 <body>
 
@@ -3926,8 +3965,7 @@
             </div>
             <div class="stall-image-stage">
               <img class="owner-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} custom hockey locker stall">
-              <div class="live-roster-clipboard">
-                <div class="clip-top"></div>
+              
                 <h4>${esc(active.teamName || active.name)}'s Roster</h4>
                 <ol>${rosterRows(roster)}</ol>
               </div>
@@ -4505,5 +4543,7 @@
 
 
 <!-- v168 final static roster room images installed -->
+
+<!-- v169: static room roster clipboard overlays removed/hidden -->
 </body>
 </html>

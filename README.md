@@ -44,3 +44,9 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Replaced Chris roster room with Raptors/Mario Kart/March Madness theme.
 - Replaced Scott roster room with mystery/spy theme.
 - Added cache-busting image version v=168.
+
+
+## v169 roster room cleanup
+- Removed/hidden the old live clipboard roster overlays from roster-room/stall pages.
+- The static roster room images now act as the roster display.
+- Kept roster data and standings logic intact.
