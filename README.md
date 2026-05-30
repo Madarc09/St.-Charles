@@ -50,3 +50,12 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Removed/hidden the old live clipboard roster overlays from roster-room/stall pages.
 - The static roster room images now act as the roster display.
 - Kept roster data and standings logic intact.
+
+
+## v170 roster room formatting update
+- Removed/hidden right-side numbered rank markers from static roster-room images.
+- Removed old top stall/owner links from roster-room view.
+- Added a Trophy Room themed right-side navigation stack:
+  - buttons for the four other owner rooms
+  - button back to Trophy Room Lobby
+- Kept static roster-room images as the main focal display.
