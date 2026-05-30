@@ -142,37 +142,59 @@
   }
 
   @media (max-width: 760px) {
+    .v174-photo-only-stall {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
     .v174-stall-stage {
-      min-height: 620px;
+      min-height: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
     }
 
     .v174-stall-img {
-      width: 180% !important;
-      height: 100% !important;
-      min-height: 620px !important;
-      object-fit: cover !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      object-fit: contain !important;
       object-position: center center !important;
-      transform: translateX(-24%);
+      transform: none !important;
+    }
+
+    /* Small cover strip only for the unwanted baked-in right-side numbers.
+       This preserves the full trophy case/room view instead of zooming the image. */
+    .v174-stall-stage::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: clamp(22px, 7vw, 42px);
+      height: 100%;
+      z-index: 15;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(2,3,4,0), #020304 36%, #020304 100%);
     }
 
     .v174-stall-nav {
-      right: 10px;
-      left: 10px;
-      bottom: 12px;
+      right: 8px;
+      left: 8px;
+      bottom: 8px;
       top: auto;
       transform: none;
       width: auto;
+      z-index: 30;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      gap: 7px;
     }
 
     .v174-stall-btn {
-      min-height: 38px;
-      font-size: 10px;
-      letter-spacing: .08em;
-      padding: 7px 8px;
-      border-radius: 10px;
+      min-height: 34px;
+      font-size: 9px;
+      letter-spacing: .07em;
+      padding: 6px 7px;
+      border-radius: 9px;
     }
 
     .v174-lobby-btn {

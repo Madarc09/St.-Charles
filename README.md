@@ -100,3 +100,10 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
   - static room photo
   - four other owner buttons
   - Trophy Room Lobby button
+
+
+## v175 mobile roster-room framing
+- Verified v174 mobile CSS was zooming room images to width:180% and translateX(-24%).
+- Replaced mobile zoom crop with full-width image display.
+- Added a narrow right-edge cover strip to hide the baked-in numbers while preserving the trophy case/room.
+- Kept the in-photo navigation buttons.
