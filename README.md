@@ -32,3 +32,6 @@ It also supports:
 Once those are set in Vercel, the first lottery run saves globally. Other devices will load that same locked result automatically from `/api/lottery`.
 
 Without those environment variables, the site still works, but the locked lottery only saves in that device/browser unless you use the copied replay link.
+
+
+V160: Home page locked to the Locker Room TV standings theme. Home Page Editor tab removed.
