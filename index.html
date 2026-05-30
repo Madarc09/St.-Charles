@@ -4425,69 +4425,39 @@
 })();
 </script>
 
-<style id="v161-trophy-room-lobby-style">
-  #rosters .section-head{display:none}
-  .trophy-lobby-host{display:block!important;width:100%}.trophy-lobby{position:relative;min-height:650px;overflow:hidden;border-radius:30px;border:1px solid rgba(255,255,255,.12);background:radial-gradient(circle at 50% 25%,rgba(65,65,55,.32),rgba(0,0,0,.96) 54%,#000 100%);box-shadow:0 35px 90px rgba(0,0,0,.72),inset 0 0 90px rgba(255,255,255,.035);isolation:isolate}.trophy-lobby:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 92%,rgba(255,255,255,.16),transparent 28%),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:auto,120px 120px,120px 120px;opacity:.42;pointer-events:none}.trophy-lobby:after{content:"";position:absolute;left:4%;right:4%;bottom:5%;height:26%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(210,195,145,.18),rgba(0,0,0,0) 62%);filter:blur(1px);pointer-events:none}.trophy-lobby-vignette{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,transparent 22%,rgba(0,0,0,.38) 68%,rgba(0,0,0,.9) 100%);z-index:8;pointer-events:none}.trophy-lobby-title{position:relative;z-index:12;text-align:center;padding:30px 18px 8px;text-transform:uppercase;letter-spacing:.45em}.trophy-lobby-title .tiny-cup{display:block;font-size:2rem;margin-bottom:2px;filter:drop-shadow(0 0 14px rgba(255,203,92,.6))}.trophy-lobby-title p{margin:0;color:#d4c796;font-size:.78rem;font-weight:900}.trophy-lobby-title h3{margin:6px 0 8px;color:#f4f1e5;font-size:clamp(1.4rem,3vw,3rem);font-weight:900;text-shadow:0 0 24px rgba(255,245,200,.22)}.trophy-lobby-title small{display:block;letter-spacing:.18em;color:rgba(255,255,255,.58);font-size:.72rem}.trophy-door-ring{position:relative;height:410px;perspective:1200px;z-index:10}.trophy-door{position:absolute;top:34px;left:50%;width:220px;height:325px;margin-left:-110px;border:0;border-radius:4px;background:linear-gradient(180deg,#151515,#050505);box-shadow:0 22px 55px rgba(0,0,0,.72),inset 0 0 0 2px rgba(255,255,255,.05);cursor:pointer;color:#f6f0dd;transition:transform .55s cubic-bezier(.2,.85,.25,1),opacity .45s,filter .45s;transform-style:preserve-3d}.trophy-door-left{transform:translateX(-295px) translateZ(-125px) rotateY(22deg) scale(.83);opacity:.78;filter:brightness(.72)}.trophy-door-center{transform:translateX(0) translateZ(70px) rotateY(0) scale(1.08);opacity:1;filter:brightness(1.08)}.trophy-door-right{transform:translateX(295px) translateZ(-125px) rotateY(-22deg) scale(.83);opacity:.78;filter:brightness(.72)}.trophy-door-hidden-left{transform:translateX(-520px) translateZ(-240px) rotateY(42deg) scale(.62);opacity:0;pointer-events:none}.trophy-door-hidden-right{transform:translateX(520px) translateZ(-240px) rotateY(-42deg) scale(.62);opacity:0;pointer-events:none}.door-glow{position:absolute;inset:-12px;border-radius:7px;background:linear-gradient(180deg,rgba(255,230,160,.64),rgba(255,210,95,.14));filter:blur(10px);opacity:.58;z-index:-1}.trophy-door:not(.is-center) .door-glow{opacity:.22}.door-nameplate{position:absolute;left:14px;right:14px;top:18px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,245,210,.32);background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.025));font-size:1.18rem;font-weight:900;letter-spacing:.16em;text-shadow:0 0 10px rgba(255,255,255,.32)}.door-panel-lines{position:absolute;left:34px;right:34px;top:86px;bottom:68px;border:2px solid rgba(255,255,255,.09);box-shadow:inset 0 0 32px rgba(255,255,255,.025)}.door-panel-lines i{position:absolute;left:22px;right:22px;height:2px;background:rgba(255,255,255,.08)}.door-panel-lines i:nth-child(1){top:24%}.door-panel-lines i:nth-child(2){top:50%}.door-panel-lines i:nth-child(3){top:76%}.door-handle{position:absolute;right:26px;top:174px;width:10px;height:48px;border-radius:999px;background:linear-gradient(90deg,#332815,#d0a642,#46371d);box-shadow:0 0 12px rgba(255,215,140,.25)}.door-meta{position:absolute;left:20px;right:20px;bottom:38px;display:flex;justify-content:space-between;gap:12px;align-items:end;color:#cfbf90}.door-meta b{font-size:1.8rem;color:#fff}.door-meta em{font-style:normal;font-size:.72rem;letter-spacing:.08em}.door-enter-hint{position:absolute;left:18px;right:18px;bottom:12px;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.56)}.is-center .door-enter-hint{color:#ffd979}.lobby-arrow{position:absolute;top:50%;z-index:13;transform:translateY(-50%);width:74px;height:74px;border-radius:22px;border:1px solid rgba(255,255,255,.16);background:rgba(8,10,13,.72);color:#fff;font-size:4rem;line-height:.8;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 30px rgba(0,0,0,.5);cursor:pointer}.lobby-arrow:hover{border-color:rgba(255,215,120,.55);box-shadow:0 0 30px rgba(255,210,90,.15)}.lobby-arrow-left{left:34px}.lobby-arrow-right{right:34px}.lobby-control-deck{position:absolute;left:50%;bottom:26px;z-index:14;transform:translateX(-50%);min-width:min(680px,82%);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:12px 16px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(0,0,0,.58);box-shadow:0 15px 50px rgba(0,0,0,.45);text-transform:uppercase;letter-spacing:.18em}.lobby-control-deck>span{color:rgba(255,255,255,.56);font-size:.72rem}.lobby-dots{display:flex;gap:9px;justify-content:center}.lobby-dots button{width:10px;height:10px;border-radius:999px;border:0;background:rgba(255,255,255,.32);cursor:pointer}.lobby-dots button.active{background:#f3c855;box-shadow:0 0 14px rgba(243,200,85,.8)}.lobby-enter{justify-self:end;border:1px solid rgba(255,215,120,.38);background:linear-gradient(180deg,rgba(255,215,120,.16),rgba(255,215,120,.06));color:#fff;border-radius:12px;padding:10px 13px;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;cursor:pointer}.lobby-enter-transition{position:absolute;inset:0;z-index:30;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:scale(1.2);transition:opacity .5s,transform .5s}.lobby-enter-transition span{position:absolute;width:52vmin;height:52vmin;border-radius:50%;background:radial-gradient(circle,rgba(255,226,145,.95),rgba(255,226,145,.15) 30%,transparent 58%);filter:blur(6px)}.lobby-enter-transition b{position:relative;color:#111;text-transform:uppercase;letter-spacing:.22em}.trophy-lobby.is-entering .lobby-enter-transition{opacity:1;transform:scale(.08)}.owner-stall-view{animation:stallArrive .42s ease both}@keyframes stallArrive{from{opacity:0;transform:scale(1.04);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
-  @media(max-width:760px){#rosters .official-source-status{margin-top:10px}.trophy-lobby{min-height:560px;border-radius:20px}.trophy-lobby-title{padding-top:22px;letter-spacing:.22em}.trophy-lobby-title small{font-size:.62rem;letter-spacing:.08em;padding:0 18px}.trophy-door-ring{height:360px}.trophy-door{width:158px;height:260px;margin-left:-79px;top:48px}.trophy-door-left{transform:translateX(-150px) translateZ(-85px) rotateY(25deg) scale(.72)}.trophy-door-center{transform:translateX(0) translateZ(45px) scale(1.02)}.trophy-door-right{transform:translateX(150px) translateZ(-85px) rotateY(-25deg) scale(.72)}.trophy-door-hidden-left{transform:translateX(-280px) translateZ(-180px) rotateY(42deg) scale(.55);opacity:0}.trophy-door-hidden-right{transform:translateX(280px) translateZ(-180px) rotateY(-42deg) scale(.55);opacity:0}.door-nameplate{font-size:.88rem;left:10px;right:10px;height:36px;letter-spacing:.1em}.door-panel-lines{left:25px;right:25px;top:74px;bottom:58px}.door-meta{bottom:31px}.door-meta b{font-size:1.2rem}.door-meta em{font-size:.58rem}.door-enter-hint{font-size:.55rem}.lobby-arrow{width:50px;height:50px;border-radius:15px;font-size:2.7rem;top:54%}.lobby-arrow-left{left:10px}.lobby-arrow-right{right:10px}.lobby-control-deck{bottom:14px;grid-template-columns:1fr;gap:8px;min-width:calc(100% - 30px);text-align:center}.lobby-enter{justify-self:stretch}.lobby-control-deck>span{display:none}}
-</style>
-
-
-
-<style id="v165-lobby-door-focus-style">
-  /* V165: keep the exact lobby image, but move the selected light with the arrows. */
-  #rosters .exact-lobby-shell{position:relative;}
-  #rosters .exact-lobby-focus-glow{position:absolute;z-index:6;pointer-events:none;border-radius:6px;border:2px solid rgba(255,220,120,.96);box-shadow:0 0 14px rgba(255,230,150,.98),0 0 42px rgba(255,190,50,.62),inset 0 0 28px rgba(255,224,140,.20);background:radial-gradient(ellipse at 50% 18%,rgba(255,227,140,.28),rgba(255,197,54,.11) 26%,rgba(0,0,0,0) 70%);transition:left .42s ease,top .42s ease,width .42s ease,height .42s ease,opacity .25s ease;mix-blend-mode:screen;}
-  #rosters .exact-lobby-shell[data-focus="scott"] .exact-lobby-focus-glow{left:1.4%;top:23.2%;width:13.8%;height:57.8%;}
-  #rosters .exact-lobby-shell[data-focus="chris"] .exact-lobby-focus-glow{left:20.0%;top:31.8%;width:14.8%;height:44.6%;}
-  #rosters .exact-lobby-shell[data-focus="nick"] .exact-lobby-focus-glow{left:42.6%;top:31.8%;width:15.7%;height:45.2%;}
-  #rosters .exact-lobby-shell[data-focus="tyler"] .exact-lobby-focus-glow{left:67.2%;top:31.8%;width:14.9%;height:45.0%;}
-  #rosters .exact-lobby-shell[data-focus="andrew"] .exact-lobby-focus-glow{left:84.8%;top:23.2%;width:13.8%;height:57.8%;}
-  #rosters .exact-lobby-hotzone.select{left:34.5%;bottom:8.6%;width:31%;height:8.5%;}
-  #rosters .exact-lobby-hotzone.is-selected{cursor:pointer;}
-  #rosters .exact-lobby-hotzone:not(.is-selected):not(.prev):not(.next):not(.select){cursor:pointer;}
-  #rosters .exact-lobby-shell.is-entering .exact-lobby-focus-glow{opacity:0;}
-</style>
-<style id="v164-literal-lobby-cleanup-style">
-  /* V164: make Trophy Room lobby be the uploaded PNG only. */
+<style id="v166-exact-trophy-lobby-clean-style">
+  /* V166: exact image lobby, no CSS door recreation. */
   #rosters > .section-head, #rostersSourceStatus{display:none!important;}
   #rosters.panel{padding-top:0!important;}
   #rosters #rosterCards{display:block!important;margin-top:0!important;}
-  #rosters .exact-lobby-host{padding:0!important;margin:0!important;}
-  #rosters .exact-lobby-shell{max-width:1536px!important;width:100%!important;aspect-ratio:1536/1024!important;border-radius:0!important;border:none!important;background:#000!important;box-shadow:none!important;}
-  #rosters .exact-lobby-scene{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;}
   #rosters .trophy-lobby{display:none!important;}
+  #rosters .exact-lobby-host{display:block!important;width:100%;padding:0!important;margin:0!important;}
+  #rosters .exact-lobby-shell{position:relative!important;width:100%!important;max-width:1536px!important;margin:0 auto!important;aspect-ratio:1536/1024!important;overflow:hidden!important;background:#000!important;border:0!important;border-radius:0!important;box-shadow:none!important;isolation:isolate!important;touch-action:pan-y!important;}
+  #rosters .exact-lobby-scene{position:absolute!important;inset:0!important;z-index:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;display:block!important;transform:none!important;filter:none!important;transition:transform .55s ease, filter .35s ease!important;}
+  #rosters .exact-lobby-shell.is-entering .exact-lobby-scene{transform:scale(1.18)!important;filter:brightness(.42) blur(1.2px)!important;}
+  #rosters .andrew-label-repair{position:absolute;z-index:4;left:89.15%;top:23.05%;width:8.15%;height:5.2%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(18,18,14,.96),rgba(4,4,4,.96));border:1px solid rgba(211,195,126,.55);box-shadow:0 0 10px rgba(255,224,150,.20), inset 0 0 16px rgba(255,245,190,.04);color:#fff1bd;font-family:'Arial Narrow','Roboto Condensed',Arial,sans-serif;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-shadow:0 0 7px rgba(255,238,180,.75);font-size:clamp(10px,1.55vw,25px);transform:skewY(-4deg);pointer-events:none;}
+  #rosters .exact-lobby-light{position:absolute;z-index:3;pointer-events:none;border-radius:8px;border:1px solid rgba(255,226,143,.55);box-shadow:0 0 20px rgba(255,227,150,.88),0 0 58px rgba(255,188,52,.46),inset 0 0 32px rgba(255,226,143,.16);background:radial-gradient(ellipse at 50% 16%,rgba(255,232,166,.26),rgba(255,208,87,.09) 34%,rgba(0,0,0,0) 72%);mix-blend-mode:screen;transition:left .32s ease,top .32s ease,width .32s ease,height .32s ease,opacity .22s ease;opacity:.78;}
+  #rosters .exact-lobby-shell[data-focus="scott"] .exact-lobby-light{left:1.4%;top:23.0%;width:13.6%;height:57.5%;}
+  #rosters .exact-lobby-shell[data-focus="chris"] .exact-lobby-light{left:20.0%;top:31.6%;width:14.9%;height:44.8%;}
+  #rosters .exact-lobby-shell[data-focus="nick"] .exact-lobby-light{left:42.5%;top:31.6%;width:15.8%;height:45.5%;}
+  #rosters .exact-lobby-shell[data-focus="tyler"] .exact-lobby-light{left:67.2%;top:31.7%;width:15.0%;height:45.0%;}
+  #rosters .exact-lobby-shell[data-focus="andrew"] .exact-lobby-light{left:84.8%;top:23.0%;width:13.6%;height:57.5%;}
+  #rosters .exact-lobby-hotzone{position:absolute!important;z-index:20!important;border:0!important;background:rgba(0,0,0,0)!important;color:transparent!important;padding:0!important;cursor:pointer!important;outline:none!important;pointer-events:auto!important;}
+  #rosters .exact-lobby-hotzone:focus-visible{outline:2px solid rgba(255,215,120,.7)!important;outline-offset:2px!important;}
+  #rosters .exact-lobby-hotzone.scott{left:1.4%;top:23.0%;width:13.6%;height:57.5%;}
+  #rosters .exact-lobby-hotzone.chris{left:20.0%;top:31.6%;width:14.9%;height:44.8%;}
+  #rosters .exact-lobby-hotzone.nick{left:42.5%;top:31.6%;width:15.8%;height:45.5%;}
+  #rosters .exact-lobby-hotzone.tyler{left:67.2%;top:31.7%;width:15.0%;height:45.0%;}
+  #rosters .exact-lobby-hotzone.andrew{left:84.8%;top:23.0%;width:13.6%;height:57.5%;}
+  #rosters .exact-lobby-hotzone.prev{left:5.5%;bottom:10.0%;width:11.3%;height:7.6%;}
+  #rosters .exact-lobby-hotzone.next{right:5.8%;bottom:10.0%;width:11.3%;height:7.6%;}
+  #rosters .exact-lobby-hotzone.select{left:34.2%;bottom:8.9%;width:31.6%;height:8.5%;}
+  #rosters .exact-enter-flash{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--enter-x,50%) var(--enter-y,48%),rgba(255,230,145,.88),rgba(255,230,145,.12) 15%,rgba(0,0,0,.93) 52%,#000 100%);transition:opacity .28s ease;}
+  #rosters .exact-lobby-shell.is-entering .exact-enter-flash{opacity:1;}
+  #rosters .exact-lobby-shell.is-entering .exact-lobby-light{opacity:0;}
   @media(max-width:760px){#rosters.panel{padding-left:0!important;padding-right:0!important;}#rosters .exact-lobby-shell{width:100vw!important;margin-left:50%!important;transform:translateX(-50%)!important;}}
 </style>
-</body>
-</html>
-
-<style id="v163-literal-trophy-lobby-style">
-  /* V163: literal lobby. The uploaded PNG is the scene; no CSS-built doors, no visible UI overlay. */
-  #rosters > .section-head{display:none!important;}
-  #rostersSourceStatus{display:none!important;}
-  .exact-lobby-host{display:block!important;width:100%;}
-  .exact-lobby-shell{position:relative;width:100%;max-width:1536px;margin:0 auto;border-radius:0;overflow:hidden;background:#000;box-shadow:0 30px 90px rgba(0,0,0,.8);isolation:isolate;aspect-ratio:3/2;}
-  .exact-lobby-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;transform:none!important;filter:none!important;transition:transform .72s cubic-bezier(.2,.85,.2,1),filter .42s ease;}
-  .exact-lobby-shell.is-entering .exact-lobby-scene{transform:scale(1.34)!important;filter:brightness(.55) blur(1.5px)!important;}
-  .exact-lobby-hotzone{position:absolute;z-index:8;border:0;background:transparent;color:transparent;cursor:pointer;padding:0;outline:none;}
-  .exact-lobby-hotzone:focus-visible{outline:2px solid rgba(255,215,120,.65);outline-offset:2px;border-radius:8px;}
-  /* Door hit zones based on the exact uploaded image. */
-  .exact-lobby-hotzone.scott{left:1.6%;top:24%;width:13.2%;height:56%;}
-  .exact-lobby-hotzone.chris{left:20.2%;top:33%;width:14.2%;height:42%;}
-  .exact-lobby-hotzone.nick{left:42.8%;top:33%;width:15.2%;height:43%;}
-  .exact-lobby-hotzone.tyler{left:67.4%;top:33%;width:14.2%;height:43%;}
-  .exact-lobby-hotzone.andrew{right:1.7%;top:24%;width:13.2%;height:56%;}
-  /* Invisible arrow hit zones over the arrows that already exist inside the image. */
-  .exact-lobby-hotzone.prev{left:5.8%;bottom:9.7%;width:11.0%;height:7.3%;}
-  .exact-lobby-hotzone.next{right:6.0%;bottom:9.7%;width:11.0%;height:7.3%;}
-  .exact-enter-flash{position:absolute;inset:0;z-index:20;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--enter-x,50%) var(--enter-y,48%),rgba(255,230,145,.88),rgba(255,230,145,.12) 16%,rgba(0,0,0,.95) 54%,#000 100%);transition:opacity .36s ease;}
-  .exact-lobby-shell.is-entering .exact-enter-flash{opacity:1;}
-  @media(max-width:760px){
-    .exact-lobby-shell{width:calc(100vw - 18px);margin-inline:-3px;border-radius:0;aspect-ratio:3/2;}
-    #rosters.panel{padding-left:8px;padding-right:8px;}
-  }
-</style>
-<script id="v165-literal-trophy-lobby-script">
+<script id="v166-exact-trophy-lobby-clean-script">
 (function(){
   const owners=[
     {id:'scott',label:'Scott'},
@@ -4499,93 +4469,51 @@
   let focusIndex=2;
   function ownerById(id){return owners.find(o=>o.id===id)||owners[focusIndex]||owners[2];}
   function focusId(){return (owners[focusIndex]||owners[2]).id;}
-  function setFocusByStep(step){
-    focusIndex=(focusIndex+step+owners.length)%owners.length;
-    applyFocus();
-  }
-  function setFocus(id){
-    const idx=owners.findIndex(o=>o.id===id);
-    if(idx>=0){focusIndex=idx;applyFocus();}
-  }
-  function applyFocus(){
-    const shell=document.querySelector('#rosterCards .exact-lobby-shell');
-    if(!shell) return;
-    shell.dataset.focus=focusId();
-    const label=(owners[focusIndex]?.label||'door');
-    shell.querySelector('[data-lobby-selected-label]')?.setAttribute('aria-label',`Enter ${label}'s locker room`);
-    shell.querySelectorAll('[data-enter-door]').forEach(btn=>{
-      const active=btn.dataset.enterDoor===focusId();
-      btn.classList.toggle('is-selected',active);
-      btn.setAttribute('aria-label', active ? `Enter ${label}'s locker room` : `Select ${btn.textContent.trim()}'s door`);
-    });
-  }
-  function enter(id, sourceEl){
-    const owner=ownerById(id||focusId());
-    const idx=owners.findIndex(o=>o.id===owner.id);
-    if(idx>=0) focusIndex=idx;
-    const target=document.getElementById('rosterCards');
-    const shell=target && target.querySelector('.exact-lobby-shell');
-    if(shell){
-      applyFocus();
-      const src=sourceEl && sourceEl.getBoundingClientRect ? sourceEl : shell.querySelector(`[data-enter-door="${owner.id}"]`) || shell;
-      const r=src.getBoundingClientRect();
-      const sr=shell.getBoundingClientRect();
-      const x=((r.left+r.width/2-sr.left)/sr.width*100).toFixed(1)+'%';
-      const y=((r.top+r.height/2-sr.top)/sr.height*100).toFixed(1)+'%';
-      shell.style.setProperty('--enter-x',x);
-      shell.style.setProperty('--enter-y',y);
-      shell.classList.add('is-entering');
-    }
-    setTimeout(()=>{ if(typeof window.openRosterStall==='function') window.openRosterStall(owner.id); },560);
+  function setFocus(id){const i=owners.findIndex(o=>o.id===id); if(i>=0){focusIndex=i; applyFocus();}}
+  function rotate(step){focusIndex=(focusIndex+step+owners.length)%owners.length; applyFocus();}
+  function shell(){return document.querySelector('#rosterCards .exact-lobby-shell');}
+  function applyFocus(){const sh=shell(); if(!sh) return; sh.dataset.focus=focusId(); sh.querySelectorAll('[data-enter-door]').forEach(b=>b.classList.toggle('is-selected',b.dataset.enterDoor===focusId()));}
+  function enter(id, src){const o=ownerById(id||focusId()); setFocus(o.id); const sh=shell(); if(sh){const s=src&&src.getBoundingClientRect?src:(sh.querySelector('[data-enter-door="'+o.id+'"]')||sh); const r=s.getBoundingClientRect(), sr=sh.getBoundingClientRect(); sh.style.setProperty('--enter-x',(((r.left+r.width/2-sr.left)/sr.width)*100).toFixed(1)+'%'); sh.style.setProperty('--enter-y',(((r.top+r.height/2-sr.top)/sr.height)*100).toFixed(1)+'%'); sh.classList.add('is-entering');}
+    setTimeout(function(){ if(typeof window.openRosterStall==='function') window.openRosterStall(o.id); }, 420);
   }
   function renderExactLobby(draft){
     window.__exactLobbyDraft=draft||{};
-    const target=document.getElementById('rosterCards');
-    if(!target) return;
+    const target=document.getElementById('rosterCards'); if(!target) return;
     target.className='walkable-locker-host trophy-lobby-host exact-lobby-host';
-    target.innerHTML=`<section class="exact-lobby-shell" data-focus="${focusId()}" aria-label="Trophy Room locker lobby">
-      <img class="exact-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=165" alt="Dark circular Trophy Room lobby with glowing owner doors">
-      <span class="exact-lobby-focus-glow" aria-hidden="true"></span>
-      <button class="exact-lobby-hotzone scott" data-enter-door="scott">Scott</button>
-      <button class="exact-lobby-hotzone chris" data-enter-door="chris">Chris</button>
-      <button class="exact-lobby-hotzone nick" data-enter-door="nick">Nick</button>
-      <button class="exact-lobby-hotzone tyler" data-enter-door="tyler">Tyler</button>
-      <button class="exact-lobby-hotzone andrew" data-enter-door="andrew">Andrew</button>
-      <button class="exact-lobby-hotzone prev" data-rotate-step="-1" aria-label="Rotate left">Previous</button>
-      <button class="exact-lobby-hotzone next" data-rotate-step="1" aria-label="Rotate right">Next</button>
-      <button class="exact-lobby-hotzone select" data-lobby-selected-label aria-label="Enter selected locker room">Select door</button>
-      <div class="exact-enter-flash" aria-hidden="true"></div>
-    </section>`;
-    target.querySelectorAll('[data-enter-door]').forEach(b=>b.addEventListener('click',e=>{
-      e.preventDefault();
-      const id=b.dataset.enterDoor;
-      if(id===focusId()) enter(id,b);
-      else setFocus(id);
-    }));
-    target.querySelectorAll('[data-rotate-step]').forEach(b=>b.addEventListener('click',e=>{
-      e.preventDefault();
-      setFocusByStep(parseInt(b.dataset.rotateStep||'1',10));
-    }));
-    target.querySelector('[data-lobby-selected-label]')?.addEventListener('click',e=>{e.preventDefault();enter(focusId(),e.currentTarget);});
-    const shell=target.querySelector('.exact-lobby-shell');
-    let start=null;
-    shell?.addEventListener('pointerdown',e=>{start=e.clientX; shell.setPointerCapture?.(e.pointerId);});
-    shell?.addEventListener('pointerup',e=>{if(start==null)return;const dx=e.clientX-start;start=null;if(Math.abs(dx)>46){setFocusByStep(dx>0?-1:1);}});
+    target.innerHTML='<section class="exact-lobby-shell" data-focus="'+focusId()+'" aria-label="Trophy Room locker lobby">'+
+      '<img class="exact-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=166" alt="Dark circular Trophy Room lobby with glowing owner doors">'+
+      '<span class="andrew-label-repair" aria-hidden="true">Andrew</span>'+
+      '<span class="exact-lobby-light" aria-hidden="true"></span>'+
+      '<button class="exact-lobby-hotzone scott" data-enter-door="scott" aria-label="Select Scott door">Scott</button>'+
+      '<button class="exact-lobby-hotzone chris" data-enter-door="chris" aria-label="Select Chris door">Chris</button>'+
+      '<button class="exact-lobby-hotzone nick" data-enter-door="nick" aria-label="Enter Nick door">Nick</button>'+
+      '<button class="exact-lobby-hotzone tyler" data-enter-door="tyler" aria-label="Select Tyler door">Tyler</button>'+
+      '<button class="exact-lobby-hotzone andrew" data-enter-door="andrew" aria-label="Select Andrew door">Andrew</button>'+
+      '<button class="exact-lobby-hotzone prev" data-rotate-step="-1" aria-label="Rotate left">Previous</button>'+
+      '<button class="exact-lobby-hotzone next" data-rotate-step="1" aria-label="Rotate right">Next</button>'+
+      '<button class="exact-lobby-hotzone select" data-select-current="1" aria-label="Enter selected door">Select door</button>'+
+      '<span class="exact-enter-flash" aria-hidden="true"></span>'+
+    '</section>';
     applyFocus();
   }
-  window.__renderExactTrophyLobby = renderExactLobby;
+  document.addEventListener('click',function(e){
+    const sh=e.target.closest && e.target.closest('#rosterCards .exact-lobby-shell');
+    if(!sh) return;
+    const rot=e.target.closest('[data-rotate-step]');
+    if(rot){e.preventDefault();e.stopPropagation();rotate(parseInt(rot.dataset.rotateStep||'1',10));return;}
+    const door=e.target.closest('[data-enter-door]');
+    if(door){e.preventDefault();e.stopPropagation();const id=door.dataset.enterDoor;if(id===focusId()) enter(id,door); else setFocus(id);return;}
+    const sel=e.target.closest('[data-select-current]');
+    if(sel){e.preventDefault();e.stopPropagation();enter(focusId(),sel);}
+  }, true);
+  document.addEventListener('pointerdown',function(e){const sh=e.target.closest&&e.target.closest('#rosterCards .exact-lobby-shell'); if(!sh) return; sh.__swipeStart=e.clientX;}, true);
+  document.addEventListener('pointerup',function(e){const sh=e.target.closest&&e.target.closest('#rosterCards .exact-lobby-shell'); if(!sh||sh.__swipeStart==null) return; const dx=e.clientX-sh.__swipeStart; sh.__swipeStart=null; if(Math.abs(dx)>45){e.preventDefault(); rotate(dx>0?-1:1);}}, true);
+  window.__renderExactTrophyLobby=renderExactLobby;
   window.renderDraftRosters=renderExactLobby;
   window.renderWalkableLockerRoom=renderExactLobby;
-  window.addEventListener('load',()=>setTimeout(async()=>{try{if(window.officialDraftApi?.load){renderExactLobby(await window.officialDraftApi.load());return;}}catch(e){}renderExactLobby(window.__exactLobbyDraft||{});},120));
-
-  const target=document.getElementById('rosterCards');
-  if(target){
-    const observer=new MutationObserver(()=>{
-      if(!target.querySelector('.exact-lobby-shell') && target.querySelector('.trophy-lobby') && !(document.querySelector('#rosters')?.classList.contains('stall-open'))) {
-        setTimeout(()=>renderExactLobby(window.__exactLobbyDraft||{}),0);
-      }
-    });
-    observer.observe(target,{childList:true,subtree:false});
-  }
+  window.addEventListener('load',function(){setTimeout(async function(){try{if(window.officialDraftApi&&window.officialDraftApi.load){renderExactLobby(await window.officialDraftApi.load());return;}}catch(err){} renderExactLobby(window.__exactLobbyDraft||{});},120);});
 })();
 </script>
+
+</body>
+</html>
