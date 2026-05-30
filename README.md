@@ -59,3 +59,12 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
   - buttons for the four other owner rooms
   - button back to Trophy Room Lobby
 - Kept static roster-room images as the main focal display.
+
+
+## v171 photo-only roster rooms
+- Removed the separate stall title/tab area.
+- Owner room pages now show the room photo as the main/only content.
+- Cropped/zoomed the photo to hide the unwanted numbered strip on the right.
+- Added five in-image navigation buttons on the right side:
+  - four other owner stalls
+  - Trophy Room Lobby
