@@ -4,33 +4,36 @@
   "gameTypeId": 2,
   "lastUpdated": null,
   "scoring": {
-    "goals": 1,
+    "goals": 2,
     "assists": 1,
     "points": 0,
     "powerPlayGoals": 0,
     "powerPlayPoints": 0,
-    "shortHandedGoals": 0,
-    "gameWinningGoals": 0,
+    "shortHandedGoals": 5,
+    "gameWinningGoals": 5,
     "shots": 0,
     "hits": 0,
     "blocks": 0,
     "goalieWins": 2,
-    "goalieShutouts": 3,
+    "goalieShutouts": 5,
     "goalieSaves": 0,
     "goalieGoalsAgainst": 0,
-    "goalieSavePctBonus": 0
+    "goalieSavePctBonus": 0,
+    "goalieAssists": 5,
+    "goalieGoals": 10
   },
   "rosterRules": {
-    "forwards": 9,
-    "defense": 4,
+    "skaters": 10,
+    "forwards": 10,
+    "defense": 0,
     "goalies": 2,
-    "bench": 3,
+    "bench": 0,
     "ir": 0,
-    "totalRosterSize": 18
+    "totalRosterSize": 12
   },
   "draftRules": {
     "type": "snake",
-    "rounds": 18,
+    "rounds": 12,
     "pickTimerSeconds": 0,
     "allowTradingPicks": true
   }

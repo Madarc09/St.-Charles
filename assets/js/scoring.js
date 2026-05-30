@@ -14,6 +14,8 @@ export function fantasyPoints(player, scoring = {}) {
     (Number(p.blocks || 0) * Number(s.blocks || 0));
   const goalieTotal =
     (Number(p.goalieWins || 0) * Number(s.goalieWins || 0)) +
+    (Number(p.goalieGoals || p.goals || 0) * Number(s.goalieGoals || 0)) +
+    (Number(p.goalieAssists || p.assists || 0) * Number(s.goalieAssists || 0)) +
     (Number(p.goalieShutouts || 0) * Number(s.goalieShutouts || 0)) +
     (Number(p.goalieSaves || 0) * Number(s.goalieSaves || 0)) +
     (Number(p.goalieGoalsAgainst || 0) * Number(s.goalieGoalsAgainst || 0)) +

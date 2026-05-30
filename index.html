@@ -48,7 +48,7 @@
           <div>
             <p class="eyebrow">Playoff Leaderboard</p>
             <h2>Pool standings</h2>
-            <p class="muted">Playoff scoring: 2 pts per goal, 1 pt per assist, 5 pts per goalie/team-goalie win.</p>
+            <p class="muted">Pool scoring: Skaters — 2 pts per goal, 1 per assist, 5 per SHG/GWG. Goalies — 2 per win, 5 per assist, 10 per goal, 5 per shutout.</p>
           </div>
           <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
         </div>
@@ -129,7 +129,7 @@
           <div id="cleanRosterNeedsPanel" class="clean-roster-needs-panel">
             <div class="needs-placeholder">
               <strong>Select a team to see roster needs.</strong>
-              <span>Limits: 6 forwards, 4 defense, 2 goalies</span>
+              <span>Limits: 10 skaters, 2 goalies</span>
             </div>
           </div>
 </div>
@@ -405,6 +405,8 @@
         var gaa = Number(g.goalsAgainstAverage || g.gaa || 0);
 
         t.gamesPlayed += gp;
+        t.goals = Number(t.goals || 0) + Number(g.goals || g.goalieGoals || 0);
+        t.assists = Number(t.assists || 0) + Number(g.assists || g.goalieAssists || 0);
         t.goalieWins += Number(g.goalieWins || g.wins || 0);
         t.goalieShutouts += Number(g.goalieShutouts || g.shutouts || 0);
         t.saves += saves;
@@ -417,7 +419,7 @@
       return Array.from(byTeam.values()).map(function(t) {
         t.savePct = t.shotsAgainst > 0 ? Number((t.saves / t.shotsAgainst).toFixed(3)) : Number((t.weightedSavePct / Math.max(1, t.gamesPlayed)).toFixed(3));
         t.goalsAgainstAverage = t.gamesPlayed > 0 ? Number((t.weightedGaa / Math.max(1, t.gamesPlayed)).toFixed(2)) : 0;
-        t.fantasyPoints = Math.round((Number(t.goalieWins || 0) * 4) + (Number(t.goalieShutouts || 0) * 3));
+        t.fantasyPoints = Math.round((Number(t.goalieWins || 0) * 2) + (Number(t.goals || 0) * 10) + (Number(t.assists || 0) * 5) + (Number(t.goalieShutouts || 0) * 5));
         return t;
       });
     };
@@ -590,7 +592,7 @@
       if (!panel) return;
 
       if (!ownerId) {
-        panel.innerHTML = '<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 6 forwards, 4 defense, 2 goalies</span></div>';
+        panel.innerHTML = '<div class="needs-placeholder"><strong>Select a team to see roster needs.</strong><span>Limits: 10 skaters, 2 goalies</span></div>';
         return;
       }
 
@@ -1063,8 +1065,8 @@
       }
       function rosterLimit() {
         var input = document.getElementById("totalRosterSize");
-        var n = Number(input && input.value || 15);
-        return Number.isFinite(n) && n > 0 ? n : 15;
+        var n = Number(input && input.value || 12);
+        return Number.isFinite(n) && n > 0 ? n : 12;
       }
       function totalPickLimit() {
         return (draftState?.owners?.length || OWNERS.length) * rosterLimit();
@@ -1094,13 +1096,17 @@
         return new Set((draftState?.picks || []).map(function (p) { return String(p.player.id); }));
       }
       function fantasyPoints(p) {
-        // Read scoring from editable rules where possible.
-        var g = Number(document.getElementById("goalPoints")?.value || 3);
-        var a = Number(document.getElementById("assistPoints")?.value || 2);
-        var win = Number(document.getElementById("goalieWinPoints")?.value || 4);
-        var so = Number(document.getElementById("goalieShutoutPoints")?.value || 3);
-        if (p.position === "G") return Math.round((Number(p.goalieWins || 0) * win) + (Number(p.goalieShutouts || 0) * so));
-        return Math.round((Number(p.goals || 0) * g) + (Number(p.assists || 0) * a));
+        // Hockey Pool scoring: skater G=2, A=1, SHG=5, GWG=5; goalie W=2, A=5, G=10, SO=5.
+        var g = Number(document.getElementById("goalPoints")?.value || 2);
+        var a = Number(document.getElementById("assistPoints")?.value || 1);
+        var shg = Number(document.getElementById("shortHandedGoalPoints")?.value || 5);
+        var gwg = Number(document.getElementById("gameWinningGoalPoints")?.value || 5);
+        var win = Number(document.getElementById("goalieWinPoints")?.value || 2);
+        var goalieA = Number(document.getElementById("goalieAssistPoints")?.value || 5);
+        var goalieG = Number(document.getElementById("goalieGoalPoints")?.value || 10);
+        var so = Number(document.getElementById("goalieShutoutPoints")?.value || 5);
+        if (p.position === "G" || p.position === "TG") return Math.round((Number(p.goalieWins || 0) * win) + (Number(p.goalieGoals || p.goals || 0) * goalieG) + (Number(p.goalieAssists || p.assists || 0) * goalieA) + (Number(p.goalieShutouts || 0) * so));
+        return Math.round((Number(p.goals || 0) * g) + (Number(p.assists || 0) * a) + (Number(p.shortHandedGoals || 0) * shg) + (Number(p.gameWinningGoals || 0) * gwg));
       }
       function normalizeSkater(row) {
         var first = row.firstName || row.firstNameDefault || "";
@@ -1115,6 +1121,8 @@
           goals: Number(row.goals || 0),
           assists: Number(row.assists || 0),
           points: Number(row.points || 0),
+          shortHandedGoals: Number(row.shGoals || row.shortHandedGoals || 0),
+          gameWinningGoals: Number(row.gameWinningGoals || row.gwGoals || 0),
           goalieWins: 0,
           goalieShutouts: 0
         };
@@ -1134,9 +1142,11 @@
           position: "G",
           nhlTeam: row.teamAbbrevs || row.teamAbbrev || row.team || "",
           gamesPlayed: Number(row.gamesPlayed || 0),
-          goals: 0,
-          assists: 0,
-          points: 0,
+          goals: Number(row.goals || 0),
+          assists: Number(row.assists || 0),
+          points: Number(row.points || 0),
+          goalieGoals: Number(row.goals || row.goalieGoals || 0),
+          goalieAssists: Number(row.assists || row.goalieAssists || 0),
           goalieWins: Number(row.wins || 0),
           goalieShutouts: Number(row.shutouts || 0),
           saves: saves,
@@ -1524,7 +1534,7 @@
         { id:"tyler", name:"Tyler", teamName:"Tyler" },
         { id:"scott", name:"Scott", teamName:"Scott" }
       ];
-      const LIMITS = { F: 6, D: 4, G: 2 };
+      const LIMITS = { SKATERS: 10, G: 2 };
       const TOTAL_PICKS = OWNERS.length * 12;
 
       let activeOwnerId = localStorage.getItem("custom-hockey-pool-active-owner") || "nick";
@@ -1569,8 +1579,8 @@
       }
 
       function fp(p){
-        if (bucket(p.position) === "G") return Math.round((Number(p.goalieWins || 0) * 4) + (Number(p.goalieShutouts || 0) * 3));
-        return Math.round((Number(p.goals || 0) * 3) + (Number(p.assists || 0) * 2));
+        if (bucket(p.position) === "G") return Math.round((Number(p.goalieWins || 0) * 2) + (Number(p.goalieGoals || p.goals || 0) * 10) + (Number(p.goalieAssists || p.assists || 0) * 5) + (Number(p.goalieShutouts || 0) * 5));
+        return Math.round((Number(p.goals || 0) * 2) + (Number(p.assists || 0) * 1) + (Number(p.shortHandedGoals || 0) * 5) + (Number(p.gameWinningGoals || 0) * 5));
       }
 
       function defaultDraft(){
@@ -1642,7 +1652,8 @@
       function canOwnerDraftPosition(ownerId, position){
         const counts = rosterCounts(ownerId);
         const b = bucket(position);
-        return counts[b] < LIMITS[b];
+        if (b === "G") return counts.G < LIMITS.G;
+        return (counts.F + counts.D) < LIMITS.SKATERS;
       }
 
       function normalizeName(first, last, fallback){
@@ -1665,6 +1676,8 @@
           goals: Number(row.goals || 0),
           assists: Number(row.assists || 0),
           points: Number(row.points || 0),
+          shortHandedGoals: Number(row.shGoals || row.shortHandedGoals || 0),
+          gameWinningGoals: Number(row.gameWinningGoals || row.gwGoals || 0),
           fantasyPoints: 0
         };
       }
@@ -1680,6 +1693,10 @@
             position: "TG",
             nhlTeam: team,
             gamesPlayed: 0,
+            goals: 0,
+            assists: 0,
+            goalieGoals: 0,
+            goalieAssists: 0,
             goalieWins: 0,
             goalieShutouts: 0,
             savePct: 0,
@@ -1687,6 +1704,10 @@
             fantasyPoints: 0
           };
           current.gamesPlayed += Number(row.gamesPlayed || row.gp || 0);
+          current.goals += Number(row.goals || row.goalieGoals || 0);
+          current.assists += Number(row.assists || row.goalieAssists || 0);
+          current.goalieGoals += Number(row.goals || row.goalieGoals || 0);
+          current.goalieAssists += Number(row.assists || row.goalieAssists || 0);
           current.goalieWins += Number(row.wins || row.goalieWins || 0);
           current.goalieShutouts += Number(row.shutouts || row.goalieShutouts || 0);
           current.savePct = Math.max(current.savePct || 0, Number(row.savePct || row.savePercentage || 0));
@@ -2338,8 +2359,10 @@
           const team = rowTeam(row);
           const goals = Number(row.goals || 0);
           const assists = Number(row.assists || 0);
-          const playoffPts = (goals * 2) + assists;
-          const item = { id, name, team, goals, assists, playoffPts };
+          const shortHandedGoals = Number(row.shortHandedGoals || row.shGoals || 0);
+          const gameWinningGoals = Number(row.gameWinningGoals || row.gwGoals || 0);
+          const playoffPts = (goals * 2) + assists + (shortHandedGoals * 5) + (gameWinningGoals * 5);
+          const item = { id, name, team, goals, assists, shortHandedGoals, gameWinningGoals, playoffPts };
           if (id) byId.set(id, item);
           byNameTeam.set(normalizeName(name) + "|" + team, item);
           byNameTeam.set(normalizeName(name), item);
@@ -2417,13 +2440,13 @@
 
             if (player.position === "TG") {
               goalieWins = Number(teamGoalieWins.get(player.nhlTeam) || 0);
-              points = goalieWins * 5;
+              points = goalieWins * 2;
             } else {
               const stat = findSkaterForPick(pick, skaterMaps);
               if (stat) {
                 goals = Number(stat.goals || 0);
                 assists = Number(stat.assists || 0);
-                points = Number(stat.playoffPts || 0);
+                points = (Number(stat.goals || 0) * 2) + (Number(stat.assists || 0) * 1) + (Number(stat.shortHandedGoals || stat.shGoals || 0) * 5) + (Number(stat.gameWinningGoals || stat.gwGoals || 0) * 5);
               }
             }
 
@@ -2446,7 +2469,7 @@
           const rows = Array.from(teams.values()).sort((a,b) => (b.total - a.total) || a.ownerName.localeCompare(b.ownerName));
 
           target.innerHTML =
-            '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>Goalie win = 5</b>. Click a team name to see the player breakdown.</div>' +
+            '<div class="playoff-scoring-note">Scoring: <b>Goal = 2</b> • <b>Assist = 1</b> • <b>SHG/GWG = 5</b> • <b>Goalie win = 2</b> • <b>Goalie assist = 5</b> • <b>Goalie goal = 10</b> • <b>Shutout = 5</b>. Click a team name to see the player breakdown.</div>' +
             '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard">' +
               '<thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>G</th><th>A</th><th>GW</th><th>Top playoff scorers</th></tr></thead>' +
               '<tbody>' + rows.map((row, i) => {
@@ -2457,12 +2480,12 @@
                   : '<span class="muted">No playoff points yet</span>';
 
                 const breakdownRows = sortedPlayers.map(p => {
-                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 2 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists + (${p.shortHandedGoals || 0} SHG × 5) + (${p.gameWinningGoals || 0} GWG × 5) = ${p.playoffPoints}`;
                   return `<tr><td><strong>${esc(p.name)}</strong><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small></td><td>${p.goals}</td><td>${p.assists}</td><td>${p.goalieWins}</td><td>${p.regularPoints}</td><td>${p.fantasyPoints}</td><td class="total-cell">${p.playoffPoints}</td><td>${esc(calc)}</td></tr>`;
                 }).join("");
 
                 const mobileBreakdownCards = sortedPlayers.map(p => {
-                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 5 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists = ${p.playoffPoints}`;
+                  const calc = p.goalieWins ? `${p.goalieWins} goalie wins × 2 = ${p.playoffPoints}` : `(${p.goals} goals × 2) + ${p.assists} assists + (${p.shortHandedGoals || 0} SHG × 5) + (${p.gameWinningGoals || 0} GWG × 5) = ${p.playoffPoints}`;
                   return `<article class="mobile-playoff-player-card"><div class="mobile-playoff-player-head"><strong>${esc(p.name)}</strong><b>${p.playoffPoints} pts</b></div><small>${esc(p.position)} • ${esc(p.nhlTeam)}</small><div class="mobile-playoff-stat-grid"><span><em>G</em>${p.goals}</span><span><em>A</em>${p.assists}</span><span><em>GW</em>${p.goalieWins}</span><span><em>NHL Pts</em>${p.regularPoints}</span><span><em>Draft FPTS</em>${p.fantasyPoints}</span></div><p>${esc(calc)}</p></article>`;
                 }).join("");
 

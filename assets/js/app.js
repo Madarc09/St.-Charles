@@ -106,6 +106,18 @@ function deepMerge(target, source) {
 
 function normalizeStateForDraftTesting() {
   state.settings = state.settings || structuredClone(defaults.settings || {});
+  state.settings.scoring = {
+    ...(state.settings.scoring || {}),
+    goals: 2, assists: 1, points: 0, powerPlayGoals: 0, powerPlayPoints: 0,
+    shortHandedGoals: 5, gameWinningGoals: 5, shots: 0, hits: 0, blocks: 0,
+    goalieWins: 2, goalieAssists: 5, goalieGoals: 10, goalieShutouts: 5,
+    goalieSaves: 0, goalieGoalsAgainst: 0, goalieSavePctBonus: 0
+  };
+  state.settings.rosterRules = {
+    ...(state.settings.rosterRules || {}),
+    skaters: 10, goalies: 2, bench: 0, ir: 0, totalRosterSize: 12
+  };
+  state.settings.draftRules = { ...(state.settings.draftRules || {}), rounds: 12 };
   state.owners = Array.isArray(state.owners) && state.owners.length ? state.owners : structuredClone(FINAL_OWNERS);
   state.rosters = state.rosters && typeof state.rosters === 'object' && !Array.isArray(state.rosters) ? state.rosters : {};
   state.draftBoard = state.draftBoard && typeof state.draftBoard === 'object' ? state.draftBoard : { currentPick: 1, draftOrder: [], picks: [] };
@@ -560,7 +572,15 @@ function assignPlayerToOwner(ownerId, directPlayerId = null) {
   const owner = state.owners.find(o => String(o.id) === String(ownerId));
   if (!player || !owner) return toast('Player or owner not found.');
   const rosterLimit = Number(state.settings.rosterRules?.totalRosterSize || 99);
-  if ((state.rosters[ownerId] || []).length >= rosterLimit) return toast('That roster is already full.');
+  const currentRoster = state.rosters[ownerId] || [];
+  if (currentRoster.length >= rosterLimit) return toast('That roster is already full.');
+  const isGoaliePick = player.position === 'G' || player.position === 'TG' || player.type === 'goalie' || player.type === 'teamGoalie';
+  const goalieLimit = Number(state.settings.rosterRules?.goalies || 2);
+  const skaterLimit = Number(state.settings.rosterRules?.skaters || (rosterLimit - goalieLimit));
+  const currentGoalies = currentRoster.filter(p => p.position === 'G' || p.position === 'TG' || p.type === 'goalie' || p.type === 'teamGoalie').length;
+  const currentSkaters = currentRoster.length - currentGoalies;
+  if (isGoaliePick && currentGoalies >= goalieLimit) return toast(`That roster already has ${goalieLimit} goalies.`);
+  if (!isGoaliePick && currentSkaters >= skaterLimit) return toast(`That roster already has ${skaterLimit} skaters.`);
   const pick = { pick: state.draftBoard.picks.length + 1, ownerId, player: minimalPlayer(player), timestamp: new Date().toISOString() };
   state.draftBoard.picks.push(pick);
   state.rosters[owner.id] = state.rosters[owner.id] || [];
@@ -582,7 +602,11 @@ function minimalPlayer(p) {
     goals: Number(p.goals || 0),
     assists: Number(p.assists || 0),
     points: Number(p.points || 0),
+    shortHandedGoals: Number(p.shortHandedGoals || p.shGoals || 0),
+    gameWinningGoals: Number(p.gameWinningGoals || p.gwGoals || 0),
     goalieWins: Number(p.goalieWins || 0),
+    goalieGoals: Number(p.goalieGoals || p.goals || 0),
+    goalieAssists: Number(p.goalieAssists || p.assists || 0),
     goalieShutouts: Number(p.goalieShutouts || 0),
     goalieSaves: Number(p.goalieSaves || 0),
     goalieGoalsAgainst: Number(p.goalieGoalsAgainst || 0)
@@ -1497,8 +1521,8 @@ function renderPlayersTable() {
 }
 
 function renderRulesForms() {
-  $('#poolSetupForm').innerHTML = field('Pool name', 'poolName', state.settings.poolName, 'text') + field('Season ID', 'seasonId', state.settings.seasonId, 'text') + field('Game type ID', 'gameTypeId', state.settings.gameTypeId || 2, 'number') + field('Draft type', 'draftRules.type', state.settings.draftRules?.type || 'snake', 'text') + field('Draft rounds', 'draftRules.rounds', state.settings.draftRules?.rounds || 18, 'number');
-  const rosterKeys = ['forwards','defense','goalies','bench','ir','totalRosterSize'];
+  $('#poolSetupForm').innerHTML = field('Pool name', 'poolName', state.settings.poolName, 'text') + field('Season ID', 'seasonId', state.settings.seasonId, 'text') + field('Game type ID', 'gameTypeId', state.settings.gameTypeId || 2, 'number') + field('Draft type', 'draftRules.type', state.settings.draftRules?.type || 'snake', 'text') + field('Draft rounds', 'draftRules.rounds', state.settings.draftRules?.rounds || 12, 'number');
+  const rosterKeys = ['skaters','goalies','bench','ir','totalRosterSize'];
   $('#rosterRulesForm').innerHTML = rosterKeys.map(k => field(labelize(k), `rosterRules.${k}`, state.settings.rosterRules?.[k] ?? 0, 'number')).join('');
   const scoreKeys = Object.keys(state.settings.scoring || {});
   $('#scoringRulesForm').innerHTML = scoreKeys.map(k => field(labelize(k), `scoring.${k}`, state.settings.scoring[k] ?? 0, 'number', '0.01')).join('');
