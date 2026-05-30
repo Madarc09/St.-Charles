@@ -68,3 +68,13 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Added five in-image navigation buttons on the right side:
   - four other owner stalls
   - Trophy Room Lobby
+
+
+## v172 hard photo-only stall renderer
+- Removed old visible stall header/top tab area, including "Andrew's Stall".
+- Removed old owner pill buttons from the top.
+- Removed visible 1-5 number strip/rank strip.
+- Room photo is now the page.
+- Navigation buttons are placed directly over the right side of the image:
+  - four other owners
+  - Trophy Room Lobby
