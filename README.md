@@ -35,3 +35,12 @@ Without those environment variables, the site still works, but the locked lotter
 
 
 V160: Home page locked to the Locker Room TV standings theme. Home Page Editor tab removed.
+
+
+## v168 final roster room image update
+- Replaced Nick roster room with final roster-prominent Matthews/Raptors/AND1/Kawhi/Bautista theme.
+- Replaced Andrew roster room with corrected static roster Flyers/Gears theme.
+- Replaced Tyler roster room with Leafs/GoldenEye/tough-guy theme.
+- Replaced Chris roster room with Raptors/Mario Kart/March Madness theme.
+- Replaced Scott roster room with mystery/spy theme.
+- Added cache-busting image version v=168.
