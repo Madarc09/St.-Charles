@@ -3904,6 +3904,20 @@
       if (room.view === 'stall') renderStall(target, owners, rosters, active);
       else renderHub(target, owners, rosters);
     }
+    window.openRosterStall = function(ownerId){
+      const id = String(ownerId || 'nick').toLowerCase();
+      room.open = id;
+      room.view = 'stall';
+      const rosterTab = document.querySelector('[data-tab="rosters"]');
+      const rosterPanel = document.getElementById('rosters');
+      if (rosterTab && rosterPanel) {
+        document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b === rosterTab); });
+        document.querySelectorAll('.panel').forEach(function (panel) { panel.classList.toggle('active', panel === rosterPanel); });
+        document.body.dataset.activeTab = 'rosters';
+      }
+      renderWalkableLocker(room.lastDraft || {});
+      setTimeout(function(){ rosterPanel && rosterPanel.scrollIntoView({ behavior:'smooth', block:'start' }); }, 50);
+    };
     window.renderDraftRosters = renderWalkableLocker;
     window.renderWalkableLockerRoom = renderWalkableLocker;
     window.addEventListener('load', () => {
@@ -4012,12 +4026,18 @@
   function cleanName(name){ return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
   function num(v){ const n=Number(v); return Number.isFinite(n) ? n : 0; }
   function ownerName(owner){ return owner.teamName || owner.name || owner.id; }
+  function valueText(v){
+    if (v == null) return '';
+    if (typeof v === 'string' || typeof v === 'number') return String(v);
+    if (typeof v === 'object') return String(v.default || v.en || v.fr || '');
+    return '';
+  }
   function rowName(row, kind){
-    const first = row.firstName || row.firstNameDefault || '';
-    const last = row.lastName || row.lastNameDefault || '';
+    const first = valueText(row.firstName || row.firstNameDefault);
+    const last = valueText(row.lastName || row.lastNameDefault);
     return row.skaterFullName || row.goalieFullName || row.playerFullName || row.fullName || `${first} ${last}`.trim();
   }
-  function rowTeam(row){ return row.teamAbbrevs || row.teamAbbrev || row.team || row.teamName || ''; }
+  function rowTeam(row){ return String(row.teamAbbrevs || row.teamAbbrev || row.team || row.teamName || '').split(',')[0].trim(); }
   function makeApiMaps(payload){
     const skaters = new Map(), goalies = new Map();
     (payload.skaters || []).forEach(row => {
@@ -4025,22 +4045,35 @@
       const team = rowTeam(row);
       const item = { source:'api', type:'skater', name, nhlTeam:team, goals:num(row.goals), assists:num(row.assists), shortHandedGoals:num(row.shGoals || row.shortHandedGoals), gameWinningGoals:num(row.gameWinningGoals || row.gwGoals), points:num(row.points) };
       skaters.set(cleanName(name), item);
-      if (team) skaters.set(cleanName(name)+'|'+team, item);
+      if (team) skaters.set(cleanName(name)+'|'+String(team).toUpperCase(), item);
     });
     (payload.goalies || []).forEach(row => {
       const name = rowName(row,'goalie'); if (!name) return;
       const team = rowTeam(row);
       const item = { source:'api', type:'goalie', name, nhlTeam:team, goalieWins:num(row.wins || row.goalieWins), goalieAssists:num(row.assists || row.goalieAssists), goalieGoals:num(row.goals || row.goalieGoals), goalieShutouts:num(row.shutouts || row.goalieShutouts) };
       goalies.set(cleanName(name), item);
-      if (team) goalies.set(cleanName(name)+'|'+team, item);
+      if (team) goalies.set(cleanName(name)+'|'+String(team).toUpperCase(), item);
     });
     return { skaters, goalies };
   }
   function findApi(player, maps){
     const key = cleanName(player.name || '');
-    const teamKey = key + '|' + (player.nhlTeam || '');
+    const team = String(player.nhlTeam || '').toUpperCase();
+    const teamKey = key + '|' + team;
     const map = (player.type === 'goalie' || player.position === 'G') ? maps.goalies : maps.skaters;
-    return map.get(teamKey) || map.get(key) || null;
+    let hit = map.get(teamKey) || map.get(key);
+    if (hit) return hit;
+    // Last-resort exact last-name + first initial match. This catches NHL API quirks without trusting screenshot stats.
+    const pieces = key.split(' ').filter(Boolean);
+    const firstInitial = pieces[0] ? pieces[0][0] : '';
+    const last = pieces[pieces.length - 1] || '';
+    if (!last) return null;
+    for (const [mapKey, value] of map.entries()) {
+      const nameOnly = mapKey.split('|')[0];
+      const parts = nameOnly.split(' ').filter(Boolean);
+      if (parts.length >= 2 && parts[0][0] === firstInitial && parts[parts.length - 1] === last) return value;
+    }
+    return null;
   }
   function fantasy(player){
     if (player.type === 'goalie' || player.position === 'G') {
@@ -4053,7 +4086,7 @@
     return `(${num(player.goals)} G × 2) + (${num(player.assists)} A × 1) + (${num(player.shortHandedGoals)} SHG × 5) + (${num(player.gameWinningGoals)} GWG × 5)`;
   }
   async function fetchRegularSeasonStats(){
-    const url = `/api/nhl?gameType=${GAME_TYPE}&limit=1000&season=${SEASON_ID}`;
+    const url = `/api/nhl?gameType=${GAME_TYPE}&limit=-1&season=${SEASON_ID}`;
     const res = await fetch(url, { cache:'no-store' });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok || !payload.ok) throw new Error(payload.error || payload.detail || 'NHL regular-season stat pull failed.');
@@ -4090,17 +4123,22 @@
     const usedApi = !!payload && !error;
     if (status) status.textContent = usedApi ? `Source: NHL API regular season ${SEASON_ID} + saved 2025-26 roster list` : `Source: saved 2025-26 roster list fallback${error ? ' — API error: '+(error.message || error) : ''}`;
     const unmatchedHtml = usedApi && unmatched.length
-      ? `<div class="season-unmatched-warning"><b>API unmatched players (${unmatched.length}):</b> ${unmatched.map(p => `${esc(p.ownerName)} — ${esc(p.name)} (${esc(p.position)} ${esc(p.nhlTeam)})`).join('; ')}. These are using saved screenshot values until their NHL API match is fixed.</div>`
+      ? `<div class="season-unmatched-warning"><b>API unmatched players (${unmatched.length}):</b> ${unmatched.map(p => `${esc(p.ownerName)} — ${esc(p.name)} (${esc(p.position)} ${esc(p.nhlTeam)})`).join('; ')}. These need API matching fixed before the season is official.</div>`
       : usedApi ? `<div class="season-unmatched-ok"><b>API check:</b> all ${totalPlayers} roster players matched.</div>` : '';
     const note = `<div class="season-leaderboard-note"><b>2025-2026 Regular Season Leaderboard</b><span class="season-source-badge">${usedApi ? 'NHL API pulled' : 'Saved fallback'}</span><br>Scoring: skaters — G 2, A 1, SHG 5, GWG 5. Goalies — W 2, A 5, G 10, SO 5. ${usedApi ? `Matched ${apiHits}/${totalPlayers} roster players from the NHL API.` : `Showing saved screenshot values until the NHL API pull succeeds.`}${unmatchedHtml}</div>`;
     target.innerHTML = note +
-      '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard season-leaderboard"><thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>Skaters</th><th>Goalies</th><th>Top scorers</th></tr></thead><tbody>' +
+      '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard season-leaderboard"><thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>Skaters</th><th>Goalies</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th><th>W</th><th>SO</th></tr></thead><tbody>' +
       rows.map((row,i)=>{
         const detailId = `${targetId}-detail-${row.ownerId}`;
-        const chips = row.players.slice(0,8).map(p => `<span class="season-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.fpts} pts <small>${p.source === 'NHL API' ? 'API' : 'saved'}</small></span>`).join('');
+        const teamGoals = row.players.reduce((s,p)=>s+num(p.goals),0);
+        const teamAssists = row.players.reduce((s,p)=>s+num(p.assists),0);
+        const teamShg = row.players.reduce((s,p)=>s+num(p.shortHandedGoals),0);
+        const teamGwg = row.players.reduce((s,p)=>s+num(p.gameWinningGoals),0);
+        const teamWins = row.players.reduce((s,p)=>s+num(p.goalieWins),0);
+        const teamSo = row.players.reduce((s,p)=>s+num(p.goalieShutouts),0);
         const details = row.players.map(p => `<tr><td><strong>${esc(p.name)}</strong><small>${esc(p.position || '')} • ${esc(p.nhlTeam || '')} • ${esc(p.source)}</small></td><td>${p.type==='goalie'||p.position==='G'?'G':'S'}</td><td>${num(p.goals)}</td><td>${num(p.assists)}</td><td>${num(p.shortHandedGoals)}</td><td>${num(p.gameWinningGoals)}</td><td>${num(p.goalieWins)}</td><td>${num(p.goalieShutouts)}</td><td class="total-cell">${p.fpts}</td><td>${esc(p.calculation)}</td></tr>`).join('');
         const mobile = row.players.map(p => `<article class="mobile-season-player-card"><div class="mobile-season-player-head"><strong>${esc(p.name)}</strong><b>${p.fpts} pts</b></div><small>${esc(p.position || '')} • ${esc(p.nhlTeam || '')} • ${esc(p.source)}</small><div class="mobile-season-stat-grid"><span><em>G</em>${num(p.goals)}</span><span><em>A</em>${num(p.assists)}</span><span><em>SHG</em>${num(p.shortHandedGoals)}</span><span><em>GWG</em>${num(p.gameWinningGoals)}</span><span><em>W</em>${num(p.goalieWins)}</span><span><em>SO</em>${num(p.goalieShutouts)}</span><span><em>Total</em>${p.fpts}</span></div></article>`).join('');
-        return `<tr class="season-summary-row"><td><b>${i+1}</b></td><td><button type="button" class="season-team-toggle" data-season-toggle="${detailId}"><span>▸</span>${esc(row.ownerName)}</button></td><td class="total-cell">${row.total}</td><td>${row.skaterPts}</td><td>${row.goaliePts}</td><td><div class="season-player-list">${chips}</div></td></tr><tr id="${detailId}" class="season-breakdown-row" hidden><td colspan="6"><div class="season-breakdown-panel"><h3>${esc(row.ownerName)} 2025-26 breakdown</h3><div class="mobile-season-breakdown-list">${mobile}</div><table class="season-breakdown-table"><thead><tr><th>Player</th><th>Type</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th><th>W</th><th>SO</th><th>FPTS</th><th>Calculation</th></tr></thead><tbody>${details}</tbody></table></div></td></tr>`;
+        return `<tr class="season-summary-row"><td data-label="Rank"><b>${i+1}</b></td><td data-label="Team"><button type="button" class="season-team-link" data-season-owner-link="${esc(row.ownerId)}">${esc(row.ownerName)}</button></td><td data-label="Total" class="total-cell">${row.total}</td><td data-label="Skaters">${row.skaterPts}</td><td data-label="Goalies">${row.goaliePts}</td><td data-label="G">${teamGoals}</td><td data-label="A">${teamAssists}</td><td data-label="SHG">${teamShg}</td><td data-label="GWG">${teamGwg}</td><td data-label="W">${teamWins}</td><td data-label="SO">${teamSo}</td></tr><tr id="${detailId}" class="season-breakdown-row" hidden><td colspan="11"><div class="season-breakdown-panel"><h3>${esc(row.ownerName)} 2025-26 breakdown</h3><div class="mobile-season-breakdown-list">${mobile}</div><table class="season-breakdown-table"><thead><tr><th>Player</th><th>Type</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th><th>W</th><th>SO</th><th>FPTS</th><th>Calculation</th></tr></thead><tbody>${details}</tbody></table></div></td></tr>`;
       }).join('') + '</tbody></table>' + `<p class="muted season-updated">Season saved as previous season record: 2025-2026 Regular Season. Roster count: ${totalPlayers}. ${usedApi ? `NHL source: ${esc(payload.source || 'api.nhle.com')}.` : ''}</p>`;
   }
   async function renderSeasonLeaderboards(){
@@ -4124,6 +4162,8 @@
     const title = document.querySelector('#dashboard h2'); if (title) title.textContent = 'Last season standings';
   }
   document.addEventListener('click', function(event){
+    const ownerLink = event.target.closest && event.target.closest('[data-season-owner-link]');
+    if (ownerLink) { event.preventDefault(); if (window.openRosterStall) window.openRosterStall(ownerLink.dataset.seasonOwnerLink); return; }
     const toggle = event.target.closest && event.target.closest('[data-season-toggle]');
     if (toggle) { event.preventDefault(); const row=document.getElementById(toggle.dataset.seasonToggle); const icon=toggle.querySelector('span'); if(row){ row.hidden=!row.hidden; if(icon) icon.textContent=row.hidden?'▸':'▾'; } return; }
     const btn = event.target.closest && event.target.closest('#refreshSeasonStatsBtn,#refreshPreviousSeasonBtn');
@@ -4136,6 +4176,29 @@
   });
 })();
 </script>
+
+
+<style id="v155-mobile-simple-standings-style">
+  .season-team-link{background:transparent;border:0;color:#dff2ff;font:inherit;font-weight:900;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0;text-align:left}
+  .season-team-link:hover{color:#fff}.season-unmatched-warning{margin-top:10px;padding:10px;border:1px solid rgba(255,100,100,.35);background:rgba(120,20,20,.22);border-radius:12px}.season-unmatched-ok{margin-top:10px;padding:10px;border:1px solid rgba(100,255,160,.28);background:rgba(20,110,50,.18);border-radius:12px}
+  @media(max-width:760px){
+    #dashboard .section-card{padding:12px!important}
+    #dashboard .section-head{display:block}
+    #dashboard .section-head h2{font-size:1.28rem;margin-bottom:6px}
+    .season-leaderboard-note{font-size:.78rem;padding:9px 10px;margin:8px 0 10px}
+    .season-leaderboard-note .season-unmatched-warning,.season-leaderboard-note .season-unmatched-ok{display:none}
+    .season-leaderboard{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .season-leaderboard thead{display:none}
+    .season-leaderboard tbody,.season-leaderboard tr{display:block;width:100%}
+    .season-leaderboard .season-summary-row{display:grid!important;grid-template-columns:42px 1.25fr .8fr .8fr .8fr;gap:6px;align-items:center;margin:0 0 8px!important;padding:10px!important;border-radius:14px;background:rgba(5,12,22,.84)!important;border:1px solid rgba(255,255,255,.13)!important}
+    .season-leaderboard .season-summary-row td{display:block!important;width:auto!important;border:0!important;padding:0!important;font-size:.8rem;line-height:1.15}
+    .season-leaderboard .season-summary-row td::before{content:attr(data-label);display:block;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;opacity:.62;margin-bottom:2px}
+    .season-leaderboard .season-summary-row td:nth-child(n+6){font-size:.72rem;opacity:.85}
+    .season-leaderboard .season-summary-row td:nth-child(6){grid-column:1}.season-leaderboard .season-summary-row td:nth-child(7){grid-column:2}.season-leaderboard .season-summary-row td:nth-child(8){grid-column:3}.season-leaderboard .season-summary-row td:nth-child(9){grid-column:4}.season-leaderboard .season-summary-row td:nth-child(10){grid-column:5}.season-leaderboard .season-summary-row td:nth-child(11){grid-column:5;justify-self:end}
+    .season-team-link{font-size:.95rem}.season-leaderboard .total-cell{font-size:1rem}.season-breakdown-row{display:none!important}
+    #homeRosterSourceStatus,.season-updated{font-size:.72rem}
+  }
+</style>
 
 </body>
 </html>

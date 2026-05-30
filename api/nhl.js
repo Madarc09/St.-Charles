@@ -1,11 +1,14 @@
 const NHL_STATS_BASE = 'https://api.nhle.com/stats/rest/en';
 
 function cleanNumber(value, fallback) {
-  const n = Number(String(value || '').replace(/[^0-9]/g, ''));
+  const raw = String(value ?? '').trim();
+  if (raw === '-1') return -1;
+  const n = Number(raw.replace(/[^0-9]/g, ''));
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-function statUrl(report, season, gameType, sort, limit) {
+function statUrl(report, season, gameType, sort, limit, extraCayenne) {
+  const cayenne = `seasonId=${season} and gameTypeId=${gameType}` + (extraCayenne ? ` and ${extraCayenne}` : '');
   const params = new URLSearchParams({
     isAggregate: 'false',
     isGame: 'false',
@@ -13,30 +16,29 @@ function statUrl(report, season, gameType, sort, limit) {
     limit: String(limit),
     sort,
     dir: 'desc',
-    cayenneExp: `seasonId=${season} and gameTypeId=${gameType}`
+    cayenneExp: cayenne
   });
   return `${NHL_STATS_BASE}/${report}/summary?${params.toString()}`;
 }
 
-function statUrlWithExtraCayenne(report, season, gameType, sort, limit, extraCayenne) {
-  const params = new URLSearchParams({
-    isAggregate: 'false',
-    isGame: 'false',
-    start: '0',
-    limit: String(limit),
-    sort,
-    dir: 'desc',
-    cayenneExp: `seasonId=${season} and gameTypeId=${gameType} and ${extraCayenne}`
-  });
-  return `${NHL_STATS_BASE}/${report}/summary?${params.toString()}`;
+function valueText(v) {
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number') return String(v);
+  if (typeof v === 'object') return String(v.default || v.en || v.fr || '');
+  return '';
+}
+
+function playerKey(row) {
+  return String(row.playerId || row.skaterId || row.goalieId || row.id || `${valueText(row.firstName)}-${valueText(row.lastName)}-${row.teamAbbrevs || row.teamAbbrev || ''}`);
 }
 
 function mergeUniquePlayers(lists) {
   const map = new Map();
   for (const list of lists) {
     for (const row of Array.isArray(list) ? list : []) {
-      const id = row.playerId || row.skaterId || row.id || `${row.firstName || ''}-${row.lastName || ''}-${row.teamAbbrevs || row.teamAbbrev || ''}`;
-      if (!map.has(String(id))) map.set(String(id), row);
+      const id = playerKey(row);
+      const existing = map.get(id) || {};
+      map.set(id, { ...existing, ...row });
     }
   }
   return Array.from(map.values());
@@ -75,6 +77,14 @@ async function firstWorking(urls) {
   throw error;
 }
 
+async function fetchReport(report, season, gameType, sort, limit, extraCayenne) {
+  // Try the all-rows pull first. If the NHL endpoint rejects it, fall back to a large paged leaderboard.
+  const allRowsUrl = statUrl(report, season, gameType, sort, -1, extraCayenne);
+  const largeUrl = statUrl(report, season, gameType, sort, limit, extraCayenne);
+  const result = await firstWorking([allRowsUrl, largeUrl]);
+  return { url: result.url, rows: Array.isArray(result.data.data) ? result.data.data : [] };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -86,34 +96,34 @@ module.exports = async function handler(req, res) {
 
   const season = cleanNumber(req.query.season, 20252026);
   const gameType = cleanNumber(req.query.gameType, 2);
-  const limit = Math.min(cleanNumber(req.query.limit, 900), 1000);
-
-  const skaterUrls = [
-    statUrl('skater', season, gameType, 'points', limit),
-    statUrl('skater', season, gameType, 'goals', limit)
-  ];
-
-  const defenseUrls = [
-    statUrlWithExtraCayenne('skater', season, gameType, 'points', limit, 'positionCode="D"'),
-    statUrlWithExtraCayenne('skater', season, gameType, 'timeOnIcePerGame', limit, 'positionCode="D"'),
-    statUrlWithExtraCayenne('skater', season, gameType, 'shots', limit, 'positionCode="D"')
-  ];
-  const goalieUrls = [
-    statUrl('goalie', season, gameType, 'wins', limit),
-    statUrl('goalie', season, gameType, 'savePct', limit)
-  ];
+  const limit = Math.min(cleanNumber(req.query.limit, 2000), 5000);
 
   try {
-    const [skaterResult, defenseResult, goalieResult] = await Promise.all([
-      firstWorking(skaterUrls),
-      firstWorking(defenseUrls),
-      firstWorking(goalieUrls)
+    const skaterJobs = [
+      fetchReport('skater', season, gameType, 'points', limit),
+      fetchReport('skater', season, gameType, 'goals', limit),
+      fetchReport('skater', season, gameType, 'assists', limit),
+      fetchReport('skater', season, gameType, 'gameWinningGoals', limit),
+      fetchReport('skater', season, gameType, 'shGoals', limit),
+      fetchReport('skater', season, gameType, 'timeOnIcePerGame', limit),
+      fetchReport('skater', season, gameType, 'points', limit, 'positionCode="D"'),
+      fetchReport('skater', season, gameType, 'timeOnIcePerGame', limit, 'positionCode="D"'),
+      fetchReport('skater', season, gameType, 'shots', limit, 'positionCode="D"')
+    ];
+    const goalieJobs = [
+      fetchReport('goalie', season, gameType, 'wins', limit),
+      fetchReport('goalie', season, gameType, 'shutouts', limit),
+      fetchReport('goalie', season, gameType, 'savePct', limit),
+      fetchReport('goalie', season, gameType, 'assists', limit)
+    ];
+
+    const [skaterResults, goalieResults] = await Promise.all([
+      Promise.all(skaterJobs),
+      Promise.all(goalieJobs)
     ]);
 
-    const skatersBase = Array.isArray(skaterResult.data.data) ? skaterResult.data.data : [];
-    const defenseExtra = Array.isArray(defenseResult.data.data) ? defenseResult.data.data : [];
-    const skaters = mergeUniquePlayers([skatersBase, defenseExtra]);
-    const goalies = Array.isArray(goalieResult.data.data) ? goalieResult.data.data : [];
+    const skaters = mergeUniquePlayers(skaterResults.map(r => r.rows));
+    const goalies = mergeUniquePlayers(goalieResults.map(r => r.rows));
 
     return res.status(200).json({
       ok: true,
@@ -122,7 +132,10 @@ module.exports = async function handler(req, res) {
       gameType: String(gameType),
       fetchedAt: new Date().toISOString(),
       counts: { skaters: skaters.length, goalies: goalies.length },
-      urls: { skaters: skaterResult.url, defense: defenseResult.url, goalies: goalieResult.url },
+      urls: {
+        skaters: skaterResults.map(r => r.url),
+        goalies: goalieResults.map(r => r.url)
+      },
       skaters,
       goalies
     });
