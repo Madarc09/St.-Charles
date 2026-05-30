@@ -107,3 +107,12 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Replaced mobile zoom crop with full-width image display.
 - Added a narrow right-edge cover strip to hide the baked-in numbers while preserving the trophy case/room.
 - Kept the in-photo navigation buttons.
+
+
+## v176 mobile Trophy Room and home leaderboard cleanup
+- Verified the Trophy Room mobile layout is controlled by the v174 CSS.
+- Moved mobile roster-room navigation below the image into the open space.
+- Kept the full room photo visible on mobile.
+- Verified the home background/image layer came from v160 locker-TV home styling.
+- Removed the locker-room background image, props, TV shell, scanline overlays, and side cards.
+- Home page now shows a clean leaderboard foundation.
