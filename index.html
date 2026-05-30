@@ -36,6 +36,7 @@
     <button class="tab active" data-tab="dashboard">Home</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Rosters</button>
+    <button class="tab" data-tab="previousSeason">Previous Season</button>
     <button class="tab" data-tab="teams">Teams</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
     <button class="tab" data-tab="admin">Admin</button>
@@ -46,17 +47,37 @@
       <article class="card home-leaderboard-card">
         <div class="section-head compact-head">
           <div>
-            <p class="eyebrow">Playoff Leaderboard</p>
-            <h2>Pool standings</h2>
+            <p class="eyebrow">2025-2026 Season Leaderboard</p>
+            <h2>Last season standings</h2>
             <p class="muted">Pool scoring: Skaters — 2 pts per goal, 1 per assist, 5 per SHG/GWG. Goalies — 2 per win, 5 per assist, 10 per goal, 5 per shutout.</p>
           </div>
-          <button class="primary" id="refreshStatsBtn2">Pull Playoff Stats</button>
+          <button class="primary" id="refreshStatsBtn2">Pull 2025-26 Stats</button>
         </div>
 <div id="homeRosterSourceStatus" class="official-source-status">Source: loading…</div>
                 <div id="leaderboardTable" class="table-wrap playoff-leaderboard-wrap">
           <div class="clean-loading-card">
-            <strong>Playoff leaderboard loading…</strong>
-            <span>Press Pull Playoff Stats if it does not load automatically.</span>
+            <strong>2025-26 leaderboard loading…</strong>
+            <span>Pulling the 2025-26 regular-season stats and calculating pool standings.</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="previousSeason" class="panel previous-season-panel">
+      <article class="card home-leaderboard-card previous-season-card">
+        <div class="section-head compact-head">
+          <div>
+            <p class="eyebrow">Season of Record</p>
+            <h2>Previous Season • 2025-2026 Regular Season</h2>
+            <p class="muted">This tab saves last season's rosters and calculates the final fantasy standings using the current pool scoring rules.</p>
+          </div>
+          <button class="primary" id="refreshPreviousSeasonBtn" type="button">Refresh 2025-26 Stats</button>
+        </div>
+        <div id="previousSeasonStatus" class="official-source-status">Source: loading…</div>
+        <div id="previousSeasonTable" class="table-wrap playoff-leaderboard-wrap">
+          <div class="clean-loading-card">
+            <strong>Previous season leaderboard loading…</strong>
+            <span>Pulling regular-season stats and calculating fantasy points.</span>
           </div>
         </div>
       </article>
@@ -3823,5 +3844,148 @@
     });
   })();
 </script>
+
+<style id="v152-season-leaderboard-style">
+  .season-leaderboard-note{margin:12px 0 14px;padding:12px 14px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(5,12,22,.72);color:#dcecff;font-size:.92rem;line-height:1.45}
+  .season-leaderboard-note b{color:#fff}.season-source-badge{display:inline-flex;gap:6px;align-items:center;margin-left:8px;padding:3px 8px;border-radius:999px;background:rgba(58,160,255,.15);border:1px solid rgba(58,160,255,.3);font-size:.78rem;color:#bfe2ff}
+  .season-leaderboard .total-cell{font-size:1.08rem;color:#fff}.season-player-list{display:flex;flex-wrap:wrap;gap:7px}.season-player-chip{display:inline-flex;gap:6px;align-items:center;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:999px;padding:5px 9px;font-size:.82rem;white-space:nowrap}.season-player-chip small{opacity:.72}
+  .season-breakdown-panel{padding:14px;border-radius:16px;background:rgba(3,8,15,.78);border:1px solid rgba(255,255,255,.12)}.season-breakdown-panel h3{margin:0 0 10px}.season-breakdown-table{width:100%;border-collapse:collapse}.season-breakdown-table th,.season-breakdown-table td{padding:8px 9px;border-bottom:1px solid rgba(255,255,255,.1);vertical-align:top}.season-breakdown-table small{display:block;opacity:.7;margin-top:2px}.season-team-toggle{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;color:inherit;font:inherit;font-weight:800;cursor:pointer}.season-updated{margin-top:12px}.mobile-season-breakdown-list{display:none}
+  @media(max-width:760px){.season-leaderboard-wrap{overflow:visible}.season-leaderboard{display:block}.season-leaderboard thead{display:none}.season-leaderboard tbody,.season-leaderboard tr,.season-leaderboard td{display:block;width:100%}.season-leaderboard .season-summary-row{margin:0 0 12px;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(5,12,22,.78)}.season-leaderboard .season-summary-row td{border:0;padding:4px 0}.season-breakdown-row td{padding:0!important}.season-breakdown-table{display:none}.mobile-season-breakdown-list{display:grid;gap:10px}.mobile-season-player-card{padding:10px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:rgba(255,255,255,.06)}.mobile-season-player-head{display:flex;justify-content:space-between;gap:10px}.mobile-season-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.mobile-season-stat-grid span{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px;text-align:center}.mobile-season-stat-grid em{display:block;font-style:normal;font-size:.68rem;opacity:.7}.season-player-list{margin-top:8px}.previous-season-card .section-head{gap:12px}}
+</style>
+<script id="v152-previous-season-leaderboard">
+(function(){
+  const SEASON_ID = '20252026';
+  const GAME_TYPE = 2;
+  const FALLBACK_OWNERS = [
+    {id:'nick',name:'Nick',teamName:'Nick'},
+    {id:'chris',name:'Chris',teamName:'Chris'},
+    {id:'andrew',name:'Andrew',teamName:'Andrew'},
+    {id:'tyler',name:'Tyler',teamName:'Tyler'},
+    {id:'scott',name:'Scott',teamName:'Scott'}
+  ];
+  const SCORING = { goals:2, assists:1, shortHandedGoals:5, gameWinningGoals:5, goalieWins:2, goalieAssists:5, goalieGoals:10, goalieShutouts:5 };
+  function esc(value){ return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  function cleanName(name){ return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+  function num(v){ const n=Number(v); return Number.isFinite(n) ? n : 0; }
+  function ownerName(owner){ return owner.teamName || owner.name || owner.id; }
+  function rowName(row, kind){
+    const first = row.firstName || row.firstNameDefault || '';
+    const last = row.lastName || row.lastNameDefault || '';
+    return row.skaterFullName || row.goalieFullName || row.playerFullName || row.fullName || `${first} ${last}`.trim();
+  }
+  function rowTeam(row){ return row.teamAbbrevs || row.teamAbbrev || row.team || row.teamName || ''; }
+  function makeApiMaps(payload){
+    const skaters = new Map(), goalies = new Map();
+    (payload.skaters || []).forEach(row => {
+      const name = rowName(row,'skater'); if (!name) return;
+      const team = rowTeam(row);
+      const item = { source:'api', type:'skater', name, nhlTeam:team, goals:num(row.goals), assists:num(row.assists), shortHandedGoals:num(row.shGoals || row.shortHandedGoals), gameWinningGoals:num(row.gameWinningGoals || row.gwGoals), points:num(row.points) };
+      skaters.set(cleanName(name), item);
+      if (team) skaters.set(cleanName(name)+'|'+team, item);
+    });
+    (payload.goalies || []).forEach(row => {
+      const name = rowName(row,'goalie'); if (!name) return;
+      const team = rowTeam(row);
+      const item = { source:'api', type:'goalie', name, nhlTeam:team, goalieWins:num(row.wins || row.goalieWins), goalieAssists:num(row.assists || row.goalieAssists), goalieGoals:num(row.goals || row.goalieGoals), goalieShutouts:num(row.shutouts || row.goalieShutouts) };
+      goalies.set(cleanName(name), item);
+      if (team) goalies.set(cleanName(name)+'|'+team, item);
+    });
+    return { skaters, goalies };
+  }
+  function findApi(player, maps){
+    const key = cleanName(player.name || '');
+    const teamKey = key + '|' + (player.nhlTeam || '');
+    const map = (player.type === 'goalie' || player.position === 'G') ? maps.goalies : maps.skaters;
+    return map.get(teamKey) || map.get(key) || null;
+  }
+  function fantasy(player){
+    if (player.type === 'goalie' || player.position === 'G') {
+      return (num(player.goalieWins)*SCORING.goalieWins) + (num(player.goalieAssists || player.assists)*SCORING.goalieAssists) + (num(player.goalieGoals || player.goals)*SCORING.goalieGoals) + (num(player.goalieShutouts)*SCORING.goalieShutouts);
+    }
+    return (num(player.goals)*SCORING.goals) + (num(player.assists)*SCORING.assists) + (num(player.shortHandedGoals)*SCORING.shortHandedGoals) + (num(player.gameWinningGoals)*SCORING.gameWinningGoals);
+  }
+  function calcLine(player){
+    if (player.type === 'goalie' || player.position === 'G') return `(${num(player.goalieWins)} W × 2) + (${num(player.goalieAssists || player.assists)} A × 5) + (${num(player.goalieGoals || player.goals)} G × 10) + (${num(player.goalieShutouts)} SO × 5)`;
+    return `(${num(player.goals)} G × 2) + (${num(player.assists)} A × 1) + (${num(player.shortHandedGoals)} SHG × 5) + (${num(player.gameWinningGoals)} GWG × 5)`;
+  }
+  async function fetchRegularSeasonStats(){
+    const url = `/api/nhl?gameType=${GAME_TYPE}&limit=1000&season=${SEASON_ID}`;
+    const res = await fetch(url, { cache:'no-store' });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok || !payload.ok) throw new Error(payload.error || payload.detail || 'NHL regular-season stat pull failed.');
+    return payload;
+  }
+  function buildRows(payload){
+    const rosters = window.__lastYearStaticRosters || {};
+    const owners = FALLBACK_OWNERS;
+    const maps = payload ? makeApiMaps(payload) : { skaters:new Map(), goalies:new Map() };
+    let apiHits = 0, totalPlayers = 0;
+    const rows = owners.map(owner => {
+      const roster = Array.isArray(rosters[owner.id]) ? rosters[owner.id] : [];
+      const players = roster.map(base => {
+        totalPlayers++;
+        const api = payload ? findApi(base, maps) : null;
+        if (api) apiHits++;
+        const merged = { ...base, ...(api || {}), source: api ? 'NHL API' : 'saved roster' };
+        const fpts = fantasy(merged);
+        return { ...merged, fpts, calculation: calcLine(merged) + ` = ${fpts}` };
+      }).sort((a,b) => b.fpts - a.fpts || a.name.localeCompare(b.name));
+      const skaterPts = players.filter(p => !(p.type === 'goalie' || p.position === 'G')).reduce((s,p)=>s+p.fpts,0);
+      const goaliePts = players.filter(p => p.type === 'goalie' || p.position === 'G').reduce((s,p)=>s+p.fpts,0);
+      return { ownerId:owner.id, ownerName:ownerName(owner), players, total:players.reduce((s,p)=>s+p.fpts,0), skaterPts, goaliePts };
+    }).sort((a,b)=>b.total-a.total || a.ownerName.localeCompare(b.ownerName));
+    return { rows, apiHits, totalPlayers };
+  }
+  function renderTable(targetId, statusId, payload, error){
+    const target = document.getElementById(targetId); if (!target) return;
+    const status = statusId ? document.getElementById(statusId) : null;
+    const { rows, apiHits, totalPlayers } = buildRows(payload || null);
+    const usedApi = !!payload && !error;
+    if (status) status.textContent = usedApi ? `Source: NHL API regular season ${SEASON_ID} + saved 2025-26 roster list` : `Source: saved 2025-26 roster list fallback${error ? ' — API error: '+(error.message || error) : ''}`;
+    const note = `<div class="season-leaderboard-note"><b>2025-2026 Regular Season Leaderboard</b><span class="season-source-badge">${usedApi ? 'NHL API pulled' : 'Saved fallback'}</span><br>Scoring: skaters — G 2, A 1, SHG 5, GWG 5. Goalies — W 2, A 5, G 10, SO 5. ${usedApi ? `Matched ${apiHits}/${totalPlayers} roster players from the NHL API; unmatched players use the saved roster values from the screenshots.` : `Showing saved screenshot values until the NHL API pull succeeds.`}</div>`;
+    target.innerHTML = note +
+      '<table class="leaderboard playoff-leaderboard expandable-playoff-leaderboard season-leaderboard"><thead><tr><th>Rank</th><th>Team</th><th>Total</th><th>Skaters</th><th>Goalies</th><th>Top scorers</th></tr></thead><tbody>' +
+      rows.map((row,i)=>{
+        const detailId = `${targetId}-detail-${row.ownerId}`;
+        const chips = row.players.slice(0,8).map(p => `<span class="season-player-chip"><b>${esc(p.name)}</b> ${esc(p.nhlTeam)} ${p.fpts} pts <small>${p.source === 'NHL API' ? 'API' : 'saved'}</small></span>`).join('');
+        const details = row.players.map(p => `<tr><td><strong>${esc(p.name)}</strong><small>${esc(p.position || '')} • ${esc(p.nhlTeam || '')} • ${esc(p.source)}</small></td><td>${p.type==='goalie'||p.position==='G'?'G':'S'}</td><td>${num(p.goals)}</td><td>${num(p.assists)}</td><td>${num(p.shortHandedGoals)}</td><td>${num(p.gameWinningGoals)}</td><td>${num(p.goalieWins)}</td><td>${num(p.goalieShutouts)}</td><td class="total-cell">${p.fpts}</td><td>${esc(p.calculation)}</td></tr>`).join('');
+        const mobile = row.players.map(p => `<article class="mobile-season-player-card"><div class="mobile-season-player-head"><strong>${esc(p.name)}</strong><b>${p.fpts} pts</b></div><small>${esc(p.position || '')} • ${esc(p.nhlTeam || '')} • ${esc(p.source)}</small><div class="mobile-season-stat-grid"><span><em>G</em>${num(p.goals)}</span><span><em>A</em>${num(p.assists)}</span><span><em>SHG</em>${num(p.shortHandedGoals)}</span><span><em>GWG</em>${num(p.gameWinningGoals)}</span><span><em>W</em>${num(p.goalieWins)}</span><span><em>SO</em>${num(p.goalieShutouts)}</span><span><em>Total</em>${p.fpts}</span></div></article>`).join('');
+        return `<tr class="season-summary-row"><td><b>${i+1}</b></td><td><button type="button" class="season-team-toggle" data-season-toggle="${detailId}"><span>▸</span>${esc(row.ownerName)}</button></td><td class="total-cell">${row.total}</td><td>${row.skaterPts}</td><td>${row.goaliePts}</td><td><div class="season-player-list">${chips}</div></td></tr><tr id="${detailId}" class="season-breakdown-row" hidden><td colspan="6"><div class="season-breakdown-panel"><h3>${esc(row.ownerName)} 2025-26 breakdown</h3><div class="mobile-season-breakdown-list">${mobile}</div><table class="season-breakdown-table"><thead><tr><th>Player</th><th>Type</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th><th>W</th><th>SO</th><th>FPTS</th><th>Calculation</th></tr></thead><tbody>${details}</tbody></table></div></td></tr>`;
+      }).join('') + '</tbody></table>' + `<p class="muted season-updated">Season saved as previous season record: 2025-2026 Regular Season. Roster count: ${totalPlayers}. ${usedApi ? `NHL source: ${esc(payload.source || 'api.nhle.com')}.` : ''}</p>`;
+  }
+  async function renderSeasonLeaderboards(){
+    const home = document.getElementById('leaderboardTable');
+    const prev = document.getElementById('previousSeasonTable');
+    [home, prev].forEach(t => { if (t) t.innerHTML = '<div class="clean-loading-card"><strong>Pulling 2025-26 regular-season stats…</strong><span>Calculating fantasy points for last season\'s roster record.</span></div>'; });
+    try{
+      const payload = await fetchRegularSeasonStats();
+      renderTable('leaderboardTable','homeRosterSourceStatus',payload,null);
+      renderTable('previousSeasonTable','previousSeasonStatus',payload,null);
+    }catch(err){
+      console.error('Season leaderboard API failed:', err);
+      renderTable('leaderboardTable','homeRosterSourceStatus',null,err);
+      renderTable('previousSeasonTable','previousSeasonStatus',null,err);
+    }
+  }
+  function prepareUi(){
+    const btn = document.getElementById('refreshStatsBtn2');
+    if (btn) { btn.id = 'refreshSeasonStatsBtn'; btn.textContent = 'Pull 2025-26 Stats'; btn.disabled = false; }
+    const eyebrow = document.querySelector('#dashboard .eyebrow'); if (eyebrow) eyebrow.textContent = '2025-2026 Season Leaderboard';
+    const title = document.querySelector('#dashboard h2'); if (title) title.textContent = 'Last season standings';
+  }
+  document.addEventListener('click', function(event){
+    const toggle = event.target.closest && event.target.closest('[data-season-toggle]');
+    if (toggle) { event.preventDefault(); const row=document.getElementById(toggle.dataset.seasonToggle); const icon=toggle.querySelector('span'); if(row){ row.hidden=!row.hidden; if(icon) icon.textContent=row.hidden?'▸':'▾'; } return; }
+    const btn = event.target.closest && event.target.closest('#refreshSeasonStatsBtn,#refreshPreviousSeasonBtn');
+    if (btn) { event.preventDefault(); renderSeasonLeaderboards(); }
+  }, true);
+  window.renderPreviousSeasonLeaderboard = renderSeasonLeaderboards;
+  window.addEventListener('load', function(){
+    prepareUi();
+    setTimeout(renderSeasonLeaderboards, 900);
+  });
+})();
+</script>
+
 </body>
 </html>
