@@ -173,3 +173,11 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
   - Player Name + FPTS shown for each roster
   - Team Goalies separated inside each roster card
 - Removed the boxed table look in favor of transparent chalk-style text.
+
+
+## v183 roster font + Kessel chalk drawing
+- Verified v182 home chalkboard renderer and source image first.
+- Created assets/images/kessel-cup-chalk-drawing.png from the uploaded Kessel Cup photo.
+- Added the chalk-style Kessel drawing in the empty area below the standings.
+- Increased roster text sizes while keeping the layout inside the chalkboard overlay.
+- Preserved the API/stat calculation and v182 mockup renderer.

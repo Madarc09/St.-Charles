@@ -817,6 +817,112 @@
   }
 </style>
 
+
+<style id="v183-bigger-rosters-kessel-chalk">
+  /* v183: Bigger roster chalk text + Kessel Cup chalk sketch under the standings. */
+
+  .v182-standings {
+    position: relative !important;
+    min-height: 100% !important;
+  }
+
+  .v182-standings::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 4.5% !important;
+    right: 3.0% !important;
+    bottom: 1.5% !important;
+    height: 49% !important;
+    background: url('assets/images/kessel-cup-chalk-drawing.png?v=183') center bottom / contain no-repeat !important;
+    opacity: .72 !important;
+    filter: drop-shadow(0 0 2px rgba(255,255,255,.16)) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
+
+  .v182-standings-table,
+  .v182-chalk-title {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* Give the roster side a little more room and larger readable chalk text. */
+  .v182-chalk-layout {
+    grid-template-columns: 35.5% 64.5% !important;
+    gap: 2.6% !important;
+  }
+
+  .v182-roster-grid {
+    column-gap: 2.6% !important;
+    row-gap: 3.5% !important;
+  }
+
+  .v182-owner-name {
+    font-size: clamp(8px, .96vw, 16px) !important;
+    margin-bottom: 3px !important;
+  }
+
+  .v182-roster-head {
+    font-size: clamp(6.1px, .68vw, 11.5px) !important;
+    padding-bottom: 3px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .v182-player-row {
+    font-size: clamp(6.4px, .73vw, 12.6px) !important;
+    line-height: 1.08 !important;
+    min-height: 1.08em !important;
+    gap: 5px !important;
+  }
+
+  .v182-goalie-break {
+    margin-top: 5px !important;
+  }
+
+  .v182-goalie-break::before {
+    font-size: clamp(6.2px, .72vw, 12px) !important;
+    margin: 4px 0 3px !important;
+    padding-top: 4px !important;
+  }
+
+  @media (max-width: 820px) {
+    .v182-chalk-layout {
+      grid-template-columns: 36.5% 63.5% !important;
+      gap: 2.0% !important;
+    }
+
+    .v182-standings::after {
+      left: 2% !important;
+      right: 1% !important;
+      bottom: 0.5% !important;
+      height: 47% !important;
+      opacity: .68 !important;
+    }
+
+    .v182-owner-name {
+      font-size: clamp(5px, 1.2vw, 7.8px) !important;
+    }
+
+    .v182-roster-head {
+      font-size: clamp(4px, .98vw, 6.4px) !important;
+      padding-bottom: 2px !important;
+      margin-bottom: 2px !important;
+    }
+
+    .v182-player-row {
+      font-size: clamp(4.15px, 1.03vw, 6.7px) !important;
+      line-height: 1.04 !important;
+      gap: 2px !important;
+    }
+
+    .v182-goalie-break::before {
+      font-size: clamp(4.1px, 1vw, 6.6px) !important;
+      margin-top: 2px !important;
+      padding-top: 2px !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
