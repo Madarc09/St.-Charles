@@ -160,3 +160,16 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Changed the immersive home scene to width: 100vw with the source image ratio preserved.
 - Removed the left/right empty bars by allowing the page to become taller than the viewport instead of shrinking to fit height.
 - Kept the leaderboard and navigation overlays positioned proportionally over the image.
+
+
+## v182 mockup chalkboard leaderboard/rosters
+- Verified the active home data renderer is the v156 themed rankings script and that it writes diagnostics to window.__lastSeasonApiDiagnostics.
+- Left the API/stat calculation intact.
+- Added a custom home chalkboard renderer that uses the live calculated rows from window.__lastSeasonApiDiagnostics.
+- Replaced the visible home overlay with the mockup layout:
+  - Standings on the left
+  - Rosters on the right
+  - 3 roster cards on top, 2 centered underneath
+  - Player Name + FPTS shown for each roster
+  - Team Goalies separated inside each roster card
+- Removed the boxed table look in favor of transparent chalk-style text.
