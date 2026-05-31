@@ -145,3 +145,11 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Other sections/tabs remain in the file for later navigation work.
 - Disabled the old v160 home leaderboard renderer and v176/v177/v178 home CSS layers.
 - Left a transparent #leaderboardTable placeholder positioned on the chalkboard for the future clean leaderboard overlay.
+
+
+## v180 full image + chalk leaderboard foundation
+- Verified the v179 dashboard, image asset, and remaining live leaderboard code first.
+- Changed the Home image from viewport-cover cropping to a contained aspect-ratio scene so the whole picture can be seen.
+- Added overlay navigation links back onto the image.
+- Kept #leaderboardTable on the chalkboard surface.
+- Styled existing live leaderboard output so explanatory panels/boxes are hidden and only transparent chalk-style standings text remains.
