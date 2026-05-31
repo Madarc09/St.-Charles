@@ -7175,5 +7175,299 @@
 })();
 </script>
 
+
+<style id="v203-mobile-home-clean-rebuild">
+  /* v203: clean mobile-only rebuild. Desktop remains untouched. This creates one steady composition:
+     left = standings + Kessel chalk art, right = readable 3-over-2 vertical rosters. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay {
+      left: 18.9% !important;
+      top: 31.85% !important;
+      width: 66.2% !important;
+      height: 43.85% !important;
+      overflow: visible !important;
+      transform: rotate(-0.08deg) !important;
+      pointer-events: auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-layout {
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      gap: 0 !important;
+      transform: none !important;
+      overflow: visible !important;
+      color: rgba(244,246,235,.91) !important;
+    }
+
+    /* LEFT ZONE: standings and image are one contained visual block. */
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 46.4% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      max-width: 46.4% !important;
+      padding: .5% 1.25% 0 0 !important;
+      overflow: hidden !important;
+      display: block !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings .v182-chalk-title {
+      display: block !important;
+      height: 14px !important;
+      min-height: 14px !important;
+      max-height: 14px !important;
+      margin: 0 0 2px !important;
+      background-size: contain !important;
+      background-position: center center !important;
+      opacity: .84 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+      text-decoration: none !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table {
+      width: 100% !important;
+      table-layout: fixed !important;
+      border-collapse: collapse !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th,
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td {
+      box-sizing: border-box !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      border: 0 !important;
+      background: transparent !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      letter-spacing: -.045em !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th {
+      font-size: 7.6px !important;
+      line-height: .94 !important;
+      padding-top: 0 !important;
+      padding-bottom: 2px !important;
+      font-weight: 650 !important;
+      border-bottom: 1px solid rgba(245,245,232,.28) !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td {
+      font-size: 9.75px !important;
+      line-height: .98 !important;
+      padding-top: 1.9px !important;
+      padding-bottom: 1.9px !important;
+      font-weight: 850 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:first-child,
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:first-child {
+      width: 24% !important;
+      text-align: left !important;
+    }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:nth-child(2),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:nth-child(2) { width: 20% !important; text-align: center !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:nth-child(3),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:nth-child(3),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:nth-child(4),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:nth-child(4) { width: 9% !important; text-align: center !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:nth-child(5),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:nth-child(5),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table th:nth-child(6),
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table td:nth-child(6) { width: 19% !important; text-align: center !important; }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings::after {
+      content: "" !important;
+      position: absolute !important;
+      left: -1.5% !important;
+      right: 3.5% !important;
+      bottom: 1.2% !important;
+      height: 46.5% !important;
+      background: url('assets/images/kessel-chalk-recreated-clean.png?v=203') center bottom / contain no-repeat !important;
+      opacity: .82 !important;
+      pointer-events: none !important;
+      z-index: -1 !important;
+    }
+
+    /* RIGHT ZONE: independent roster board. It does not depend on the standings width. */
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters {
+      position: absolute !important;
+      left: 47.2% !important;
+      top: 0 !important;
+      width: 52.8% !important;
+      height: 100% !important;
+      min-width: 0 !important;
+      max-width: 52.8% !important;
+      padding: .35% .25% 0 .75% !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters .v182-chalk-title {
+      display: block !important;
+      height: 13px !important;
+      min-height: 13px !important;
+      max-height: 13px !important;
+      margin: 0 0 2px !important;
+      background-size: contain !important;
+      background-position: center center !important;
+      opacity: .83 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+      text-decoration: none !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-grid {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+      grid-template-rows: 1fr 1fr !important;
+      column-gap: 1.65% !important;
+      row-gap: 2.6% !important;
+      width: 100% !important;
+      height: calc(100% - 15px) !important;
+      min-height: 0 !important;
+      align-items: stretch !important;
+      align-content: stretch !important;
+      justify-items: stretch !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      padding: 0 .55% !important;
+      background: rgba(0,0,0,.035) !important;
+      border: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(1) { grid-column: 1 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(2) { grid-column: 3 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(3) { grid-column: 5 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(4) { grid-column: 2 / span 2 !important; grid-row: 2 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(5) { grid-column: 4 / span 2 !important; grid-row: 2 !important; }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-owner-name {
+      font-size: 6.9px !important;
+      line-height: .98 !important;
+      margin: 0 0 1.4px !important;
+      letter-spacing: -.035em !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-head {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 1px !important;
+      font-size: 4.55px !important;
+      line-height: .98 !important;
+      padding-bottom: 1px !important;
+      margin-bottom: 1.1px !important;
+      border-bottom: 1px solid rgba(245,245,232,.24) !important;
+      white-space: nowrap !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 1px !important;
+      font-size: 5.72px !important;
+      line-height: 1.085 !important;
+      min-height: 1.085em !important;
+      letter-spacing: -.032em !important;
+      white-space: nowrap !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:first-child {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:last-child {
+      min-width: 1.35em !important;
+      text-align: right !important;
+      color: rgba(255,244,174,.94) !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break {
+      margin-top: 2px !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break::before {
+      font-size: 4.6px !important;
+      line-height: 1 !important;
+      margin: 1.6px 0 1.1px !important;
+      padding-top: 1px !important;
+      border-top: 1px solid rgba(245,245,232,.22) !important;
+      opacity: .88 !important;
+    }
+  }
+</style>
+
+<script id="v203-mobile-home-clean-rebuild-enforcer">
+(function(){
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 820px)').matches; }
+  function important(el, prop, value){ if(el && el.style) el.style.setProperty(prop, value, 'important'); }
+  function each(root, selector, fn){ if(root) root.querySelectorAll(selector).forEach(fn); }
+  function enforce(){
+    if(!isMobile()) return;
+    var host = document.getElementById('leaderboardTable');
+    if(!host || !host.classList.contains('home-chalk-leaderboard-overlay')) return;
+    host.setAttribute('data-v203-mobile-clean-rebuild','true');
+    important(host,'left','18.9%'); important(host,'top','31.85%'); important(host,'width','66.2%'); important(host,'height','43.85%'); important(host,'overflow','visible'); important(host,'transform','rotate(-0.08deg)');
+    var layout = host.querySelector('.v182-chalk-layout');
+    important(layout,'position','relative'); important(layout,'display','block'); important(layout,'width','100%'); important(layout,'height','100%'); important(layout,'gap','0'); important(layout,'transform','none'); important(layout,'overflow','visible');
+    var standings = host.querySelector('.v182-standings');
+    important(standings,'position','absolute'); important(standings,'left','0'); important(standings,'top','0'); important(standings,'width','46.4%'); important(standings,'height','100%'); important(standings,'max-width','46.4%'); important(standings,'padding','.5% 1.25% 0 0'); important(standings,'overflow','hidden'); important(standings,'display','block');
+    var rosters = host.querySelector('.v182-rosters');
+    important(rosters,'position','absolute'); important(rosters,'left','47.2%'); important(rosters,'top','0'); important(rosters,'width','52.8%'); important(rosters,'height','100%'); important(rosters,'max-width','52.8%'); important(rosters,'padding','.35% .25% 0 .75%'); important(rosters,'overflow','hidden'); important(rosters,'display','flex'); important(rosters,'flex-direction','column');
+    each(host,'.v182-standings .v182-chalk-title',function(el){ important(el,'height','14px'); important(el,'min-height','14px'); important(el,'max-height','14px'); important(el,'margin','0 0 2px'); important(el,'background-size','contain'); important(el,'opacity','.84'); important(el,'font-size','0'); important(el,'line-height','0'); });
+    each(host,'.v182-rosters .v182-chalk-title',function(el){ important(el,'height','13px'); important(el,'min-height','13px'); important(el,'max-height','13px'); important(el,'margin','0 0 2px'); important(el,'background-size','contain'); important(el,'opacity','.83'); important(el,'font-size','0'); important(el,'line-height','0'); important(el,'flex','0 0 auto'); });
+    var table=host.querySelector('.v182-standings-table');
+    important(table,'width','100%'); important(table,'table-layout','fixed'); important(table,'border-collapse','collapse'); important(table,'margin','0');
+    each(host,'.v182-standings-table th',function(el){ important(el,'font-size','7.6px'); important(el,'line-height','.94'); important(el,'padding-top','0'); important(el,'padding-bottom','2px'); important(el,'font-weight','650'); important(el,'letter-spacing','-.045em'); important(el,'white-space','nowrap'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); });
+    each(host,'.v182-standings-table td',function(el){ important(el,'font-size','9.75px'); important(el,'line-height','.98'); important(el,'padding-top','1.9px'); important(el,'padding-bottom','1.9px'); important(el,'font-weight','850'); important(el,'letter-spacing','-.045em'); important(el,'white-space','nowrap'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); });
+    each(host,'.v182-roster-grid',function(el){ important(el,'display','grid'); important(el,'grid-template-columns','repeat(6, minmax(0, 1fr))'); important(el,'grid-template-rows','1fr 1fr'); important(el,'column-gap','1.65%'); important(el,'row-gap','2.6%'); important(el,'width','100%'); important(el,'height','calc(100% - 15px)'); important(el,'min-height','0'); important(el,'align-items','stretch'); important(el,'align-content','stretch'); important(el,'justify-items','stretch'); });
+    each(host,'.v182-roster-card',function(el,i){ important(el,'min-width','0'); important(el,'width','100%'); important(el,'max-width','100%'); important(el,'height','100%'); important(el,'min-height','0'); important(el,'overflow','hidden'); important(el,'padding','0 .55%'); important(el,'background','rgba(0,0,0,.035)'); important(el,'border','0'); important(el,'display','flex'); important(el,'flex-direction','column'); important(el,'justify-content','flex-start'); var pos=[['1 / span 2','1'],['3 / span 2','1'],['5 / span 2','1'],['2 / span 2','2'],['4 / span 2','2']][i]; if(pos){ important(el,'grid-column',pos[0]); important(el,'grid-row',pos[1]); } });
+    each(host,'.v182-owner-name',function(el){ important(el,'font-size','6.9px'); important(el,'line-height','.98'); important(el,'margin','0 0 1.4px'); important(el,'letter-spacing','-.035em'); important(el,'text-align','left'); important(el,'white-space','nowrap'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); important(el,'flex','0 0 auto'); });
+    each(host,'.v182-roster-head',function(el){ important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) auto'); important(el,'gap','1px'); important(el,'font-size','4.55px'); important(el,'line-height','.98'); important(el,'padding-bottom','1px'); important(el,'margin-bottom','1.1px'); important(el,'white-space','nowrap'); important(el,'flex','0 0 auto'); });
+    each(host,'.v182-player-row',function(el){ important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) auto'); important(el,'gap','1px'); important(el,'font-size','5.72px'); important(el,'line-height','1.085'); important(el,'min-height','1.085em'); important(el,'letter-spacing','-.032em'); important(el,'white-space','nowrap'); important(el,'flex','0 0 auto'); });
+    each(host,'.v182-player-row span:first-child',function(el){ important(el,'min-width','0'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); important(el,'white-space','nowrap'); });
+    each(host,'.v182-player-row span:last-child',function(el){ important(el,'min-width','1.35em'); important(el,'text-align','right'); });
+    each(host,'.v182-goalie-break',function(el){ important(el,'margin-top','2px'); important(el,'flex','0 0 auto'); });
+  }
+  window.__v203EnforceMobileHomeCleanRebuild = enforce;
+  document.addEventListener('DOMContentLoaded', function(){ enforce(); setTimeout(enforce,120); setTimeout(enforce,650); setTimeout(enforce,1600); setTimeout(enforce,3300); });
+  window.addEventListener('load', function(){ enforce(); setTimeout(enforce,400); setTimeout(enforce,1200); setTimeout(enforce,2600); setTimeout(enforce,5200); });
+  window.addEventListener('resize', enforce, {passive:true});
+  new MutationObserver(function(){ requestAnimationFrame(enforce); }).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>

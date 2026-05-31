@@ -196,3 +196,9 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
   - centered roster cards
   - bigger but contained roster text
 - Improved mobile by using the vertical viewport height instead of shrinking the whole scene too much.
+
+v203 mobile rebuild:
+- Removed the drag/drop editor direction from the active build and rebuilt the mobile home board as a clean two-zone composition.
+- Desktop is preserved.
+- Mobile left zone: standings plus Kessel chalk art.
+- Mobile right zone: 3-over-2 vertical rosters with tighter, readable chalk text and balanced spacing.
