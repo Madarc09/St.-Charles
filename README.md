@@ -116,3 +116,13 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Verified the home background/image layer came from v160 locker-TV home styling.
 - Removed the locker-room background image, props, TV shell, scanline overlays, and side cards.
 - Home page now shows a clean leaderboard foundation.
+
+
+## v177 basement chalkboard home leaderboard
+- Copied selected generated image into assets/images/home-leaderboard-basement-board.png.
+- Verified the live home leaderboard is still produced by the v160 renderer.
+- Kept the API/live leaderboard structure intact.
+- Added the image as the home leaderboard scene.
+- Positioned the live leaderboard over the chalkboard area.
+- Restyled the live leaderboard with chalk-like text.
+- Hid the old TV/background chrome while preserving sorting and row expansion behavior.
