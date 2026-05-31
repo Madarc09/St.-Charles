@@ -181,3 +181,18 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Added the chalk-style Kessel drawing in the empty area below the standings.
 - Increased roster text sizes while keeping the layout inside the chalkboard overlay.
 - Preserved the API/stat calculation and v182 mockup renderer.
+
+
+## v184 reference-style live home page
+- Verified the active home path first:
+  - v156 live/API renderer still calculates standings and rosters
+  - v182 home renderer reads window.__lastSeasonApiDiagnostics
+  - #leaderboardTable remains the live overlay target
+- Kept the clean chalkboard image as the page background so API text is not duplicated over fake static text.
+- Used the final generated image as a visual reference and extracted a better Kessel chalk drawing from it.
+- Restyled the live standings and roster overlay to more closely match the generated reference:
+  - better chalk spacing
+  - stronger Kessel drawing under standings
+  - centered roster cards
+  - bigger but contained roster text
+- Improved mobile by using the vertical viewport height instead of shrinking the whole scene too much.
