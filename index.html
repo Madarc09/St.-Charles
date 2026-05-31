@@ -2118,185 +2118,6 @@
   }
 </style>
 
-
-
-<style id="v196-mobile-rosters-symmetric-menu-board">
-  /* v196: mobile-only roster rebuild. Leave v193 left/standings side untouched; make the right side its own symmetrical chalk menu board. */
-  @media (max-width: 820px) {
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-layout {
-      grid-template-columns: minmax(0, 46.8%) minmax(0, 52.8%) !important;
-      gap: .4% !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters {
-      padding: .65% 0 0 1.0% !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      height: 100% !important;
-      max-height: 100% !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters .v182-chalk-title {
-      height: 13px !important;
-      min-height: 13px !important;
-      max-height: 13px !important;
-      margin: 0 0 2px !important;
-      background-size: contain !important;
-      background-position: center center !important;
-      opacity: .88 !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-grid {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) !important;
-      grid-auto-rows: minmax(0, 1fr) !important;
-      column-gap: 0 !important;
-      row-gap: 1.15% !important;
-      width: 98.4% !important;
-      max-width: 98.4% !important;
-      height: calc(100% - 15px) !important;
-      max-height: calc(100% - 15px) !important;
-      align-items: stretch !important;
-      align-content: stretch !important;
-      justify-items: stretch !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-      grid-auto-flow: row !important;
-      column-gap: 4.2% !important;
-      row-gap: 0 !important;
-      width: 100% !important;
-      min-width: 0 !important;
-      height: 100% !important;
-      min-height: 0 !important;
-      padding: .35% 1.8% .45% !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-      border-top: 1px solid rgba(245, 240, 220, .22) !important;
-      border-bottom: 1px solid rgba(10, 10, 8, .20) !important;
-      background: linear-gradient(90deg, rgba(255,255,230,.025), rgba(255,255,230,.005), rgba(255,255,230,.025)) !important;
-      transform: none !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(1),
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(2),
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(3),
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(4),
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(5) {
-      grid-column: auto !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-owner-name {
-      grid-column: 1 / -1 !important;
-      justify-self: center !important;
-      width: 100% !important;
-      font-size: 6.85px !important;
-      line-height: .98 !important;
-      margin: 0 0 .8px !important;
-      letter-spacing: .02em !important;
-      text-align: center !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: clip !important;
-      text-shadow: 0 0 2px rgba(255,255,240,.20), 0 1px 0 rgba(0,0,0,.45) !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-head {
-      grid-column: 1 / -1 !important;
-      display: grid !important;
-      grid-template-columns: minmax(0,1fr) 1.65em minmax(0,1fr) 1.65em !important;
-      gap: 1.5% !important;
-      font-size: 3.45px !important;
-      line-height: .95 !important;
-      padding: 0 0 .7px !important;
-      margin: 0 0 .7px !important;
-      opacity: .74 !important;
-      border-bottom: 1px solid rgba(245,245,232,.24) !important;
-      box-sizing: border-box !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-head span:first-child::after {
-      content: " / FPTS";
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-head span:last-child {
-      display: none !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) 1.65em !important;
-      gap: 1px !important;
-      font-size: 4.85px !important;
-      line-height: .98 !important;
-      min-height: 0 !important;
-      height: auto !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      letter-spacing: -.035em !important;
-      overflow: hidden !important;
-      box-sizing: border-box !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:first-child {
-      min-width: 0 !important;
-      overflow: hidden !important;
-      text-overflow: clip !important;
-      white-space: nowrap !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:last-child {
-      min-width: 1.45em !important;
-      text-align: right !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card > .v182-player-row:nth-of-type(odd) {
-      grid-column: 1 !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card > .v182-player-row:nth-of-type(even) {
-      grid-column: 2 !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break {
-      grid-column: 1 / -1 !important;
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-      column-gap: 4.2% !important;
-      row-gap: 0 !important;
-      margin: .7px 0 0 !important;
-      padding: .6px 0 0 !important;
-      border-top: 1px solid rgba(245,245,232,.20) !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break::before {
-      content: "Goalies" !important;
-      grid-column: 1 / -1 !important;
-      display: block !important;
-      font-size: 3.65px !important;
-      line-height: .9 !important;
-      margin: 0 0 .5px !important;
-      padding: 0 !important;
-      text-align: center !important;
-      opacity: .70 !important;
-      letter-spacing: .02em !important;
-    }
-
-    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break .v182-player-row {
-      font-size: 4.65px !important;
-      line-height: .96 !important;
-    }
-  }
-</style>
-
 </head>
 <body>
 
@@ -7041,7 +6862,124 @@
 
 
 
-<script id="v196-mobile-rosters-symmetric-inline-enforcer">
+<style id="v197-mobile-rosters-3-over-2-readable">
+  /* v197: mobile-only roster reset. Return to the preferred 3-over-2 vertical team layout, centered and readable, while preserving the v193 left-side split and all desktop styling. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-layout {
+      grid-template-columns: minmax(0, 46.8%) minmax(0, 52.8%) !important;
+      gap: .4% !important;
+      align-items: start !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      padding: .8% 0 0 .9% !important;
+      overflow: hidden !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters .v182-chalk-title {
+      height: 13px !important;
+      min-height: 13px !important;
+      max-height: 13px !important;
+      margin: 0 0 2px !important;
+      background-size: contain !important;
+      opacity: .90 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-grid {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+      column-gap: 1.35% !important;
+      row-gap: 4.4% !important;
+      width: 98.8% !important;
+      max-width: 98.8% !important;
+      height: auto !important;
+      align-items: start !important;
+      align-content: start !important;
+      justify-items: stretch !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 .55% !important;
+      overflow: hidden !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(1) { grid-column: 1 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(2) { grid-column: 3 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(3) { grid-column: 5 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(4) { grid-column: 2 / span 2 !important; grid-row: 2 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-card:nth-child(5) { grid-column: 4 / span 2 !important; grid-row: 2 !important; }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-owner-name {
+      font-size: 6.15px !important;
+      line-height: 1.02 !important;
+      margin: 0 0 1.25px !important;
+      letter-spacing: -.035em !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-roster-head {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 1px !important;
+      font-size: 4.05px !important;
+      line-height: 1.02 !important;
+      padding-bottom: 1px !important;
+      margin-bottom: 1px !important;
+      border-bottom: 1px solid rgba(245,245,232,.22) !important;
+      white-space: nowrap !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 1px !important;
+      font-size: 4.95px !important;
+      line-height: 1.045 !important;
+      min-height: 1.045em !important;
+      letter-spacing: -.035em !important;
+      white-space: nowrap !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:first-child {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-player-row span:last-child {
+      min-width: 1.48em !important;
+      text-align: right !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break {
+      margin-top: 1.7px !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-goalie-break::before {
+      font-size: 4.15px !important;
+      line-height: 1 !important;
+      margin: 1.25px 0 1px !important;
+      padding-top: 1px !important;
+      border-top: 1px solid rgba(245,245,232,.20) !important;
+    }
+  }
+</style>
+
+<script id="v197-mobile-rosters-3-over-2-enforcer">
 (function(){
   function isMobileHome(){ return window.matchMedia && window.matchMedia('(max-width: 820px)').matches; }
   function important(el, prop, value){ if(el && el.style) el.style.setProperty(prop, value, 'important'); }
@@ -7052,45 +6990,25 @@
     var layout=host.querySelector('.v182-chalk-layout');
     important(layout,'grid-template-columns','minmax(0, 46.8%) minmax(0, 52.8%)');
     important(layout,'gap','.4%');
+    important(layout,'align-items','start');
     var rosters=host.querySelector('.v182-rosters');
-    important(rosters,'padding','.65% 0 0 1.0%');
-    important(rosters,'width','100%');
-    important(rosters,'max-width','100%');
-    important(rosters,'height','100%');
-    important(rosters,'max-height','100%');
-    important(rosters,'overflow','hidden');
-    important(rosters,'box-sizing','border-box');
-    host.querySelectorAll('.v182-rosters .v182-chalk-title').forEach(function(el){
-      important(el,'height','13px'); important(el,'min-height','13px'); important(el,'max-height','13px'); important(el,'margin','0 0 2px'); important(el,'background-size','contain'); important(el,'background-position','center center'); important(el,'opacity','.88');
-    });
-    host.querySelectorAll('.v182-roster-grid').forEach(function(el){
-      important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr)'); important(el,'grid-auto-rows','minmax(0, 1fr)'); important(el,'column-gap','0'); important(el,'row-gap','1.15%'); important(el,'width','98.4%'); important(el,'max-width','98.4%'); important(el,'height','calc(100% - 15px)'); important(el,'max-height','calc(100% - 15px)'); important(el,'align-items','stretch'); important(el,'align-content','stretch'); important(el,'justify-items','stretch'); important(el,'overflow','hidden'); important(el,'box-sizing','border-box');
-    });
-    host.querySelectorAll('.v182-roster-card').forEach(function(el){
-      important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) minmax(0, 1fr)'); important(el,'grid-auto-flow','row'); important(el,'column-gap','4.2%'); important(el,'row-gap','0'); important(el,'grid-column','auto'); important(el,'width','100%'); important(el,'height','100%'); important(el,'min-height','0'); important(el,'min-width','0'); important(el,'padding','.35% 1.8% .45%'); important(el,'overflow','hidden'); important(el,'box-sizing','border-box'); important(el,'border-top','1px solid rgba(245, 240, 220, .22)'); important(el,'border-bottom','1px solid rgba(10, 10, 8, .20)'); important(el,'background','linear-gradient(90deg, rgba(255,255,230,.025), rgba(255,255,230,.005), rgba(255,255,230,.025))'); important(el,'transform','none');
-    });
-    host.querySelectorAll('.v182-owner-name').forEach(function(el){
-      important(el,'grid-column','1 / -1'); important(el,'justify-self','center'); important(el,'width','100%'); important(el,'font-size','6.85px'); important(el,'line-height','.98'); important(el,'margin','0 0 .8px'); important(el,'letter-spacing','.02em'); important(el,'text-align','center'); important(el,'white-space','nowrap'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); important(el,'text-shadow','0 0 2px rgba(255,255,240,.20), 0 1px 0 rgba(0,0,0,.45)');
-    });
-    host.querySelectorAll('.v182-roster-head').forEach(function(el){
-      important(el,'grid-column','1 / -1'); important(el,'display','grid'); important(el,'grid-template-columns','minmax(0,1fr) 1.65em minmax(0,1fr) 1.65em'); important(el,'gap','1.5%'); important(el,'font-size','3.45px'); important(el,'line-height','.95'); important(el,'padding','0 0 .7px'); important(el,'margin','0 0 .7px'); important(el,'opacity','.74'); important(el,'border-bottom','1px solid rgba(245,245,232,.24)'); important(el,'box-sizing','border-box');
-    });
-    host.querySelectorAll('.v182-roster-head span:last-child').forEach(function(el){ important(el,'display','none'); });
-    host.querySelectorAll('.v182-player-row').forEach(function(el){
-      important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) 1.65em'); important(el,'gap','1px'); important(el,'font-size','4.85px'); important(el,'line-height','.98'); important(el,'min-height','0'); important(el,'height','auto'); important(el,'margin','0'); important(el,'padding','0'); important(el,'letter-spacing','-.035em'); important(el,'overflow','hidden'); important(el,'box-sizing','border-box');
-    });
+    important(rosters,'width','100%'); important(rosters,'max-width','100%'); important(rosters,'min-width','0'); important(rosters,'height','100%'); important(rosters,'max-height','100%'); important(rosters,'padding','.8% 0 0 .9%'); important(rosters,'overflow','hidden');
+    host.querySelectorAll('.v182-rosters .v182-chalk-title').forEach(function(el){ important(el,'height','13px'); important(el,'min-height','13px'); important(el,'max-height','13px'); important(el,'margin','0 0 2px'); important(el,'background-size','contain'); important(el,'opacity','.90'); });
+    host.querySelectorAll('.v182-roster-grid').forEach(function(el){ important(el,'display','grid'); important(el,'grid-template-columns','repeat(6, minmax(0, 1fr))'); important(el,'column-gap','1.35%'); important(el,'row-gap','4.4%'); important(el,'width','98.8%'); important(el,'max-width','98.8%'); important(el,'height','auto'); important(el,'align-items','start'); important(el,'align-content','start'); important(el,'justify-items','stretch'); });
+    host.querySelectorAll('.v182-roster-card').forEach(function(el,i){ important(el,'min-width','0'); important(el,'width','100%'); important(el,'max-width','100%'); important(el,'padding','0 .55%'); important(el,'overflow','hidden'); important(el,'background','transparent'); important(el,'border','0'); var pos=[['1 / span 2','1'],['3 / span 2','1'],['5 / span 2','1'],['2 / span 2','2'],['4 / span 2','2']][i]; if(pos){ important(el,'grid-column',pos[0]); important(el,'grid-row',pos[1]); } });
+    host.querySelectorAll('.v182-owner-name').forEach(function(el){ important(el,'font-size','6.15px'); important(el,'line-height','1.02'); important(el,'margin','0 0 1.25px'); important(el,'letter-spacing','-.035em'); important(el,'text-align','left'); important(el,'white-space','nowrap'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); });
+    host.querySelectorAll('.v182-roster-head').forEach(function(el){ important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) auto'); important(el,'gap','1px'); important(el,'font-size','4.05px'); important(el,'line-height','1.02'); important(el,'padding-bottom','1px'); important(el,'margin-bottom','1px'); important(el,'white-space','nowrap'); });
+    host.querySelectorAll('.v182-player-row').forEach(function(el){ important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) auto'); important(el,'gap','1px'); important(el,'font-size','4.95px'); important(el,'line-height','1.045'); important(el,'min-height','1.045em'); important(el,'letter-spacing','-.035em'); important(el,'white-space','nowrap'); });
     host.querySelectorAll('.v182-player-row span:first-child').forEach(function(el){ important(el,'min-width','0'); important(el,'overflow','hidden'); important(el,'text-overflow','clip'); important(el,'white-space','nowrap'); });
-    host.querySelectorAll('.v182-player-row span:last-child').forEach(function(el){ important(el,'min-width','1.45em'); important(el,'text-align','right'); });
-    host.querySelectorAll('.v182-goalie-break').forEach(function(el){
-      important(el,'grid-column','1 / -1'); important(el,'display','grid'); important(el,'grid-template-columns','minmax(0, 1fr) minmax(0, 1fr)'); important(el,'column-gap','4.2%'); important(el,'row-gap','0'); important(el,'margin','.7px 0 0'); important(el,'padding','.6px 0 0'); important(el,'border-top','1px solid rgba(245,245,232,.20)'); important(el,'min-height','0'); important(el,'overflow','hidden');
-    });
-    host.querySelectorAll('.v182-goalie-break .v182-player-row').forEach(function(el){ important(el,'font-size','4.65px'); important(el,'line-height','.96'); });
+    host.querySelectorAll('.v182-player-row span:last-child').forEach(function(el){ important(el,'min-width','1.48em'); important(el,'text-align','right'); });
+    host.querySelectorAll('.v182-goalie-break').forEach(function(el){ important(el,'margin-top','1.7px'); });
+    host.querySelectorAll('.v182-goalie-break').forEach(function(el){ if(!el.dataset.v197){ el.dataset.v197='1'; } });
   }
-  window.__v196EnforceMobileSymmetricRosters = enforce;
-  document.addEventListener('DOMContentLoaded', function(){ enforce(); setTimeout(enforce,120); setTimeout(enforce,650); setTimeout(enforce,1800); setTimeout(enforce,3600); });
-  window.addEventListener('load', function(){ enforce(); setTimeout(enforce,450); setTimeout(enforce,1500); setTimeout(enforce,3200); });
+  window.__v197EnforceMobileRosterThreeTwo = enforce;
+  document.addEventListener('DOMContentLoaded', function(){ enforce(); setTimeout(enforce,150); setTimeout(enforce,700); setTimeout(enforce,1800); setTimeout(enforce,3600); });
+  window.addEventListener('load', function(){ enforce(); setTimeout(enforce,500); setTimeout(enforce,1800); setTimeout(enforce,3500); setTimeout(enforce,6500); });
   window.addEventListener('resize', enforce, {passive:true});
-  new MutationObserver(enforce).observe(document.documentElement,{childList:true,subtree:true});
+  new MutationObserver(function(){ requestAnimationFrame(enforce); }).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 
