@@ -135,3 +135,13 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Removed the dark TV/table blocks that were hiding the image.
 - Made all leaderboard text inherit the same chalk-style font family used by the scorebug/title.
 - Preserved live API rendering, sorting, refresh, and expandable roster rows.
+
+
+## v179 immersive home reset
+- Verified the actual dashboard section, tab/nav/header structure, and selected image asset first.
+- Rebuilt the Home page from scratch instead of layering over the old standings board.
+- Home now displays the selected generated image as the full immersive page.
+- Header image and top navigation are hidden while the Home tab is active.
+- Other sections/tabs remain in the file for later navigation work.
+- Disabled the old v160 home leaderboard renderer and v176/v177/v178 home CSS layers.
+- Left a transparent #leaderboardTable placeholder positioned on the chalkboard for the future clean leaderboard overlay.
