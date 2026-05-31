@@ -510,6 +510,67 @@
   }
 </style>
 
+
+<style id="v181-home-fill-width-no-side-bars">
+  /* v181: fill the browser horizontally without cropping the generated image.
+     The page can scroll vertically because the source art is 4:3 and most screens are wider. */
+
+  body.v180-home-active {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body.v180-home-active main.shell {
+    display: block !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    place-items: unset !important;
+  }
+
+  #dashboard.home-immersive-reset {
+    display: block !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+  }
+
+  #dashboard .home-immersive-scene {
+    width: 100vw !important;
+    max-width: none !important;
+    min-width: 100vw !important;
+    height: auto !important;
+    aspect-ratio: 1448 / 1086 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #dashboard .home-immersive-image {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill !important;
+    object-position: center center !important;
+  }
+
+  @media (max-width: 820px) {
+    #dashboard .home-immersive-scene {
+      width: 100vw !important;
+      max-width: none !important;
+      aspect-ratio: 1448 / 1086 !important;
+    }
+
+    #dashboard .home-immersive-image {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
+      object-position: center center !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 

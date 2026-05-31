@@ -153,3 +153,10 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Added overlay navigation links back onto the image.
 - Kept #leaderboardTable on the chalkboard surface.
 - Styled existing live leaderboard output so explanatory panels/boxes are hidden and only transparent chalk-style standings text remains.
+
+
+## v181 home image full-width framing
+- Verified v180 was limiting the image width with width: min(100vw, calc(100vh * 1.333333)).
+- Changed the immersive home scene to width: 100vw with the source image ratio preserved.
+- Removed the left/right empty bars by allowing the page to become taller than the viewport instead of shrinking to fit height.
+- Kept the leaderboard and navigation overlays positioned proportionally over the image.
