@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 150" width="720" height="150">
+  <defs>
+    <filter id="chalk" x="-10%" y="-40%" width="120%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="17" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation="0.22"/>
+    </filter>
+    <style>
+      .word{font-family:'Comic Sans MS','Chalkboard SE','Segoe Print',cursive;font-size:74px;font-weight:800;letter-spacing:3px;fill:none;stroke:#f6f6e8;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;filter:url(#chalk)}
+      .dust{font-family:'Comic Sans MS','Chalkboard SE','Segoe Print',cursive;font-size:74px;font-weight:800;letter-spacing:3px;fill:#f6f6e8;opacity:.18;filter:url(#chalk)}
+      .line{fill:none;stroke:#f6f6e8;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.78;filter:url(#chalk)}
+      .thin{fill:none;stroke:#f6f6e8;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.62;filter:url(#chalk)}
+      .dot{fill:#f6f6e8;opacity:.48;filter:url(#chalk)}
+    </style>
+  </defs>
+  <g opacity=".95">
+    <text class="dust" x="360" y="85" text-anchor="middle">STANDINGS</text>
+    <text class="word" x="360" y="85" text-anchor="middle">STANDINGS</text>
+    <path class="line" d="M150 106 C235 123, 480 123, 570 106"/>
+    <path class="thin" d="M190 118 L275 101 M530 118 L445 101"/>
+    <path class="thin" d="M194 116 l-18 6 m50 -14 l-17 5 m280 -5 l17 5 m33 9 l-18 -6"/>
+    <ellipse class="thin" cx="360" cy="116" rx="35" ry="9"/>
+    <circle class="dot" cx="95" cy="59" r="5"/><circle class="dot" cx="625" cy="61" r="5"/>
+  </g>
+</svg>

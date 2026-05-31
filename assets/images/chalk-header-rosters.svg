@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 150" width="720" height="150">
+  <defs>
+    <filter id="chalk" x="-10%" y="-40%" width="120%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.052" numOctaves="3" seed="31" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation="0.23"/>
+    </filter>
+    <style>
+      .word{font-family:'Comic Sans MS','Chalkboard SE','Segoe Print',cursive;font-size:82px;font-weight:800;letter-spacing:5px;fill:none;stroke:#f7f7e9;stroke-width:3.7;stroke-linecap:round;stroke-linejoin:round;filter:url(#chalk)}
+      .dust{font-family:'Comic Sans MS','Chalkboard SE','Segoe Print',cursive;font-size:82px;font-weight:800;letter-spacing:5px;fill:#f7f7e9;opacity:.17;filter:url(#chalk)}
+      .line{fill:none;stroke:#f7f7e9;stroke-width:4.2;stroke-linecap:round;stroke-linejoin:round;opacity:.76;filter:url(#chalk)}
+      .thin{fill:none;stroke:#f7f7e9;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;opacity:.62;filter:url(#chalk)}
+      .dot{fill:#f7f7e9;opacity:.46;filter:url(#chalk)}
+    </style>
+  </defs>
+  <g opacity=".95">
+    <text class="dust" x="360" y="88" text-anchor="middle">ROSTERS</text>
+    <text class="word" x="360" y="88" text-anchor="middle">ROSTERS</text>
+    <path class="line" d="M178 111 C260 127, 460 127, 543 111"/>
+    <path class="thin" d="M222 119 L306 101 M498 119 L414 101"/>
+    <path class="thin" d="M226 118 l-17 6 m48 -14 l-16 5 m237 -5 l16 5 m31 9 l-17 -6"/>
+    <path class="thin" d="M112 74 q35 -23 70 0 q-35 23 -70 0Z"/>
+    <path class="thin" d="M539 74 q35 -23 70 0 q-35 23 -70 0Z"/>
+    <circle class="dot" cx="106" cy="42" r="4"/><circle class="dot" cx="617" cy="43" r="4"/>
+  </g>
+</svg>
