@@ -1,26 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 170" width="760" height="170">
   <defs>
-    <filter id="chalk" x="-12%" y="-45%" width="124%" height="190%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.071" numOctaves="4" seed="114" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
-      <feGaussianBlur stdDeviation="0.2"/>
+    <filter id="chalk" x="-14%" y="-55%" width="128%" height="210%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.057" numOctaves="5" seed="193" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.85" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation="0.16"/>
+    </filter>
+    <filter id="dust" x="-20%" y="-70%" width="140%" height="240%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="3" seed="42"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 .32"/></feComponentTransfer>
     </filter>
     <style><![CDATA[
-      .goth{font-family:Georgia,'Times New Roman',serif;font-size:86px;font-weight:900;letter-spacing:8px;fill:#f2f0df;opacity:.21;filter:url(#chalk)}
-      .edge{font-family:Georgia,'Times New Roman',serif;font-size:86px;font-weight:900;letter-spacing:8px;fill:none;stroke:#f8f4df;stroke-width:3.8;stroke-linejoin:round;stroke-linecap:round;filter:url(#chalk)}
-      .shade{font-family:Georgia,'Times New Roman',serif;font-size:86px;font-weight:900;letter-spacing:8px;fill:none;stroke:#171714;stroke-width:7;stroke-linejoin:round;opacity:.42}
-      .line{fill:none;stroke:#f4f1df;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;opacity:.76;filter:url(#chalk)}
-      .thin{fill:none;stroke:#f4f1df;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;opacity:.60;filter:url(#chalk)}
-      .dust{fill:#f4f1df;opacity:.34;filter:url(#chalk)}
+      .script{font-family:'Brush Script MT','Snell Roundhand','Segoe Script','Lucida Handwriting',cursive;font-size:96px;font-weight:400;letter-spacing:1px;fill:none;stroke:#f4f0dc;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;filter:url(#chalk);opacity:.88}
+      .soft{font-family:'Brush Script MT','Snell Roundhand','Segoe Script','Lucida Handwriting',cursive;font-size:96px;font-weight:400;letter-spacing:1px;fill:#f4f0dc;opacity:.12;filter:url(#chalk)}
+      .shadow{font-family:'Brush Script MT','Snell Roundhand','Segoe Script','Lucida Handwriting',cursive;font-size:96px;font-weight:400;letter-spacing:1px;fill:none;stroke:#11110f;stroke-width:4.8;stroke-linejoin:round;stroke-linecap:round;opacity:.38}
+      .line{fill:none;stroke:#f4f0dc;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;opacity:.65;filter:url(#chalk)}
+      .thin{fill:none;stroke:#f4f0dc;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;opacity:.48;filter:url(#chalk)}
+      .speck{fill:#f4f0dc;opacity:.28;filter:url(#dust)}
     ]]></style>
   </defs>
-  <g transform="translate(0 2)">
-    <path class="thin" d="M79 73 q43 -30 86 0 q-43 30 -86 0Z M595 73 q43 -30 86 0 q-43 30 -86 0Z"/>
-    <path class="line" d="M168 125 C260 151, 499 151, 592 125"/>
-    <path class="thin" d="M226 134 L294 101 M535 134 L467 101 M255 141 l-33 12 M505 141 l33 12"/>
-    <text class="shade" x="380" y="96" text-anchor="middle">ROSTERS</text>
-    <text class="goth" x="380" y="96" text-anchor="middle">ROSTERS</text>
-    <text class="edge" x="380" y="96" text-anchor="middle">ROSTERS</text>
-    <circle class="dust" cx="96" cy="36" r="4"/><circle class="dust" cx="663" cy="37" r="4"/><circle class="dust" cx="381" cy="139" r="3"/>
+  <g transform="translate(0 4)">
+    <path class="thin" d="M102 74 q36 -23 72 0 q-36 24 -72 0Z M586 74 q36 -23 72 0 q-36 24 -72 0Z"/>
+    <path class="line" d="M210 126 C292 146 468 146 550 126"/>
+    <path class="thin" d="M237 132 l-35 13 M523 132 l35 13"/>
+    <text class="shadow" x="380" y="98" text-anchor="middle">Rosters</text>
+    <text class="soft" x="380" y="98" text-anchor="middle">Rosters</text>
+    <text class="script" x="380" y="98" text-anchor="middle">Rosters</text>
+    <circle class="speck" cx="105" cy="38" r="3"/><circle class="speck" cx="657" cy="39" r="3"/><circle class="speck" cx="382" cy="139" r="2.2"/>
   </g>
 </svg>
