@@ -126,3 +126,12 @@ V160: Home page locked to the Locker Room TV standings theme. Home Page Editor t
 - Positioned the live leaderboard over the chalkboard area.
 - Restyled the live leaderboard with chalk-like text.
 - Hid the old TV/background chrome while preserving sorting and row expansion behavior.
+
+
+## v178 showcase chalkboard overlay
+- Verified v177 image asset and live v160 renderer first.
+- Forced the generated image into a full visible pseudo-background on the home card.
+- Positioned the live API standings over the chalkboard area.
+- Removed the dark TV/table blocks that were hiding the image.
+- Made all leaderboard text inherit the same chalk-style font family used by the scorebug/title.
+- Preserved live API rendering, sorting, refresh, and expandable roster rows.
