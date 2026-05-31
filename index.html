@@ -1296,6 +1296,76 @@
   }
 </style>
 
+
+<style id="v188-lift-kessel-and-bigger-mobile-chalk">
+  /* v188: lift the new chalk Kessel art off the lower-left corner and use more mobile chalkboard space. */
+  .v182-standings::after {
+    left: 1.5% !important;
+    right: 3.5% !important;
+    bottom: 8.5% !important;
+    height: 52% !important;
+    background-position: center center !important;
+    background-size: contain !important;
+    opacity: .88 !important;
+  }
+
+  @media (max-width: 820px) {
+    .v182-standings::after {
+      left: 0% !important;
+      right: 4% !important;
+      bottom: 10.5% !important;
+      height: 52% !important;
+      background-position: center center !important;
+    }
+
+    .v182-chalk-title {
+      font-size: clamp(7.4px, 1.85svh, 15px) !important;
+      margin-bottom: 4px !important;
+    }
+
+    .v182-standings-table {
+      width: 92.5% !important;
+      margin-left: 1.5% !important;
+    }
+
+    .v182-standings-table th {
+      font-size: clamp(4.8px, 1.12svh, 9.2px) !important;
+      padding: 1.5px .5px 2.5px !important;
+      line-height: 1.02 !important;
+    }
+
+    .v182-standings-table td {
+      font-size: clamp(5.2px, 1.34svh, 10.7px) !important;
+      padding: 2.6px .5px !important;
+      line-height: 1.06 !important;
+    }
+
+    .v182-owner-name {
+      font-size: clamp(5.1px, 1.20svh, 9.6px) !important;
+      margin-bottom: 1.5px !important;
+      line-height: 1.02 !important;
+    }
+
+    .v182-roster-head {
+      font-size: clamp(3.9px, .90svh, 7.0px) !important;
+      padding-bottom: 1.5px !important;
+      margin-bottom: 1.5px !important;
+      line-height: 1.02 !important;
+    }
+
+    .v182-player-row {
+      font-size: clamp(4.0px, .94svh, 7.5px) !important;
+      line-height: 1.05 !important;
+      gap: 1px !important;
+    }
+
+    .v182-goalie-break::before {
+      font-size: clamp(3.9px, .90svh, 7.1px) !important;
+      margin: 2px 0 1.5px !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
