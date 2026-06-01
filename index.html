@@ -9529,3 +9529,89 @@
   }, true);
 })();
 </script>
+
+<style id="v241-book-close-columns-not-smaller">
+/* v241: fix the book tables by tightening the columns, not by shrinking the writing. */
+.v228-history-book-modal .v219-page.right{
+  overflow:hidden!important;
+}
+.v228-history-book-modal .v219-page.right .v238-alltime-title,
+.v228-history-book-modal .v219-page.right .v237-season-title{
+  font-size:clamp(24px,2vw,34px)!important;
+  line-height:.96!important;
+  margin:0 0 .2em!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table{
+  display:inline-table!important;
+  width:auto!important;
+  max-width:100%!important;
+  table-layout:auto!important;
+  border-collapse:collapse!important;
+  margin:0!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td{
+  font-size:clamp(14px,1.05vw,18px)!important;
+  line-height:1!important;
+  padding:.08em .32em .08em 0!important;
+  letter-spacing:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  border-bottom:1px solid rgba(73,37,11,.24)!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(1),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(1){width:3ch!important;max-width:3ch!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(2),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(2){width:7ch!important;max-width:7ch!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(3),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(3){width:18ch!important;max-width:18ch!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(4),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(4){width:5.8ch!important;max-width:5.8ch!important;text-align:right!important;padding-right:.38em!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(5),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(5){width:3ch!important;max-width:3ch!important;text-align:right!important;padding-right:0!important;}
+.v237-season-ledger.v239-season-owner-ledger{
+  width:max-content!important;
+  max-width:100%!important;
+  margin:0!important;
+  border-top:2px solid rgba(73,37,11,.5)!important;
+  border-bottom:2px solid rgba(73,37,11,.5)!important;
+}
+.v239-season-owner-ledger .v237-season-head,
+.v239-season-owner-ledger .v237-season-row{
+  display:grid!important;
+  grid-template-columns:3.4ch 7ch 18ch 5.8ch!important;
+  column-gap:.34em!important;
+  width:max-content!important;
+  max-width:100%!important;
+  align-items:baseline!important;
+}
+.v239-season-owner-ledger .v237-season-head{
+  font-size:clamp(12px,.9vw,16px)!important;
+  line-height:1!important;
+  padding:.08em 0!important;
+}
+.v239-season-owner-ledger .v237-season-row{
+  font-size:clamp(16px,1.15vw,21px)!important;
+  line-height:1!important;
+  padding:.05em 0!important;
+}
+.v239-season-owner-ledger .v239-owner,
+.v239-season-owner-ledger .v237-team{
+  min-width:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.v239-season-owner-ledger .v237-fpts{
+  text-align:right!important;
+  padding-left:0!important;
+}
+@media(max-width:820px){
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table td{font-size:13px!important;padding:.12em .22em .12em 0!important;}
+  .v239-season-owner-ledger .v237-season-head,
+  .v239-season-owner-ledger .v237-season-row{grid-template-columns:3ch 6.2ch 16ch 5.2ch!important;column-gap:.22em!important;}
+  .v239-season-owner-ledger .v237-season-row{font-size:14px!important;}
+}
+</style>
