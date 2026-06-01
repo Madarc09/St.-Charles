@@ -6337,7 +6337,7 @@
             <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} roster room">
             <button type="button" class="v219-championships-hotspot" data-locker-back aria-label="Back to Trophy Room"></button>
             <nav class="v174-stall-nav v219-bottom-stall-nav" aria-label="Roster room navigation">
-              <button type="button" class="v174-stall-btn v220-stall-home-link" data-stall-home="dashboard">Home</button>${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
+              <button type="button" class="v174-stall-btn v220-stall-home-link" data-stall-home="dashboard">Home</button><button type="button" class="v174-stall-btn v225-stall-trophy-link" data-open-trophy-room> Trophy Room</button>${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
             </nav>
           </div>
         </section>`;
@@ -8419,6 +8419,63 @@
   window.openHockeyHistoryBook=openBook;
 })();
 </script>
+
+
+<style id="v225-trophy-room-link-state-fix-style">
+  /* v225: visible Trophy Room link on every roster/player room page. */
+  #rosters .v174-photo-only-stall .v225-stall-trophy-link {
+    border-color: rgba(255,214,132,.62) !important;
+    background: linear-gradient(180deg,rgba(82,54,18,.86),rgba(22,13,4,.78)) !important;
+    color: #fff2c7 !important;
+  }
+</style>
+<script id="v225-trophy-room-link-state-fix-script">
+(function(){
+  function activateRosterTab(){
+    var rosterTab = document.querySelector('button.tab[data-tab="rosters"], [data-tab="rosters"]');
+    var rosterPanel = document.getElementById('rosters');
+    if (rosterTab && rosterPanel) {
+      document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b === rosterTab); });
+      document.querySelectorAll('.panel').forEach(function(panel){ panel.classList.toggle('active', panel === rosterPanel); });
+      document.body.dataset.activeTab = 'rosters';
+      document.body.classList.add('v217-rosters-active','v218-rosters-active');
+    }
+    return rosterPanel;
+  }
+
+  function openTrophyLobby(){
+    var rosterPanel = activateRosterTab();
+    try {
+      if (typeof window.__renderExactTrophyLobby === 'function') {
+        window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+      } else if (typeof window.renderDraftRosters === 'function') {
+        window.renderDraftRosters(window.__exactLobbyDraft || {});
+      }
+    } catch(err) {
+      console.warn('Trophy Room lobby reset failed:', err);
+    }
+    setTimeout(function(){
+      try { if (typeof window.__renderExactTrophyLobby === 'function') window.__renderExactTrophyLobby(window.__exactLobbyDraft || {}); } catch(err) {}
+      if (rosterPanel) rosterPanel.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 60);
+  }
+
+  window.openTrophyRoomLobby = openTrophyLobby;
+
+  document.addEventListener('click', function(e){
+    var trophyLink = e.target.closest && e.target.closest('[data-open-trophy-room]');
+    var rosterTab = e.target.closest && e.target.closest('[data-tab="rosters"]');
+    var fromHomeTrophy = e.target.closest && e.target.closest('.home-image-hotspot-trophy[data-tab="rosters"]');
+    var isMainTrophyTab = rosterTab && !e.target.closest('[data-enter-door], [data-roster-owner], [data-walk-stall]');
+    if (!trophyLink && !fromHomeTrophy && !isMainTrophyTab) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    openTrophyLobby();
+  }, true);
+})();
+</script>
+
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
