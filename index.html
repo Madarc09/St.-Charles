@@ -7828,5 +7828,74 @@
 })();
 </script>
 
+
+<style id="v215-mobile-rosters-match-standings-position">
+  /* v215: mobile rosters were still pinned by the v203 inline enforcer at top:0.
+     Match the corrected mobile standings vertical position while leaving desktop untouched. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters {
+      top: 18.8% !important;
+      height: 81.2% !important;
+      padding-top: 0 !important;
+      overflow: hidden !important;
+    }
+  }
+</style>
+
+<script id="v215-mobile-rosters-match-standings-enforcer">
+(function(){
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 820px)').matches; }
+  function important(el, prop, value){ if(el && el.style) el.style.setProperty(prop, value, 'important'); }
+  function fix(){
+    if(!isMobile()) return;
+    var host = document.getElementById('leaderboardTable');
+    if(!host || !host.classList.contains('home-chalk-leaderboard-overlay')) return;
+
+    var rosters = host.querySelector('.v182-rosters');
+    var grid = host.querySelector('.v182-roster-grid');
+
+    /* v203's mobile enforcer writes top:0 inline to rosters. This later enforcer is the actual matching lever. */
+    important(rosters, 'position', 'absolute');
+    important(rosters, 'top', '18.8%');
+    important(rosters, 'height', '81.2%');
+    important(rosters, 'padding-top', '0');
+    important(rosters, 'padding-right', '.25%');
+    important(rosters, 'padding-bottom', '0');
+    important(rosters, 'padding-left', '.75%');
+    important(rosters, 'overflow', 'hidden');
+
+    important(grid, 'height', '100%');
+    important(grid, 'max-height', '100%');
+  }
+
+  window.__v215FixMobileRostersMatchStandings = fix;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    fix();
+    setTimeout(fix, 80);
+    setTimeout(fix, 300);
+    setTimeout(fix, 900);
+    setTimeout(fix, 1800);
+    setTimeout(fix, 3600);
+    setTimeout(fix, 6500);
+  });
+  window.addEventListener('load', function(){
+    fix();
+    setTimeout(fix, 250);
+    setTimeout(fix, 1000);
+    setTimeout(fix, 2500);
+    setTimeout(fix, 5200);
+  });
+  window.addEventListener('resize', fix, {passive:true});
+
+  var observerReady = function(){
+    var host = document.getElementById('leaderboardTable');
+    if(host) new MutationObserver(fix).observe(host, {childList:true, subtree:true, attributes:true});
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observerReady);
+  else observerReady();
+})();
+</script>
+
 </body>
 </html>
