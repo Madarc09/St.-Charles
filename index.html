@@ -8569,9 +8569,29 @@
     const row = s.standings.find(r=>r.ownerId===ownerId);
     return row ? ('#'+row.rank+' / '+fmt(row.pts)+' pts') : '—';
   }
+  function v242LedgerHtml(columns, rows, className){
+    return '<div class="v242-book-ledger '+esc(className||'')+'" role="table">' +
+      '<div class="v242-book-ledger-head" role="row">' + columns.map(c=>'<span class="v242-col-'+esc(c.key||c.label||'col')+'">'+(c.sort?sortButton(c.sort,c.label):esc(c.label))+'</span>').join('') + '</div>' +
+      rows.map(row=>'<div class="v242-book-ledger-row" role="row">'+columns.map(c=>'<span class="v242-col-'+esc(c.key||c.label||'col')+' '+esc(c.align==='right'?'v242-num':'')+'">'+row[c.key]+'</span>').join('')+'</div>').join('') +
+      '</div>';
+  }
   function totalHtml(){
     const rows = sortRows(aggregateRows(), 'total', 'total');
-    return '<h2 class="v238-alltime-title">All-Time Stats</h2>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'YRS'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>')).replace('v228-book-table','v228-book-table v238-alltime-table');
+    const columns = [
+      {key:'rank', label:'#'},
+      {key:'owner', label:'Owner', sort:'owner'},
+      {key:'team', label:'Team', sort:'team'},
+      {key:'total', label:'FPTS', sort:'total', align:'right'},
+      {key:'seasons', label:'YRS', sort:'seasons', align:'right'}
+    ];
+    const ledgerRows = rows.map((r,i)=>({
+      rank:String(i+1),
+      owner:esc(r.owner),
+      team:esc(r.team),
+      total:fmt(r.total),
+      seasons:String(r.seasons)
+    }));
+    return '<h2 class="v242-book-title">All-Time Stats</h2>'+v242LedgerHtml(columns, ledgerRows, 'v242-alltime-ledger');
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
@@ -8579,10 +8599,19 @@
       ...r,
       owner:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId
     })), s.id, 'pts');
-    return '<h2 class="v237-season-title">'+esc(s.label)+'</h2><div class="v237-season-ledger v239-season-owner-ledger" role="table" aria-label="'+esc(s.label)+' standings">'+
-      '<div class="v237-season-head" role="row"><span>Rank</span><span>'+sortButton('owner','Owner')+'</span><span>'+sortButton('team','Team')+'</span><span>'+sortButton('pts','FPTS')+'</span></div>'+
-      rows.map((r,i)=>'<div class="v237-season-row" role="row"><span class="v237-rank">'+(i+1)+'</span><span class="v239-owner">'+esc(r.owner)+'</span><span class="v237-team">'+esc(r.team)+'</span><span class="v237-fpts">'+fmt(r.pts)+'</span></div>').join('')+
-      '</div>';
+    const columns = [
+      {key:'rank', label:'#'},
+      {key:'owner', label:'Owner', sort:'owner'},
+      {key:'team', label:'Team', sort:'team'},
+      {key:'pts', label:'FPTS', sort:'pts', align:'right'}
+    ];
+    const ledgerRows = rows.map((r,i)=>({
+      rank:String(i+1),
+      owner:esc(r.owner),
+      team:esc(r.team),
+      pts:fmt(r.pts)
+    }));
+    return '<h2 class="v242-book-title">'+esc(seasonYearLabel(s))+'</h2>'+v242LedgerHtml(columns, ledgerRows, 'v242-season-ledger');
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
   function draw(){
@@ -9201,6 +9230,93 @@
 .v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(5){width:12%!important;text-align:right!important;}
 </style>
 
+
+
+<style id="v242-book-ledger-rebuild-from-scratch">
+/* v242: One rebuilt ledger system for the book. No table stretching, no shrink hack. */
+.v228-history-book-modal .v219-page.right{
+  overflow:hidden!important;
+  display:block!important;
+  padding:clamp(12px,1.2vw,18px)!important;
+}
+.v228-history-book-modal .v219-page.right .v242-book-title{
+  font-family:"Segoe Print","Bradley Hand","Comic Sans MS",cursive!important;
+  font-size:clamp(24px,2.05vw,36px)!important;
+  line-height:.95!important;
+  margin:0 0 .28em!important;
+  color:#2b1708!important;
+  text-shadow:0 1px 0 rgba(255,246,206,.45)!important;
+}
+.v242-book-ledger{
+  display:block!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border-top:2px solid rgba(69,35,10,.52)!important;
+  border-bottom:2px solid rgba(69,35,10,.52)!important;
+  font-family:"Segoe Print","Bradley Hand","Comic Sans MS",cursive!important;
+  color:#2b1708!important;
+}
+.v242-book-ledger-head,
+.v242-book-ledger-row{
+  display:grid!important;
+  align-items:baseline!important;
+  width:max-content!important;
+  max-width:100%!important;
+  column-gap:.28em!important;
+  box-sizing:border-box!important;
+}
+.v242-alltime-ledger .v242-book-ledger-head,
+.v242-alltime-ledger .v242-book-ledger-row{
+  grid-template-columns:2.2ch 5.4ch 17ch 5.3ch 2.7ch!important;
+}
+.v242-season-ledger .v242-book-ledger-head,
+.v242-season-ledger .v242-book-ledger-row{
+  grid-template-columns:2.2ch 5.4ch 17ch 5.3ch!important;
+}
+.v242-book-ledger-head{
+  font-size:clamp(12px,.9vw,16px)!important;
+  line-height:.98!important;
+  padding:.08em 0 .12em!important;
+  font-weight:900!important;
+  border-bottom:1px solid rgba(69,35,10,.36)!important;
+}
+.v242-book-ledger-row{
+  font-size:clamp(16px,1.13vw,21px)!important;
+  line-height:.98!important;
+  padding:.04em 0!important;
+  border-bottom:1px solid rgba(69,35,10,.18)!important;
+  font-weight:700!important;
+}
+.v242-book-ledger-row:last-child{border-bottom:0!important;}
+.v242-book-ledger span{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.v242-book-ledger .v242-num{
+  text-align:right!important;
+  font-weight:900!important;
+}
+.v242-book-ledger button{
+  all:unset!important;
+  cursor:pointer!important;
+  text-decoration:underline!important;
+  text-underline-offset:2px!important;
+}
+.v242-book-ledger .v242-col-rank{text-align:left!important;font-weight:900!important;}
+@media(max-width:820px){
+  .v228-history-book-modal .v219-page.right .v242-book-title{font-size:24px!important;}
+  .v242-alltime-ledger .v242-book-ledger-head,
+  .v242-alltime-ledger .v242-book-ledger-row{grid-template-columns:2ch 4.8ch 13ch 4.8ch 2.3ch!important;column-gap:.18em!important;}
+  .v242-season-ledger .v242-book-ledger-head,
+  .v242-season-ledger .v242-book-ledger-row{grid-template-columns:2ch 4.8ch 13ch 4.8ch!important;column-gap:.18em!important;}
+  .v242-book-ledger-row{font-size:14px!important;}
+  .v242-book-ledger-head{font-size:11px!important;}
+}
+</style>
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
