@@ -250,7 +250,7 @@ Fix: v218 adds a later, active-tab scoped override so #rosters uses the same out
 
 ### README-v220.txt
 
-v220 fixes: Trophy Room mobile horizontal pan restored to match Home behavior; roster-room Championships shelf enlarged/clickable back to Trophy Room; Home added to bottom roster-room nav; Previous Season tab now includes static 2024-2025 and 2023-2024 archive data from supplied screenshots.
+v220 fixes: Trophy Room mobile horizontal pan restored to match Home behavior; roster-room Championships shelf enlarged/clickable back to Trophy Room; Home added to bottom roster-room nav; Previous Season tab now includes static 2024-2025 and 2023-2024 archive data from supplied history sources.
 
 
 ### README-v222.txt
@@ -300,3 +300,16 @@ v225 changes:
 - Added a visible Trophy Room button to every owner roster/player room bottom navigation.
 - Fixed the Home page Trophy Room link and main Trophy Room tab so they always reset to the Trophy Room lobby instead of reopening the last owner roster room.
 - Left existing owner-room door links, Home links, roster images, and previous-season archive content unchanged.
+
+
+## Ricoh/Friends History Book Data
+
+The previous-season history for the book is now saved in `assets/data/pool-history.json`. This file is the clean source of truth for the history book instead of relying on history source text. To add a completed future season, copy one existing season object, update the `id`, `label`, `championOwnerId`, and `standings` rows, then redeploy/save the site.
+
+Each standings row uses:
+
+- `rank`
+- `ownerId`
+- `team`
+- `pts`
+- optional `skaters`, `goalies`, `skatersTotal`, `goaliesTotal` for deeper archive details

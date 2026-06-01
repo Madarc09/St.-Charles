@@ -9,27 +9,112 @@
     scott:{owner:'Scott', team:'Scott'}
   };
   const STATIC_SEASONS = [
-    { id:'20252026', label:'2025-2026 Regular Season', note:'Saved 2025-2026 roster/stat record used by the Previous Season page.', standings:[
-      {rank:1, ownerId:'andrew', team:'Between The Pipes', pts:1376},
-      {rank:2, ownerId:'chris', team:'CeCe Hairless Horde', pts:1357},
-      {rank:3, ownerId:'scott', team:'Scott', pts:1346},
-      {rank:4, ownerId:'nick', team:'Glizzy Disposal', pts:1258},
-      {rank:5, ownerId:'tyler', team:'Puck Slut', pts:1202}
-    ]},
-    { id:'20242025', label:'2024-2025 Ricoh Abandon Pool', note:'Saved OnlinePools screenshot transcription.', standings:[
-      {rank:1, ownerId:'chris', team:'CeCe Hairless Horde', pts:1380},
-      {rank:2, ownerId:'nick', team:'Glizzy Disposal', pts:1301},
-      {rank:3, ownerId:'andrew', team:'Between The Pipes', pts:1172},
-      {rank:4, ownerId:'tyler', team:'Puck Slut', pts:1163}
-    ]},
-    { id:'20232024', label:'2023-2024 Legend Of Ricoh', note:'Saved OnlinePools screenshot transcription.', standings:[
-      {rank:1, ownerId:'chris', team:'CeCe Hairless Horde', pts:1515},
-      {rank:2, ownerId:'nick', team:'Glizzy Disposal', pts:1418},
-      {rank:3, ownerId:'andrew', team:'Between The Pipes', pts:1265},
-      {rank:4, ownerId:'tyler', team:'Puck Slut', pts:1249},
-      {rank:5, ownerId:'ricoh', team:'Senile Cely', pts:1143}
-    ]}
-  ];
+    {
+        "id": "20252026",
+        "label": "2025-2026 Regular Season",
+        "note": "Saved history file.",
+        "standings": [
+            {
+                "rank": 1,
+                "ownerId": "andrew",
+                "team": "Between The Pipes",
+                "pts": 1376
+            },
+            {
+                "rank": 2,
+                "ownerId": "chris",
+                "team": "CeCe Hairless Horde",
+                "pts": 1357
+            },
+            {
+                "rank": 3,
+                "ownerId": "scott",
+                "team": "Scott",
+                "pts": 1346
+            },
+            {
+                "rank": 4,
+                "ownerId": "nick",
+                "team": "Glizzy Disposal",
+                "pts": 1258
+            },
+            {
+                "rank": 5,
+                "ownerId": "tyler",
+                "team": "Puck Slut",
+                "pts": 1202
+            }
+        ]
+    },
+    {
+        "id": "20242025",
+        "label": "2024-2025 Ricoh Abandon Pool",
+        "note": "Saved history file.",
+        "standings": [
+            {
+                "rank": 1,
+                "ownerId": "chris",
+                "team": "CeCe Hairless Horde",
+                "pts": 1380
+            },
+            {
+                "rank": 2,
+                "ownerId": "nick",
+                "team": "Glizzy Disposal",
+                "pts": 1301
+            },
+            {
+                "rank": 3,
+                "ownerId": "andrew",
+                "team": "Between The Pipes",
+                "pts": 1172
+            },
+            {
+                "rank": 4,
+                "ownerId": "tyler",
+                "team": "Puck Slut",
+                "pts": 1163
+            }
+        ]
+    },
+    {
+        "id": "20232024",
+        "label": "2023-2024 Legend Of Ricoh",
+        "note": "Saved history file.",
+        "standings": [
+            {
+                "rank": 1,
+                "ownerId": "chris",
+                "team": "CeCe Hairless Horde",
+                "pts": 1515
+            },
+            {
+                "rank": 2,
+                "ownerId": "nick",
+                "team": "Glizzy Disposal",
+                "pts": 1418
+            },
+            {
+                "rank": 3,
+                "ownerId": "andrew",
+                "team": "Between The Pipes",
+                "pts": 1265
+            },
+            {
+                "rank": 4,
+                "ownerId": "tyler",
+                "team": "Puck Slut",
+                "pts": 1249
+            },
+            {
+                "rank": 5,
+                "ownerId": "ricoh",
+                "team": "Senile Cely",
+                "pts": 1143
+            }
+        ]
+    }
+];
   const OWNER_ORDER = ['chris','nick','andrew','tyler','scott','ricoh'];
   let activeView = 'total';
   let modal = null;
@@ -101,10 +186,9 @@
       goalieAssists:r.hasFullStats?Number(r.goalieAssists)||0:null, goalieGoals:r.hasFullStats?Number(r.goalieGoals)||0:null
     })), s.id, 'pts');
     const full = rows.some(r=>r.hasFullStats);
-    return '<h2>'+esc(s.label)+'</h2><p>'+esc(s.note)+'</p>'+table([
-      {label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'pts',label:'FPTS'},{key:'goals',label:'G'},{key:'assists',label:'A'},
-      {key:'shortHandedGoals',label:'SHG'},{key:'gameWinningGoals',label:'GWG'},{key:'goalieWins',label:'W'},{key:'goalieShutouts',label:'SO'},{key:'goalieAssists',label:'GA'},{key:'goalieGoals',label:'GG'}
-    ], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td><td>'+statCell(r.goals)+'</td><td>'+statCell(r.assists)+'</td><td>'+statCell(r.shortHandedGoals)+'</td><td>'+statCell(r.gameWinningGoals)+'</td><td>'+statCell(r.goalieWins)+'</td><td>'+statCell(r.goalieShutouts)+'</td><td>'+statCell(r.goalieAssists)+'</td><td>'+statCell(r.goalieGoals)+'</td></tr>')) + (full ? '<p class="v232-stat-note">Tap a stat header to sort this book page.</p>' : '<p class="v232-stat-note">Older OnlinePools screenshots only included fantasy points, so unavailable stat columns show as dashes.</p>');
+    return '<h2>'+esc(s.label)+'</h2>'+table([
+      {label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'pts',label:'Fantasy Pts'}
+    ], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td></tr>'));
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
   function draw(){
