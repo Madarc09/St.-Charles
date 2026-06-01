@@ -8443,16 +8443,20 @@
     return '<table class="v219-history-table v228-book-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
   }
   function collectorHtml(){
-    const rows = aggregateRows();
-    return '<h2>Collector</h2><p>This left page stays as the book index. Pick what the right page displays.</p>'+ 
-      '<div class="v228-book-nav"><button type="button" data-v228-view="total">Total Points Board</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>'+ 
-      '<h3>All-Time Total Points</h3>'+table(['Owner','Total','Seasons'], rows.map((r,i)=>'<tr><td><b>'+(i+1)+'. '+esc(r.owner)+'</b><small>'+esc(r.team)+'</small></td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'))+
-      '<p class="v228-book-note">Six owners total: Nick, Andrew, Tyler, Chris, Ricoh, and Scott. Nick/Andrew/Tyler/Chris have three seasons; Ricoh and Scott each have one saved season.</p>';
+    return '<h2>Collector</h2><p>This left page is only the book index. Pick what the right page displays.</p>'+ 
+      '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>'+ 
+      '<p class="v228-book-note">Left page = collector/index. Right page = the selected board only. Six owners total: Nick, Andrew, Tyler, Chris, Ricoh, and Scott.</p>';
+  }
+  function rankText(seasonId, ownerId){
+    const s = allSeasons().find(x=>x.id===seasonId);
+    if(!s) return '—';
+    const row = s.standings.find(r=>r.ownerId===ownerId);
+    return row ? ('#'+row.rank+' / '+fmt(row.pts)+' pts') : '—';
   }
   function totalHtml(){
     const rows = aggregateRows();
-    return '<h2>Total Points Board</h2><p>All saved seasons added together by owner.</p>'+table(['Rank','Owner','Team','Total Pts','Seasons'], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'))+
-      '<h3>Season Columns</h3>'+table(['Owner','2025-26','2024-25','2023-24'], rows.map(r=>'<tr><td>'+esc(r.owner)+'</td><td>'+fmt(r.bySeason['20252026']||0)+'</td><td>'+fmt(r.bySeason['20242025']||0)+'</td><td>'+fmt(r.bySeason['20232024']||0)+'</td></tr>'));
+    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. The season columns show each owner’s rank and points for that year, so one-season owners stay obvious.</p>'+table(['Rank','Owner','Team','Total Pts','Seasons Played'], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'))+
+      '<h3>Ranking By Season</h3>'+table(['Owner','2025-26','2024-25','2023-24'], rows.map(r=>'<tr><td>'+esc(r.owner)+'</td><td>'+rankText('20252026',r.ownerId)+'</td><td>'+rankText('20242025',r.ownerId)+'</td><td>'+rankText('20232024',r.ownerId)+'</td></tr>'));
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
