@@ -2218,6 +2218,32 @@
 
 </style>
 
+
+
+<style id="v208-baked-board-no-dom-headers-no-site-photo">
+  /* v208: the new baked background already contains the metal Standings/Rosters headers.
+     Hide/remove the old DOM chalk header text/graphics and remove the old header photo from the rest of the site. */
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title,
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title::before,
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+  }
+
+  /* Remove the old cinematic header image from every non-home page.
+     Home already uses the full baked background image instead. */
+  header.hero-retro,
+  .hero-picture-wrap,
+  .hero-picture {
+    display: none !important;
+  }
+
+  body:not(.v180-home-active) main.shell {
+    margin-top: 14px !important;
+  }
+</style>
+
 </head>
 <body>
 
@@ -6752,7 +6778,6 @@
   function renderStandings(rows){
     return `
       <section class="v182-standings">
-        <h2 class="v182-chalk-title">Standings</h2>
         <table class="v182-standings-table" aria-label="Pool standings">
           <thead>
             <tr><th>Team</th><th>FPTS</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th></tr>
@@ -6797,7 +6822,6 @@
 
     return `
       <section class="v182-rosters">
-        <h2 class="v182-chalk-title v182-roster-title">Rosters</h2>
         <div class="v182-roster-grid">
           ${ordered.slice(0,5).map(renderRosterCard).join("")}
         </div>
@@ -7612,5 +7636,39 @@
   });
 })();
 </script>
+<style id="v208-final-override-no-dom-headers-no-site-photo">
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title,
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title::before,
+  #leaderboardTable.home-chalk-leaderboard-overlay .v182-chalk-title::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  header.hero-retro,
+  header.hero-retro .hero-picture-wrap,
+  header.hero-retro .hero-picture {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.v180-home-active) main.shell {
+    margin-top: 14px !important;
+  }
+</style>
+
 </body>
 </html>

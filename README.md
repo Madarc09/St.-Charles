@@ -202,3 +202,9 @@ v203 mobile rebuild:
 - Desktop is preserved.
 - Mobile left zone: standings plus Kessel chalk art.
 - Mobile right zone: 3-over-2 vertical rosters with tighter, readable chalk text and balanced spacing.
+
+
+## v208 update
+- Removed the old DOM/chalk-written Standings and Rosters headers from the home overlay because the new baked background already contains metal headers.
+- Hid the old cinematic header photo from the rest of the site pages.
+- Preserved the v207 baked background, draft/trophy hotspots, and jersey-to-roster-room hotspots.
