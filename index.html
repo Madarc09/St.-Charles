@@ -8572,11 +8572,13 @@
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
     const rows = sortRows(s.standings.map(r=>({
-      ...r, owner:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId
+      ...r,
+      owner:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId
     })), s.id, 'pts');
-    return '<h2>'+esc(s.label)+'</h2>'+table([
-      {label:'Rank'},{key:'team',label:'Team'},{key:'pts',label:'FPTS'}
-    ], rows.map((r,i)=>'<tr class="v235-season-row"><td>'+(i+1)+'</td><td class="v235-team-cell"><strong>'+esc(r.team)+'</strong><em>'+esc(r.owner)+'</em></td><td class="v235-fpts-cell">'+fmt(r.pts)+'</td></tr>'));
+    return '<h2 class="v237-season-title">'+esc(s.label)+'</h2><div class="v237-season-ledger" role="table" aria-label="'+esc(s.label)+' standings">'+
+      '<div class="v237-season-head" role="row"><span>Rank</span><span>'+sortButton('team','Team')+'</span><span>'+sortButton('pts','FPTS')+'</span></div>'+
+      rows.map((r,i)=>'<div class="v237-season-row" role="row"><span class="v237-rank">'+(i+1)+'</span><span class="v237-team">'+esc(r.team)+'</span><span class="v237-fpts">'+fmt(r.pts)+'</span></div>').join('')+
+      '</div>';
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
   function draw(){
@@ -8931,38 +8933,123 @@
 @media(max-width:820px){.v228-history-book-modal .v219-history-shell{width:99vw!important;max-height:92svh!important;aspect-ratio:auto!important}.v228-history-book-modal .v219-book-spread{grid-template-columns:1fr!important;max-height:88svh!important;overflow:auto!important}.v228-history-book-modal .v219-page{min-height:38svh!important}.v228-book-table th,.v228-book-table td{font-size:15px!important;padding:5px 4px!important}.v228-history-book-modal .v219-page h2{font-size:28px!important}}
 </style>
 
-<style id="v235-book-standings-tight-columns">
-/* v235: stop wasting horizontal space in the book standings. Team and FPTS now sit close together and fit inside the page. */
-.v228-history-book-modal .v219-history-shell{width:min(1500px,99vw)!important;max-height:92vh!important;aspect-ratio:1.9/1!important;}
-.v228-history-book-modal .v219-page{padding:clamp(12px,1.05vw,20px)!important;}
-.v228-history-book-modal .v219-page.right{overflow:hidden!important;}
-.v228-history-book-modal .v219-page h2{font-size:clamp(28px,2.2vw,42px)!important;line-height:.98!important;margin:0 0 .28em!important;}
-.v228-history-book-modal .v219-page p{font-size:clamp(12px,.86vw,16px)!important;line-height:1.08!important;margin:.15em 0 .38em!important;}
-.v228-book-table{width:auto!important;max-width:100%!important;table-layout:auto!important;border-collapse:collapse!important;margin:.1em 0 0!important;}
-.v228-book-table th,.v228-book-table td{font-size:clamp(17px,1.18vw,23px)!important;line-height:1!important;padding:.16em .24em!important;white-space:nowrap!important;overflow:visible!important;overflow-wrap:normal!important;}
-.v228-book-table th{font-size:clamp(14px,.95vw,18px)!important;padding-bottom:.22em!important;}
-.v228-book-table th button{all:unset!important;cursor:pointer!important;text-decoration:underline!important;text-underline-offset:2px!important;}
-.v228-book-table th:nth-child(1),.v228-book-table td:nth-child(1){width:3.4em!important;min-width:3.4em!important;text-align:left!important;}
-.v228-book-table th:nth-child(2),.v228-book-table td:nth-child(2){width:auto!important;max-width:none!important;text-align:left!important;padding-right:.55em!important;}
-.v228-book-table th:nth-child(3),.v228-book-table td:nth-child(3){width:4.8em!important;min-width:4.8em!important;text-align:right!important;padding-left:.15em!important;}
-.v228-book-table th:nth-child(n+4),.v228-book-table td:nth-child(n+4){width:4.6em!important;text-align:right!important;}
-.v235-team-cell strong{display:inline!important;font:inherit!important;font-weight:900!important;}
-.v235-team-cell em{display:inline!important;margin-left:.38em!important;font-size:.78em!important;opacity:.78!important;font-style:normal!important;}
-.v235-fpts-cell{font-weight:900!important;}
-/* All-time page has 5 columns, so keep it compact without crushing Seasons Played off-screen. */
-.v228-book-table:has(th:nth-child(5)) { width:100%!important; table-layout:fixed!important; }
-.v228-book-table:has(th:nth-child(5)) th,.v228-book-table:has(th:nth-child(5)) td{font-size:clamp(14px,.98vw,19px)!important;padding:.18em .22em!important;}
-.v228-book-table:has(th:nth-child(5)) th:nth-child(1),.v228-book-table:has(th:nth-child(5)) td:nth-child(1){width:10%!important;}
-.v228-book-table:has(th:nth-child(5)) th:nth-child(2),.v228-book-table:has(th:nth-child(5)) td:nth-child(2){width:22%!important;}
-.v228-book-table:has(th:nth-child(5)) th:nth-child(3),.v228-book-table:has(th:nth-child(5)) td:nth-child(3){width:36%!important;}
-.v228-book-table:has(th:nth-child(5)) th:nth-child(4),.v228-book-table:has(th:nth-child(5)) td:nth-child(4){width:18%!important;text-align:right!important;}
-.v228-book-table:has(th:nth-child(5)) th:nth-child(5),.v228-book-table:has(th:nth-child(5)) td:nth-child(5){width:14%!important;text-align:right!important;}
+<style id="v236-book-season-compact-same-as-alltime">
+/* v236: season standings use one compact table row layout so they fit like All-Time Stats. */
+.v228-history-book-modal .v219-page.right .v236-season-compact-wrap{
+  width:100%!important;
+  max-width:100%!important;
+  overflow:visible!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact{
+  width:100%!important;
+  max-width:100%!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+  margin-top:clamp(4px,.45vw,8px)!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th,
+.v228-history-book-modal .v219-page.right table.v236-season-compact td{
+  padding:clamp(2px,.22vw,4px) clamp(3px,.26vw,5px)!important;
+  line-height:.92!important;
+  font-size:clamp(15px,1.05vw,20px)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  border-bottom:1px solid rgba(75,38,12,.22)!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th{
+  font-size:clamp(12px,.82vw,16px)!important;
+  line-height:.9!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th:nth-child(1),
+.v228-history-book-modal .v219-page.right table.v236-season-compact td:nth-child(1){
+  width:12%!important;
+  text-align:left!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th:nth-child(2),
+.v228-history-book-modal .v219-page.right table.v236-season-compact td:nth-child(2){
+  width:58%!important;
+  text-align:left!important;
+  padding-right:4px!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th:nth-child(3),
+.v228-history-book-modal .v219-page.right table.v236-season-compact td:nth-child(3){
+  width:30%!important;
+  text-align:right!important;
+  padding-left:2px!important;
+}
+.v228-history-book-modal .v219-page.right table.v236-season-compact th button{
+  all:unset!important;
+  cursor:pointer!important;
+  text-decoration:underline!important;
+  text-underline-offset:2px!important;
+}
+.v228-history-book-modal .v219-page.right h2{
+  margin-bottom:clamp(4px,.45vw,8px)!important;
+}
 @media(max-width:820px){
-  .v228-history-book-modal .v219-history-shell{width:99vw!important;max-height:92svh!important;aspect-ratio:auto!important;}
-  .v228-history-book-modal .v219-book-spread{grid-template-columns:1fr!important;max-height:88svh!important;overflow:auto!important;}
-  .v228-history-book-modal .v219-page.right{overflow:auto!important;}
-  .v228-book-table th,.v228-book-table td{font-size:15px!important;padding:4px 4px!important;}
-  .v235-team-cell em{display:none!important;}
+  .v228-history-book-modal .v219-page.right table.v236-season-compact th,
+  .v228-history-book-modal .v219-page.right table.v236-season-compact td{font-size:14px!important;padding:3px 3px!important;}
+}
+</style>
+
+<style id="v237-book-season-ledger-fit">
+/* v237: use a single tight ledger line for season pages so the standings fit inside the book. */
+.v228-history-book-modal .v219-page.right{overflow:hidden!important;}
+.v228-history-book-modal .v219-page.right .v237-season-title{
+  font-size:clamp(24px,1.7vw,34px)!important;
+  line-height:.95!important;
+  margin:0 0 .18em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.v237-season-ledger{
+  width:min(100%, 560px)!important;
+  margin:.05em auto 0!important;
+  padding:0!important;
+  display:block!important;
+  border-top:2px solid rgba(73,37,11,.5)!important;
+  border-bottom:2px solid rgba(73,37,11,.5)!important;
+}
+.v237-season-head,
+.v237-season-row{
+  display:grid!important;
+  grid-template-columns:3.8ch minmax(14ch,auto) max-content!important;
+  align-items:baseline!important;
+  column-gap:.38em!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.v237-season-head{
+  padding:.06em .1em .1em!important;
+  border-bottom:1px solid rgba(73,37,11,.45)!important;
+  font-size:clamp(13px,.9vw,17px)!important;
+  line-height:.95!important;
+}
+.v237-season-row{
+  padding:.02em .1em!important;
+  border-bottom:1px solid rgba(73,37,11,.22)!important;
+  font-size:clamp(18px,1.22vw,24px)!important;
+  line-height:.96!important;
+  min-height:0!important;
+}
+.v237-season-row:last-child{border-bottom:0!important;}
+.v237-rank{font-weight:900!important;text-align:left!important;}
+.v237-team{
+  min-width:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  padding-right:0!important;
+}
+.v237-fpts{font-weight:900!important;text-align:right!important;white-space:nowrap!important;}
+.v237-season-head button{all:unset!important;cursor:pointer!important;text-decoration:underline!important;text-underline-offset:2px!important;}
+@media(max-width:820px){
+  .v237-season-ledger{width:100%!important;}
+  .v228-history-book-modal .v219-page.right .v237-season-title{font-size:24px!important;}
+  .v237-season-row{font-size:16px!important;}
+  .v237-season-head,.v237-season-row{grid-template-columns:3.4ch minmax(10ch,1fr) max-content!important;column-gap:.28em!important;}
 }
 </style>
 

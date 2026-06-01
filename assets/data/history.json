@@ -1,0 +1,735 @@
+{
+  "schemaVersion": 1,
+  "poolId": "ricoh-history-book",
+  "description": "Canonical previous-season history file for the Ricoh/friends hockey pool book. Add future completed seasons here instead of relying on screenshots.",
+  "owners": {
+    "nick": {
+      "owner": "Nick",
+      "currentTeam": "Glizzy Disposal"
+    },
+    "andrew": {
+      "owner": "Andrew",
+      "currentTeam": "Between The Pipes"
+    },
+    "tyler": {
+      "owner": "Tyler",
+      "currentTeam": "Puck Slut"
+    },
+    "chris": {
+      "owner": "Chris",
+      "currentTeam": "CeCe Hairless Horde"
+    },
+    "ricoh": {
+      "owner": "Ricoh",
+      "currentTeam": "Senile Cely"
+    },
+    "scott": {
+      "owner": "Scott",
+      "currentTeam": "Scott"
+    }
+  },
+  "seasons": [
+    {
+      "id": "20252026",
+      "label": "2025-2026 Regular Season",
+      "source": "saved-history-file",
+      "championOwnerId": "andrew",
+      "standings": [
+        {
+          "rank": 1,
+          "ownerId": "andrew",
+          "team": "Between The Pipes",
+          "pts": 1376
+        },
+        {
+          "rank": 2,
+          "ownerId": "chris",
+          "team": "CeCe Hairless Horde",
+          "pts": 1357
+        },
+        {
+          "rank": 3,
+          "ownerId": "scott",
+          "team": "Scott",
+          "pts": 1346
+        },
+        {
+          "rank": 4,
+          "ownerId": "nick",
+          "team": "Glizzy Disposal",
+          "pts": 1258
+        },
+        {
+          "rank": 5,
+          "ownerId": "tyler",
+          "team": "Puck Slut",
+          "pts": 1202
+        }
+      ]
+    },
+    {
+      "id": "20242025",
+      "label": "2024-2025 Ricoh Abandon Pool",
+      "source": "saved-history-file",
+      "championOwnerId": "chris",
+      "standings": [
+        {
+          "rank": 1,
+          "ownerId": "chris",
+          "team": "CeCe Hairless Horde",
+          "pts": 1380,
+          "skatersTotal": 1250,
+          "goaliesTotal": 130,
+          "skaters": [
+            {
+              "name": "MacKinnon, N",
+              "nhlTeam": "COL",
+              "pts": 173
+            },
+            {
+              "name": "Draisaitl, L",
+              "nhlTeam": "EDM",
+              "pts": 213
+            },
+            {
+              "name": "Kaprizov, K",
+              "nhlTeam": "MIN",
+              "pts": 106
+            },
+            {
+              "name": "Crosby, S",
+              "nhlTeam": "PIT",
+              "pts": 174
+            },
+            {
+              "name": "Nylander, W",
+              "nhlTeam": "TOR",
+              "pts": 169
+            },
+            {
+              "name": "Tkachuk, M",
+              "nhlTeam": "FLA",
+              "pts": 89
+            },
+            {
+              "name": "Fox, A",
+              "nhlTeam": "NYR",
+              "pts": 81
+            },
+            {
+              "name": "Morrissey, J",
+              "nhlTeam": "WPG",
+              "pts": 86
+            },
+            {
+              "name": "Dahlin, R",
+              "nhlTeam": "BUF",
+              "pts": 90
+            },
+            {
+              "name": "Karlsson, E",
+              "nhlTeam": "PIT",
+              "pts": 69
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Oettinger, J",
+              "nhlTeam": "DAL",
+              "pts": 87
+            },
+            {
+              "name": "DeSmith, C",
+              "nhlTeam": "DAL",
+              "pts": 43
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "ownerId": "nick",
+          "team": "Glizzy Disposal",
+          "pts": 1301,
+          "skatersTotal": 1175,
+          "goaliesTotal": 126,
+          "skaters": [
+            {
+              "name": "Rantanen, M",
+              "nhlTeam": "DAL",
+              "pts": 150
+            },
+            {
+              "name": "Hughes, J",
+              "nhlTeam": "NJD",
+              "pts": 132
+            },
+            {
+              "name": "Marner, M",
+              "nhlTeam": "TOR",
+              "pts": 164
+            },
+            {
+              "name": "Robertson, J",
+              "nhlTeam": "DAL",
+              "pts": 145
+            },
+            {
+              "name": "Aho, S",
+              "nhlTeam": "CAR",
+              "pts": 148
+            },
+            {
+              "name": "Bedard, C",
+              "nhlTeam": "CHI",
+              "pts": 115
+            },
+            {
+              "name": "Makar, C",
+              "nhlTeam": "COL",
+              "pts": 142
+            },
+            {
+              "name": "Bouchard, E",
+              "nhlTeam": "EDM",
+              "pts": 91
+            },
+            {
+              "name": "Heiskanen, M",
+              "nhlTeam": "DAL",
+              "pts": 30
+            },
+            {
+              "name": "Rielly, M",
+              "nhlTeam": "TOR",
+              "pts": 58
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Quick, J",
+              "nhlTeam": "NYR",
+              "pts": 42
+            },
+            {
+              "name": "Shesterkin, I",
+              "nhlTeam": "NYR",
+              "pts": 84
+            }
+          ]
+        },
+        {
+          "rank": 3,
+          "ownerId": "andrew",
+          "team": "Between The Pipes",
+          "pts": 1172,
+          "skatersTotal": 1056,
+          "goaliesTotal": 116,
+          "skaters": [
+            {
+              "name": "McDavid, C",
+              "nhlTeam": "EDM",
+              "pts": 141
+            },
+            {
+              "name": "Kucherov, N",
+              "nhlTeam": "TAM",
+              "pts": 203
+            },
+            {
+              "name": "Reinhart, S",
+              "nhlTeam": "FLA",
+              "pts": 140
+            },
+            {
+              "name": "Pettersson, E",
+              "nhlTeam": "VAN",
+              "pts": 65
+            },
+            {
+              "name": "Thomas, R",
+              "nhlTeam": "STL",
+              "pts": 127
+            },
+            {
+              "name": "Michkov, M",
+              "nhlTeam": "PHI",
+              "pts": 104
+            },
+            {
+              "name": "Josi, R",
+              "nhlTeam": "NAS",
+              "pts": 52
+            },
+            {
+              "name": "Dobson, N",
+              "nhlTeam": "NYI",
+              "pts": 54
+            },
+            {
+              "name": "Werenski, Z",
+              "nhlTeam": "CBJ",
+              "pts": 130
+            },
+            {
+              "name": "McAvoy, C",
+              "nhlTeam": "BOS",
+              "pts": 40
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Skinner, S",
+              "nhlTeam": "EDM",
+              "pts": 67
+            },
+            {
+              "name": "Pickard, C",
+              "nhlTeam": "EDM",
+              "pts": 49
+            }
+          ]
+        },
+        {
+          "rank": 4,
+          "ownerId": "tyler",
+          "team": "Puck Slut",
+          "pts": 1163,
+          "skatersTotal": 1060,
+          "goaliesTotal": 103,
+          "skaters": [
+            {
+              "name": "Matthews, A",
+              "nhlTeam": "TOR",
+              "pts": 121
+            },
+            {
+              "name": "Pastrnak, D",
+              "nhlTeam": "BOS",
+              "pts": 169
+            },
+            {
+              "name": "Miller, J",
+              "nhlTeam": "NYR",
+              "pts": 102
+            },
+            {
+              "name": "Panarin, A",
+              "nhlTeam": "NYR",
+              "pts": 141
+            },
+            {
+              "name": "Forsberg, F",
+              "nhlTeam": "NAS",
+              "pts": 122
+            },
+            {
+              "name": "Stamkos, S",
+              "nhlTeam": "NAS",
+              "pts": 110
+            },
+            {
+              "name": "Hughes, Q",
+              "nhlTeam": "VAN",
+              "pts": 107
+            },
+            {
+              "name": "Hedman, V",
+              "nhlTeam": "TAM",
+              "pts": 80
+            },
+            {
+              "name": "Seider, M",
+              "nhlTeam": "DET",
+              "pts": 54
+            },
+            {
+              "name": "Skjei, B",
+              "nhlTeam": "NAS",
+              "pts": 54
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Saros, J",
+              "nhlTeam": "NAS",
+              "pts": 65
+            },
+            {
+              "name": "Wedgewood, S",
+              "nhlTeam": "COL",
+              "pts": 38
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20232024",
+      "label": "2023-2024 Legend Of Ricoh",
+      "source": "saved-history-file",
+      "championOwnerId": "chris",
+      "standings": [
+        {
+          "rank": 1,
+          "ownerId": "chris",
+          "team": "CeCe Hairless Horde",
+          "pts": 1515,
+          "skatersTotal": 1429,
+          "goaliesTotal": 86,
+          "skaters": [
+            {
+              "name": "MacKinnon, N",
+              "nhlTeam": "COL",
+              "pts": 236
+            },
+            {
+              "name": "Kucherov, N",
+              "nhlTeam": "TAM",
+              "pts": 218
+            },
+            {
+              "name": "Tkachuk, B",
+              "nhlTeam": "OTT",
+              "pts": 121
+            },
+            {
+              "name": "Tkachuk, M",
+              "nhlTeam": "FLA",
+              "pts": 124
+            },
+            {
+              "name": "Kaprizov, K",
+              "nhlTeam": "MIN",
+              "pts": 182
+            },
+            {
+              "name": "Hintz, R",
+              "nhlTeam": "DAL",
+              "pts": 125
+            },
+            {
+              "name": "Makar, C",
+              "nhlTeam": "COL",
+              "pts": 116
+            },
+            {
+              "name": "Karlsson, E",
+              "nhlTeam": "PIT",
+              "pts": 87
+            },
+            {
+              "name": "Josi, R",
+              "nhlTeam": "NAS",
+              "pts": 133
+            },
+            {
+              "name": "Carlson, J",
+              "nhlTeam": "WAS",
+              "pts": 87
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Georgiev, A",
+              "nhlTeam": "COL",
+              "pts": 86
+            },
+            {
+              "name": "Francouz, P",
+              "nhlTeam": "COL",
+              "pts": 0
+            }
+          ]
+        },
+        {
+          "rank": 2,
+          "ownerId": "nick",
+          "team": "Glizzy Disposal",
+          "pts": 1418,
+          "skatersTotal": 1280,
+          "goaliesTotal": 138,
+          "skaters": [
+            {
+              "name": "McDavid, C",
+              "nhlTeam": "EDM",
+              "pts": 189
+            },
+            {
+              "name": "Crosby, S",
+              "nhlTeam": "PIT",
+              "pts": 151
+            },
+            {
+              "name": "Nylander, W",
+              "nhlTeam": "TOR",
+              "pts": 173
+            },
+            {
+              "name": "Stutzle, T",
+              "nhlTeam": "OTT",
+              "pts": 98
+            },
+            {
+              "name": "Eichel, J",
+              "nhlTeam": "VGK",
+              "pts": 134
+            },
+            {
+              "name": "Aho, S",
+              "nhlTeam": "CAR",
+              "pts": 175
+            },
+            {
+              "name": "Fox, A",
+              "nhlTeam": "NYR",
+              "pts": 115
+            },
+            {
+              "name": "Seider, M",
+              "nhlTeam": "DET",
+              "pts": 51
+            },
+            {
+              "name": "Bouchard, E",
+              "nhlTeam": "EDM",
+              "pts": 135
+            },
+            {
+              "name": "Jones, S",
+              "nhlTeam": "CHI",
+              "pts": 59
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Quick, J",
+              "nhlTeam": "NYR",
+              "pts": 46
+            },
+            {
+              "name": "Shesterkin, I",
+              "nhlTeam": "NYR",
+              "pts": 92
+            }
+          ]
+        },
+        {
+          "rank": 3,
+          "ownerId": "andrew",
+          "team": "Between The Pipes",
+          "pts": 1265,
+          "skatersTotal": 1221,
+          "goaliesTotal": 44,
+          "skaters": [
+            {
+              "name": "Matthews, A",
+              "nhlTeam": "TOR",
+              "pts": 216
+            },
+            {
+              "name": "Thompson, T",
+              "nhlTeam": "BUF",
+              "pts": 100
+            },
+            {
+              "name": "Rantanen, M",
+              "nhlTeam": "COL",
+              "pts": 191
+            },
+            {
+              "name": "Verhaeghe, C",
+              "nhlTeam": "FLA",
+              "pts": 141
+            },
+            {
+              "name": "Ovechkin, A",
+              "nhlTeam": "WAS",
+              "pts": 121
+            },
+            {
+              "name": "Stamkos, S",
+              "nhlTeam": "TAM",
+              "pts": 151
+            },
+            {
+              "name": "Dahlin, R",
+              "nhlTeam": "BUF",
+              "pts": 89
+            },
+            {
+              "name": "Morrissey, J",
+              "nhlTeam": "WPG",
+              "pts": 84
+            },
+            {
+              "name": "Montour, B",
+              "nhlTeam": "FLA",
+              "pts": 56
+            },
+            {
+              "name": "Toews, D",
+              "nhlTeam": "COL",
+              "pts": 72
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Vanecek, V",
+              "nhlTeam": "SAN",
+              "pts": 34
+            },
+            {
+              "name": "Schmid, A",
+              "nhlTeam": "NJD",
+              "pts": 10
+            }
+          ]
+        },
+        {
+          "rank": 4,
+          "ownerId": "tyler",
+          "team": "Puck Slut",
+          "pts": 1249,
+          "skatersTotal": 1130,
+          "goaliesTotal": 119,
+          "skaters": [
+            {
+              "name": "Draisaitl, L",
+              "nhlTeam": "EDM",
+              "pts": 182
+            },
+            {
+              "name": "Hughes, J",
+              "nhlTeam": "NJD",
+              "pts": 121
+            },
+            {
+              "name": "Pettersson, E",
+              "nhlTeam": "VAN",
+              "pts": 173
+            },
+            {
+              "name": "Robertson, J",
+              "nhlTeam": "DAL",
+              "pts": 129
+            },
+            {
+              "name": "Hischier, N",
+              "nhlTeam": "NJD",
+              "pts": 114
+            },
+            {
+              "name": "Tavares, J",
+              "nhlTeam": "TOR",
+              "pts": 124
+            },
+            {
+              "name": "Hughes, Q",
+              "nhlTeam": "VAN",
+              "pts": 119
+            },
+            {
+              "name": "Hamilton, D",
+              "nhlTeam": "NJD",
+              "pts": 21
+            },
+            {
+              "name": "Heiskanen, M",
+              "nhlTeam": "DAL",
+              "pts": 73
+            },
+            {
+              "name": "McAvoy, C",
+              "nhlTeam": "BOS",
+              "pts": 74
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Ullmark, L",
+              "nhlTeam": "BOS",
+              "pts": 54
+            },
+            {
+              "name": "Swayman, J",
+              "nhlTeam": "BOS",
+              "pts": 65
+            }
+          ]
+        },
+        {
+          "rank": 5,
+          "ownerId": "ricoh",
+          "team": "Senile Cely",
+          "pts": 1143,
+          "skatersTotal": 1040,
+          "goaliesTotal": 103,
+          "skaters": [
+            {
+              "name": "Pastrnak, D",
+              "nhlTeam": "BOS",
+              "pts": 182
+            },
+            {
+              "name": "Marner, M",
+              "nhlTeam": "TOR",
+              "pts": 121
+            },
+            {
+              "name": "Bedard, C",
+              "nhlTeam": "CHI",
+              "pts": 93
+            },
+            {
+              "name": "Point, B",
+              "nhlTeam": "TAM",
+              "pts": 196
+            },
+            {
+              "name": "Zibanejad, M",
+              "nhlTeam": "NYR",
+              "pts": 113
+            },
+            {
+              "name": "Panarin, A",
+              "nhlTeam": "NYR",
+              "pts": 194
+            },
+            {
+              "name": "Dunn, V",
+              "nhlTeam": "SEA",
+              "pts": 57
+            },
+            {
+              "name": "Sergachev, M",
+              "nhlTeam": "TAM",
+              "pts": 21
+            },
+            {
+              "name": "Barrie, T",
+              "nhlTeam": "NAS",
+              "pts": 16
+            },
+            {
+              "name": "Pietrangelo, A",
+              "nhlTeam": "VGK",
+              "pts": 47
+            }
+          ],
+          "goalies": [
+            {
+              "name": "Sorokin, I",
+              "nhlTeam": "NYI",
+              "pts": 60
+            },
+            {
+              "name": "Varlamov, S",
+              "nhlTeam": "NYI",
+              "pts": 43
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

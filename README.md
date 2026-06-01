@@ -313,3 +313,7 @@ Each standings row uses:
 - `team`
 - `pts`
 - optional `skaters`, `goalies`, `skatersTotal`, `goaliesTotal` for deeper archive details
+
+## Permanent history data source
+
+The long-term history source is now stored in `assets/data/history.json` and mirrored in `assets/data/pool-history.json` for the current book code. Add completed future seasons there so the book/history pages can be updated from data instead of screenshots.
