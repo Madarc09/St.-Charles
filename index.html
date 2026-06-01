@@ -7907,6 +7907,155 @@
 })();
 </script>
 
+
+
+<style id="v218-trophy-room-match-home-stage-real-fix">
+  /* v218: actual fix. Trophy Room now uses the same outer page/stage behavior as the Home page. 
+     Cause found: v217 changed the inner shell, but it did not mirror the Home page's full-width outer main/panel rules,
+     and it used a min(100vw, 100vh*ratio) width that created side gaps. */
+  body.v217-rosters-active,
+  body.v218-rosters-active,
+  body[data-active-tab="rosters"] {
+    background: #020304 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body.v217-rosters-active .hero-retro,
+  body.v218-rosters-active .hero-retro,
+  body[data-active-tab="rosters"] .hero-retro,
+  body.v217-rosters-active > nav.tabs,
+  body.v218-rosters-active > nav.tabs,
+  body[data-active-tab="rosters"] > nav.tabs {
+    display: none !important;
+  }
+
+  body.v217-rosters-active main.shell,
+  body.v218-rosters-active main.shell,
+  body[data-active-tab="rosters"] main.shell {
+    max-width: none !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    place-items: unset !important;
+    background: #020304 !important;
+    overflow: visible !important;
+  }
+
+  body.v217-rosters-active #rosters.panel,
+  body.v218-rosters-active #rosters.panel,
+  body[data-active-tab="rosters"] #rosters.panel {
+    display: block !important;
+    width: 100vw !important;
+    max-width: none !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #020304 !important;
+    overflow: visible !important;
+  }
+
+  body.v217-rosters-active #rosters #rosterCards,
+  body.v218-rosters-active #rosters #rosterCards,
+  body[data-active-tab="rosters"] #rosters #rosterCards,
+  body.v217-rosters-active #rosters .exact-lobby-host,
+  body.v218-rosters-active #rosters .exact-lobby-host,
+  body[data-active-tab="rosters"] #rosters .exact-lobby-host {
+    width: 100vw !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #020304 !important;
+    overflow: visible !important;
+  }
+
+  body.v217-rosters-active #rosters .straight-lobby-shell,
+  body.v218-rosters-active #rosters .straight-lobby-shell,
+  body[data-active-tab="rosters"] #rosters .straight-lobby-shell {
+    position: relative !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: none !important;
+    height: auto !important;
+    aspect-ratio: 1448 / 1086 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    background: #020304 !important;
+    isolation: isolate !important;
+    touch-action: pan-y !important;
+  }
+
+  body.v217-rosters-active #rosters .straight-lobby-scene,
+  body.v218-rosters-active #rosters .straight-lobby-scene,
+  body[data-active-tab="rosters"] #rosters .straight-lobby-scene {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: fill !important;
+    object-position: center center !important;
+    background: #020304 !important;
+    z-index: 0 !important;
+  }
+
+  @media (max-width: 820px) {
+    body.v217-rosters-active main.shell,
+    body.v218-rosters-active main.shell,
+    body[data-active-tab="rosters"] main.shell,
+    body.v217-rosters-active #rosters.panel,
+    body.v218-rosters-active #rosters.panel,
+    body[data-active-tab="rosters"] #rosters.panel {
+      min-height: 100svh !important;
+    }
+
+    body.v217-rosters-active #rosters .straight-lobby-shell,
+    body.v218-rosters-active #rosters .straight-lobby-shell,
+    body[data-active-tab="rosters"] #rosters .straight-lobby-shell {
+      width: auto !important;
+      min-width: 0 !important;
+      height: 100svh !important;
+      min-height: 100svh !important;
+      max-width: none !important;
+      aspect-ratio: 1448 / 1086 !important;
+      margin: 0 auto !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script id="v218-trophy-room-match-home-stage-real-fix-script">
+(function(){
+  function sync(){
+    var rosters = document.getElementById('rosters');
+    var active = !!(rosters && rosters.classList.contains('active'));
+    document.body.classList.toggle('v218-rosters-active', active);
+    if (active) document.body.dataset.activeTab = 'rosters';
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    sync();
+    setTimeout(sync, 50);
+    setTimeout(sync, 250);
+    setTimeout(sync, 900);
+  });
+  document.addEventListener('click', function(){ setTimeout(sync, 0); setTimeout(sync, 120); }, true);
+  window.addEventListener('load', sync);
+  window.addEventListener('resize', sync, {passive:true});
+  new MutationObserver(sync).observe(document.body, {subtree:true, attributes:true, attributeFilter:['class']});
+})();
+</script>
+
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
