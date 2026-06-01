@@ -226,3 +226,77 @@ v219 changes:
 - Roster-room player links moved from side rail to bottom nav.
 - Trophy Room Lobby button removed from roster-room nav; the existing Championships area is now the back-to-Trophy-Room hotspot.
 - Trophy Room book hotspot added; opens an ancient Hockey History book overlay with saved 2024-2025 and 2023-2024 standings/team pages.
+
+---
+
+## Consolidated version notes
+
+The old separate README-v### files were merged here so the project has one human notes file. These notes do not power the website.
+
+
+### README-v218.txt
+
+v218 diagnosis/fix
+
+Problem: Trophy Room did not match Home page visual sizing.
+Cause: v217 changed the inner trophy image shell to 1448x1086, but the Trophy Room tab still did not mirror the Home page's full-width outer body/main/panel rules. Also v217 used width:min(100vw, calc(100vh*1.333333)), which intentionally creates side margins on wide desktop screens. Home v181 uses full viewport width on desktop and 100svh height on mobile.
+
+Fix: v218 adds a later, active-tab scoped override so #rosters uses the same outer shell behavior as Home:
+- desktop: shell is 100vw wide, stage is 100vw with 1448/1086 aspect ratio
+- mobile: stage height is 100svh with 1448/1086 aspect ratio
+- top trophy tab bar remains hidden
+- bottom nav, Home jersey hotspot, and door hotspots preserved
+
+
+### README-v220.txt
+
+v220 fixes: Trophy Room mobile horizontal pan restored to match Home behavior; roster-room Championships shelf enlarged/clickable back to Trophy Room; Home added to bottom roster-room nav; Previous Season tab now includes static 2024-2025 and 2023-2024 archive data from supplied screenshots.
+
+
+### README-v222.txt
+
+v222 roster-room mobile redo
+
+Built from v220, not v221.
+
+Why v221 failed:
+- It used object-fit: cover and full viewport locking too broadly.
+- That cropped/zoomed the roster images on mobile.
+- It also affected desktop scroll behavior.
+
+v222 fix:
+- Desktop rules are untouched.
+- Mobile only:
+  - Roster room stage is 100svh high.
+  - Image is height:100svh and width:auto, so the full image height is visible.
+  - Stage allows horizontal panning instead of cropping the image.
+  - Bottom navigation floats fixed at the bottom.
+  - Script centers the wide image after render.
+
+
+### README-v223.txt
+
+v223
+
+Built from v222.
+Changed only assets/images/locker-stall-chris.png.
+Replaced Chris roster-room image with updated version showing two trophies on the Championships shelf.
+All layout/mobile fixes from v222 preserved.
+
+
+### README-v224.txt
+
+v224
+
+Built from v223.
+Changed only assets/images/locker-stall-chris.png.
+Replaced Chris roster-room image with the corrected two-trophy version with no dates on the trophies.
+All layout/mobile fixes and other site changes preserved.
+
+
+### README-v225.txt
+
+v225 changes:
+- Added a visible Trophy Room button to every owner roster/player room bottom navigation.
+- Fixed the Home page Trophy Room link and main Trophy Room tab so they always reset to the Trophy Room lobby instead of reopening the last owner roster room.
+- Left existing owner-room door links, Home links, roster images, and previous-season archive content unchanged.
