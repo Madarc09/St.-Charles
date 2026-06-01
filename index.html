@@ -6184,7 +6184,7 @@
             <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} roster room">
             <button type="button" class="v219-championships-hotspot" data-locker-back aria-label="Back to Trophy Room"></button>
             <nav class="v174-stall-nav v219-bottom-stall-nav" aria-label="Roster room navigation">
-              ${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
+              <button type="button" class="v174-stall-btn v220-stall-home-link" data-stall-home="dashboard">Home</button>${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
             </nav>
           </div>
         </section>`;
@@ -6197,6 +6197,10 @@
         room.open = btn.dataset.walkStall || 'nick';
         room.view = 'stall';
         renderWalkableLocker(room.lastDraft || {});
+      }));
+      target.querySelectorAll('[data-stall-home]').forEach(btn => btn.addEventListener('click', () => {
+        const homeTab = document.querySelector('[data-tab="dashboard"]');
+        if (homeTab) homeTab.click();
       }));
     }
     function renderWalkableLocker(draft = {}){
@@ -8397,5 +8401,153 @@
     if (e.target.closest && e.target.closest('[data-tab]')) setTimeout(refresh, 40);
   }, true);
   window.addEventListener('load', function(){ setTimeout(refresh, 180); setTimeout(refresh, 650); });
+})();
+</script>
+
+
+<style id="v220-trophy-mobile-pan-roster-exits-previous-seasons">
+/* v220: real fixes after v219/v218.
+   - Trophy Room mobile now behaves like Home: the image is full height and horizontally pannable instead of locked.
+   - Roster room stall nav has Home at the bottom beside owner names.
+   - Championships shelf hotspot is enlarged so it reliably returns to the Trophy Room lobby.
+*/
+#rosters .v174-photo-only-stall .v219-bottom-stall-nav .v220-stall-home-link {
+  border-color: rgba(132,194,255,.55) !important;
+  background: linear-gradient(180deg,rgba(18,42,68,.82),rgba(5,14,27,.76)) !important;
+  color: #eaf7ff !important;
+}
+#rosters .v219-championships-hotspot {
+  /* Larger safety net over the championship shelf area. Transparent but clickable. */
+  left: 30% !important;
+  top: 61% !important;
+  width: 40% !important;
+  height: 25% !important;
+  z-index: 60 !important;
+}
+#rosters .v219-championships-hotspot:hover { background: rgba(255,211,111,.035) !important; }
+@media (max-width: 820px) {
+  body.v218-rosters-active,
+  body[data-active-tab="rosters"] {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #020304 !important;
+  }
+  body.v218-rosters-active main.shell,
+  body[data-active-tab="rosters"] main.shell,
+  body.v218-rosters-active #rosters.panel,
+  body[data-active-tab="rosters"] #rosters.panel,
+  body.v218-rosters-active #rosters #rosterCards,
+  body[data-active-tab="rosters"] #rosters #rosterCards,
+  body.v218-rosters-active #rosters .exact-lobby-host,
+  body[data-active-tab="rosters"] #rosters .exact-lobby-host {
+    width: 100vw !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    background: #020304 !important;
+  }
+  body.v218-rosters-active #rosters.panel::-webkit-scrollbar,
+  body[data-active-tab="rosters"] #rosters.panel::-webkit-scrollbar,
+  body.v218-rosters-active #rosters #rosterCards::-webkit-scrollbar,
+  body[data-active-tab="rosters"] #rosters #rosterCards::-webkit-scrollbar { display: none !important; }
+  body.v218-rosters-active #rosters .straight-lobby-shell,
+  body[data-active-tab="rosters"] #rosters .straight-lobby-shell {
+    position: relative !important;
+    height: 100svh !important;
+    min-height: 100svh !important;
+    width: calc(100svh * 1448 / 1086) !important;
+    min-width: calc(100svh * 1448 / 1086) !important;
+    max-width: none !important;
+    aspect-ratio: 1448 / 1086 !important;
+    margin: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    touch-action: pan-x pan-y !important;
+  }
+  body.v218-rosters-active #rosters .straight-lobby-scene,
+  body[data-active-tab="rosters"] #rosters .straight-lobby-scene {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill !important;
+  }
+}
+
+/* Previous Season archive styling */
+.v220-prev-archive { color:#f3ead0; }
+.v220-prev-archive .season-arena-banner { margin-bottom: 14px; }
+.v220-prev-tabs { display:flex; flex-wrap:wrap; gap:8px; margin: 12px 0 16px; }
+.v220-prev-tabs button { border:1px solid rgba(230,190,110,.38); background:rgba(20,14,8,.72); color:#ffe7b7; border-radius:999px; padding:8px 12px; cursor:pointer; }
+.v220-prev-tabs button.active { background:linear-gradient(180deg,rgba(118,82,28,.9),rgba(45,27,10,.9)); box-shadow:0 0 18px rgba(255,184,71,.18); }
+.v220-history-team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-top:14px; }
+.v220-history-team-card { border:1px solid rgba(215,176,100,.28); border-radius:16px; padding:12px; background:linear-gradient(180deg,rgba(21,16,10,.82),rgba(6,5,4,.78)); box-shadow:inset 0 0 18px rgba(255,208,126,.045); }
+.v220-history-team-card h3 { margin:0 0 8px; color:#ffe5a8; }
+.v220-history-team-card p { margin:.25em 0; line-height:1.35; }
+.v220-history-team-card small { color:#cbbd9b; }
+.v220-prev-archive table { width:100%; border-collapse:collapse; margin-top:8px; }
+.v220-prev-archive th,.v220-prev-archive td { padding:8px 7px; border-bottom:1px solid rgba(223,188,111,.22); text-align:left; }
+.v220-prev-archive th:last-child,.v220-prev-archive td:last-child { text-align:right; }
+</style>
+
+<script id="v220-previous-season-archive-and-trophy-room-fixes">
+(function(){
+  const seasons = {
+    '20242025': {
+      title:'2024-2025 Ricoh Abandon Pool', champion:'CeCe Hairless Horde',
+      standings:[['1','CeCe Hairless Horde','1,380'],['2','Glizzy Disposal','1,301'],['3','Between The Pipes','1,172'],['4','Puck Slut','1,163']],
+      teams:[
+        {name:'CeCe Hairless Horde', total:'1,380', skaters:'MacKinnon 173; Draisaitl 213; Kaprizov 106; Crosby 174; Nylander 169; Tkachuk M 89; Fox 81; Morrissey 86; Dahlin 90; Karlsson 69.', goalies:'Oettinger 87; DeSmith 43.'},
+        {name:'Glizzy Disposal', total:'1,301', skaters:'Rantanen 150; Hughes J 132; Marner 164; Robertson 145; Aho 148; Bedard 115; Makar 142; Bouchard 91; Heiskanen 30; Rielly 58.', goalies:'Quick 42; Shesterkin 84.'},
+        {name:'Between The Pipes', total:'1,172', skaters:'McDavid 141; Kucherov 203; Reinhart 140; Pettersson 65; Thomas 127; Michkov 104; Josi 52; Dobson 54; Werenski 130; McAvoy 40.', goalies:'Skinner 67; Pickard 49.'},
+        {name:'Puck Slut', total:'1,163', skaters:'Matthews 121; Pastrnak 169; Miller 102; Panarin 141; Forsberg 122; Stamkos 110; Hughes Q 107; Hedman 80; Seider 54; Skjei 54.', goalies:'Saros 65; Wedgewood 38.'}
+      ]
+    },
+    '20232024': {
+      title:'2023-2024 Legend Of Ricoh', champion:'CeCe Hairless Horde',
+      standings:[['1','CeCe Hairless Horde','1,515'],['2','Glizzy Disposal','1,418'],['3','Between The Pipes','1,265'],['4','Puck Slut','1,249'],['5','Senile Cely','1,143']],
+      teams:[
+        {name:'CeCe Hairless Horde', total:'1,515', skaters:'MacKinnon 236; Kucherov 218; Tkachuk B 121; Tkachuk M 124; Kaprizov 182; Hintz 125; Makar 116; Karlsson 87; Josi 133; Carlson 87.', goalies:'Georgiev 86; Francouz 0.'},
+        {name:'Glizzy Disposal', total:'1,418', skaters:'McDavid 189; Crosby 151; Nylander 173; Stutzle 98; Eichel 134; Aho 175; Fox 115; Seider 51; Bouchard 135; Jones 59.', goalies:'Quick 46; Shesterkin 92.'},
+        {name:'Between The Pipes', total:'1,265', skaters:'Matthews 216; Thompson 100; Rantanen 191; Verhaeghe 141; Ovechkin 121; Stamkos 151; Dahlin 89; Morrissey 84; Montour 56; Toews 72.', goalies:'Vanecek 34; Schmid 10.'},
+        {name:'Puck Slut', total:'1,249', skaters:'Draisaitl 182; Hughes J 121; Pettersson 173; Robertson 129; Hischier 114; Tavares 124; Hughes Q 119; Hamilton 21; Heiskanen 73; McAvoy 74.', goalies:'Ullmark 54; Swayman 65.'},
+        {name:'Senile Cely', total:'1,143', skaters:'Pastrnak 182; Marner 121; Bedard 93; Point 196; Zibanejad 113; Panarin 194; Dunn 57; Sergachev 21; Barrie 16; Pietrangelo 47.', goalies:'Sorokin 60; Varlamov 43.'}
+      ]
+    }
+  };
+  function esc(s){return String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function renderStaticSeason(key){
+    const s=seasons[key]; const target=document.getElementById('previousSeasonTable'); const status=document.getElementById('previousSeasonStatus');
+    if(!s||!target) return false;
+    if(status) status.textContent='Source: saved OnlinePools screenshots transcribed to text';
+    target.innerHTML='<div class="v220-prev-archive"><div class="season-arena-banner"><div class="season-arena-logo">🏆</div><div><strong>'+esc(s.title)+'</strong><span>Champion: '+esc(s.champion)+'. Saved historical season record.</span></div><div class="season-arena-pill">Archive</div></div>'+ 
+      '<table><thead><tr><th>Rank</th><th>Team</th><th>FPTS</th></tr></thead><tbody>'+s.standings.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>').join('')+'</tbody></table>'+ 
+      '<div class="v220-history-team-grid">'+s.teams.map(t=>'<article class="v220-history-team-card"><h3>'+esc(t.name)+'</h3><p><b>Total:</b> '+esc(t.total)+' pts</p><p><b>Skaters:</b> '+esc(t.skaters)+'</p><p><b>Goalies:</b> '+esc(t.goalies)+'</p></article>').join('')+'</div></div>';
+    return true;
+  }
+  function upgradePicker(){
+    const table=document.getElementById('previousSeasonTable'); if(!table) return;
+    let picker=document.getElementById('previousSeasonPicker');
+    if(!picker){ picker=document.createElement('div'); picker.id='previousSeasonPicker'; picker.className='season-prev-picker'; table.parentNode.insertBefore(picker,table); }
+    picker.innerHTML='<label for="previousSeasonSelect">Season</label><select id="previousSeasonSelect"><option value="">Select a season…</option><option value="20252026">2025-2026 Regular Season</option><option value="20242025">2024-2025 Ricoh Abandon Pool</option><option value="20232024">2023-2024 Legend Of Ricoh</option></select>';
+    const head=document.querySelector('.previous-season-card .section-head div');
+    if(head){ const h=head.querySelector('h2'); if(h) h.textContent='Previous Season Archive'; const p=head.querySelector('p'); if(p) p.textContent='Choose a saved season to view standings and roster breakdowns.'; }
+  }
+  document.addEventListener('change',function(e){
+    if(e.target && e.target.id==='previousSeasonSelect' && seasons[e.target.value]){
+      e.preventDefault(); e.stopImmediatePropagation(); renderStaticSeason(e.target.value);
+    }
+  },true);
+  window.addEventListener('load',function(){
+    setTimeout(upgradePicker,1800); setTimeout(upgradePicker,2600); setTimeout(upgradePicker,4200);
+  });
+  document.addEventListener('click',function(e){
+    // If a later script re-renders the picker, restore our extra saved seasons shortly after tab clicks/refreshes.
+    if(e.target && (e.target.closest('[data-tab="previousSeason"]') || e.target.closest('#refreshPreviousSeasonBtn'))){ setTimeout(upgradePicker,250); setTimeout(upgradePicker,900); }
+  },true);
 })();
 </script>

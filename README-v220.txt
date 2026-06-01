@@ -1,0 +1,1 @@
+v220 fixes: Trophy Room mobile horizontal pan restored to match Home behavior; roster-room Championships shelf enlarged/clickable back to Trophy Room; Home added to bottom roster-room nav; Previous Season tab now includes static 2024-2025 and 2023-2024 archive data from supplied screenshots.
