@@ -9731,3 +9731,228 @@
   .v239-season-owner-ledger .v237-season-row{font-size:14px!important;}
 }
 </style>
+
+<style id="v243-mobile-home-rosters-new-tight-chart">
+  /* v243: mobile-only replacement roster chart. The old roster chart stays in the file; this creates a new tighter chart beside the standings so player names and FPTS do not stretch apart. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-rosters {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-mobile-rosters {
+      position: absolute !important;
+      left: 47.15% !important;
+      top: 0 !important;
+      width: 52.85% !important;
+      height: 100% !important;
+      max-width: 52.85% !important;
+      padding: .35% .2% 0 .75% !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      color: rgba(244,244,226,.93) !important;
+      text-shadow: 0 1px 0 rgba(0,0,0,.9), 0 0 5px rgba(255,255,220,.12) !important;
+      font-family: "Comic Sans MS", "Bradley Hand", "Chalkboard SE", "Segoe Print", cursive !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-title {
+      height: 13px !important;
+      min-height: 13px !important;
+      max-height: 13px !important;
+      margin: 0 0 2px !important;
+      background-image: url('assets/images/chalk-header-rosters.svg?v=192') !important;
+      background-repeat: no-repeat !important;
+      background-position: center center !important;
+      background-size: contain !important;
+      opacity: .84 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-grid {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+      column-gap: 1.05% !important;
+      row-gap: 2.25% !important;
+      width: 100% !important;
+      height: calc(100% - 15px) !important;
+      min-height: 0 !important;
+      align-items: stretch !important;
+      align-content: stretch !important;
+      justify-items: stretch !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+      padding: 0 .35% !important;
+      background: transparent !important;
+      border: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      align-items: flex-start !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card:nth-child(1) { grid-column: 1 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card:nth-child(2) { grid-column: 3 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card:nth-child(3) { grid-column: 5 / span 2 !important; grid-row: 1 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card:nth-child(4) { grid-column: 2 / span 2 !important; grid-row: 2 !important; }
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-card:nth-child(5) { grid-column: 4 / span 2 !important; grid-row: 2 !important; }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-owner-name {
+      font-size: 6.9px !important;
+      line-height: .98 !important;
+      margin: 0 0 1.25px !important;
+      letter-spacing: -.035em !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      flex: 0 0 auto !important;
+      max-width: 100% !important;
+      font-weight: 900 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-head,
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-player-row {
+      display: inline-grid !important;
+      grid-template-columns: minmax(0, auto) max-content !important;
+      justify-content: start !important;
+      align-items: baseline !important;
+      column-gap: 3px !important;
+      width: max-content !important;
+      max-width: 100% !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-roster-head {
+      font-size: 4.85px !important;
+      line-height: .98 !important;
+      margin: 0 0 1.05px !important;
+      padding-bottom: .8px !important;
+      border-bottom: 1px solid rgba(245,245,232,.23) !important;
+      letter-spacing: -.035em !important;
+      opacity: .88 !important;
+      font-weight: 900 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-player-row {
+      font-size: 5.75px !important;
+      line-height: 1.075 !important;
+      min-height: 1.075em !important;
+      letter-spacing: -.032em !important;
+      font-weight: 850 !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-player-name {
+      min-width: 0 !important;
+      max-width: 12.8ch !important;
+      overflow: hidden !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-player-fpts {
+      min-width: 1.25em !important;
+      width: auto !important;
+      text-align: right !important;
+      color: rgba(255,244,174,.94) !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-goalie-break {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      margin-top: 1.75px !important;
+      flex: 0 0 auto !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-goalie-break::before {
+      content: "G" !important;
+      display: block !important;
+      font-size: 4.6px !important;
+      line-height: 1 !important;
+      margin: 1.4px 0 1px !important;
+      padding-top: 1px !important;
+      width: 100% !important;
+      border-top: 1px solid rgba(245,245,232,.22) !important;
+      opacity: .88 !important;
+      letter-spacing: .08em !important;
+      font-weight: 900 !important;
+    }
+  }
+</style>
+
+<script id="v243-mobile-home-rosters-new-tight-chart-script">
+(function(){
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 820px)').matches; }
+  function esc(value){ return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+  function num(value){ var n = Number(value); return Number.isFinite(n) ? n : 0; }
+  function shortName(name){
+    var s = String(name || '').trim();
+    if (!s) return '';
+    var parts = s.split(/\s+/);
+    return parts.length <= 2 ? s : parts[0] + ' ' + parts[parts.length - 1];
+  }
+  function isGoalie(player){ return player && (player.type === 'goalie' || player.position === 'G'); }
+  function orderedRows(rows){
+    var order = ['nick','chris','andrew','tyler','scott','ricoh'];
+    var byId = new Map(rows.map(function(row){ return [row.ownerId, row]; }));
+    var out = order.map(function(id){ return byId.get(id); }).filter(Boolean);
+    rows.forEach(function(row){ if (out.indexOf(row) === -1) out.push(row); });
+    return out;
+  }
+  function playerLine(player){
+    return '<div class="v243-player-row"><span class="v243-player-name">' + esc(shortName(player.name)) + '</span><span class="v243-player-fpts">' + num(player.fpts) + '</span></div>';
+  }
+  function card(row){
+    var players = Array.isArray(row.players) ? row.players.slice() : [];
+    var skaters = players.filter(function(p){ return !isGoalie(p); }).slice(0, 10);
+    var goalies = players.filter(isGoalie).slice(0, 2);
+    return '<article class="v243-roster-card">' +
+      '<h3 class="v243-owner-name">' + esc(row.ownerName) + '</h3>' +
+      '<div class="v243-roster-head"><span class="v243-player-name">Player</span><span class="v243-player-fpts">FPTS</span></div>' +
+      skaters.map(playerLine).join('') +
+      '<div class="v243-goalie-break">' + goalies.map(playerLine).join('') + '</div>' +
+      '</article>';
+  }
+  function build(){
+    if (!isMobile()) return;
+    var host = document.getElementById('leaderboardTable');
+    if (!host || !host.classList.contains('home-chalk-leaderboard-overlay')) return;
+    var layout = host.querySelector('.v182-chalk-layout');
+    if (!layout) return;
+    var diag = window.__lastSeasonApiDiagnostics;
+    if (!diag || !Array.isArray(diag.rows) || !diag.rows.length) return;
+    var rows = orderedRows(diag.rows).slice(0, 5);
+    var signature = rows.map(function(r){ return r.ownerId + ':' + num(r.total); }).join('|');
+    var existing = layout.querySelector('.v243-mobile-rosters');
+    if (existing && existing.getAttribute('data-signature') === signature) return;
+    if (existing) existing.remove();
+    var section = document.createElement('section');
+    section.className = 'v243-mobile-rosters';
+    section.setAttribute('data-signature', signature);
+    section.innerHTML = '<div class="v243-roster-title">Rosters</div><div class="v243-roster-grid">' + rows.map(card).join('') + '</div>';
+    layout.appendChild(section);
+  }
+  function schedule(){ build(); setTimeout(build, 120); setTimeout(build, 550); setTimeout(build, 1400); }
+  window.__v243BuildMobileHomeRosterChart = build;
+  document.addEventListener('DOMContentLoaded', schedule);
+  window.addEventListener('load', schedule);
+  window.addEventListener('resize', schedule, {passive:true});
+  document.addEventListener('click', function(){ setTimeout(build, 120); }, true);
+  new MutationObserver(function(){ requestAnimationFrame(build); }).observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
