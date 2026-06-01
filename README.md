@@ -213,3 +213,10 @@ v203 mobile rebuild:
 ## v214
 - Fixed the mobile standings movement by targeting the actual v203 inline mobile enforcer that was pinning `.v182-standings` to `top: 0` with inline `!important` styles.
 - Desktop and roster positions are preserved.
+
+
+## v217
+- Trophy Room image resized to match Home page canvas dimensions (1448x1086).
+- Trophy Room top tab bar hidden while the Trophy Room is active.
+- Added Home-style bottom navigation inside the Trophy Room scene.
+- Preserved Flyers HOME jersey hotspot and roster-room door links.
