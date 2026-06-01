@@ -7754,5 +7754,79 @@
   }
 </style>
 
+
+<style id="v214-mobile-standings-real-cause-fix">
+  /* v214: mobile standings was not moving because v203's inline mobile enforcer kept writing top:0 and padding:.5% directly onto .v182-standings with !important.
+     This style is paired with the script below, which runs after that old enforcer and changes the real mobile-controlled values. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings {
+      top: 18.8% !important;
+      height: 81.2% !important;
+      padding-top: 0 !important;
+      overflow: visible !important;
+    }
+
+    #leaderboardTable.home-chalk-leaderboard-overlay .v182-standings-table {
+      margin-top: 0 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script id="v214-mobile-standings-real-cause-fix-enforcer">
+(function(){
+  function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 820px)').matches; }
+  function important(el, prop, value){ if(el && el.style) el.style.setProperty(prop, value, 'important'); }
+  function fix(){
+    if(!isMobile()) return;
+    var host = document.getElementById('leaderboardTable');
+    if(!host || !host.classList.contains('home-chalk-leaderboard-overlay')) return;
+
+    var standings = host.querySelector('.v182-standings');
+    var table = host.querySelector('.v182-standings-table');
+
+    /* This is the actual mobile lever: the v203 rebuild made standings absolute and pinned it at top:0 inline. */
+    important(standings, 'position', 'absolute');
+    important(standings, 'top', '18.8%');
+    important(standings, 'height', '81.2%');
+    important(standings, 'padding-top', '0');
+    important(standings, 'padding-right', '1.25%');
+    important(standings, 'padding-bottom', '0');
+    important(standings, 'padding-left', '0');
+    important(standings, 'overflow', 'visible');
+
+    important(table, 'margin-top', '0');
+    important(table, 'transform', 'none');
+  }
+
+  window.__v214FixMobileStandingsActualPosition = fix;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    fix();
+    setTimeout(fix, 80);
+    setTimeout(fix, 300);
+    setTimeout(fix, 900);
+    setTimeout(fix, 1800);
+    setTimeout(fix, 3600);
+    setTimeout(fix, 6500);
+  });
+  window.addEventListener('load', function(){
+    fix();
+    setTimeout(fix, 250);
+    setTimeout(fix, 1000);
+    setTimeout(fix, 2500);
+    setTimeout(fix, 5200);
+  });
+  window.addEventListener('resize', fix, {passive:true});
+
+  var observerReady = function(){
+    var host = document.getElementById('leaderboardTable');
+    if(host) new MutationObserver(fix).observe(host, {childList:true, subtree:true, attributes:true});
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observerReady);
+  else observerReady();
+})();
+</script>
+
 </body>
 </html>

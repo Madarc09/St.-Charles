@@ -208,3 +208,8 @@ v203 mobile rebuild:
 - Removed the old DOM/chalk-written Standings and Rosters headers from the home overlay because the new baked background already contains metal headers.
 - Hid the old cinematic header photo from the rest of the site pages.
 - Preserved the v207 baked background, draft/trophy hotspots, and jersey-to-roster-room hotspots.
+
+
+## v214
+- Fixed the mobile standings movement by targeting the actual v203 inline mobile enforcer that was pinning `.v182-standings` to `top: 0` with inline `!important` styles.
+- Desktop and roster positions are preserved.
