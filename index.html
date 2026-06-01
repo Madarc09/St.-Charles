@@ -929,7 +929,7 @@
      Uses live API data from v156 diagnostics; only the Kessel chalk drawing is image-based. */
 
   #dashboard .home-immersive-image {
-    content: url('assets/images/home-leaderboard-basement-board.png?v=206') !important;
+    content: url('assets/images/home-leaderboard-basement-board.png?v=207') !important;
   }
 
   #leaderboardTable.home-chalk-leaderboard-overlay {
@@ -2123,7 +2123,7 @@
 <style id="v206-baked-background-hotspots-and-clean-home-links">
   /* v206: baked final background with image-map style links and no bottom Draft/Trophy pills. */
   #dashboard .home-immersive-image {
-    content: url('assets/images/home-leaderboard-basement-board.png?v=206') !important;
+    content: url('assets/images/home-leaderboard-basement-board.png?v=207') !important;
   }
 
   #dashboard .home-image-hotspots {
@@ -2175,6 +2175,47 @@
     display: none !important;
     content: none !important;
   }
+
+  /* v207: jersey image-map links for direct owner roster rooms on the baked background. */
+  #dashboard .home-image-hotspot-owner {
+    z-index: 2 !important;
+  }
+
+  #dashboard .home-image-hotspot-owner-nick {
+    left: 15.9% !important;
+    top: 3.8% !important;
+    width: 14.1% !important;
+    height: 25.1% !important;
+  }
+
+  #dashboard .home-image-hotspot-owner-scott {
+    left: 29.8% !important;
+    top: 3.9% !important;
+    width: 13.9% !important;
+    height: 25.0% !important;
+  }
+
+  #dashboard .home-image-hotspot-owner-andrew {
+    left: 42.4% !important;
+    top: 2.4% !important;
+    width: 18.0% !important;
+    height: 31.8% !important;
+  }
+
+  #dashboard .home-image-hotspot-owner-tyler {
+    left: 58.8% !important;
+    top: 3.8% !important;
+    width: 13.2% !important;
+    height: 25.0% !important;
+  }
+
+  #dashboard .home-image-hotspot-owner-chris {
+    left: 71.0% !important;
+    top: 3.8% !important;
+    width: 13.7% !important;
+    height: 25.0% !important;
+  }
+
 </style>
 
 </head>
@@ -2216,10 +2257,15 @@
   <main class="shell">
     <section id="dashboard" class="panel active home-panel home-immersive-reset">
       <article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
-        <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=206" alt="Basement Bar League current champion chalkboard homepage scene">
+        <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=207" alt="Basement Bar League current champion chalkboard homepage scene">
         <div class="home-image-hotspots" aria-label="Homepage image links">
           <button class="home-image-hotspot home-image-hotspot-draft" type="button" data-tab="draft" aria-label="Enter the Draft Room"></button>
           <button class="home-image-hotspot home-image-hotspot-trophy" type="button" data-tab="rosters" aria-label="Enter the Trophy Room"></button>
+          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-nick" type="button" data-roster-owner="nick" aria-label="Open Nick's roster room"></button>
+          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-scott" type="button" data-roster-owner="scott" aria-label="Open Scott's roster room"></button>
+          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-andrew" type="button" data-roster-owner="andrew" aria-label="Open Andrew's roster room"></button>
+          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-tyler" type="button" data-roster-owner="tyler" aria-label="Open Tyler's roster room"></button>
+          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-chris" type="button" data-roster-owner="chris" aria-label="Open Chris's roster room"></button>
         </div>
         <nav class="home-image-nav" aria-label="Homepage navigation">
           <button class="home-image-link" type="button" data-tab="previousSeason">Previous Season</button>
@@ -7530,5 +7576,41 @@
 })();
 </script>
 
+
+<script id="v207-home-jersey-hotspot-links">
+(function(){
+  function openOwner(ownerId){
+    ownerId = String(ownerId || '').toLowerCase();
+    if (!ownerId) return;
+    if (typeof window.openRosterStall === 'function') {
+      window.openRosterStall(ownerId);
+      return;
+    }
+    var rosterTab = document.querySelector('[data-tab="rosters"]');
+    var rosterPanel = document.getElementById('rosters');
+    if (rosterTab && rosterPanel) {
+      document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b === rosterTab); });
+      document.querySelectorAll('.panel').forEach(function (panel) { panel.classList.toggle('active', panel === rosterPanel); });
+      document.body.dataset.activeTab = 'rosters';
+    }
+    window.__pendingHomeRosterOwner = ownerId;
+  }
+
+  document.addEventListener('click', function(event){
+    var btn = event.target.closest && event.target.closest('.home-image-hotspot-owner[data-roster-owner]');
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openOwner(btn.getAttribute('data-roster-owner'));
+  }, true);
+
+  window.addEventListener('load', function(){
+    if (window.__pendingHomeRosterOwner && typeof window.openRosterStall === 'function') {
+      window.openRosterStall(window.__pendingHomeRosterOwner);
+      window.__pendingHomeRosterOwner = '';
+    }
+  });
+})();
+</script>
 </body>
 </html>
