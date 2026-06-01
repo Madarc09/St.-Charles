@@ -10056,3 +10056,62 @@
     }
   }
 </style>
+
+<style id="v245-mobile-rosters-down-history-book-wide">
+  /* v245: mobile-only polish. Move the home rosters slightly lower and let the history-book ledgers use the horizontal space instead of clipping FPTS. */
+  @media (max-width: 820px) {
+    /* Home page: roster chart down a bit, without changing the standings board. */
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-mobile-rosters {
+      top: 15.1% !important;
+      height: 84.9% !important;
+    }
+
+    /* History book mobile: give the right page and ledger more usable horizontal room. */
+    .v228-history-book-modal .v219-page.right {
+      padding-left: 6px !important;
+      padding-right: 4px !important;
+      overflow: visible !important;
+    }
+
+    .v228-history-book-modal .v219-page.right .v242-book-title {
+      margin-left: 0 !important;
+      margin-bottom: .2em !important;
+    }
+
+    .v228-history-book-modal .v219-page.right .v242-book-ledger {
+      width: max-content !important;
+      max-width: none !important;
+      margin-left: 0 !important;
+      transform: none !important;
+    }
+
+    .v228-history-book-modal .v219-page.right .v242-book-ledger-head,
+    .v228-history-book-modal .v219-page.right .v242-book-ledger-row {
+      width: max-content !important;
+      max-width: none !important;
+      column-gap: .26em !important;
+    }
+
+    /* Season pages: wider team + FPTS room so the points read cleanly. */
+    .v228-history-book-modal .v219-page.right .v242-season-ledger .v242-book-ledger-head,
+    .v228-history-book-modal .v219-page.right .v242-season-ledger .v242-book-ledger-row {
+      grid-template-columns: 2ch 5.4ch 18.5ch 6.2ch !important;
+    }
+
+    /* All-time page: keep the extra YRS column but stop squeezing FPTS. */
+    .v228-history-book-modal .v219-page.right .v242-alltime-ledger .v242-book-ledger-head,
+    .v228-history-book-modal .v219-page.right .v242-alltime-ledger .v242-book-ledger-row {
+      grid-template-columns: 2ch 5.4ch 16.2ch 6.2ch 2.9ch !important;
+    }
+
+    .v228-history-book-modal .v219-page.right .v242-book-ledger .v242-num,
+    .v228-history-book-modal .v219-page.right .v242-book-ledger .v242-col-pts,
+    .v228-history-book-modal .v219-page.right .v242-book-ledger .v242-col-total,
+    .v228-history-book-modal .v219-page.right .v242-book-ledger .v242-col-seasons {
+      overflow: visible !important;
+      text-overflow: clip !important;
+      white-space: nowrap !important;
+      text-align: right !important;
+    }
+  }
+</style>
