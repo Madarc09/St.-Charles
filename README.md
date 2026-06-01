@@ -220,3 +220,9 @@ v203 mobile rebuild:
 - Trophy Room top tab bar hidden while the Trophy Room is active.
 - Added Home-style bottom navigation inside the Trophy Room scene.
 - Preserved Flyers HOME jersey hotspot and roster-room door links.
+
+
+v219 changes:
+- Roster-room player links moved from side rail to bottom nav.
+- Trophy Room Lobby button removed from roster-room nav; the existing Championships area is now the back-to-Trophy-Room hotspot.
+- Trophy Room book hotspot added; opens an ancient Hockey History book overlay with saved 2024-2025 and 2023-2024 standings/team pages.
