@@ -163,7 +163,7 @@
   }
   function statCell(v){ return (v===null || typeof v === 'undefined') ? '<span class="v232-unavailable">—</span>' : fmt(v); }
   function collectorHtml(){
-    return '<h2>Collector</h2><p>This left page is only the book index. Pick what the right page displays.</p>'+ 
+    return '<h2>Collector</h2><p>Choose the record you want to open.</p>'+ 
       '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>'+ 
       '<p class="v228-book-note">Left page = collector/index. Right page = the selected board only. Six owners total: Nick, Andrew, Tyler, Chris, Ricoh, and Scott.</p>';
   }
@@ -175,7 +175,7 @@
   }
   function totalHtml(){
     const rows = sortRows(aggregateRows(), 'total', 'total');
-    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. Seasons Played shows who has three seasons and who only joined for one.</p>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'Seasons'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'));
+    return '<h2>All-Time Stats</h2>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'YRS'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>')); 
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];

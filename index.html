@@ -8571,7 +8571,7 @@
   }
   function totalHtml(){
     const rows = sortRows(aggregateRows(), 'total', 'total');
-    return '<h2 class="v238-alltime-title">All-Time Stats</h2><p class="v238-alltime-note">All saved seasons added together by owner.</p>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'Seasons'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>')).replace('v228-book-table','v228-book-table v238-alltime-table');
+    return '<h2 class="v238-alltime-title">All-Time Stats</h2>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'YRS'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>')).replace('v228-book-table','v228-book-table v238-alltime-table');
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
@@ -9165,6 +9165,40 @@
   .v239-season-owner-ledger .v237-season-row{grid-template-columns:3ch 7ch minmax(10ch,1fr) max-content!important;column-gap:.18em!important;}
   .v239-season-owner-ledger .v237-season-row{font-size:14px!important;}
 }
+</style>
+
+
+<style id="v240-book-yrs-visible-no-extra-copy">
+/* v240: keep the season-count column visible but remove the bulky Seasons Played wording. */
+.v228-history-book-modal .v219-page.right .v238-alltime-note{display:none!important;}
+.v228-history-book-modal .v219-page.right .v238-alltime-title{font-size:clamp(20px,1.8vw,30px)!important;margin:.02em 0 .12em!important;line-height:.9!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table{
+  width:100%!important;
+  max-width:560px!important;
+  table-layout:fixed!important;
+  margin:0 auto!important;
+  border-collapse:collapse!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td{
+  font-size:clamp(10px,.68vw,13px)!important;
+  line-height:.84!important;
+  padding:.035em .045em!important;
+  letter-spacing:-.035em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(1),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(1){width:6%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(2),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(2){width:13%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(3),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(3){width:45%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(4),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(4){width:24%!important;text-align:right!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(5),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(5){width:12%!important;text-align:right!important;}
 </style>
 
 </body>
