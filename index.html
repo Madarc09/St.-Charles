@@ -8555,9 +8555,13 @@
     });
   }
   function statCell(v){ return (v===null || typeof v === 'undefined') ? '<span class="v232-unavailable">—</span>' : fmt(v); }
+  function seasonYearLabel(s){
+    const m = String(s && s.label || '').match(/(\d{4}-\d{4})/);
+    return m ? m[1] : String(s && s.id || '').replace(/(\d{4})(\d{4})/,'$1-$2');
+  }
   function collectorHtml(){
     return '<h2>Collector</h2><p>Choose the record you want to open.</p>'+ 
-      '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>';
+      '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(seasonYearLabel(s))+'</button>').join('')+'</div>';
   }
   function rankText(seasonId, ownerId){
     const s = allSeasons().find(x=>x.id===seasonId);
@@ -8575,9 +8579,9 @@
       ...r,
       owner:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId
     })), s.id, 'pts');
-    return '<h2 class="v237-season-title">'+esc(s.label)+'</h2><div class="v237-season-ledger" role="table" aria-label="'+esc(s.label)+' standings">'+
-      '<div class="v237-season-head" role="row"><span>Rank</span><span>'+sortButton('team','Team')+'</span><span>'+sortButton('pts','FPTS')+'</span></div>'+
-      rows.map((r,i)=>'<div class="v237-season-row" role="row"><span class="v237-rank">'+(i+1)+'</span><span class="v237-team">'+esc(r.team)+'</span><span class="v237-fpts">'+fmt(r.pts)+'</span></div>').join('')+
+    return '<h2 class="v237-season-title">'+esc(s.label)+'</h2><div class="v237-season-ledger v239-season-owner-ledger" role="table" aria-label="'+esc(s.label)+' standings">'+
+      '<div class="v237-season-head" role="row"><span>Rank</span><span>'+sortButton('owner','Owner')+'</span><span>'+sortButton('team','Team')+'</span><span>'+sortButton('pts','FPTS')+'</span></div>'+
+      rows.map((r,i)=>'<div class="v237-season-row" role="row"><span class="v237-rank">'+(i+1)+'</span><span class="v239-owner">'+esc(r.owner)+'</span><span class="v237-team">'+esc(r.team)+'</span><span class="v237-fpts">'+fmt(r.pts)+'</span></div>').join('')+
       '</div>';
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
@@ -9097,6 +9101,69 @@
 @media(max-width:820px){
   .v228-history-book-modal .v219-page.right table.v238-alltime-table th,
   .v228-history-book-modal .v219-page.right table.v238-alltime-table td{font-size:12px!important;padding:3px 2px!important;}
+}
+</style>
+
+
+<style id="v239-book-final-tight-columns">
+/* v239: tighten book tables further, keep Seasons visible, add Owner column to season standings, and use year-only left menu labels. */
+.v228-history-book-modal .v219-page.right{overflow:hidden!important;}
+.v228-history-book-modal .v219-page.right .v238-alltime-note{display:none!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table{
+  width:min(100%, 540px)!important;
+  margin:.02em auto 0!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td{
+  font-size:clamp(10.5px,.74vw,14px)!important;
+  line-height:.92!important;
+  padding:.07em .08em!important;
+  letter-spacing:-.02em!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(1),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(1){width:7%!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(2),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(2){width:15%!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(3),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(3){width:38%!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(4),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(4){width:22%!important;text-align:right!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(5),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(5){width:18%!important;text-align:right!important;}
+.v237-season-ledger.v239-season-owner-ledger{
+  width:min(100%, 575px)!important;
+  margin:.02em auto 0!important;
+}
+.v239-season-owner-ledger .v237-season-head,
+.v239-season-owner-ledger .v237-season-row{
+  grid-template-columns:3.2ch 7.5ch minmax(13ch,1fr) max-content!important;
+  column-gap:.22em!important;
+}
+.v239-season-owner-ledger .v237-season-head{
+  font-size:clamp(10.5px,.72vw,14px)!important;
+  padding:.04em .06em .08em!important;
+}
+.v239-season-owner-ledger .v237-season-row{
+  font-size:clamp(15px,1.03vw,20px)!important;
+  line-height:.9!important;
+  padding:.01em .06em!important;
+}
+.v239-owner,
+.v239-season-owner-ledger .v237-team{
+  min-width:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.v239-owner{font-weight:900!important;}
+.v239-season-owner-ledger .v237-fpts{padding-left:.08em!important;}
+@media(max-width:820px){
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table{width:100%!important;}
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table td{font-size:11px!important;padding:2px 1px!important;}
+  .v239-season-owner-ledger .v237-season-head,
+  .v239-season-owner-ledger .v237-season-row{grid-template-columns:3ch 7ch minmax(10ch,1fr) max-content!important;column-gap:.18em!important;}
+  .v239-season-owner-ledger .v237-season-row{font-size:14px!important;}
 }
 </style>
 
