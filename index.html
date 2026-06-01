@@ -8467,9 +8467,8 @@
   }
   function statCell(v){ return (v===null || typeof v === 'undefined') ? '<span class="v232-unavailable">—</span>' : fmt(v); }
   function collectorHtml(){
-    return '<h2>Collector</h2><p>This left page is only the book index. Pick what the right page displays.</p>'+ 
-      '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>'+ 
-      '<p class="v228-book-note">Left page = collector/index. Right page = the selected board only. Six owners total: Nick, Andrew, Tyler, Chris, Ricoh, and Scott.</p>';
+    return '<h2>Collector</h2><p>Choose the record you want to open.</p>'+ 
+      '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>';
   }
   function rankText(seasonId, ownerId){
     const s = allSeasons().find(x=>x.id===seasonId);
@@ -8489,11 +8488,9 @@
       gameWinningGoals:r.hasFullStats?Number(r.gameWinningGoals)||0:null, goalieWins:r.hasFullStats?Number(r.goalieWins)||0:null, goalieShutouts:r.hasFullStats?Number(r.goalieShutouts)||0:null,
       goalieAssists:r.hasFullStats?Number(r.goalieAssists)||0:null, goalieGoals:r.hasFullStats?Number(r.goalieGoals)||0:null
     })), s.id, 'pts');
-    const full = rows.some(r=>r.hasFullStats);
     return '<h2>'+esc(s.label)+'</h2><p>'+esc(s.note)+'</p>'+table([
-      {label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'pts',label:'FPTS'},{key:'goals',label:'G'},{key:'assists',label:'A'},
-      {key:'shortHandedGoals',label:'SHG'},{key:'gameWinningGoals',label:'GWG'},{key:'goalieWins',label:'W'},{key:'goalieShutouts',label:'SO'},{key:'goalieAssists',label:'GA'},{key:'goalieGoals',label:'GG'}
-    ], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td><td>'+statCell(r.goals)+'</td><td>'+statCell(r.assists)+'</td><td>'+statCell(r.shortHandedGoals)+'</td><td>'+statCell(r.gameWinningGoals)+'</td><td>'+statCell(r.goalieWins)+'</td><td>'+statCell(r.goalieShutouts)+'</td><td>'+statCell(r.goalieAssists)+'</td><td>'+statCell(r.goalieGoals)+'</td></tr>')) + (full ? '<p class="v232-stat-note">Tap a stat header to sort this book page.</p>' : '<p class="v232-stat-note">Older OnlinePools screenshots only included fantasy points, so unavailable stat columns show as dashes.</p>');
+      {label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'pts',label:'Fantasy Pts'}
+    ], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td></tr>')) + '<p class="v232-stat-note">Tap Fantasy Pts, Owner, or Team to sort this book page.</p>';
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
   function draw(){
@@ -8811,6 +8808,21 @@
 })();
 </script>
 
+
+<style id="v233-book-fpts-only-cleanup">
+/* v233: clean collector note and keep standings to Fantasy Points only with bigger cursive writing. */
+.v228-history-book-modal .v219-page p.v228-book-note{display:none!important;}
+.v228-history-book-modal .v219-page h2{font-size:clamp(34px,2.9vw,56px)!important;}
+.v228-history-book-modal .v219-page p{font-size:clamp(18px,1.25vw,24px)!important;}
+.v228-book-table{table-layout:fixed!important;font-size:clamp(20px,1.35vw,27px)!important;}
+.v228-book-table th,.v228-book-table td{font-size:clamp(20px,1.35vw,27px)!important;padding:.34em .42em!important;line-height:1.08!important;}
+.v228-book-table th{font-size:clamp(17px,1.12vw,23px)!important;}
+.v228-book-table th:nth-child(1),.v228-book-table td:nth-child(1){width:12%!important;}
+.v228-book-table th:nth-child(2),.v228-book-table td:nth-child(2){width:24%!important;}
+.v228-book-table th:nth-child(3),.v228-book-table td:nth-child(3){width:40%!important;}
+.v228-book-table th:nth-child(4),.v228-book-table td:nth-child(4){width:24%!important;text-align:right!important;}
+@media(max-width:820px){.v228-book-table{min-width:0!important}.v228-book-table th,.v228-book-table td{font-size:16px!important;padding:6px 5px!important}.v228-history-book-modal .v219-page h2{font-size:30px!important}}
+</style>
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
