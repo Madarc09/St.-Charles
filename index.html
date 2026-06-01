@@ -6672,8 +6672,8 @@
   #rosters .trophy-lobby{display:none!important;}
   #rosters .exact-lobby-host{display:block!important;width:100%;padding:0!important;margin:0!important;}
   #rosters .straight-lobby-shell{
-    position:relative!important;width:100%!important;max-width:1536px!important;margin:0 auto!important;
-    aspect-ratio:1536/1024!important;overflow:hidden!important;background:#000!important;border:0!important;
+    position:relative!important;width:100%!important;max-width:1672px!important;margin:0 auto!important;
+    aspect-ratio:1672/941!important;overflow:hidden!important;background:#000!important;border:0!important;
     border-radius:0!important;box-shadow:none!important;isolation:isolate!important;touch-action:pan-y!important;
   }
   #rosters .straight-lobby-scene{
@@ -6687,12 +6687,14 @@
     color:transparent!important;padding:0!important;cursor:pointer!important;outline:none!important;pointer-events:auto!important;
   }
   #rosters .straight-door-hotzone:focus-visible{outline:2px solid rgba(255,235,165,.75)!important;outline-offset:2px!important;}
-  /* Door hitboxes align to the straight-on five-door image: Scott, Nick, Andrew, Tyler, Chris. */
-  #rosters .straight-door-hotzone.scott{left:2.1%;top:29.1%;width:15.1%;height:48.8%;}
-  #rosters .straight-door-hotzone.nick{left:22.3%;top:29.0%;width:15.4%;height:48.9%;}
-  #rosters .straight-door-hotzone.andrew{left:42.2%;top:29.0%;width:15.7%;height:48.9%;}
-  #rosters .straight-door-hotzone.tyler{left:62.4%;top:29.0%;width:15.4%;height:48.9%;}
-  #rosters .straight-door-hotzone.chris{left:82.4%;top:29.0%;width:15.2%;height:48.9%;}
+  /* v216: hitboxes aligned to the new 1672x941 trophy-room background. */
+  #rosters .straight-door-hotzone.scott{left:18.2%;top:18.0%;width:10.2%;height:40.0%;}
+  #rosters .straight-door-hotzone.nick{left:30.0%;top:18.0%;width:10.2%;height:40.0%;}
+  #rosters .straight-door-hotzone.andrew{left:42.1%;top:18.0%;width:10.2%;height:40.0%;}
+  #rosters .straight-door-hotzone.tyler{left:54.2%;top:18.0%;width:10.2%;height:40.0%;}
+  #rosters .straight-door-hotzone.chris{left:66.4%;top:18.0%;width:10.2%;height:40.0%;}
+  #rosters .straight-home-hotzone{position:absolute!important;z-index:22!important;left:1.6%;top:8.5%;width:11.8%;height:42.5%;border:0!important;background:rgba(0,0,0,0)!important;color:transparent!important;padding:0!important;cursor:pointer!important;outline:none!important;pointer-events:auto!important;}
+  #rosters .straight-home-hotzone:focus-visible{outline:2px solid rgba(255,235,165,.75)!important;outline-offset:2px!important;}
   #rosters .straight-enter-flash{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--enter-x,50%) var(--enter-y,52%),rgba(255,238,170,.80),rgba(255,238,170,.12) 16%,rgba(0,0,0,.88) 54%,#000 100%);transition:opacity .26s ease;}
   #rosters .straight-lobby-shell.is-entering .straight-enter-flash{opacity:1;}
   @media(max-width:760px){#rosters.panel{padding-left:0!important;padding-right:0!important;}#rosters .straight-lobby-shell{width:100vw!important;margin-left:50%!important;transform:translateX(-50%)!important;}}
@@ -6724,11 +6726,19 @@
     const target=document.getElementById('rosterCards'); if(!target) return;
     target.className='walkable-locker-host trophy-lobby-host exact-lobby-host straight-lobby-host';
     target.innerHTML='<section class="straight-lobby-shell" aria-label="Trophy Room locker doors">'+
-      '<img class="straight-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=167" alt="Straight-on Trophy Room lobby with five named doors: Scott, Nick, Andrew, Tyler, and Chris">'+
+      '<img class="straight-lobby-scene" src="assets/images/trophy-room-lobby-reference.png?v=216" alt="Trophy room with five roster-room doors, a Home jersey link, championship banners, a Stanley Cup display, and a hockey history book">'+
+      '<button class="straight-home-hotzone" type="button" data-tab="dashboard" aria-label="Return Home">Home</button>'+ 
       owners.map(o=>'<button class="straight-door-hotzone '+o.id+'" data-enter-door="'+o.id+'" type="button" aria-label="Enter '+o.label+' locker room">'+o.label+'</button>').join('')+
       '<span class="straight-enter-flash" aria-hidden="true"></span>'+ 
     '</section>';
   }
+
+  document.addEventListener('click',function(e){
+    const home=e.target.closest&&e.target.closest('#rosterCards .straight-home-hotzone[data-tab="dashboard"]');
+    if(!home) return;
+    const homeTab=document.querySelector('button.tab[data-tab="dashboard"]');
+    if(homeTab){ e.preventDefault(); e.stopPropagation(); homeTab.click(); }
+  }, true);
   document.addEventListener('click',function(e){
     const door=e.target.closest&&e.target.closest('#rosterCards .straight-door-hotzone[data-enter-door]');
     if(!door) return;
