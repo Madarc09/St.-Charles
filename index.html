@@ -2278,118 +2278,81 @@
 </style>
 
 
-<style id="v221-roster-room-mobile-fullscreen-fix">
-  /* v221: Fix roster-room mobile black void.
-     Cause: the owner room image was rendered as a normal inline image at 100% width/auto height,
-     so on phones the wide roster image only occupied the top half of the viewport.
-     Fix: treat each roster-room image like the Home/Trophy scenes: full viewport stage,
-     image covers the stage, bottom nav floats above it. Desktop remains close to current layout. */
-
-  #rosters .walkable-locker-host.v174-photo-only-host {
-    width: 100vw !important;
-    max-width: none !important;
-    min-height: 100svh !important;
-    height: 100svh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #020304 !important;
-    overflow: hidden !important;
-    display: grid !important;
-    place-items: center !important;
-  }
-
-  #rosters .v174-photo-only-stall {
-    width: 100vw !important;
-    max-width: none !important;
-    height: 100svh !important;
-    min-height: 100svh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #020304 !important;
-    overflow: hidden !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-  }
-
-  #rosters .v174-stall-stage {
-    position: relative !important;
-    width: 100vw !important;
-    height: 100svh !important;
-    min-height: 100svh !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: #020304 !important;
-    line-height: 0 !important;
-  }
-
-  #rosters .v174-stall-img {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-    display: block !important;
-    background: #020304 !important;
-    transform: none !important;
-  }
-
-  #rosters .v174-stall-nav.v219-bottom-stall-nav {
-    position: absolute !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: max(12px, env(safe-area-inset-bottom)) !important;
-    top: auto !important;
-    transform: translateX(-50%) !important;
-    z-index: 40 !important;
-    width: min(92vw, 760px) !important;
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: clamp(7px, 1.6vw, 12px) !important;
-    padding: 8px !important;
-    border: 1px solid rgba(202, 169, 92, .55) !important;
-    border-radius: 18px !important;
-    background: rgba(13, 11, 8, .72) !important;
-    box-shadow: 0 16px 38px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.10) !important;
-    backdrop-filter: blur(5px) !important;
-    line-height: normal !important;
-  }
-
-  #rosters .v174-stall-nav.v219-bottom-stall-nav .v174-stall-btn {
-    flex: 0 1 auto !important;
-    min-width: clamp(64px, 14vw, 104px) !important;
-    min-height: clamp(38px, 5.2vw, 52px) !important;
-    padding: 8px 10px !important;
-    font-size: clamp(11px, 2.7vw, 15px) !important;
-    letter-spacing: .02em !important;
-    text-transform: none !important;
-    border-radius: 12px !important;
-    white-space: nowrap !important;
-  }
-
-  #rosters .v219-championships-hotspot {
-    z-index: 38 !important;
-  }
+<style id="v222-roster-room-mobile-fit-height-no-desktop-lock">
+  /* v222: redo roster-room mobile from v220.
+     Desktop is intentionally untouched.
+     Mobile roster rooms should show the full image height, like a wide scene you can pan across,
+     not zoom/crop with object-fit: cover and not leave a giant static black void. */
 
   @media (max-width: 760px) {
     body:has(#rosters.active) {
-      overflow: hidden !important;
       background: #020304 !important;
     }
 
     #rosters.active {
       width: 100vw !important;
+      min-height: 100svh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #020304 !important;
+      overflow: hidden !important;
+    }
+
+    #rosters .walkable-locker-host.v174-photo-only-host {
+      width: 100vw !important;
       height: 100svh !important;
       min-height: 100svh !important;
-      overflow: hidden !important;
-      background: #020304 !important;
-      padding: 0 !important;
       margin: 0 !important;
+      padding: 0 !important;
+      background: #020304 !important;
+      overflow: hidden !important;
+      display: block !important;
+    }
+
+    #rosters .v174-photo-only-stall {
+      width: 100vw !important;
+      max-width: none !important;
+      height: 100svh !important;
+      min-height: 100svh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #020304 !important;
+      overflow: hidden !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    #rosters .v174-stall-stage {
+      position: relative !important;
+      width: 100vw !important;
+      height: 100svh !important;
+      min-height: 100svh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      background: #020304 !important;
+      line-height: 0 !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+    }
+
+    #rosters .v174-stall-stage::-webkit-scrollbar {
+      display: none !important;
+    }
+
+    #rosters .v174-stall-img {
+      position: relative !important;
+      display: block !important;
+      width: auto !important;
+      height: 100svh !important;
+      max-width: none !important;
+      max-height: none !important;
+      min-width: 100vw !important;
+      object-fit: contain !important;
+      object-position: left center !important;
+      background: #020304 !important;
+      transform: none !important;
     }
 
     #rosters .v174-stall-stage::after {
@@ -2397,17 +2360,29 @@
       content: none !important;
     }
 
-    #rosters .v174-stall-img {
-      object-fit: cover !important;
-      object-position: center center !important;
-    }
-
     #rosters .v174-stall-nav.v219-bottom-stall-nav {
+      position: fixed !important;
+      left: 50% !important;
+      right: auto !important;
+      bottom: max(10px, env(safe-area-inset-bottom)) !important;
+      top: auto !important;
+      transform: translateX(-50%) !important;
+      z-index: 999 !important;
       width: min(94vw, 720px) !important;
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: flex-start !important;
+      align-items: center !important;
       gap: 7px !important;
       padding: 7px !important;
       overflow-x: auto !important;
-      justify-content: flex-start !important;
+      overflow-y: hidden !important;
+      border: 1px solid rgba(202, 169, 92, .55) !important;
+      border-radius: 18px !important;
+      background: rgba(13, 11, 8, .76) !important;
+      box-shadow: 0 16px 38px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.10) !important;
+      backdrop-filter: blur(5px) !important;
+      line-height: normal !important;
       scrollbar-width: none !important;
     }
 
@@ -2419,18 +2394,41 @@
       flex: 0 0 auto !important;
       min-width: 76px !important;
       min-height: 42px !important;
-      font-size: 13px !important;
       padding: 8px 10px !important;
+      border-radius: 12px !important;
+      font-size: 13px !important;
+      letter-spacing: .02em !important;
+      text-transform: none !important;
+      white-space: nowrap !important;
     }
-  }
 
-  @media (orientation: portrait) and (max-width: 760px) {
-    #rosters .v174-stall-img {
-      /* Slightly favour the roster board/center content on phones. */
-      object-position: center top !important;
+    #rosters .v219-championships-hotspot {
+      z-index: 80 !important;
     }
   }
 </style>
+<script id="v222-roster-room-mobile-center-pan">
+  /* Center the wide roster-room image on mobile after each room render.
+     This keeps the image full-height while letting the user pan left/right. */
+  (function(){
+    function centerRosterStage(){
+      if (!window.matchMedia || !window.matchMedia('(max-width: 760px)').matches) return;
+      const activeRosters = document.querySelector('#rosters.active');
+      if (!activeRosters) return;
+      activeRosters.querySelectorAll('.v174-stall-stage').forEach(stage => {
+        requestAnimationFrame(() => {
+          const max = Math.max(0, stage.scrollWidth - stage.clientWidth);
+          if (max > 0) stage.scrollLeft = Math.round(max / 2);
+        });
+      });
+    }
+    document.addEventListener('click', () => setTimeout(centerRosterStage, 80), true);
+    window.addEventListener('resize', () => setTimeout(centerRosterStage, 120));
+    window.addEventListener('load', () => setTimeout(centerRosterStage, 250));
+    const mo = new MutationObserver(() => setTimeout(centerRosterStage, 80));
+    mo.observe(document.documentElement, {childList:true, subtree:true, attributes:true, attributeFilter:['class']});
+  })();
+</script>
 
 </head>
 <body>
