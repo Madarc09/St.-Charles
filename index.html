@@ -2472,7 +2472,7 @@
         <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=207" alt="Basement Bar League current champion chalkboard homepage scene">
         <div class="home-image-hotspots" aria-label="Homepage image links">
           <button class="home-image-hotspot home-image-hotspot-draft" type="button" data-tab="draft" aria-label="Enter the Draft Room"></button>
-          <button class="home-image-hotspot home-image-hotspot-trophy" type="button" data-tab="rosters" aria-label="Enter the Trophy Room"></button>
+          <button class="home-image-hotspot home-image-hotspot-trophy" type="button" data-open-trophy-room data-tab="rosters" aria-label="Enter the Trophy Room"></button>
           <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-nick" type="button" data-roster-owner="nick" aria-label="Open Nick's roster room"></button>
           <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-scott" type="button" data-roster-owner="scott" aria-label="Open Scott's roster room"></button>
           <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-andrew" type="button" data-roster-owner="andrew" aria-label="Open Andrew's roster room"></button>
@@ -6359,6 +6359,7 @@
     function renderWalkableLocker(draft = {}){
       room.lastDraft = draft;
       if (room.view !== 'stall' && typeof window.__renderExactTrophyLobby === 'function') {
+        room.view = 'hub';
         window.__renderExactTrophyLobby(draft);
         return;
       }
@@ -6371,6 +6372,12 @@
       if (room.view === 'stall') renderStall(target, owners, rosters, active);
       else renderHub(target, owners, rosters);
     }
+    window.__forceRosterTrophyLobby = function(draft){
+      room.view = 'hub';
+      room.open = '';
+      room.focus = 'nick';
+      renderWalkableLocker(draft || room.lastDraft || {});
+    };
     window.openRosterStall = function(ownerId){
       const id = String(ownerId || 'nick').toLowerCase();
       room.open = id;
@@ -6868,6 +6875,7 @@
   function ownerById(id){return owners.find(o=>o.id===id)||owners[1];}
   function enter(id, src){
     const o=ownerById(id);
+    const token = (window.__trophyRoomNavigationToken = (window.__trophyRoomNavigationToken || 0) + 1);
     const sh=document.querySelector('#rosterCards .straight-lobby-shell');
     if(sh){
       const s=src&&src.getBoundingClientRect?src:(sh.querySelector('[data-enter-door="'+o.id+'"]')||sh);
@@ -6876,9 +6884,13 @@
       sh.style.setProperty('--enter-y',(((r.top+r.height/2-sr.top)/sr.height)*100).toFixed(1)+'%');
       sh.classList.add('is-entering');
     }
-    setTimeout(function(){ if(typeof window.openRosterStall==='function') window.openRosterStall(o.id); }, 360);
+    setTimeout(function(){
+      if (window.__trophyRoomNavigationToken !== token) return;
+      if(typeof window.openRosterStall==='function') window.openRosterStall(o.id);
+    }, 360);
   }
   function renderStraightLobby(draft){
+    window.__trophyRoomNavigationToken = (window.__trophyRoomNavigationToken || 0) + 1;
     window.__exactLobbyDraft=draft||{};
     const target=document.getElementById('rosterCards'); if(!target) return;
     target.className='walkable-locker-host trophy-lobby-host exact-lobby-host straight-lobby-host';
@@ -8446,7 +8458,9 @@
   function openTrophyLobby(){
     var rosterPanel = activateRosterTab();
     try {
-      if (typeof window.__renderExactTrophyLobby === 'function') {
+      if (typeof window.__forceRosterTrophyLobby === 'function') {
+        window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+      } else if (typeof window.__renderExactTrophyLobby === 'function') {
         window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
       } else if (typeof window.renderDraftRosters === 'function') {
         window.renderDraftRosters(window.__exactLobbyDraft || {});
@@ -8472,6 +8486,147 @@
     e.stopPropagation();
     if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
     openTrophyLobby();
+  }, true);
+})();
+</script>
+
+
+
+<style id="v226-trophy-room-state-hard-fix-style">
+  /* v226: keep the Trophy Room lobby from being replaced by a stale delayed owner-room open. */
+  #rosters .v226-lobby-resetting { pointer-events: auto; }
+</style>
+<script id="v226-trophy-room-state-hard-fix-script">
+(function(){
+  var suppressUntil = 0;
+  var allowOwnerOpenUntil = 0;
+
+  function now(){ return Date.now ? Date.now() : new Date().getTime(); }
+  function markRealOwnerIntent(){ allowOwnerOpenUntil = now() + 1200; }
+
+  document.addEventListener('click', function(e){
+    if (!e.target || !e.target.closest) return;
+    if (e.target.closest('[data-enter-door], .home-image-hotspot-owner[data-roster-owner], [data-walk-stall], [data-lobby-enter], [data-door-id]')) {
+      markRealOwnerIntent();
+    }
+  }, true);
+
+  function activateRostersPanel(){
+    var rosterPanel = document.getElementById('rosters');
+    var rosterTab = document.querySelector('button.tab[data-tab="rosters"]');
+    document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b === rosterTab); });
+    document.querySelectorAll('.panel').forEach(function(panel){ panel.classList.toggle('active', panel === rosterPanel); });
+    document.body.dataset.activeTab = 'rosters';
+    document.body.classList.add('v217-rosters-active','v218-rosters-active');
+    return rosterPanel;
+  }
+
+  function renderLobbyAgain(){
+    try {
+      if (typeof window.__forceRosterTrophyLobby === 'function') {
+        window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+      } else if (typeof window.__renderExactTrophyLobby === 'function') {
+        window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+      } else if (typeof window.renderDraftRosters === 'function') {
+        window.renderDraftRosters(window.__exactLobbyDraft || {});
+      }
+    } catch(err) { console.warn('v226 Trophy Room lobby render failed:', err); }
+  }
+
+  function forceTrophyLobby(){
+    suppressUntil = now() + 3200;
+    var panel = activateRostersPanel();
+    renderLobbyAgain();
+    [80, 260, 700, 1300, 2300].forEach(function(delay){
+      setTimeout(function(){
+        if (now() <= suppressUntil) {
+          activateRostersPanel();
+          renderLobbyAgain();
+        }
+      }, delay);
+    });
+    setTimeout(function(){ if (panel) panel.scrollIntoView({behavior:'smooth', block:'start'}); }, 90);
+  }
+
+  var oldOpenRosterStall = window.openRosterStall;
+  Object.defineProperty(window, 'openRosterStall', {
+    configurable: true,
+    get: function(){
+      return function(ownerId){
+        var staleBlocked = now() < suppressUntil && now() > allowOwnerOpenUntil;
+        if (staleBlocked) return;
+        suppressUntil = 0;
+        if (typeof oldOpenRosterStall === 'function') return oldOpenRosterStall.apply(this, arguments);
+      };
+    },
+    set: function(fn){
+      oldOpenRosterStall = fn;
+    }
+  });
+
+  window.openTrophyRoomLobby = forceTrophyLobby;
+
+  document.addEventListener('click', function(e){
+    if (!e.target || !e.target.closest) return;
+    var trophyRequest = e.target.closest('[data-open-trophy-room], .home-image-hotspot-trophy[data-tab="rosters"], button.tab[data-tab="rosters"]');
+    if (!trophyRequest) return;
+    if (e.target.closest('[data-enter-door], [data-roster-owner], [data-walk-stall]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    forceTrophyLobby();
+  }, true);
+})();
+</script>
+
+
+
+<style id="v227-trophy-room-authoritative-fix-style">
+  /* v227: Trophy Room home link is now an explicit lobby reset, not a generic roster-room reopen. */
+  #dashboard .home-image-hotspot-trophy { pointer-events: auto !important; }
+</style>
+<script id="v227-trophy-room-authoritative-fix-script">
+(function(){
+  function activateRostersPanel(){
+    var rosterPanel = document.getElementById('rosters');
+    var rosterTab = document.querySelector('button.tab[data-tab="rosters"]');
+    document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b === rosterTab); });
+    document.querySelectorAll('.panel').forEach(function(panel){ panel.classList.toggle('active', panel === rosterPanel); });
+    document.body.dataset.activeTab = 'rosters';
+    document.body.classList.add('v217-rosters-active','v218-rosters-active');
+    return rosterPanel;
+  }
+  function hardOpenTrophyLobby(){
+    window.__trophyRoomNavigationToken = (window.__trophyRoomNavigationToken || 0) + 1;
+    var panel = activateRostersPanel();
+    try {
+      if (typeof window.__forceRosterTrophyLobby === 'function') {
+        window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+      } else if (typeof window.__renderExactTrophyLobby === 'function') {
+        window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+      }
+    } catch(err) { console.warn('v227 Trophy Room lobby open failed:', err); }
+    [50, 180, 420, 900].forEach(function(delay){
+      setTimeout(function(){
+        try {
+          activateRostersPanel();
+          if (typeof window.__forceRosterTrophyLobby === 'function') window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+          else if (typeof window.__renderExactTrophyLobby === 'function') window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+        } catch(err) {}
+      }, delay);
+    });
+    setTimeout(function(){ if(panel) panel.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+  }
+  window.openTrophyRoomLobby = hardOpenTrophyLobby;
+  document.addEventListener('click', function(e){
+    if (!e.target || !e.target.closest) return;
+    var trophy = e.target.closest('[data-open-trophy-room], .home-image-hotspot-trophy, button.tab[data-tab="rosters"]');
+    if (!trophy) return;
+    if (e.target.closest('[data-enter-door], .straight-door-hotzone, [data-roster-owner], [data-walk-stall]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    hardOpenTrophyLobby();
   }, true);
 })();
 </script>
@@ -8759,5 +8914,48 @@
     // If a later script re-renders the picker, restore our extra saved seasons shortly after tab clicks/refreshes.
     if(e.target && (e.target.closest('[data-tab="previousSeason"]') || e.target.closest('#refreshPreviousSeasonBtn'))){ setTimeout(upgradePicker,250); setTimeout(upgradePicker,900); }
   },true);
+})();
+</script>
+
+<script id="v227-trophy-room-authoritative-fix-final-pass">
+(function(){
+  function activateRostersPanel(){
+    var rosterPanel = document.getElementById('rosters');
+    var rosterTab = document.querySelector('button.tab[data-tab="rosters"]');
+    document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active', b === rosterTab); });
+    document.querySelectorAll('.panel').forEach(function(panel){ panel.classList.toggle('active', panel === rosterPanel); });
+    document.body.dataset.activeTab = 'rosters';
+    document.body.classList.add('v217-rosters-active','v218-rosters-active');
+    return rosterPanel;
+  }
+  function hardOpenTrophyLobby(){
+    window.__trophyRoomNavigationToken = (window.__trophyRoomNavigationToken || 0) + 1;
+    var panel = activateRostersPanel();
+    try {
+      if (typeof window.__forceRosterTrophyLobby === 'function') window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+      else if (typeof window.__renderExactTrophyLobby === 'function') window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+    } catch(err) { console.warn('v227 final Trophy Room lobby open failed:', err); }
+    [40, 160, 360, 760, 1400].forEach(function(delay){
+      setTimeout(function(){
+        try {
+          activateRostersPanel();
+          if (typeof window.__forceRosterTrophyLobby === 'function') window.__forceRosterTrophyLobby(window.__exactLobbyDraft || {});
+          else if (typeof window.__renderExactTrophyLobby === 'function') window.__renderExactTrophyLobby(window.__exactLobbyDraft || {});
+        } catch(err) {}
+      }, delay);
+    });
+    setTimeout(function(){ if(panel) panel.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+  }
+  window.openTrophyRoomLobby = hardOpenTrophyLobby;
+  document.addEventListener('click', function(e){
+    if (!e.target || !e.target.closest) return;
+    var trophy = e.target.closest('[data-open-trophy-room], .home-image-hotspot-trophy, button.tab[data-tab="rosters"]');
+    if (!trophy) return;
+    if (e.target.closest('[data-enter-door], .straight-door-hotzone, [data-roster-owner], [data-walk-stall]')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    hardOpenTrophyLobby();
+  }, true);
 })();
 </script>
