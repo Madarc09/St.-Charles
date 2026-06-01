@@ -8374,7 +8374,14 @@
 .v228-book-nav{display:grid;grid-template-columns:1fr;gap:7px;margin:10px 0 12px;}
 .v228-book-nav button{border:1px solid rgba(79,39,12,.42);border-radius:999px;background:rgba(255,239,184,.34);color:#2a1709;font:900 clamp(10px,.78vw,13px)/1.1 system-ui,sans-serif;padding:8px 10px;cursor:pointer;text-align:left;box-shadow:inset 0 1px rgba(255,255,255,.4);}
 .v228-book-nav button.is-active{background:rgba(95,46,12,.75);color:#fff0c7;border-color:rgba(95,46,12,.75);}
-.v228-book-table{font-size:clamp(9px,.76vw,13px)!important;}
+.v228-book-table{font-size:clamp(8px,.66vw,11.5px)!important;table-layout:fixed!important;width:100%!important;}
+.v228-book-table th,.v228-book-table td{padding:.18em .16em!important;line-height:1.08!important;white-space:normal!important;word-break:normal!important;}
+.v228-book-table th:nth-child(1),.v228-book-table td:nth-child(1){width:12%!important;}
+.v228-book-table th:nth-child(2),.v228-book-table td:nth-child(2){width:20%!important;}
+.v228-book-table th:nth-child(3),.v228-book-table td:nth-child(3){width:32%!important;}
+.v228-book-table th:nth-child(4),.v228-book-table td:nth-child(4){width:20%!important;text-align:right!important;}
+.v228-book-table th:nth-child(5),.v228-book-table td:nth-child(5){width:16%!important;text-align:right!important;}
+.v228-history-book-modal .v219-page.right{padding:clamp(12px,1.25vw,20px)!important;overflow:hidden!important;}
 .v228-book-table td small{display:block;font-size:.78em;opacity:.72;margin-top:2px;}
 .v228-book-note{font-size:clamp(10px,.78vw,13px)!important;margin-top:10px;padding:9px 10px;border-radius:12px;background:rgba(91,48,16,.14);border:1px solid rgba(72,38,13,.22);}
 .v228-history-book-modal .v219-book-controls{display:none!important;}
@@ -8455,8 +8462,7 @@
   }
   function totalHtml(){
     const rows = aggregateRows();
-    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. The season columns show each owner’s rank and points for that year, so one-season owners stay obvious.</p>'+table(['Rank','Owner','Team','Total Pts','Seasons Played'], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'))+
-      '<h3>Ranking By Season</h3>'+table(['Owner','2025-26','2024-25','2023-24'], rows.map(r=>'<tr><td>'+esc(r.owner)+'</td><td>'+rankText('20252026',r.ownerId)+'</td><td>'+rankText('20242025',r.ownerId)+'</td><td>'+rankText('20232024',r.ownerId)+'</td></tr>'));
+    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. The Seasons Played column shows who has three seasons and who only joined for one.</p>'+table(['Rank','Owner','Team','Total Pts','Seasons Played'], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'));
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
