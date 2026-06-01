@@ -8567,7 +8567,7 @@
   }
   function totalHtml(){
     const rows = sortRows(aggregateRows(), 'total', 'total');
-    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. Seasons Played shows who has three seasons and who only joined for one.</p>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'Seasons'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'));
+    return '<h2 class="v238-alltime-title">All-Time Stats</h2><p class="v238-alltime-note">All saved seasons added together by owner.</p>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'Seasons'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>')).replace('v228-book-table','v228-book-table v238-alltime-table');
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
@@ -9050,6 +9050,53 @@
   .v228-history-book-modal .v219-page.right .v237-season-title{font-size:24px!important;}
   .v237-season-row{font-size:16px!important;}
   .v237-season-head,.v237-season-row{grid-template-columns:3.4ch minmax(10ch,1fr) max-content!important;column-gap:.28em!important;}
+}
+</style>
+
+
+<style id="v238-book-alltime-restore-fit">
+/* v238: keep the v237 season ledger fix, but restore/fit the All-Time table with all columns. */
+.v228-history-book-modal .v219-page.right .v238-alltime-title{
+  font-size:clamp(24px,1.7vw,34px)!important;
+  line-height:.95!important;
+  margin:0 0 .16em!important;
+}
+.v228-history-book-modal .v219-page.right .v238-alltime-note{
+  font-size:clamp(12px,.82vw,16px)!important;
+  line-height:1!important;
+  margin:0 0 .22em!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table{
+  width:100%!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+  margin:.05em auto 0!important;
+  font-size:clamp(12px,.86vw,16px)!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td{
+  font-size:clamp(12px,.86vw,16px)!important;
+  line-height:.98!important;
+  padding:.12em .14em!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  border-bottom:1px solid rgba(73,37,11,.24)!important;
+}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(1),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(1){width:9%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(2),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(2){width:18%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(3),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(3){width:36%!important;text-align:left!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(4),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(4){width:22%!important;text-align:right!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th:nth-child(5),
+.v228-history-book-modal .v219-page.right table.v238-alltime-table td:nth-child(5){width:15%!important;text-align:right!important;}
+.v228-history-book-modal .v219-page.right table.v238-alltime-table th button{all:unset!important;cursor:pointer!important;text-decoration:underline!important;text-underline-offset:2px!important;}
+@media(max-width:820px){
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table th,
+  .v228-history-book-modal .v219-page.right table.v238-alltime-table td{font-size:12px!important;padding:3px 2px!important;}
 }
 </style>
 
