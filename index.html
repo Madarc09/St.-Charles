@@ -8422,12 +8422,18 @@
   const OWNER_ORDER = ['chris','nick','andrew','tyler','scott','ricoh'];
   let activeView = 'total';
   let modal = null;
+  let bookSort = { view:'total', key:'total', dir:'desc' };
   function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function fmt(n){return Number(n||0).toLocaleString('en-CA');}
   function liveSeasonRows(){
     const d = window.__lastSeasonApiDiagnostics;
     if(!d || !Array.isArray(d.rows) || !d.rows.length) return null;
-    return d.rows.map((r,i)=>({rank:i+1, ownerId:r.ownerId, team:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].team)||r.ownerName||r.ownerId, pts:Number(r.total)||0}));
+    return d.rows.map((r,i)=>({
+      rank:i+1, ownerId:r.ownerId, team:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].team)||r.ownerName||r.ownerId,
+      pts:Number(r.total)||0, goals:Number(r.goals)||0, assists:Number(r.assists)||0, shortHandedGoals:Number(r.shortHandedGoals)||0,
+      gameWinningGoals:Number(r.gameWinningGoals)||0, goalieWins:Number(r.goalieWins)||0, goalieShutouts:Number(r.goalieShutouts)||0,
+      goalieAssists:Number(r.goalieAssists)||0, goalieGoals:Number(r.goalieGoals)||0, hasFullStats:true
+    }));
   }
   function allSeasons(){
     const seasons = STATIC_SEASONS.map(s=>({...s, standings:s.standings.map(r=>({...r}))}));
@@ -8446,9 +8452,20 @@
     }));
     return Object.values(totals).sort((a,b)=>b.total-a.total || b.seasons-a.seasons || a.owner.localeCompare(b.owner));
   }
+  function sortButton(key,label){ return '<button type="button" data-v232-book-sort="'+esc(key)+'">'+esc(label)+'</button>'; }
   function table(headers, rows){
-    return '<table class="v219-history-table v228-book-table"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
+    return '<table class="v219-history-table v228-book-table"><thead><tr>'+headers.map(h=>'<th>'+(h.key?sortButton(h.key,h.label):esc(h.label||h))+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
   }
+  function sortRows(rows, view, fallbackKey){
+    const key = (bookSort.view===view && bookSort.key) ? bookSort.key : fallbackKey;
+    const dir = (bookSort.view===view && bookSort.dir==='asc') ? 1 : -1;
+    return rows.slice().sort((a,b)=>{
+      const av = a[key], bv = b[key];
+      if(typeof av === 'number' || typeof bv === 'number') return ((Number(av)||0)-(Number(bv)||0))*dir || String(a.team||a.owner||'').localeCompare(String(b.team||b.owner||''));
+      return String(av||'').localeCompare(String(bv||''))*dir;
+    });
+  }
+  function statCell(v){ return (v===null || typeof v === 'undefined') ? '<span class="v232-unavailable">—</span>' : fmt(v); }
   function collectorHtml(){
     return '<h2>Collector</h2><p>This left page is only the book index. Pick what the right page displays.</p>'+ 
       '<div class="v228-book-nav"><button type="button" data-v228-view="total">All-Time Stats</button>'+allSeasons().map(s=>'<button type="button" data-v228-view="'+esc(s.id)+'">'+esc(s.label.replace(' Regular Season',''))+'</button>').join('')+'</div>'+ 
@@ -8461,12 +8478,22 @@
     return row ? ('#'+row.rank+' / '+fmt(row.pts)+' pts') : '—';
   }
   function totalHtml(){
-    const rows = aggregateRows();
-    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. The Seasons Played column shows who has three seasons and who only joined for one.</p>'+table(['Rank','Owner','Team','Total Pts','Seasons Played'], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'));
+    const rows = sortRows(aggregateRows(), 'total', 'total');
+    return '<h2>All-Time Stats</h2><p>All saved seasons added together by owner. Seasons Played shows who has three seasons and who only joined for one.</p>'+table([{label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'total',label:'FPTS'},{key:'seasons',label:'Seasons'}], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.total)+'</td><td>'+r.seasons+'</td></tr>'));
   }
   function seasonHtml(id){
     const s = allSeasons().find(x=>x.id===id) || allSeasons()[0];
-    return '<h2>'+esc(s.label)+'</h2><p>'+esc(s.note)+'</p>'+table(['Rank','Owner','Team','Pts'], s.standings.map(r=>'<tr><td>'+r.rank+'</td><td>'+esc((OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td></tr>'));
+    const rows = sortRows(s.standings.map(r=>({
+      ...r, owner:(OWNER_META[r.ownerId]&&OWNER_META[r.ownerId].owner)||r.ownerId,
+      goals:r.hasFullStats?Number(r.goals)||0:null, assists:r.hasFullStats?Number(r.assists)||0:null, shortHandedGoals:r.hasFullStats?Number(r.shortHandedGoals)||0:null,
+      gameWinningGoals:r.hasFullStats?Number(r.gameWinningGoals)||0:null, goalieWins:r.hasFullStats?Number(r.goalieWins)||0:null, goalieShutouts:r.hasFullStats?Number(r.goalieShutouts)||0:null,
+      goalieAssists:r.hasFullStats?Number(r.goalieAssists)||0:null, goalieGoals:r.hasFullStats?Number(r.goalieGoals)||0:null
+    })), s.id, 'pts');
+    const full = rows.some(r=>r.hasFullStats);
+    return '<h2>'+esc(s.label)+'</h2><p>'+esc(s.note)+'</p>'+table([
+      {label:'Rank'},{key:'owner',label:'Owner'},{key:'team',label:'Team'},{key:'pts',label:'FPTS'},{key:'goals',label:'G'},{key:'assists',label:'A'},
+      {key:'shortHandedGoals',label:'SHG'},{key:'gameWinningGoals',label:'GWG'},{key:'goalieWins',label:'W'},{key:'goalieShutouts',label:'SO'},{key:'goalieAssists',label:'GA'},{key:'goalieGoals',label:'GG'}
+    ], rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.team)+'</td><td>'+fmt(r.pts)+'</td><td>'+statCell(r.goals)+'</td><td>'+statCell(r.assists)+'</td><td>'+statCell(r.shortHandedGoals)+'</td><td>'+statCell(r.gameWinningGoals)+'</td><td>'+statCell(r.goalieWins)+'</td><td>'+statCell(r.goalieShutouts)+'</td><td>'+statCell(r.goalieAssists)+'</td><td>'+statCell(r.goalieGoals)+'</td></tr>')) + (full ? '<p class="v232-stat-note">Tap a stat header to sort this book page.</p>' : '<p class="v232-stat-note">Older OnlinePools screenshots only included fantasy points, so unavailable stat columns show as dashes.</p>');
   }
   function rightHtml(){ return activeView==='total' ? totalHtml() : seasonHtml(activeView); }
   function draw(){
@@ -8482,7 +8509,12 @@
     modal.innerHTML='<div class="v219-history-shell" role="dialog" aria-modal="true" aria-label="Hockey History book"><button class="v219-history-close" type="button">Close</button><div class="v219-book-spread"><article class="v219-page left"></article><article class="v219-page right"></article></div><div class="v219-book-controls"></div></div>';
     document.body.appendChild(modal);
     modal.querySelector('.v219-history-close').addEventListener('click',()=>modal.classList.remove('is-open'));
-    modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('is-open'); const btn=e.target.closest&&e.target.closest('[data-v228-view]'); if(btn){ activeView=btn.dataset.v228View||'total'; draw(); } });
+    modal.addEventListener('click',e=>{
+      if(e.target===modal) modal.classList.remove('is-open');
+      const sort=e.target.closest&&e.target.closest('[data-v232-book-sort]');
+      if(sort){ const key=sort.dataset.v232BookSort; const view=activeView; if(bookSort.view===view && bookSort.key===key) bookSort.dir=bookSort.dir==='asc'?'desc':'asc'; else bookSort={view:view,key:key,dir:(key==='owner'||key==='team')?'asc':'desc'}; draw(); return; }
+      const btn=e.target.closest&&e.target.closest('[data-v228-view]'); if(btn){ activeView=btn.dataset.v228View||'total'; draw(); }
+    });
     return modal;
   }
   function openBook(){ activeView='total'; ensureModal().classList.add('is-open'); draw(); }
@@ -8540,6 +8572,44 @@
   .v228-history-book-modal .v219-page h2{font-size:24px!important;}
   .v228-history-book-modal .v219-page p{font-size:11px!important;}
   .v228-book-table th,.v228-book-table td{font-size:10.5px!important;}
+}
+</style>
+
+
+<style id="v232-book-full-sortable-stats-cursive-fit">
+/* v232: bigger cursive book standings with full stat columns and sortable headers. */
+.v228-history-book-modal .v219-history-shell{width:min(1480px,99vw)!important;max-height:92vh!important;aspect-ratio:1.92/1!important;}
+.v228-history-book-modal .v219-page{padding:clamp(18px,1.55vw,30px)!important;}
+.v228-history-book-modal .v219-page.left{padding-right:clamp(16px,1.35vw,24px)!important;}
+.v228-history-book-modal .v219-page.right{padding-left:clamp(16px,1.35vw,24px)!important;overflow:auto!important;}
+.v228-history-book-modal .v219-page,
+.v228-history-book-modal .v219-page p,
+.v228-history-book-modal .v219-page li,
+.v228-history-book-modal .v219-page table,
+.v228-history-book-modal .v219-page th,
+.v228-history-book-modal .v219-page td,
+.v228-book-nav button{font-family:"Brush Script MT","Lucida Handwriting","Segoe Script","Bradley Hand",cursive!important;color:#321b08!important;font-weight:700!important;}
+.v228-history-book-modal .v219-page h2,.v228-history-book-modal .v219-page h3{font-family:"Lucida Handwriting","Brush Script MT","Segoe Script",cursive!important;text-transform:none!important;letter-spacing:.02em!important;}
+.v228-history-book-modal .v219-page h2{font-size:clamp(30px,2.45vw,48px)!important;margin-bottom:.28em!important;}
+.v228-history-book-modal .v219-page p{font-size:clamp(16px,1.08vw,21px)!important;line-height:1.16!important;margin:.25em 0 .55em!important;}
+.v228-book-nav{gap:10px!important;margin-top:14px!important;}
+.v228-book-nav button{font-size:clamp(15px,1vw,20px)!important;line-height:1.05!important;padding:10px 13px!important;}
+.v228-book-table{table-layout:auto!important;width:100%!important;font-size:clamp(15px,.98vw,20px)!important;}
+.v228-book-table th,.v228-book-table td{font-size:clamp(15px,.98vw,20px)!important;line-height:1.05!important;padding:.26em .25em!important;white-space:nowrap!important;border-bottom:1px solid rgba(75,38,12,.28)!important;}
+.v228-book-table th{font-size:clamp(13px,.82vw,17px)!important;}
+.v228-book-table th button{all:unset;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;}
+.v228-book-table th:first-child,.v228-book-table td:first-child{width:7%!important;text-align:left!important;}
+.v228-book-table th:nth-child(2),.v228-book-table td:nth-child(2){width:auto!important;}
+.v228-book-table th:nth-child(n+4),.v228-book-table td:nth-child(n+4){text-align:right!important;}
+.v232-unavailable{opacity:.48;}
+.v232-stat-note{font-size:clamp(13px,.85vw,17px)!important;opacity:.85;}
+@media(max-width:820px){
+  .v228-history-book-modal .v219-history-shell{width:99vw!important;aspect-ratio:auto!important;}
+  .v228-history-book-modal .v219-page.right{overflow:auto!important;}
+  .v228-history-book-modal .v219-page h2{font-size:28px!important;}
+  .v228-history-book-modal .v219-page p{font-size:15px!important;}
+  .v228-book-table{min-width:720px!important;}
+  .v228-book-table th,.v228-book-table td{font-size:15px!important;padding:6px 7px!important;}
 }
 </style>
 
