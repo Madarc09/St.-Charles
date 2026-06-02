@@ -71,7 +71,7 @@ function cleanDraft(input) {
   const draftOrder = Array.isArray(body.draftOrder) ? body.draftOrder.map(String).filter(id => allowedOwners.has(id)) : [];
   const picks = Array.isArray(body.picks) ? body.picks : [];
 
-  return {
+  const cleaned = {
     owners: cleanedOwners.length ? cleanedOwners : defaultOwners,
     draftOrder: draftOrder.length === 5 ? draftOrder : ['nick', 'chris', 'andrew', 'tyler', 'scott'],
     picks: picks.map((p, index) => ({
@@ -99,6 +99,15 @@ function cleanDraft(input) {
     })).filter(p => allowedOwners.has(p.ownerId) && p.player.id),
     updatedAt: new Date().toISOString()
   };
+
+  // Preserve draft/reset metadata so a deliberate roster reset does not get
+  // overwritten by the static 2025-2026 history roster fallback on reload.
+  if (body.__manualRosterReset) cleaned.__manualRosterReset = true;
+  if (body.__rostersClearedAt) cleaned.__rostersClearedAt = String(body.__rostersClearedAt);
+  if (body.draftClosed === true) cleaned.draftClosed = true;
+  if (body.__seasonLockedRecord) cleaned.__seasonLockedRecord = String(body.__seasonLockedRecord);
+  if (body.__fromStaticSeasonRecord) cleaned.__fromStaticSeasonRecord = true;
+  return cleaned;
 }
 
 module.exports = async function handler(req, res) {

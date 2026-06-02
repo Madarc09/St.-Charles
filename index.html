@@ -2926,6 +2926,12 @@
           }
 
           const empty = defaultDraft();
+          try {
+            if (localStorage.getItem("custom-hockey-pool-rosters-manually-cleared") === "true") {
+              empty.__manualRosterReset = true;
+              empty.__rostersClearedAt = new Date().toISOString();
+            }
+          } catch(e) {}
           empty.__source = data && data.configured === false ? "shared API empty temporary" : "shared API empty";
           empty.__configured = data ? data.configured : null;
           empty.__storage = data ? data.storage : "api";
@@ -2957,6 +2963,8 @@
         if (!res.ok || !data.ok) throw new Error(data.error || "Shared draft save failed.");
 
         const saved = data.draft && Array.isArray(data.draft.picks) ? data.draft : clean;
+        if (clean.__manualRosterReset) saved.__manualRosterReset = true;
+        if (clean.__rostersClearedAt) saved.__rostersClearedAt = clean.__rostersClearedAt;
         saved.__source = data.configured ? "shared API persistent" : "shared API temporary";
         saved.__configured = data.configured;
         saved.__storage = data.storage || "api";
@@ -2968,6 +2976,11 @@
       async function resetSharedDraftOfficial(){
         try { await fetch("/api/draft", { method:"DELETE" }); } catch(e) {}
         const fresh = defaultDraft();
+        fresh.picks = [];
+        fresh.draftClosed = false;
+        fresh.__manualRosterReset = true;
+        fresh.__rostersClearedAt = new Date().toISOString();
+        try { localStorage.setItem("custom-hockey-pool-rosters-manually-cleared", "true"); } catch(e) {}
         return saveSharedDraftOfficial(fresh).catch(() => fresh);
       }
 
@@ -4096,6 +4109,18 @@
         return (window.__lastYearStaticRosters && typeof window.__lastYearStaticRosters === "object") ? window.__lastYearStaticRosters : {};
       }
 
+      const ROSTER_RESET_KEY = "custom-hockey-pool-rosters-manually-cleared";
+      function markRostersManuallyCleared(){
+        try { localStorage.setItem(ROSTER_RESET_KEY, "true"); } catch(e) {}
+      }
+      function clearRostersManuallyCleared(){
+        try { localStorage.removeItem(ROSTER_RESET_KEY); } catch(e) {}
+      }
+      function rostersWereManuallyCleared(){
+        try { if (localStorage.getItem(ROSTER_RESET_KEY) === "true") return true; } catch(e) {}
+        return !!(draft && draft.__manualRosterReset);
+      }
+
       function hasFullStaticSeasonRosters(){
         const rosters = lastYearStaticRosters();
         return OWNERS.every(o => Array.isArray(rosters[o.id]) && rosters[o.id].length >= 12);
@@ -4131,6 +4156,9 @@
 
       function applyStaticSeasonLockIfNeeded(){
         if (!draft) return;
+        // If Nick has intentionally reset/cleared rosters for draft testing, do not
+        // auto-rebuild the old 2025-2026 roster list from the static history file.
+        if (rostersWereManuallyCleared()) return;
         if (!hasFullStaticSeasonRosters()) return;
         if (Array.isArray(draft.picks) && draft.picks.length > 0) return;
         draft.picks = staticSeasonPicks();
@@ -4634,6 +4662,8 @@
 
       async function autoDraftEntireDraft(){
         await loadSharedDraft();
+        clearRostersManuallyCleared();
+        if (draft) { draft.__manualRosterReset = false; delete draft.__rostersClearedAt; }
         if (isDraftClosed()) { showDraftClosed("Rosters full. Draft closed."); return toast("Rosters full. Draft closed."); }
         if (!playersLoaded || !players.length) return toast("Pull NHL players first.");
         if (!confirm("Auto draft the entire remaining draft?")) return;
@@ -4660,11 +4690,20 @@
 
       async function resetLiveDraft(){
         if (!confirm("Reset the shared live draft picks for everyone?")) return;
+        markRostersManuallyCleared();
         draft = window.officialDraftApi ? await window.officialDraftApi.reset() : defaultDraft();
         draft.draftOrder = draftOrder();
+        draft.picks = [];
+        draft.draftClosed = false;
+        delete draft.__seasonLockedRecord;
+        delete draft.__fromStaticSeasonRecord;
+        draft.__manualRosterReset = true;
+        draft.__rostersClearedAt = new Date().toISOString();
         await saveSharedDraft();
+        window.__currentLiveDraft = draft;
+        if (window.renderDraftRosters) window.renderDraftRosters(draft);
         renderRoom();
-        toast("Shared live draft reset.");
+        toast("Shared live draft reset. Rosters are now blank for the next draft.");
       }
 
       async function startRoom(){
@@ -8509,6 +8548,13 @@
     }
 ];
   const OWNER_ORDER = ['chris','nick','andrew','tyler','scott','ricoh'];
+  const TEST_SEASONS_KEY = 'custom-hockey-pool-test-history-seasons';
+  function readTestSeasons(){
+    try {
+      const items = JSON.parse(localStorage.getItem(TEST_SEASONS_KEY) || '[]');
+      return Array.isArray(items) ? items.filter(s => s && Array.isArray(s.standings)) : [];
+    } catch(e) { return []; }
+  }
   let activeView = 'total';
   let modal = null;
   let bookSort = { view:'total', key:'total', dir:'desc' };
@@ -8525,10 +8571,16 @@
     }));
   }
   function allSeasons(){
-    const seasons = STATIC_SEASONS.map(s=>({...s, standings:s.standings.map(r=>({...r}))}));
+    let seasons = STATIC_SEASONS.map(s=>({...s, standings:s.standings.map(r=>({...r}))}));
     const live = liveSeasonRows();
     if(live){ seasons[0] = {...seasons[0], note:'Live 2025-2026 values from the Previous Season standings board/NHL API pull.', standings:live}; }
+    const tests = readTestSeasons().map(s=>({...s, standings:s.standings.map(r=>({...r})), testSeason:true}));
+    if (tests.length) {
+      const testIds = new Set(tests.map(t => String(t.id)));
+      seasons = seasons.filter(s => !testIds.has(String(s.id))).concat(tests);
+    }
     seasons.forEach(season=>{ season.standings.sort((a,b)=>b.pts-a.pts || String(a.team).localeCompare(String(b.team))); season.standings.forEach((r,i)=>r.rank=i+1); });
+    seasons.sort((a,b)=>String(b.id||'').localeCompare(String(a.id||'')));
     return seasons;
   }
   function aggregateRows(){
@@ -8636,6 +8688,8 @@
     return modal;
   }
   function openBook(){ activeView='total'; ensureModal().classList.add('is-open'); draw(); }
+  window.refreshHockeyHistoryBook = function(){ if(modal) draw(); };
+  window.getHockeyHistoryBookSeasons = allSeasons;
   document.addEventListener('click',function(e){
     const b=e.target.closest&&e.target.closest('#rosterCards .straight-book-hotzone, #rosters .straight-book-hotzone');
     if(!b) return;
@@ -9626,6 +9680,128 @@
   window.addEventListener('load', function(){ fix(); setTimeout(fix,250); setTimeout(fix,1500); });
   window.addEventListener('resize', fix, {passive:true});
   if(document.readyState !== 'loading') fix();
+})();
+</script>
+
+
+<style id="v252-end-season-reset-fix-style">
+  .v252-end-season-btn{background:linear-gradient(135deg,#7a3015,#d69b44)!important;border-color:rgba(255,226,154,.55)!important;color:#fff8dc!important;font-weight:900!important;}
+  .v252-clear-test-btn{background:rgba(77,16,16,.86)!important;border-color:rgba(255,160,135,.5)!important;color:#ffe1d9!important;}
+</style>
+<script id="v252-end-season-and-real-reset-fix">
+(function(){
+  'use strict';
+  const TEST_KEY = 'custom-hockey-pool-test-history-seasons';
+  const RESET_KEY = 'custom-hockey-pool-rosters-manually-cleared';
+  const OWNERS = [
+    {id:'nick', owner:'Nick', team:'Glizzy Disposal'},
+    {id:'chris', owner:'Chris', team:'CeCe Hairless Horde'},
+    {id:'andrew', owner:'Andrew', team:'Between The Pipes'},
+    {id:'tyler', owner:'Tyler', team:'Puck Slut'},
+    {id:'scott', owner:'Scott', team:'Scott'}
+  ];
+  function toast(message){ const t=document.getElementById('toast'); if(!t) return alert(message); t.textContent=message; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+  function readTests(){ try{ const v=JSON.parse(localStorage.getItem(TEST_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+  function writeTests(items){ try{ localStorage.setItem(TEST_KEY, JSON.stringify(items)); }catch(e){} }
+  function markReset(){ try{ localStorage.setItem(RESET_KEY,'true'); }catch(e){} }
+  function yearTextFromId(id){ return String(id||'').replace(/^(\d{4})(\d{4})$/,'$1-$2'); }
+  function nextSeasonId(){
+    const base = ['20232024','20242025','20252026'];
+    const tests = readTests().map(s=>String(s.id||''));
+    let maxStart = 2025;
+    base.concat(tests).forEach(id=>{ const m=String(id).match(/^(\d{4})(\d{4})$/); if(m) maxStart=Math.max(maxStart, Number(m[1])); });
+    const start = maxStart + 1;
+    return String(start) + String(start + 1);
+  }
+  function playerPts(player){
+    const p = player || {};
+    const explicit = Number(p.fantasyPoints ?? p.fpts);
+    if (Number.isFinite(explicit) && explicit) return explicit;
+    const pos = String(p.position || p.type || '').toUpperCase();
+    if (pos === 'G' || pos === 'TG' || pos === 'GOALIE') {
+      return (Number(p.goalieWins||0)*2) + (Number(p.goalieAssists||p.assists||0)*5) + (Number(p.goalieGoals||p.goals||0)*10) + (Number(p.goalieShutouts||0)*5);
+    }
+    return (Number(p.goals||0)*2) + Number(p.assists||0) + (Number(p.shortHandedGoals||p.shGoals||0)*5) + (Number(p.gameWinningGoals||p.gwGoals||0)*5);
+  }
+  async function loadDraft(){
+    if (window.officialDraftApi && window.officialDraftApi.load) return await window.officialDraftApi.load();
+    return window.__currentLiveDraft || {owners:OWNERS,picks:[]};
+  }
+  async function resetDraftToBlank(){
+    markReset();
+    let fresh = null;
+    if (window.officialDraftApi && window.officialDraftApi.reset) fresh = await window.officialDraftApi.reset();
+    else fresh = {owners:OWNERS.map(o=>({id:o.id,name:o.owner,teamName:o.owner})), draftOrder:OWNERS.map(o=>o.id), picks:[]};
+    fresh.picks = [];
+    fresh.draftClosed = false;
+    fresh.__manualRosterReset = true;
+    fresh.__rostersClearedAt = new Date().toISOString();
+    delete fresh.__seasonLockedRecord;
+    delete fresh.__fromStaticSeasonRecord;
+    if (window.officialDraftApi && window.officialDraftApi.save) fresh = await window.officialDraftApi.save(fresh);
+    window.__currentLiveDraft = fresh;
+    if (window.renderDraftRosters) window.renderDraftRosters(fresh);
+    if (window.renderDraftRoomLottery) window.renderDraftRoomLottery(fresh);
+    if (window.v91DraftRoom && window.v91DraftRoom.refreshRoom) setTimeout(()=>window.v91DraftRoom.refreshRoom(), 50);
+    return fresh;
+  }
+  async function endSeason(){
+    const draft = await loadDraft();
+    const picks = Array.isArray(draft && draft.picks) ? draft.picks : [];
+    if (!picks.length) return toast('No drafted rosters found. Run the draft first.');
+    const seasonId = nextSeasonId();
+    const totals = {};
+    OWNERS.forEach(o=>totals[o.id]={ownerId:o.id, team:o.team, pts:0});
+    picks.forEach(p=>{
+      const ownerId = String(p.ownerId||'').toLowerCase();
+      if (!totals[ownerId]) totals[ownerId] = {ownerId, team:p.ownerName||ownerId, pts:0};
+      totals[ownerId].pts += playerPts(p.player||{});
+    });
+    const standings = Object.values(totals).filter(r=>r.pts || picks.some(p=>String(p.ownerId).toLowerCase()===r.ownerId))
+      .sort((a,b)=>b.pts-a.pts || String(a.team).localeCompare(String(b.team)))
+      .map((r,i)=>({rank:i+1, ownerId:r.ownerId, team:r.team, pts:Math.round(r.pts)}));
+    const record = {
+      id: seasonId,
+      label: yearTextFromId(seasonId) + ' Test Season',
+      source: 'end-season-test-button',
+      testSeason: true,
+      savedAt: new Date().toISOString(),
+      championOwnerId: standings[0] && standings[0].ownerId,
+      standings
+    };
+    const tests = readTests().filter(s=>String(s.id)!==seasonId);
+    tests.push(record);
+    tests.sort((a,b)=>String(b.id).localeCompare(String(a.id)));
+    writeTests(tests);
+    if (window.refreshHockeyHistoryBook) window.refreshHockeyHistoryBook();
+    await resetDraftToBlank();
+    toast('Ended season: saved '+yearTextFromId(seasonId)+' to test history and reset draft.');
+  }
+  async function clearTestSeasons(){
+    if (!confirm('Clear only fake/test seasons and reset the draft back to blank? Real 2023-2024, 2024-2025, and 2025-2026 history stays safe.')) return;
+    try{ localStorage.removeItem(TEST_KEY); }catch(e){}
+    if (window.refreshHockeyHistoryBook) window.refreshHockeyHistoryBook();
+    await resetDraftToBlank();
+    toast('Cleared test seasons. Real saved history is unchanged.');
+  }
+  function installButtons(){
+    const host = document.querySelector('.admin-draft-actions') || document.querySelector('#cleanAutoDraftBtn')?.parentElement;
+    if (!host || document.getElementById('endSeasonBtn')) return;
+    const end = document.createElement('button');
+    end.id = 'endSeasonBtn'; end.type = 'button'; end.className = 'primary v252-end-season-btn'; end.textContent = 'End Season';
+    const clear = document.createElement('button');
+    clear.id = 'clearTestSeasonsBtn'; clear.type = 'button'; clear.className = 'danger v252-clear-test-btn'; clear.textContent = 'Clear Test Seasons';
+    host.appendChild(end); host.appendChild(clear);
+  }
+  document.addEventListener('click', function(e){
+    const end = e.target.closest && e.target.closest('#endSeasonBtn');
+    if (end){ e.preventDefault(); e.stopPropagation(); endSeason(); return; }
+    const clear = e.target.closest && e.target.closest('#clearTestSeasonsBtn');
+    if (clear){ e.preventDefault(); e.stopPropagation(); clearTestSeasons(); return; }
+  }, true);
+  window.addEventListener('load', ()=>setTimeout(installButtons, 350));
+  window.endHockeyPoolSeasonForTest = endSeason;
+  window.clearHockeyPoolTestSeasons = clearTestSeasons;
 })();
 </script>
 
