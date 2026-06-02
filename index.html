@@ -11133,3 +11133,115 @@
   if(document.readyState !== 'loading') fix();
 })();
 </script>
+
+<script id="v255-draft-picks-drive-home-rosters-and-stat-source">
+(function(){
+  'use strict';
+  const RESET_KEY = 'custom-hockey-pool-rosters-manually-cleared';
+  const API_URL = '/api/draft';
+  let lastSignature = '';
+
+  function hasLivePicks(draft){
+    return !!(draft && Array.isArray(draft.picks) && draft.picks.length > 0 && !draft.__fromStaticSeasonRecord && !draft.__seasonLockedRecord);
+  }
+  function clearResetFlag(){
+    try { localStorage.removeItem(RESET_KEY); } catch(e) {}
+  }
+  function signature(draft){
+    if (!draft || !Array.isArray(draft.picks)) return 'empty';
+    return String(draft.updatedAt || '') + '|' + draft.picks.length + '|' + draft.picks.map(function(p){
+      return [p.pickNumber,p.ownerId,p.player && p.player.id,p.player && p.player.name,p.player && (p.player.fantasyPoints ?? p.player.fpts ?? p.player.points)].join(':');
+    }).join('|');
+  }
+  function publishDraft(draft){
+    if (!draft || !Array.isArray(draft.picks)) return false;
+    if (hasLivePicks(draft)) {
+      clearResetFlag();
+      draft.__manualRosterReset = false;
+      delete draft.__rostersClearedAt;
+    }
+    window.__currentLiveDraft = draft;
+    lastSignature = signature(draft);
+    if (typeof window.renderDraftRosters === 'function') {
+      try { window.renderDraftRosters(draft); } catch(e) {}
+    }
+    if (window.liveLottery && typeof window.liveLottery.renderLiveDraftTicker === 'function') {
+      try { window.liveLottery.renderLiveDraftTicker(draft, true); } catch(e) {}
+    }
+    if (typeof window.__v253RenderBlankOrLiveHomeRosters === 'function') {
+      try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e) {}
+      setTimeout(function(){ try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e) {} }, 120);
+      setTimeout(function(){ try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e) {} }, 550);
+    }
+    if (typeof window.__v243BuildMobileHomeRosterChart === 'function') {
+      setTimeout(function(){ try { window.__v243BuildMobileHomeRosterChart(); } catch(e) {} }, 180);
+      setTimeout(function(){ try { window.__v243BuildMobileHomeRosterChart(); } catch(e) {} }, 700);
+    }
+    return true;
+  }
+  async function syncFromApi(force){
+    try {
+      const res = await fetch(API_URL + '?t=' + Date.now(), { cache:'no-store' });
+      const data = await res.json().catch(function(){ return {}; });
+      const draft = data && data.draft;
+      if (!draft || !Array.isArray(draft.picks)) return;
+      const sig = signature(draft);
+      if (force || sig !== lastSignature || hasLivePicks(draft)) publishDraft(draft);
+    } catch(e) {}
+  }
+
+  function hookOfficialDraftApi(){
+    if (!window.officialDraftApi || window.officialDraftApi.__v255Hooked) return;
+    const api = window.officialDraftApi;
+    const oldLoad = api.load;
+    const oldSave = api.save;
+    const oldReset = api.reset;
+    if (typeof oldLoad === 'function') {
+      api.load = async function(){
+        const draft = await oldLoad.apply(this, arguments);
+        publishDraft(draft);
+        return draft;
+      };
+    }
+    if (typeof oldSave === 'function') {
+      api.save = async function(draft){
+        if (hasLivePicks(draft)) clearResetFlag();
+        const saved = await oldSave.apply(this, arguments);
+        publishDraft(saved || draft);
+        return saved;
+      };
+    }
+    if (typeof oldReset === 'function') {
+      api.reset = async function(){
+        const fresh = await oldReset.apply(this, arguments);
+        publishDraft(fresh);
+        return fresh;
+      };
+    }
+    api.__v255Hooked = true;
+  }
+
+  function install(){
+    hookOfficialDraftApi();
+    publishDraft(window.__currentLiveDraft);
+    setTimeout(function(){ syncFromApi(true); }, 300);
+    setTimeout(function(){ syncFromApi(true); }, 1200);
+    setTimeout(function(){ syncFromApi(true); }, 2800);
+  }
+
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.closest && e.target.closest('#cleanAutoDraftBtn,[data-clean-sign],#resetLiveDraftBtn,#resetDraftBtn,#adminResetDraftBtn,#endSeasonBtn,#clearTestSeasonsBtn')) {
+      setTimeout(hookOfficialDraftApi, 0);
+      setTimeout(function(){ syncFromApi(true); }, 250);
+      setTimeout(function(){ syncFromApi(true); }, 950);
+      setTimeout(function(){ syncFromApi(true); }, 2200);
+    }
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', install);
+  window.addEventListener('load', install);
+  setInterval(function(){ hookOfficialDraftApi(); syncFromApi(false); }, 2500);
+
+  window.__v255SyncDraftToHomeRosters = function(){ return syncFromApi(true); };
+})();
+</script>
