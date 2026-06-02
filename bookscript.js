@@ -12,7 +12,7 @@
     {
         "id": "20252026",
         "label": "2025-2026 Regular Season",
-        "note": "Saved history file.",
+        "note": "Saved history file verified from OnlinePools screenshot.",
         "standings": [
             {
                 "rank": 1,
@@ -24,7 +24,7 @@
                 "rank": 2,
                 "ownerId": "chris",
                 "team": "CeCe Hairless Horde",
-                "pts": 1357
+                "pts": 1362
             },
             {
                 "rank": 3,
