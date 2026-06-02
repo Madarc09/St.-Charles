@@ -83,18 +83,21 @@ function cleanDraft(input) {
       timestamp: String(p.timestamp || new Date().toISOString()),
       player: {
         id: String(p.player?.id || ''),
-        name: String(p.player?.name || ''),
+        name: String(p.player?.name || (String(p.player?.position || '').toUpperCase() === 'TG' ? `${p.player?.nhlTeam || 'NHL'} Team Goalies` : 'Drafted Player')),
         position: String(p.player?.position || ''),
         nhlTeam: String(p.player?.nhlTeam || ''),
         gamesPlayed: Number(p.player?.gamesPlayed || 0),
         goals: Number(p.player?.goals || 0),
         assists: Number(p.player?.assists || 0),
         points: Number(p.player?.points || 0),
+        goalieGoals: Number(p.player?.goalieGoals || p.player?.goals || 0),
+        goalieAssists: Number(p.player?.goalieAssists || p.player?.assists || 0),
         goalieWins: Number(p.player?.goalieWins || 0),
         goalieShutouts: Number(p.player?.goalieShutouts || 0),
         savePct: Number(p.player?.savePct || 0),
         goalsAgainstAverage: Number(p.player?.goalsAgainstAverage || 0),
-        fantasyPoints: Number(p.player?.fantasyPoints || 0)
+        fantasyPoints: Number(p.player?.fantasyPoints || p.player?.fpts || 0),
+        fpts: Number(p.player?.fpts || p.player?.fantasyPoints || 0)
       }
     })).filter(p => allowedOwners.has(p.ownerId) && p.player.id),
     updatedAt: new Date().toISOString()

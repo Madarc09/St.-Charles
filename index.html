@@ -3455,11 +3455,7 @@
         setTimeout(function () { t.classList.remove("show"); }, 2600);
       }
       function currentSeasonId() {
-        var now = new Date();
-        var year = now.getFullYear();
-        var month = now.getMonth() + 1;
-        var start = month >= 7 ? year : year - 1;
-        return String(start) + String(start + 1);
+        return "20252026";
       }
       function defaultState() {
         return {
@@ -4026,11 +4022,9 @@
       }
 
       function currentSeasonId(){
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = now.getMonth() + 1;
-        const start = m >= 7 ? y : y - 1;
-        return String(start) + String(start + 1);
+        // Draft testing should use the completed 2025-2026 regular-season stat pool.
+        // Do not roll this automatically by calendar date while we are testing the draft/rollover flow.
+        return "20252026";
       }
 
       function bucket(position){
@@ -4624,18 +4618,21 @@
           timestamp: new Date().toISOString(),
           player: {
             id: String(player.id),
-            name: player.name,
+            name: player.name || (player.position === "TG" ? ((player.nhlTeam || "NHL") + " Team Goalies") : "Drafted Player"),
             position: player.position,
             nhlTeam: player.nhlTeam,
             gamesPlayed: player.gamesPlayed || 0,
             goals: player.goals || 0,
             assists: player.assists || 0,
             points: player.points || 0,
+            goalieGoals: player.goalieGoals || player.goals || 0,
+            goalieAssists: player.goalieAssists || player.assists || 0,
             goalieWins: player.goalieWins || 0,
             goalieShutouts: player.goalieShutouts || 0,
             savePct: player.savePct || 0,
             goalsAgainstAverage: player.goalsAgainstAverage || 0,
-            fantasyPoints: fp(player)
+            fantasyPoints: fp(player),
+            fpts: fp(player)
           }
         });
       }
@@ -4814,11 +4811,7 @@
       }
 
       function currentSeasonId(){
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-        const start = month >= 7 ? year : year - 1;
-        return String(start) + String(start + 1);
+        return "20252026";
       }
 
       function toast(message){
@@ -9871,7 +9864,11 @@
     if (!player || String(player.name || '').toUpperCase() === 'TBA') {
       return { name:'TBA', fpts:0, position: goalie ? 'G' : 'F', type: goalie ? 'goalie' : 'skater', goals:0, assists:0, shortHandedGoals:0, gameWinningGoals:0 };
     }
-    return Object.assign({}, player, { fpts: fp(player) });
+    const fixed = Object.assign({}, player);
+    if (!String(fixed.name || '').trim() && isGoalie(fixed)) fixed.name = (fixed.nhlTeam || fixed.team || 'NHL') + ' Team Goalies';
+    if (!String(fixed.name || '').trim()) fixed.name = 'Drafted Player';
+    fixed.fpts = fp(fixed);
+    return fixed;
   }
   function blankPlayers(){
     const skaters = Array.from({length:10}, () => playerRow(null, false));
@@ -9995,6 +9992,81 @@
   }
 })();
 </script>
+
+
+<script id="v256-roster-cache-and-2025-stat-source-fix">
+(function(){
+  'use strict';
+  const RESET_KEY = 'custom-hockey-pool-rosters-manually-cleared';
+  const DRAFT_BACKUP_KEY = 'custom-hockey-pool-v40-clean-live-draft';
+  const OLD_APP_STATE_KEY = 'custom-hockey-pool-v30-last-year-rosters';
+  const TEST_SEASON_KEY = 'hockey-pool-test-seasons-v1';
+
+  function status(msg){ try{ if (typeof toast === 'function') toast(msg); }catch(e){} }
+
+  async function reloadLiveDraftToHome(){
+    if (window.__v255SyncDraftToHomeRosters) { try { await window.__v255SyncDraftToHomeRosters(); } catch(e){} }
+    if (window.__v253RenderBlankOrLiveHomeRosters) {
+      try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e){}
+      setTimeout(function(){ try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e){} }, 120);
+      setTimeout(function(){ try { window.__v253RenderBlankOrLiveHomeRosters(); } catch(e){} }, 650);
+    }
+    if (window.__v243BuildMobileHomeRosterChart) {
+      setTimeout(function(){ try { window.__v243BuildMobileHomeRosterChart(); } catch(e){} }, 180);
+      setTimeout(function(){ try { window.__v243BuildMobileHomeRosterChart(); } catch(e){} }, 780);
+    }
+  }
+
+  async function clearRosterDisplayCache(){
+    let hadLivePicks = false;
+    try {
+      const res = await fetch('/api/draft?t=' + Date.now(), { cache:'no-store' });
+      const data = await res.json().catch(function(){ return {}; });
+      hadLivePicks = !!(data && data.draft && Array.isArray(data.draft.picks) && data.draft.picks.length);
+      if (hadLivePicks) {
+        window.__currentLiveDraft = data.draft;
+        try { localStorage.removeItem(RESET_KEY); } catch(e){}
+      }
+    } catch(e) {}
+
+    // Remove only stale display/cache states that can flash the old static 2025-2026 roster.
+    // Do not remove the permanent history JSON and do not remove test-season history.
+    try { localStorage.removeItem(OLD_APP_STATE_KEY); } catch(e){}
+    try { localStorage.removeItem(DRAFT_BACKUP_KEY); } catch(e){}
+    if (!hadLivePicks) { try { localStorage.setItem(RESET_KEY, 'true'); } catch(e){} }
+
+    await reloadLiveDraftToHome();
+    status(hadLivePicks ? 'Roster display cache cleared. Showing live drafted rosters.' : 'Roster display cache cleared. No live picks found, so rosters show TBA.');
+  }
+
+  function installButton(){
+    const host = document.querySelector('.admin-draft-actions') || document.querySelector('#cleanAutoDraftBtn')?.parentElement;
+    if (!host || document.getElementById('clearRosterDisplayCacheBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'clearRosterDisplayCacheBtn';
+    btn.type = 'button';
+    btn.className = 'warning';
+    btn.textContent = 'Clear Roster Cache';
+    btn.title = 'Clears stale roster display cache only. It does not delete saved history.';
+    host.appendChild(btn);
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target && e.target.closest && e.target.closest('#clearRosterDisplayCacheBtn');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    clearRosterDisplayCache();
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){ installButton(); setTimeout(installButton, 500); });
+  window.addEventListener('load', function(){ installButton(); setTimeout(installButton, 900); setTimeout(reloadLiveDraftToHome, 1100); });
+
+  window.__v256ClearRosterDisplayCache = clearRosterDisplayCache;
+})();
+</script>
+
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
@@ -10593,7 +10665,11 @@
     return out;
   }
   function playerLine(player){
-    return '<div class="v243-player-row"><span class="v243-player-name">' + esc(shortName(player.name)) + '</span><span class="v243-player-fpts">' + num(player.fpts) + '</span></div>';
+    var name = player && player.name ? player.name : '';
+    if (!name && isGoalie(player)) name = (player.nhlTeam || player.team || 'NHL') + ' Team Goalies';
+    if (!name) name = 'TBA';
+    var pts = player && (player.fpts ?? player.fantasyPoints ?? player.pts ?? player.points);
+    return '<div class="v243-player-row"><span class="v243-player-name">' + esc(shortName(name)) + '</span><span class="v243-player-fpts">' + num(pts) + '</span></div>';
   }
   function card(row){
     var players = Array.isArray(row.players) ? row.players.slice() : [];
@@ -10615,7 +10691,7 @@
     var diag = window.__lastSeasonApiDiagnostics;
     if (!diag || !Array.isArray(diag.rows) || !diag.rows.length) return;
     var rows = orderedRows(diag.rows).slice(0, 5);
-    var signature = rows.map(function(r){ return r.ownerId + ':' + num(r.total); }).join('|');
+    var signature = rows.map(function(r){ return r.ownerId + ':' + num(r.total) + ':' + (Array.isArray(r.players) ? r.players.map(function(p){ return [p.id,p.name,p.nhlTeam,p.fpts,p.fantasyPoints].join('~'); }).join(',') : ''); }).join('|');
     var existing = layout.querySelector('.v243-mobile-rosters');
     if (existing && existing.getAttribute('data-signature') === signature) return;
     if (existing) existing.remove();
