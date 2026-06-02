@@ -2460,7 +2460,6 @@
     <button class="tab active" data-tab="dashboard">Home</button>
     <button class="tab" data-tab="draft">Draft Room</button>
     <button class="tab" data-tab="rosters">Trophy Room</button>
-    <button class="tab" data-tab="previousSeason">Previous Season</button>
     <button class="tab" data-tab="teams">Teams</button>
     <button class="tab" data-tab="rules">Rules Editor</button>
     <button class="tab" data-tab="admin">Admin</button>
@@ -2480,7 +2479,6 @@
           <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-chris" type="button" data-roster-owner="chris" aria-label="Open Chris's roster room"></button>
         </div>
         <nav class="home-image-nav" aria-label="Homepage navigation">
-          <button class="home-image-link" type="button" data-tab="previousSeason">Previous Season</button>
           <button class="home-image-link" type="button" data-tab="teams">Teams</button>
           <button class="home-image-link" type="button" data-tab="rules">Rules</button>
           <button class="home-image-link" type="button" data-tab="admin">Admin</button>
@@ -2494,27 +2492,6 @@
       </article>
     </section>
 
-    <section id="previousSeason" class="panel previous-season-panel">
-      <article class="card home-leaderboard-card previous-season-card">
-        <div class="section-head compact-head">
-          <div>
-            <p class="eyebrow">Season of Record</p>
-            <h2>Previous Season • 2025-2026 Regular Season</h2>
-            <p class="muted">This tab saves last season's rosters and calculates the final fantasy standings using the current pool scoring rules.</p>
-          </div>
-          <button class="primary" id="refreshPreviousSeasonBtn" type="button">Refresh 2025-26 Stats</button>
-        </div>
-        <div id="previousSeasonStatus" class="official-source-status">Source: loading…</div>
-        <div id="previousSeasonTable" class="table-wrap playoff-leaderboard-wrap">
-          <div class="clean-loading-card">
-            <strong>Previous season leaderboard loading…</strong>
-            <span>Pulling regular-season stats and calculating fantasy points.</span>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    
     <section id="draft" class="panel clean-live-draft-shell">
 <div id="cleanDraftRoom" class="clean-draft-room">
 
@@ -10180,8 +10157,7 @@
     var nav = document.createElement('nav');
     nav.className = 'trophy-lobby-bottom-nav';
     nav.setAttribute('aria-label', 'Trophy room bottom navigation');
-    nav.innerHTML = '<button class="trophy-lobby-bottom-link" type="button" data-tab="previousSeason">Previous Season</button>' +
-      '<button class="trophy-lobby-bottom-link" type="button" data-tab="teams">Teams</button>' +
+    nav.innerHTML = '<button class="trophy-lobby-bottom-link" type="button" data-tab="teams">Teams</button>' +
       '<button class="trophy-lobby-bottom-link" type="button" data-tab="rules">Rules</button>' +
       '<button class="trophy-lobby-bottom-link" type="button" data-tab="admin">Admin</button>';
     shell.appendChild(nav);
