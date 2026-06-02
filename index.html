@@ -9805,6 +9805,196 @@
 })();
 </script>
 
+
+
+<style id="v253-blank-rosters-reset-visible">
+  /* v253: when draft/rosters are reset, do not keep showing manually seeded 2025-2026 rosters on Home. Show TBA rows and zero standings instead. */
+  @media (max-width: 820px) {
+    #leaderboardTable.home-chalk-leaderboard-overlay .v243-player-row.v253-tba-row {
+      opacity: .78 !important;
+      font-style: italic !important;
+    }
+  }
+</style>
+<script id="v253-roster-reset-home-source-fix">
+(function(){
+  'use strict';
+  const RESET_KEY = 'custom-hockey-pool-rosters-manually-cleared';
+  const OWNERS = [
+    { id:'nick', ownerName:'Nick', teamName:'Glizzy Disposal' },
+    { id:'chris', ownerName:'Chris', teamName:'CeCe Hairless Horde' },
+    { id:'andrew', ownerName:'Andrew', teamName:'Between The Pipes' },
+    { id:'tyler', ownerName:'Tyler', teamName:'Puck Slut' },
+    { id:'scott', ownerName:'Scott', teamName:'Scott' }
+  ];
+  function esc(value){ return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  function num(value){ const n=Number(value); return Number.isFinite(n) ? n : 0; }
+  function fp(player){
+    const p = player || {};
+    for (const key of ['fpts','fantasyPoints','pts','points']) {
+      if (p[key] !== undefined && p[key] !== null && p[key] !== '') {
+        const n = Number(p[key]);
+        if (Number.isFinite(n)) return n;
+      }
+    }
+    const pos = String(p.position || p.type || '').toUpperCase();
+    if (pos === 'G' || pos === 'TG' || pos === 'GOALIE') {
+      return (num(p.goalieWins || p.wins) * 2) + (num(p.goalieAssists || p.assists) * 5) + (num(p.goalieGoals || p.goals) * 10) + (num(p.goalieShutouts || p.shutouts) * 5);
+    }
+    return (num(p.goals) * 2) + num(p.assists) + (num(p.shortHandedGoals || p.shg) * 5) + (num(p.gameWinningGoals || p.gwg) * 5);
+  }
+  function isGoalie(player){
+    const p = player || {};
+    const pos = String(p.position || p.type || '').toUpperCase();
+    return pos === 'G' || pos === 'TG' || pos === 'GOALIE' || String(p.name || '').toLowerCase().includes('goalie');
+  }
+  function shortName(name){
+    const s=String(name||'').trim();
+    if(!s || s.toUpperCase()==='TBA') return 'TBA';
+    const parts=s.split(/\s+/);
+    return parts.length<=2 ? s : parts[0]+' '+parts[parts.length-1];
+  }
+  function resetFlag(){
+    try { if (localStorage.getItem(RESET_KEY) === 'true') return true; } catch(e) {}
+    const d = window.__currentLiveDraft;
+    return !!(d && d.__manualRosterReset && (!Array.isArray(d.picks) || d.picks.length === 0));
+  }
+  function currentDraft(){ return window.__currentLiveDraft || null; }
+  function hasRealDraftPicks(){
+    const d = currentDraft();
+    return !!(d && Array.isArray(d.picks) && d.picks.length > 0 && !d.__fromStaticSeasonRecord && !d.__seasonLockedRecord);
+  }
+  function shouldUseLiveOrBlank(){ return resetFlag() || hasRealDraftPicks(); }
+  function ownerLabel(owner){ return owner.ownerName || owner.name || owner.teamName || owner.id; }
+  function teamLabel(owner){ return owner.teamName || owner.team || ownerLabel(owner); }
+  function playerRow(player, goalie){
+    if (!player || String(player.name || '').toUpperCase() === 'TBA') {
+      return { name:'TBA', fpts:0, position: goalie ? 'G' : 'F', type: goalie ? 'goalie' : 'skater', goals:0, assists:0, shortHandedGoals:0, gameWinningGoals:0 };
+    }
+    return Object.assign({}, player, { fpts: fp(player) });
+  }
+  function blankPlayers(){
+    const skaters = Array.from({length:10}, () => playerRow(null, false));
+    const goalies = Array.from({length:2}, () => playerRow(null, true));
+    return skaters.concat(goalies);
+  }
+  function buildRowsFromDraft(){
+    const draft = currentDraft();
+    const ownerDefs = (draft && Array.isArray(draft.owners) && draft.owners.length ? draft.owners : OWNERS).map(o => {
+      const id = String(o.id || '').toLowerCase();
+      const meta = OWNERS.find(x => x.id === id) || {};
+      return { id, ownerName: meta.ownerName || o.name || o.teamName || id, teamName: meta.teamName || o.teamName || o.name || id };
+    });
+    const grouped = new Map(ownerDefs.map(o => [o.id, []]));
+    if (draft && Array.isArray(draft.picks)) {
+      draft.picks.forEach(pick => {
+        const ownerId = String(pick.ownerId || '').toLowerCase();
+        if (!grouped.has(ownerId)) grouped.set(ownerId, []);
+        if (pick.player) grouped.get(ownerId).push(playerRow(pick.player, isGoalie(pick.player)));
+      });
+    }
+    return ownerDefs.map(owner => {
+      const rawPlayers = grouped.get(owner.id) || [];
+      const skaters = rawPlayers.filter(p => !isGoalie(p)).slice(0, 10);
+      const goalies = rawPlayers.filter(isGoalie).slice(0, 2);
+      while (skaters.length < 10) skaters.push(playerRow(null, false));
+      while (goalies.length < 2) goalies.push(playerRow(null, true));
+      const players = skaters.concat(goalies);
+      return {
+        ownerId: owner.id,
+        ownerName: owner.ownerName,
+        teamName: owner.teamName,
+        total: Math.round(players.reduce((sum,p)=>sum+fp(p),0)),
+        players
+      };
+    });
+  }
+  function totals(row){
+    const players = Array.isArray(row.players) ? row.players : [];
+    return {
+      goals: players.reduce((s,p)=>s+num(p.goals),0),
+      assists: players.reduce((s,p)=>s+num(p.assists),0),
+      shg: players.reduce((s,p)=>s+num(p.shortHandedGoals||p.shg),0),
+      gwg: players.reduce((s,p)=>s+num(p.gameWinningGoals||p.gwg),0)
+    };
+  }
+  function renderStandings(rows){
+    return '<section class="v182-standings"><table class="v182-standings-table" aria-label="Pool standings"><thead><tr><th>Team</th><th>FPTS</th><th>G</th><th>A</th><th>SHG</th><th>GWG</th></tr></thead><tbody>' +
+      rows.map(row => { const t=totals(row); return '<tr><td>'+esc(row.ownerName)+'</td><td>'+num(row.total)+'</td><td>'+t.goals+'</td><td>'+t.assists+'</td><td>'+t.shg+'</td><td>'+t.gwg+'</td></tr>'; }).join('') +
+      '</tbody></table></section>';
+  }
+  function renderV182Card(row){
+    const players = Array.isArray(row.players) ? row.players : blankPlayers();
+    const skaters = players.filter(p => !isGoalie(p)).slice(0,10);
+    const goalies = players.filter(isGoalie).slice(0,2);
+    const line = p => '<div class="v182-player-row'+(String(p.name).toUpperCase()==='TBA'?' v253-tba-row':'')+'"><span>'+esc(shortName(p.name))+'</span><span>'+num(fp(p))+'</span></div>';
+    return '<article class="v182-roster-card"><h3 class="v182-owner-name">'+esc(row.ownerName)+'</h3><div class="v182-roster-head"><span>Player Name</span><span>FPTS</span></div>'+skaters.map(line).join('')+'<div class="v182-goalie-break">'+goalies.map(line).join('')+'</div></article>';
+  }
+  function renderV182Rosters(rows){
+    const order=['nick','chris','andrew','tyler','scott'];
+    const byId=new Map(rows.map(r=>[r.ownerId,r]));
+    const ordered=order.map(id=>byId.get(id)).filter(Boolean);
+    rows.forEach(r=>{ if(!ordered.includes(r)) ordered.push(r); });
+    return '<section class="v182-rosters"><div class="v182-roster-grid">'+ordered.slice(0,5).map(renderV182Card).join('')+'</div></section>';
+  }
+  function renderHomeFromRows(){
+    if (!shouldUseLiveOrBlank()) return false;
+    const host = document.getElementById('leaderboardTable');
+    if (!host || !host.classList.contains('home-chalk-leaderboard-overlay')) return false;
+    const rows = buildRowsFromDraft().sort((a,b)=>num(b.total)-num(a.total) || String(a.ownerName).localeCompare(String(b.ownerName)));
+    window.__lastSeasonApiDiagnostics = { rows: rows.map(r => Object.assign({}, r, { players: r.players.map(p=>Object.assign({}, p)) })), source:'live-draft-or-blank-reset-v253' };
+    host.innerHTML = '<div class="v182-chalk-layout">'+renderStandings(rows)+renderV182Rosters(rows)+'</div>';
+    if (window.__v243BuildMobileHomeRosterChart) setTimeout(window.__v243BuildMobileHomeRosterChart, 0);
+    return true;
+  }
+  function maybeRender(){
+    if (renderHomeFromRows()) {
+      setTimeout(renderHomeFromRows,80);
+      setTimeout(function(){ if(window.__v243BuildMobileHomeRosterChart) window.__v243BuildMobileHomeRosterChart(); },160);
+    }
+  }
+  const oldRender = window.renderV182HomeChalkboard;
+  window.renderV182HomeChalkboard = function(){
+    if (renderHomeFromRows()) return true;
+    return typeof oldRender === 'function' ? oldRender.apply(this, arguments) : false;
+  };
+  window.__v253RenderBlankOrLiveHomeRosters = maybeRender;
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(maybeRender,350); setTimeout(maybeRender,1200); });
+  window.addEventListener('load', function(){ setTimeout(maybeRender,350); setTimeout(maybeRender,1400); setTimeout(maybeRender,3200); });
+  document.addEventListener('click', function(e){
+    if (e.target.closest && e.target.closest('#cleanResetDraftBtn,#resetDraftBtn,#resetSharedDraftBtn,#resetLiveDraftBtn,#endSeasonBtn,#clearTestSeasonsBtn')) {
+      setTimeout(maybeRender,250); setTimeout(maybeRender,900); setTimeout(maybeRender,1800);
+    }
+  }, true);
+})();
+</script>
+
+<script id="v253-end-season-points-and-reset-hook">
+(function(){
+  'use strict';
+  const RESET_KEY = 'custom-hockey-pool-rosters-manually-cleared';
+  function markReset(){ try{ localStorage.setItem(RESET_KEY,'true'); }catch(e){} }
+  function rerender(){ if (window.__v253RenderBlankOrLiveHomeRosters) window.__v253RenderBlankOrLiveHomeRosters(); }
+  const oldEnd = window.endHockeyPoolSeasonForTest;
+  if (typeof oldEnd === 'function') {
+    window.endHockeyPoolSeasonForTest = async function(){
+      const result = await oldEnd.apply(this, arguments);
+      markReset();
+      setTimeout(rerender, 120); setTimeout(rerender, 700); setTimeout(rerender, 1600);
+      return result;
+    };
+  }
+  const oldClear = window.clearHockeyPoolTestSeasons;
+  if (typeof oldClear === 'function') {
+    window.clearHockeyPoolTestSeasons = async function(){
+      const result = await oldClear.apply(this, arguments);
+      markReset();
+      setTimeout(rerender, 120); setTimeout(rerender, 700); setTimeout(rerender, 1600);
+      return result;
+    };
+  }
+})();
+</script>
 </body>
 </html>
 <style id="v217-trophy-room-home-size-and-bottom-nav">
