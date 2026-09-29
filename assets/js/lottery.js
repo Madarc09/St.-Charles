@@ -18,13 +18,21 @@
       let tickerLastTime = 0;
       let tickerAnimationId = 0;
       let resultsTickerSignature = "";
+      let lastObservedPickCount = null;
       window.__v127ResultsTicker = window.__v127ResultsTicker || {
         cards: [],
         index: 0,
         intervalId: 0,
         lastRenderedKey: "",
-        started: false
+        started: false,
+        takeoverActive: false,
+        takeoverQueue: [],
+        takeoverTimer: 0
       };
+      // V262: keep these fields available when upgrading from an older in-memory ticker object.
+      window.__v127ResultsTicker.takeoverActive = false;
+      window.__v127ResultsTicker.takeoverQueue = [];
+      window.__v127ResultsTicker.takeoverTimer = 0;
       let skipLotteryReveal = false;
 
       function startSportsTicker(){
@@ -220,6 +228,118 @@
         return map[id] || "";
       }
 
+      function cancelPickTakeover(){
+        const state = window.__v127ResultsTicker;
+        if (!state) return;
+        clearTimeout(state.takeoverTimer);
+        state.takeoverTimer = 0;
+        state.takeoverActive = false;
+        state.takeoverQueue = [];
+        state.lastRenderedKey = "";
+        document.querySelector("#v120TickerSystem .v126-results-row")?.classList.remove("v262-pick-takeover-active");
+        setResultsTickerTitle("Draft Results");
+      }
+
+      function observeNewPickCards(cards, pickCount){
+        const currentCount = Number(pickCount || 0);
+        if (lastObservedPickCount === null) {
+          // First paint is only a baseline. Do not announce an old pick when somebody opens the page mid-draft.
+          lastObservedPickCount = currentCount;
+          return [];
+        }
+
+        if (currentCount <= lastObservedPickCount) {
+          // Covers undo/reset/end-season. The next real pick should still announce normally.
+          if (currentCount < lastObservedPickCount) cancelPickTakeover();
+          lastObservedPickCount = currentCount;
+          return [];
+        }
+
+        const firstNewIndex = lastObservedPickCount;
+        lastObservedPickCount = currentCount;
+        if (!window.PoolApp?.inDraft) return [];
+
+        const announced = cards.slice(firstNewIndex, currentCount).filter(card => card && card.type === "filled");
+        // Normal live drafting produces one at a time. If a commissioner auto-fills a test draft,
+        // avoid trapping the ticker in a minute-long announcement queue.
+        return announced.length > 3 ? announced.slice(-1) : announced;
+      }
+
+      function setResultsTickerTitle(text){
+        const title = document.getElementById("v262ResultsTitleText");
+        if (title) title.textContent = text;
+      }
+
+      function queuePickTakeover(cards){
+        const state = window.__v127ResultsTicker;
+        if (!state || !Array.isArray(cards) || !cards.length) return;
+
+        for (const card of cards) {
+          if (!card || card.type !== "filled") continue;
+          const key = `takeover-${card.key}`;
+          if (state.takeoverQueue.some(item => item._takeoverKey === key)) continue;
+          state.takeoverQueue.push({ ...card, _takeoverKey:key });
+        }
+        if (!state.takeoverActive) runNextPickTakeover();
+      }
+
+      function pickRevealHtml(card){
+        const image = card.pic
+          ? `<img class="v262-pick-reveal-image ${card.picType === "team-logo" ? "v136-team-goalie-logo" : ""}" src="${safeHtml(card.pic)}" alt="" loading="eager">`
+          : `<span class="v262-pick-reveal-number">${safeHtml(card.pickNumber)}</span>`;
+        return `<div class="v262-pick-takeover is-reveal">
+          ${image}
+          <span class="v262-pick-reveal-copy">
+            <small>${safeHtml(String(card.owner || "").toUpperCase())} SELECTS</small>
+            <strong>${safeHtml(card.player)}</strong>
+            <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • Overall pick ${safeHtml(card.pickNumber)}</em>
+          </span>
+        </div>`;
+      }
+
+      function runNextPickTakeover(){
+        const state = window.__v127ResultsTicker;
+        const host = document.getElementById("v126ResultsCardHost");
+        const row = document.querySelector("#v120TickerSystem .v126-results-row");
+        const roundPickLabel = document.getElementById("v135RoundPickLabel");
+        if (!state || !host || !row || state.takeoverActive || !state.takeoverQueue.length) return;
+
+        const card = state.takeoverQueue.shift();
+        state.takeoverActive = true;
+        state.lastRenderedKey = "";
+        clearTimeout(state.takeoverTimer);
+        row.classList.add("v262-pick-takeover-active");
+        setResultsTickerTitle("LIVE PICK");
+        if (roundPickLabel) roundPickLabel.textContent = `R:${card.roundNumber || ""} P:${card.pickInRound || ""}`;
+
+        host.innerHTML = `<div class="v262-pick-takeover is-alert"><strong>THE PICK IS IN</strong></div>`;
+
+        state.takeoverTimer = setTimeout(() => {
+          host.innerHTML = pickRevealHtml(card);
+          const reveal = host.querySelector(".v262-pick-takeover.is-reveal");
+          if (reveal) {
+            void reveal.offsetWidth;
+            reveal.classList.add("show");
+          }
+
+          state.takeoverTimer = setTimeout(() => {
+            state.takeoverActive = false;
+            row.classList.remove("v262-pick-takeover-active");
+            setResultsTickerTitle("Draft Results");
+            state.lastRenderedKey = "";
+
+            // Continue the regular results ticker after the announcement.
+            const justPickedIndex = state.cards.findIndex(item => item && item.key === card.key);
+            if (justPickedIndex >= 0 && state.cards.length) state.index = (justPickedIndex + 1) % state.cards.length;
+            renderSingleResultCard(state.cards[state.index] || state.cards[0]);
+
+            if (state.takeoverQueue.length) {
+              state.takeoverTimer = setTimeout(runNextPickTakeover, 450);
+            }
+          }, 4300);
+        }, 1800);
+      }
+
       function renderLiveDraftTicker(draft, force = false){
         const cardHost = document.getElementById("v126ResultsCardHost");
         if (!cardHost) return;
@@ -292,6 +412,7 @@
           }
         }
 
+        const newlyPickedCards = observeNewPickCards(newCards, picks.length);
         const resultsSignature = `${picks.length}|${picks.map(p => (p.pickNumber || "") + ":" + (p.player && (p.player.id || p.player.playerId || p.player.nhlId) || "")).join(",")}`;
         const signature = `${pickIndex}|${order.join(",")}|${resultsSignature}`;
 
@@ -301,6 +422,7 @@
 
         // Bottom Draft Results ticker only. No live/upcoming ticker is rendered in V129.
         setV127ResultsCards(newCards, resultsSignature);
+        if (newlyPickedCards.length) queuePickTakeover(newlyPickedCards);
       }
 
       function resultCardHtml(card){
@@ -376,7 +498,7 @@
         if (!state.started) {
           state.started = true;
           startV127ResultsTicker();
-        } else if (!document.getElementById("v126ResultsCard")) {
+        } else if (!state.takeoverActive && !document.getElementById("v126ResultsCard")) {
           renderSingleResultCard(state.cards[state.index] || state.cards[0]);
         }
       }
@@ -387,7 +509,7 @@
 
         function tick(){
           const currentState = window.__v127ResultsTicker;
-          if (!currentState.cards.length || document.hidden || !window.PoolApp?.inDraft) return;
+          if (!currentState.cards.length || currentState.takeoverActive || document.hidden || !window.PoolApp?.inDraft) return;
 
           if (currentState.index >= currentState.cards.length) currentState.index = 0;
 

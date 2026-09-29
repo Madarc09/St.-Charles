@@ -1,11 +1,19 @@
-# v261 visual draft-control update
+# v262 live pick ticker takeover
+
+## Live pick announcement
+- Every newly saved shared draft pick temporarily takes over the bottom Draft Results ticker.
+- The ticker flashes **THE PICK IS IN**, then reveals **MANAGER SELECTS PLAYER** with the player/team details.
+- After the reveal, the normal rotating Draft Results ticker resumes automatically.
+- The announcement is driven from shared draft state, so other managers viewing the Draft Room see the same saved pick on their next live refresh.
+- Opening the page mid-draft does not replay an old pick as if it were new.
+
 
 - Active Draft action is now a black hockey-puck button with white DRAFT text.
 - The previous Wait state now names the manager on the clock, for example “Nick is picking”.
 - Full-position and Saving states remain explicit.
 - All v260 roster-room/live-roster changes are retained.
 
-# Basement Bar League — v260
+# Basement Bar League — v262
 
 The draft-room upgrade for your existing GitHub → Vercel website.
 
