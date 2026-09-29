@@ -1,3 +1,10 @@
+# v261 visual draft-control update
+
+- Active Draft action is now a black hockey-puck button with white DRAFT text.
+- The previous Wait state now names the manager on the clock, for example “Nick is picking”.
+- Full-position and Saving states remain explicit.
+- All v260 roster-room/live-roster changes are retained.
+
 # Basement Bar League — v260
 
 The draft-room upgrade for your existing GitHub → Vercel website.

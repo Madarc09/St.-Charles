@@ -209,27 +209,60 @@ body.v259-draft-active #toast{bottom:175px}
 #downloadSeasonArchive{margin-top:22px;background:#d3b47d;color:#0c1822;border:0;border-radius:5px;padding:12px;font-size:11px}
 @media(max-width:620px){.season-archive-dialog{padding:18px}.season-archive-dialog h2{font-size:18px}.archive-roster-grid{grid-template-columns:1fr}.archive-roster table{font-size:12px}.v228-history-book-modal .archive-detail-button{font-size:10px!important;margin-top:9px!important;padding:6px 8px}}
 
-/* v260: make the Draft / Wait action readable without changing the draft-board layout. */
-#draft [data-pick-player] {
-  color:#101820;
-  background:linear-gradient(180deg,#f2d99f,#c9a35d);
-  border-color:#f3dca8;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 2px 8px rgba(0,0,0,.24);
-  text-shadow:none;
+/* v261: turn the active Draft action into a black hockey puck and show who is picking instead of a generic Wait label. */
+#draft .draft-player-row{grid-template-columns:minmax(230px,1fr) 65px 80px 85px 70px 120px}
+#draft [data-pick-player]{
+  width:100%;
+  min-height:40px;
+  font-weight:850;
+  letter-spacing:.015em;
+  text-align:center;
 }
-#draft [data-pick-player]:disabled {
+#draft .draft-status-button:disabled{
   color:#eef7ff;
   background:linear-gradient(180deg,#31536e,#1b344a);
-  border-color:#6e9ab9;
+  border:1px solid #6e9ab9;
+  border-radius:5px;
   opacity:1;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 7px rgba(0,0,0,.22);
   text-shadow:0 1px 1px rgba(0,0,0,.72);
+  font-size:11px;
+  line-height:1.15;
+  padding:7px 6px;
+}
+#draft .draft-puck-button,
+#draft .draft-puck-button:not(:disabled){
+  justify-self:center;
+  width:68px;
+  min-width:68px;
+  height:46px;
+  min-height:46px;
+  padding:0 7px;
+  color:#fff;
+  background:linear-gradient(180deg,#333 0%,#1a1a1a 32%,#050505 36%,#000 100%);
+  border:2px solid #484848;
+  border-radius:50%;
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.08),inset 0 -5px 0 #000,0 4px 0 #050505,0 7px 12px rgba(0,0,0,.6);
+  text-shadow:0 1px 2px #000;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+#draft .draft-puck-button:hover:not(:disabled),
+#draft .draft-puck-button:focus-visible:not(:disabled){
+  background:linear-gradient(180deg,#444 0%,#202020 32%,#080808 36%,#000 100%);
+  border-color:#737373;
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.1),inset 0 -5px 0 #000,0 4px 0 #050505,0 8px 15px rgba(0,0,0,.72);
+}
+#draft .draft-puck-button:active:not(:disabled){
+  transform:translateY(2px);
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.07),inset 0 -4px 0 #000,0 2px 0 #050505,0 4px 8px rgba(0,0,0,.65);
 }
 @media(max-width:820px){
-  #draft [data-pick-player],
-  #draft [data-pick-player]:disabled {
-    font-size:11px;
-    font-weight:850;
-    letter-spacing:.015em;
-  }
+  #draft .draft-player-row{grid-template-columns:repeat(4,minmax(0,1fr)) 100px}
+  #draft [data-pick-player]{font-size:10px;font-weight:850;letter-spacing:.01em}
+  #draft .draft-status-button:disabled{font-size:10px;line-height:1.15;padding:6px 4px}
+  #draft .draft-puck-button,
+  #draft .draft-puck-button:not(:disabled){width:64px;min-width:64px;height:43px;min-height:43px;font-size:10px;letter-spacing:.06em;padding:0 5px}
 }
