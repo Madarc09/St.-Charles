@@ -1,3 +1,10 @@
+# v263 pick reveal visibility fix
+
+- Fixed the live ticker takeover going black after **THE PICK IS IN**.
+- The manager name, selected player, position/team and overall pick now render visibly during the reveal.
+- Added a CSS + JavaScript visibility fallback so the reveal cannot remain stuck at `opacity: 0`.
+- All v262 draft ticker, roster-room, puck button and shared-draft behavior is otherwise unchanged.
+
 # v262 live pick ticker takeover
 
 ## Live pick announcement

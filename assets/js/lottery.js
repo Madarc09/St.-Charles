@@ -320,6 +320,9 @@
           if (reveal) {
             void reveal.offsetWidth;
             reveal.classList.add("show");
+            // V263 visibility guard: never allow the saved-pick reveal to remain black/hidden.
+            reveal.style.setProperty("opacity", "1", "important");
+            reveal.style.setProperty("transform", "scale(1) translateY(0)", "important");
           }
 
           state.takeoverTimer = setTimeout(() => {
