@@ -133,3 +133,11 @@ The local test preview is `http://127.0.0.1:8787/?room=test-local#draft`. It use
 Validation performed for this ZIP: automated concurrent-pick, lottery, roster-limit, archive, stale-data refusal, test-isolation, pagination, migration, and scoring checks; JavaScript syntax, HTML IDs, asset references, and unchanged original image/history checks.
 
 Still to verify after upload: desktop/mobile rendering in your browsers, your existing production Redis connection, and real NHL responses from Vercel. This session’s preview browser could not open the local build, and the live NHL endpoint was unavailable from the review environment. The two-device guide covers those checks; do them in the test room first.
+
+## v265 — live 2026–27 stat refresh
+- Current-season NHL totals now refresh in the browser about once per minute instead of every five minutes.
+- Current-season `/api/nhl` responses no longer sit in the CDN cache; the server uses a short shared NHL cache to protect the upstream feed while keeping all five managers current.
+- Returning to the Home board, bringing the tab back into view, or reconnecting triggers a current-stat check.
+- Home status now clearly says `LIVE NHL`, shows the last official NHL update time, and notes the ~60 second check cadence.
+- Draft comparison data remains previous-season data and historical-season caching remains long-lived.
+- Team-goalie scoring remains the league rule: W 2, A 5, G 10, SO 5. A goalie unit can therefore correctly show 0 FPTS while a game is still undecided or after a loss.
