@@ -1,3 +1,12 @@
+# v268 live stat lines in Roster Rooms
+
+- Roster Rooms now use the same current-season player objects that power the Home standings.
+- Skaters display **GP, G, A, SHG, GWG, FPTS**.
+- Team-goalie entries display **GP, W, A, G, SO, FPTS**.
+- The roster board continues to populate automatically from saved shared-draft picks.
+- While a roster room is open, a live NHL stat refresh now re-renders that room so its stat line stays in sync with Home.
+- Browser asset version bumped to `?v=268` so the updated roster-room code is fetched after deploy.
+
 # v264 permanent Last Pick display
 
 - Removed the rotating Draft Results ticker behavior.

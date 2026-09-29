@@ -1,3 +1,9 @@
+## v268 Roster Room live-stat check
+1. Open a manager's Roster Room after at least one player has been drafted.
+2. Confirm skaters show GP / G / A / SHG / GWG / FPTS and goalies show GP / W / A / G / SO / FPTS.
+3. Confirm the player list still comes from the shared saved draft.
+4. Leave the Roster Room open through a live-stat refresh and confirm the stat row updates without changing rooms.
+
 # A safe rehearsal on your phone and computer
 
 Run this after uploading v259 and waiting for Vercel to finish deploying.

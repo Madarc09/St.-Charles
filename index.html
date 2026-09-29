@@ -2470,29 +2470,52 @@
     letter-spacing: .045em !important;
     font-weight: 950 !important;
   }
+  /* v268: the locker board now uses the same live player totals as Home. */
+  #rosters .v260-roster-stat-head,
   #rosters .v260-roster-player {
     display: grid !important;
-    grid-template-columns: minmax(0,1fr) auto !important;
-    gap: 8px !important;
-    align-items: baseline !important;
+    grid-template-columns: minmax(0, 2.75fr) repeat(5, minmax(0, .48fr)) minmax(0, .78fr) !important;
+    column-gap: clamp(2px, .28vw, 5px) !important;
+    align-items: center !important;
     min-width: 0 !important;
-    padding: .65% 1% !important;
-    font-size: clamp(8px, 1.05vw, 17px) !important;
-    line-height: 1.08 !important;
-    letter-spacing: .035em !important;
-    font-weight: 800 !important;
   }
-  #rosters .v260-roster-player span {
+  #rosters .v260-roster-stat-head {
+    padding: 0 1% .7% !important;
+    color: #989b9d !important;
+    font-size: clamp(5px, .5vw, 8px) !important;
+    line-height: 1 !important;
+    letter-spacing: .03em !important;
+    font-weight: 900 !important;
+    text-align: right !important;
+  }
+  #rosters .v260-roster-stat-head span:first-child { text-align: left !important; }
+  #rosters .v260-roster-player {
+    padding: .52% 1% !important;
+    font-size: clamp(6px, .68vw, 11px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: .015em !important;
+    font-weight: 850 !important;
+    border-bottom: 1px solid rgba(255,255,255,.035) !important;
+  }
+  #rosters .v260-roster-player .v268-name {
     min-width: 0 !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
+    text-align: left !important;
+    color: #f0f0ec !important;
   }
-  #rosters .v260-roster-player em {
-    color: #c9c9c3 !important;
-    font-style: normal !important;
-    font-weight: 750 !important;
-    letter-spacing: .08em !important;
+  #rosters .v260-roster-player .v268-stat {
+    min-width: 0 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    color: #c8c9c4 !important;
+    font-variant-numeric: tabular-nums !important;
+  }
+  #rosters .v260-roster-player .v268-fpts {
+    color: #ffffff !important;
+    font-weight: 950 !important;
+    text-shadow: 0 0 7px rgba(47,131,229,.28) !important;
   }
   #rosters .v260-roster-player.is-empty { opacity: .24 !important; }
   @media (max-width: 760px) {
@@ -2508,9 +2531,12 @@
     #rosters .v260-roster-section h3 {
       font-size: clamp(10px, 2.05svh, 17px) !important;
     }
+    #rosters .v260-roster-stat-head {
+      font-size: clamp(5px, .72svh, 7px) !important;
+    }
     #rosters .v260-roster-player {
-      font-size: clamp(8px, 1.55svh, 13px) !important;
-      gap: 5px !important;
+      font-size: clamp(6px, 1.05svh, 10px) !important;
+      column-gap: 3px !important;
     }
   }
 </style>
@@ -2947,18 +2973,50 @@
       const raw = String(player?.name || 'TBA');
       return rosterBucket(player) === 'G' ? raw.replace(/\s+Goalies$/i, '') : raw;
     }
+    function liveRosterStats(ownerId, roster){
+      const safeRoster = Array.isArray(roster) ? roster : [];
+      const rows = window.__lastSeasonApiDiagnostics?.rows;
+      const liveRow = Array.isArray(rows) ? rows.find(row => String(row?.ownerId || '').toLowerCase() === String(ownerId || '').toLowerCase()) : null;
+      const livePlayers = Array.isArray(liveRow?.players) ? liveRow.players : [];
+      if (!livePlayers.length) return safeRoster;
+      const byId = new Map(livePlayers.filter(p => p?.id != null).map(p => [String(p.id), p]));
+      return safeRoster.map(player => {
+        const idMatch = player?.id != null ? byId.get(String(player.id)) : null;
+        if (idMatch) return {...player, ...idMatch};
+        const name = String(player?.name || '').trim().toLowerCase();
+        const team = String(player?.nhlTeam || player?.team || '').trim().toUpperCase();
+        const nameMatch = livePlayers.find(p => String(p?.name || '').trim().toLowerCase() === name && (!team || String(p?.nhlTeam || p?.team || '').trim().toUpperCase() === team));
+        return nameMatch ? {...player, ...nameMatch} : player;
+      });
+    }
+    function rosterStatNumber(value){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+    function rosterStatText(value){
+      const n = rosterStatNumber(value);
+      return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10);
+    }
     function rosterBoardSection(roster, bucket, label, slots){
       const players = roster.filter(player => rosterBucket(player) === bucket).slice(0, slots);
+      const goalie = bucket === 'G';
+      const head = goalie
+        ? ['PLAYER','GP','W','A','G','SO','FPTS']
+        : ['PLAYER','GP','G','A','SHG','GWG','FPTS'];
+      const header = `<div class="v260-roster-stat-head">${head.map(h => `<span>${h}</span>`).join('')}</div>`;
       const rows = Array.from({length:slots}, (_, index) => {
         const player = players[index];
-        if (!player) return '<div class="v260-roster-player is-empty"><span>—</span><em></em></div>';
-        return `<div class="v260-roster-player"><span>${esc(rosterBoardName(player))}</span><em>${esc(player.nhlTeam || '')}</em></div>`;
+        if (!player) return `<div class="v260-roster-player is-empty"><span class="v268-name">—</span>${Array.from({length:6},()=>'<span class="v268-stat">—</span>').join('')}</div>`;
+        const stats = goalie
+          ? [player.gamesPlayed, player.goalieWins, player.goalieAssists ?? player.assists, player.goalieGoals ?? player.goals, player.goalieShutouts, player.fpts ?? player.fantasyPoints]
+          : [player.gamesPlayed, player.goals, player.assists, player.shortHandedGoals ?? player.shGoals, player.gameWinningGoals, player.fpts ?? player.fantasyPoints];
+        return `<div class="v260-roster-player"><span class="v268-name" title="${esc(rosterBoardName(player))} · ${esc(player.nhlTeam || '')}">${esc(rosterBoardName(player))}</span>${stats.map((value, i) => `<span class="v268-stat${i === stats.length - 1 ? ' v268-fpts' : ''}">${esc(rosterStatText(value))}</span>`).join('')}</div>`;
       }).join('');
-      return `<section class="v260-roster-section"><h3>${label}</h3>${rows}</section>`;
+      return `<section class="v260-roster-section"><h3>${label}</h3>${header}${rows}</section>`;
     }
-    function renderLiveRosterBoard(roster){
-      const safeRoster = Array.isArray(roster) ? roster : [];
-      return `<div class="v260-live-roster" aria-label="Current saved roster">
+    function renderLiveRosterBoard(ownerId, roster){
+      const safeRoster = liveRosterStats(ownerId, roster);
+      return `<div class="v260-live-roster" aria-label="Current saved roster with live season statistics">
         ${rosterBoardSection(safeRoster, 'F', 'FORWARDS', 6)}
         ${rosterBoardSection(safeRoster, 'D', 'DEFENSE', 4)}
         ${rosterBoardSection(safeRoster, 'G', 'GOALIES', 2)}
@@ -2975,7 +3033,7 @@
           <div class="v174-stall-stage">
             <div class="v260-stall-scene">
               <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.name)} roster room">
-              ${renderLiveRosterBoard(roster)}
+              ${renderLiveRosterBoard(active.id, roster)}
               <button type="button" class="v219-championships-hotspot" data-locker-back aria-label="Back to Trophy Room"></button>
             </div>
             <nav class="v174-stall-nav v219-bottom-stall-nav" aria-label="Roster room navigation">
@@ -3045,6 +3103,9 @@
     };
     window.renderDraftRosters = renderWalkableLocker;
     window.renderWalkableLockerRoom = renderWalkableLocker;
+    document.addEventListener('pool:live-stats-updated', () => {
+      if (room.view === 'stall') renderWalkableLocker(room.lastDraft || {});
+    });
     window.addEventListener('load', () => {
       setTimeout(async () => {
         try {
@@ -7149,8 +7210,8 @@
 <dialog id="draftIdentityDialog" class="draft-identity-dialog" aria-labelledby="draftIdentityTitle"><div class="identity-inner"><span class="eyebrow">Welcome to draft night</span><h2 id="draftIdentityTitle">Who is this?</h2><p>Select your name to enter the room.</p><div id="draftIdentityChoices"></div><button id="cancelDraftIdentity" type="button">Back to Home</button></div></dialog>
 <aside id="draftChat" class="draft-chat" hidden><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">Draft chat <span id="chatUnread"></span></button><div id="chatPanel" hidden><div class="chat-heading"><strong>At the draft table</strong><button id="chatClose" type="button" aria-label="Minimize chat">×</button></div><div id="chatMessages" role="log" aria-live="polite" aria-label="Draft chat messages"></div><form id="chatForm"><label class="sr-only" for="chatInput">Message the room</label><input id="chatInput" maxlength="300" autocomplete="off" placeholder="Nice pick…"><button type="submit">Send</button></form><p id="chatStatus" role="status"></p></div></aside>
 <dialog id="seasonArchiveDialog" class="season-archive-dialog" aria-labelledby="seasonArchiveTitle"><header><h2 id="seasonArchiveTitle"></h2><button id="closeSeasonArchive" type="button" aria-label="Close season details">×</button></header><div id="seasonArchiveContent"></div><button id="downloadSeasonArchive" type="button">Download this season’s full record</button></dialog>
-<script defer src="assets/js/pool-core.js?v=267"></script>
-<script defer src="assets/js/app.js?v=267"></script>
+<script defer src="assets/js/pool-core.js?v=268"></script>
+<script defer src="assets/js/app.js?v=268"></script>
 <script defer src="assets/js/lottery.js?v=262"></script>
 <link rel="stylesheet" href="assets/css/draft-room.css?v=260">
 
