@@ -59,9 +59,9 @@ When everything passes, share the normal homepage with your friends. Leave the r
 - **Old layout or old controls:** refresh the page after the deployment is finished. If needed, close the old tab and open the site again.
 - **Any unexpected behavior:** stop the rehearsal and note the step, device, and visible message. A screenshot makes it easier to identify the problem. Avoid using the live reset button to fix a test-room issue.
 
-## v265 live-season scoring check
-1. Deploy v265 and open Home on phone and computer.
-2. Confirm the status under Home says `LIVE NHL`, shows a current update time, and says checks about every 60 sec.
+## v266 live-season scoring check
+1. Deploy v266 and open Home on phone and computer.
+2. Confirm the status under Home says `LIVE NHL`, shows a current update time, and says checks about every 15 sec.
 3. Draft/current rosters should keep using the shared picks; current-season FPTS should come from 2026-27 regular-season NHL totals.
 4. Leave a Home page open during games. Official NHL totals should refresh without a manual reload within roughly a minute of the NHL feed changing.
 5. Remember team-goalie FPTS only use W (2), A (5), G (10), SO (5). A goalie unit may correctly remain at 0 while its game is in progress or after a loss.

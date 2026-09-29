@@ -55,6 +55,22 @@ test('NHL totals, traded goalies, rookies, season scoring and snake turns',async
  const d={draftOrder:C.OWNERS.map(o=>o.id),picks:[]};assert.equal(C.currentPick({...d,picks:Array(4)}).ownerId,'scott');assert.equal(C.currentPick({...d,picks:Array(5)}).ownerId,'scott');assert.equal(C.currentPick({...d,picks:Array(9)}).ownerId,'nick');
  const rows=C.standings({...d,picks:[{ownerId:'nick',player:{id:'123',position:'C',goals:90,assists:80,fpts:500}}]},[]);assert.equal(rows.find(r=>r.ownerId==='nick').pts,0);
 });
+
+test('live GameCenter overlay shows an in-progress goal before season summary catches up',async()=>{
+ fixture.setMultiplier(1);
+ const season=C.seasonId();
+ const data=await NHL.statistics(season,{fresh:true});
+ const scorer=data.players.find(p=>p.id===String(fixture.skaters[0].playerId));
+ const helper=data.players.find(p=>p.id===String(fixture.skaters[1].playerId));
+ assert.equal(data.liveOverlay,true);
+ assert.equal(scorer.goals,fixture.skaters[0].goals+1);
+ assert.equal(helper.assists,fixture.skaters[1].assists+1);
+ assert.equal(scorer.fpts,C.points(scorer));
+ // Also cover opening-night zero-row behavior: the live event must create the stat row.
+ const opening=NHL.applyLive({players:[],goalies:[],teamGoalies:[],fetchedAt:new Date().toISOString()},{fetchedAt:new Date().toISOString(),standings:[],games:[{game:{id:1,season:Number(season),gameType:2,gameState:'LIVE',awayTeam:{abbrev:'MTL',score:0},homeTeam:{abbrev:'TOR',score:1}},landing:{gameState:'LIVE',awayTeam:{abbrev:'MTL',score:0},homeTeam:{abbrev:'TOR',score:1},scoring:[{goals:[{playerId:8479999,name:{default:'Opening Night Scorer'},teamAbbrev:{default:'TOR'},strength:'EV',goalsToDate:1,awayScore:0,homeScore:1,assists:[]}]}]}}]});
+ const created=opening.players.find(p=>p.id==='8479999');
+ assert.ok(created);assert.equal(created.goals,1);assert.equal(created.fpts,2);
+});
 test('paged NHL responses and legacy migration preserve the intended room',async()=>{
  fixture.setPageLimit(25);
  try {const rows=await NHL.report('skater/summary','20232024');assert.equal(rows.length,130);assert.equal(new Set(rows.map(r=>r.playerId)).size,130);}finally{fixture.setPageLimit(Infinity);}
