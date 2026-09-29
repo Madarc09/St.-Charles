@@ -2430,6 +2430,91 @@
   })();
 </script>
 
+
+<style id="v260-live-roster-room-board">
+  /* v260: keep the custom locker-room artwork, but cover the baked previous-season list
+     with the roster currently saved by the shared draft. */
+  #rosters .v260-stall-scene {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    line-height: normal !important;
+  }
+  #rosters .v260-live-roster {
+    position: absolute !important;
+    z-index: 12 !important;
+    left: 35.25% !important;
+    top: 18.15% !important;
+    width: 30.55% !important;
+    height: 64.8% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: clamp(10px, 1.15vw, 18px) clamp(12px, 1.35vw, 22px) !important;
+    background: linear-gradient(180deg, rgba(16,16,15,.995), rgba(7,8,9,.995)) !important;
+    border: 1px solid rgba(174,139,82,.24) !important;
+    box-shadow: inset 0 0 24px rgba(0,0,0,.75), 0 0 12px rgba(31,99,182,.12) !important;
+    color: #e6e6e3 !important;
+    font-family: "Arial Narrow", "Roboto Condensed", Impact, system-ui, sans-serif !important;
+    text-transform: uppercase !important;
+    pointer-events: none !important;
+  }
+  #rosters .v260-roster-section { margin: 0 0 3.2% !important; }
+  #rosters .v260-roster-section:last-child { margin-bottom: 0 !important; }
+  #rosters .v260-roster-section h3 {
+    margin: 0 0 2.3% !important;
+    padding: 0 0 1.5% !important;
+    border-bottom: 1px solid rgba(203,181,132,.72) !important;
+    color: #2f83e5 !important;
+    font-size: clamp(10px, 1.35vw, 21px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: .045em !important;
+    font-weight: 950 !important;
+  }
+  #rosters .v260-roster-player {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto !important;
+    gap: 8px !important;
+    align-items: baseline !important;
+    min-width: 0 !important;
+    padding: .65% 1% !important;
+    font-size: clamp(8px, 1.05vw, 17px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: .035em !important;
+    font-weight: 800 !important;
+  }
+  #rosters .v260-roster-player span {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  #rosters .v260-roster-player em {
+    color: #c9c9c3 !important;
+    font-style: normal !important;
+    font-weight: 750 !important;
+    letter-spacing: .08em !important;
+  }
+  #rosters .v260-roster-player.is-empty { opacity: .24 !important; }
+  @media (max-width: 760px) {
+    #rosters .v260-stall-scene {
+      display: inline-block !important;
+      width: auto !important;
+      height: 100svh !important;
+      vertical-align: top !important;
+    }
+    #rosters .v260-live-roster {
+      padding: 1.45svh 1.55svh !important;
+    }
+    #rosters .v260-roster-section h3 {
+      font-size: clamp(10px, 2.05svh, 17px) !important;
+    }
+    #rosters .v260-roster-player {
+      font-size: clamp(8px, 1.55svh, 13px) !important;
+      gap: 5px !important;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -2794,7 +2879,7 @@
               const pos = rel === 0 ? 'center' : rel === -1 ? 'left' : rel === 1 ? 'right' : rel < -1 ? 'hidden-left' : 'hidden-right';
               return `<button class="trophy-door trophy-door-${pos} ${rel === 0 ? 'is-center' : ''}" data-door-id="${esc(owner.id)}" style="--door-rel:${rel}; --door-index:${idx}">
                 <span class="door-glow"></span>
-                <span class="door-nameplate">${esc(owner.teamName || owner.name)}</span>
+                <span class="door-nameplate">${esc(owner.name)}</span>
                 <span class="door-panel-lines"><i></i><i></i><i></i></span>
                 <span class="door-handle"></span>
                 <span class="door-meta"><b>${esc(stall.number || '—')}</b><em>${count} players</em></span>
@@ -2806,8 +2891,8 @@
           <button class="lobby-arrow lobby-arrow-right" data-lobby-next aria-label="Next locker door">›</button>
           <div class="lobby-control-deck">
             <span>Swipe / rotate</span>
-            <div class="lobby-dots">${owners.map(o=>`<button class="${o.id === room.focus ? 'active' : ''}" data-lobby-dot="${esc(o.id)}" aria-label="Show ${esc(o.teamName || o.name)} door"></button>`).join('')}</div>
-            <button class="lobby-enter" data-lobby-enter>Walk through ${esc((owners[focusIndex]?.teamName || owners[focusIndex]?.name || 'door'))}'s door</button>
+            <div class="lobby-dots">${owners.map(o=>`<button class="${o.id === room.focus ? 'active' : ''}" data-lobby-dot="${esc(o.id)}" aria-label="Show ${esc(o.name)} door"></button>`).join('')}</div>
+            <button class="lobby-enter" data-lobby-enter>Walk through ${esc((owners[focusIndex]?.name || 'door'))}'s door</button>
           </div>
           <div class="lobby-enter-transition" aria-hidden="true"><span></span><b>Entering locker room…</b></div>
         </section>`;
@@ -2853,18 +2938,48 @@
         if (Math.abs(dx) > 40) rotate(dx > 0 ? -1 : 1);
       });
     }
+    function rosterBucket(player){
+      const value = String(player?.position || player?.type || '').toUpperCase();
+      if (['G','TG','GOALIE','TEAMGOALIE'].includes(value)) return 'G';
+      return value === 'D' ? 'D' : 'F';
+    }
+    function rosterBoardName(player){
+      const raw = String(player?.name || 'TBA');
+      return rosterBucket(player) === 'G' ? raw.replace(/\s+Goalies$/i, '') : raw;
+    }
+    function rosterBoardSection(roster, bucket, label, slots){
+      const players = roster.filter(player => rosterBucket(player) === bucket).slice(0, slots);
+      const rows = Array.from({length:slots}, (_, index) => {
+        const player = players[index];
+        if (!player) return '<div class="v260-roster-player is-empty"><span>—</span><em></em></div>';
+        return `<div class="v260-roster-player"><span>${esc(rosterBoardName(player))}</span><em>${esc(player.nhlTeam || '')}</em></div>`;
+      }).join('');
+      return `<section class="v260-roster-section"><h3>${label}</h3>${rows}</section>`;
+    }
+    function renderLiveRosterBoard(roster){
+      const safeRoster = Array.isArray(roster) ? roster : [];
+      return `<div class="v260-live-roster" aria-label="Current saved roster">
+        ${rosterBoardSection(safeRoster, 'F', 'FORWARDS', 6)}
+        ${rosterBoardSection(safeRoster, 'D', 'DEFENSE', 4)}
+        ${rosterBoardSection(safeRoster, 'G', 'GOALIES', 2)}
+      </div>`;
+    }
     function renderStall(target, owners, rosters, active){
       const stall = STALLS[active.id] || STALLS.nick;
+      const roster = rosters[active.id] || [];
       target.className = 'walkable-locker-host v174-photo-only-host';
 
       const navOwners = owners.filter(o => o.id !== active.id);
       target.innerHTML = `
-        <section class="owner-stall-view owner-${esc(active.id)} v174-photo-only-stall" aria-label="${esc(active.teamName || active.name)} roster room">
+        <section class="owner-stall-view owner-${esc(active.id)} v174-photo-only-stall" aria-label="${esc(active.name)} roster room">
           <div class="v174-stall-stage">
-            <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.teamName || active.name)} roster room">
-            <button type="button" class="v219-championships-hotspot" data-locker-back aria-label="Back to Trophy Room"></button>
+            <div class="v260-stall-scene">
+              <img class="owner-stall-img v174-stall-img" src="${esc(stall.image)}" alt="${esc(active.name)} roster room">
+              ${renderLiveRosterBoard(roster)}
+              <button type="button" class="v219-championships-hotspot" data-locker-back aria-label="Back to Trophy Room"></button>
+            </div>
             <nav class="v174-stall-nav v219-bottom-stall-nav" aria-label="Roster room navigation">
-              <button type="button" class="v174-stall-btn v220-stall-home-link" data-stall-home="dashboard">Home</button><button type="button" class="v174-stall-btn v225-stall-trophy-link" data-open-trophy-room> Trophy Room</button>${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.teamName || o.name)}</button>`).join('')}
+              <button type="button" class="v174-stall-btn v220-stall-home-link" data-stall-home="dashboard">Home</button><button type="button" class="v174-stall-btn v225-stall-trophy-link" data-open-trophy-room>Trophy Room</button>${navOwners.map(o=>`<button type="button" class="v174-stall-btn" data-walk-stall="${esc(o.id)}">${esc(o.name)}</button>`).join('')}
             </nav>
           </div>
         </section>`;
@@ -2917,6 +3032,15 @@
         document.body.dataset.activeTab = 'rosters';
       }
       renderWalkableLocker(room.lastDraft || {});
+      const latestDraft = window.PoolApp?.refresh
+        ? window.PoolApp.refresh().then(payload => payload?.draft || window.PoolApp?.state?.draft)
+        : window.officialDraftApi?.load?.();
+      Promise.resolve(latestDraft).then(draft => {
+        if (!draft) return;
+        room.lastDraft = draft;
+        window.__exactLobbyDraft = draft;
+        if (room.view === 'stall' && room.open === id) renderWalkableLocker(draft);
+      }).catch(() => {});
       setTimeout(function(){ rosterPanel && rosterPanel.scrollIntoView({ behavior:'smooth', block:'start' }); }, 50);
     };
     window.renderDraftRosters = renderWalkableLocker;
@@ -7025,10 +7149,10 @@
 <dialog id="draftIdentityDialog" class="draft-identity-dialog" aria-labelledby="draftIdentityTitle"><div class="identity-inner"><span class="eyebrow">Welcome to draft night</span><h2 id="draftIdentityTitle">Who is this?</h2><p>Select your name to enter the room.</p><div id="draftIdentityChoices"></div><button id="cancelDraftIdentity" type="button">Back to Home</button></div></dialog>
 <aside id="draftChat" class="draft-chat" hidden><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">Draft chat <span id="chatUnread"></span></button><div id="chatPanel" hidden><div class="chat-heading"><strong>At the draft table</strong><button id="chatClose" type="button" aria-label="Minimize chat">×</button></div><div id="chatMessages" role="log" aria-live="polite" aria-label="Draft chat messages"></div><form id="chatForm"><label class="sr-only" for="chatInput">Message the room</label><input id="chatInput" maxlength="300" autocomplete="off" placeholder="Nice pick…"><button type="submit">Send</button></form><p id="chatStatus" role="status"></p></div></aside>
 <dialog id="seasonArchiveDialog" class="season-archive-dialog" aria-labelledby="seasonArchiveTitle"><header><h2 id="seasonArchiveTitle"></h2><button id="closeSeasonArchive" type="button" aria-label="Close season details">×</button></header><div id="seasonArchiveContent"></div><button id="downloadSeasonArchive" type="button">Download this season’s full record</button></dialog>
-<script defer src="assets/js/pool-core.js?v=259"></script>
-<script defer src="assets/js/app.js?v=259"></script>
-<script defer src="assets/js/lottery.js?v=259"></script>
-<link rel="stylesheet" href="assets/css/draft-room.css?v=259">
+<script defer src="assets/js/pool-core.js?v=260"></script>
+<script defer src="assets/js/app.js?v=260"></script>
+<script defer src="assets/js/lottery.js?v=260"></script>
+<link rel="stylesheet" href="assets/css/draft-room.css?v=260">
 
 </body>
 </html>

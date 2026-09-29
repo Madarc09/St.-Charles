@@ -1,4 +1,4 @@
-# Basement Bar League — v259
+# Basement Bar League — v260
 
 The draft-room upgrade for your existing GitHub → Vercel website.
 
@@ -14,6 +14,7 @@ Use the same Vercel settings as your existing static site. This project has no b
 
 ## What changed
 
+- **v260 roster-room update:** Draft/Wait buttons have stronger contrast on desktop and mobile. Owner-room navigation uses manager names again (Nick, Andrew, Tyler, Chris, Scott). Each locker room now overlays the roster currently saved in the shared draft, so new picks replace the baked previous-season player list automatically; opening a room refreshes the shared draft first.
 - Entering the draft room requires choosing Nick, Chris, Andrew, Tyler, or Scott. There is no automatic Nick selection and no password. The name is remembered in that browser tab; use the name button to change it.
 - The arena screen shows **Draft Lottery Results**, with all five positions set to **TBA** until the lottery is official.
 - The existing Bettman reveal sequence, ready check, online indicators, commissioner “Confirm for all managers,” skip, and replay are retained. Replay uses the saved order.
