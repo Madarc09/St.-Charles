@@ -237,7 +237,7 @@
         state.takeoverQueue = [];
         state.lastRenderedKey = "";
         document.querySelector("#v120TickerSystem .v126-results-row")?.classList.remove("v262-pick-takeover-active");
-        setResultsTickerTitle("Draft Results");
+        setResultsTickerTitle("Last Pick");
       }
 
       function observeNewPickCards(cards, pickCount){
@@ -283,11 +283,11 @@
         if (!state.takeoverActive) runNextPickTakeover();
       }
 
-      function pickRevealHtml(card){
+      function pickRevealHtml(card, visible = false){
         const image = card.pic
           ? `<img class="v262-pick-reveal-image ${card.picType === "team-logo" ? "v136-team-goalie-logo" : ""}" src="${safeHtml(card.pic)}" alt="" loading="eager">`
           : `<span class="v262-pick-reveal-number">${safeHtml(card.pickNumber)}</span>`;
-        return `<div class="v262-pick-takeover is-reveal">
+        return `<div class="v262-pick-takeover is-reveal${visible ? " show" : ""}">
           ${image}
           <span class="v262-pick-reveal-copy">
             <small>${safeHtml(String(card.owner || "").toUpperCase())} SELECTS</small>
@@ -295,6 +295,30 @@
             <em>${safeHtml(card.pos)}${card.team ? " • " + safeHtml(card.team) : ""} • Overall pick ${safeHtml(card.pickNumber)}</em>
           </span>
         </div>`;
+      }
+
+      function renderLatestPickCard(cards){
+        const state = window.__v127ResultsTicker;
+        const host = document.getElementById("v126ResultsCardHost");
+        const row = document.querySelector("#v120TickerSystem .v126-results-row");
+        const roundPickLabel = document.getElementById("v135RoundPickLabel");
+        if (!state || !host || !Array.isArray(cards) || !cards.length) return;
+
+        const latest = [...cards].reverse().find(card => card && card.type === "filled");
+        row?.classList.remove("v262-pick-takeover-active");
+        setResultsTickerTitle("Last Pick");
+
+        if (latest) {
+          if (roundPickLabel) roundPickLabel.textContent = `R:${latest.roundNumber || ""} P:${latest.pickInRound || ""}`;
+          host.innerHTML = pickRevealHtml(latest, true);
+          state.lastRenderedKey = `last-${latest.key}`;
+          return;
+        }
+
+        const waiting = cards[0];
+        if (roundPickLabel) roundPickLabel.textContent = `R:${waiting?.roundNumber || 1} P:${waiting?.pickInRound || 1}`;
+        host.innerHTML = resultCardHtml(waiting);
+        state.lastRenderedKey = waiting ? `last-${waiting.key}` : "";
       }
 
       function runNextPickTakeover(){
@@ -309,7 +333,7 @@
         state.lastRenderedKey = "";
         clearTimeout(state.takeoverTimer);
         row.classList.add("v262-pick-takeover-active");
-        setResultsTickerTitle("LIVE PICK");
+        setResultsTickerTitle("THE PICK IS IN");
         if (roundPickLabel) roundPickLabel.textContent = `R:${card.roundNumber || ""} P:${card.pickInRound || ""}`;
 
         host.innerHTML = `<div class="v262-pick-takeover is-alert"><strong>THE PICK IS IN</strong></div>`;
@@ -325,21 +349,16 @@
             reveal.style.setProperty("transform", "scale(1) translateY(0)", "important");
           }
 
-          state.takeoverTimer = setTimeout(() => {
-            state.takeoverActive = false;
-            row.classList.remove("v262-pick-takeover-active");
-            setResultsTickerTitle("Draft Results");
-            state.lastRenderedKey = "";
+          // V264: the reveal is now the permanent Last Pick display. There is no rotating ticker.
+          state.takeoverActive = false;
+          state.lastRenderedKey = `last-${card.key}`;
+          row.classList.remove("v262-pick-takeover-active");
+          setResultsTickerTitle("Last Pick");
+          state.takeoverTimer = 0;
 
-            // Continue the regular results ticker after the announcement.
-            const justPickedIndex = state.cards.findIndex(item => item && item.key === card.key);
-            if (justPickedIndex >= 0 && state.cards.length) state.index = (justPickedIndex + 1) % state.cards.length;
-            renderSingleResultCard(state.cards[state.index] || state.cards[0]);
-
-            if (state.takeoverQueue.length) {
-              state.takeoverTimer = setTimeout(runNextPickTakeover, 450);
-            }
-          }, 4300);
+          if (state.takeoverQueue.length) {
+            state.takeoverTimer = setTimeout(runNextPickTakeover, 500);
+          }
         }, 1800);
       }
 
@@ -424,7 +443,7 @@
         cardHost.dataset.v129Ready = "1";
 
         // Bottom Draft Results ticker only. No live/upcoming ticker is rendered in V129.
-        setV127ResultsCards(newCards, resultsSignature);
+        setV127ResultsCards(newCards, resultsSignature, newlyPickedCards.length > 0);
         if (newlyPickedCards.length) queuePickTakeover(newlyPickedCards);
       }
 
@@ -479,51 +498,34 @@
         }
       }
 
-      function setV127ResultsCards(cards, signature){
+      function setV127ResultsCards(cards, signature, holdForAnnouncement = false){
         const state = window.__v127ResultsTicker;
         if (!Array.isArray(cards) || !cards.length) return;
 
-        const oldCurrent = state.cards[state.index] || null;
-        const oldKey = oldCurrent && oldCurrent.key;
-
         state.cards = cards;
-
-        if (oldKey) {
-          const sameIndex = cards.findIndex(card => card.key === oldKey);
-          if (sameIndex >= 0) state.index = sameIndex;
-          else if (state.index >= cards.length) state.index = 0;
-        } else if (state.index >= cards.length) {
-          state.index = 0;
-        }
-
+        const latestIndex = (() => {
+          for (let i = cards.length - 1; i >= 0; i--) if (cards[i] && cards[i].type === "filled") return i;
+          return 0;
+        })();
+        state.index = latestIndex;
         resultsTickerSignature = signature;
+        state.started = true;
 
-        if (!state.started) {
-          state.started = true;
-          startV127ResultsTicker();
-        } else if (!state.takeoverActive && !document.getElementById("v126ResultsCard")) {
-          renderSingleResultCard(state.cards[state.index] || state.cards[0]);
-        }
+        // V264: kill the old 5-second rotation permanently. This panel is Last Pick only.
+        if (state.intervalId) clearInterval(state.intervalId);
+        state.intervalId = 0;
+
+        // When a fresh shared pick is about to announce, leave the previous pick visible for the
+        // few milliseconds before THE PICK IS IN takes over so the new player is never spoiled.
+        if (!holdForAnnouncement && !state.takeoverActive) renderLatestPickCard(cards);
       }
 
       function startV127ResultsTicker(){
+        // V264 compatibility shim: older callers may still invoke this function, but rotation is gone.
         const state = window.__v127ResultsTicker;
         if (state.intervalId) clearInterval(state.intervalId);
-
-        function tick(){
-          const currentState = window.__v127ResultsTicker;
-          if (!currentState.cards.length || currentState.takeoverActive || document.hidden || !window.PoolApp?.inDraft) return;
-
-          if (currentState.index >= currentState.cards.length) currentState.index = 0;
-
-          const card = currentState.cards[currentState.index];
-          renderSingleResultCard(card);
-
-          currentState.index = (currentState.index + 1) % currentState.cards.length;
-        }
-
-        tick();
-        state.intervalId = setInterval(tick, 5000);
+        state.intervalId = 0;
+        if (!state.takeoverActive) renderLatestPickCard(state.cards);
       }
 
       function renderTickerFromOrder(order){

@@ -1,3 +1,12 @@
+# v264 permanent Last Pick display
+
+- Removed the rotating Draft Results ticker behavior.
+- The bottom draft panel now always shows only the most recent completed pick.
+- A new shared pick flashes **THE PICK IS IN**, reveals **MANAGER SELECTS PLAYER**, and then remains on screen until the next pick.
+- Opening the draft midway through immediately shows the latest saved pick without replaying the announcement.
+- Undo/reset updates the panel back to the newest remaining pick (or the waiting state when no picks remain).
+- Everything else from v263 is unchanged.
+
 # v263 pick reveal visibility fix
 
 - Fixed the live ticker takeover going black after **THE PICK IS IN**.

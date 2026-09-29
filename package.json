@@ -1,6 +1,6 @@
 {
   "name": "basement-bar-league",
-  "version": "263.0.0",
+  "version": "264.0.0",
   "private": true,
   "description": "Shared NHL pool draft, lottery, chat and season history",
   "scripts": {
