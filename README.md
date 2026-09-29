@@ -1,319 +1,103 @@
-# Custom Hockey Pool — v14 Global Lottery + Better Jerseys
+# Basement Bar League — v259
+
+The draft-room upgrade for your existing GitHub → Vercel website.
+
+## Upload to GitHub
+
+1. Keep your previous ZIP or GitHub commit as a backup.
+2. Extract this ZIP. Upload its **contents** into the same GitHub repository folder that currently contains `index.html`. Do not upload the ZIP itself or put everything inside an extra nested folder.
+3. Include the new `lib` folder, all six files in `api`, the updated `assets` folder, `index.html`, `package.json`, and `vercel.json`. The scripts and tests can also stay in the repository.
+4. Keep your existing Vercel project and its Redis environment variables. No new paid service, API key, or database is introduced.
+5. Let Vercel deploy your GitHub change, then refresh the site on both devices. Follow `PHONE-AND-COMPUTER-TEST.md` before your real draft.
+
+Use the same Vercel settings as your existing static site. This project has no build step or runtime npm dependencies. The root `index.html` is the homepage; `/api/*` are Vercel functions. Do not publish it as GitHub Pages, which cannot run those functions.
 
 ## What changed
-- Upgraded the lottery stick-men so the jerseys look much more like hockey jerseys.
-- Nick: Leafs-style `13 SUNDIN` jersey.
-- Andrew: Flyers-style `88 LINDROS` jersey.
-- Chris, Tyler, and Scott: Leafs-style throwback jerseys with different numbers/names.
-- Made the classified folder result page smaller.
-- Added optional global lottery storage through `/api/lottery`.
-
-## Lottery behavior
-- Before running: `LOTTERY NOT COMPLETED YET`.
-- First run: equal-weight random order for Nick, Chris, Andrew, Tyler, and Scott.
-- The first result locks into the page and becomes the draft order.
-- After locking, the main lottery button changes to `REPLAY LOCKED LOTTERY`.
-- Replay shows the exact same animation and order.
-- `Reset Draft` clears rosters, picks, and the locked lottery result, then returns the lottery to a fresh first run.
-
-## Important: making everyone see the same saved lottery
-Browser local storage only saves on one device. To make the result appear for everyone who opens the normal site URL, connect persistent storage on Vercel.
 
-This build includes `/api/lottery`, which supports Vercel Redis / Upstash-style REST environment variables:
+- Entering the draft room requires choosing Nick, Chris, Andrew, Tyler, or Scott. There is no automatic Nick selection and no password. The name is remembered in that browser tab; use the name button to change it.
+- The arena screen shows **Draft Lottery Results**, with all five positions set to **TBA** until the lottery is official.
+- The existing Bettman reveal sequence, ready check, online indicators, commissioner “Confirm for all managers,” skip, and replay are retained. Replay uses the saved order.
+- Lottery results, picks, presence, and chat are shared. The server checks whose turn it is, roster limits, duplicate players, and simultaneous requests.
+- **Roster Needs**, **Up Next**, a collapsible personal roster, and the Draft Results ticker remain. The old drafting-as selector and On Deck block are removed.
+- Player/team search includes all 32 team-goalie units. Position and team filters can be combined; sorting includes fantasy points, names, teams, goals, assists, games, goalie wins, save percentage, and GAA. Player rows no longer say “Real NHL API.”
+- A small collapsible chat sits above the ticker. It keeps the latest 150 messages for that room.
+- The draft has a new arena background. Existing home, trophy-room, owner-room images, and original historical season files are unchanged.
+- Broken duplicate draft controllers and unused controls were removed. Team and scoring rules now describe the actual 6F / 4D / 2 team-goalie draft.
 
-- `KV_REST_API_URL`
-- `KV_REST_API_TOKEN`
-
-It also supports:
-
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
+## Lottery and draft flow
 
-Once those are set in Vercel, the first lottery run saves globally. Other devices will load that same locked result automatically from `/api/lottery`.
-
-Without those environment variables, the site still works, but the locked lottery only saves in that device/browser unless you use the copied replay link.
-
-
-V160: Home page locked to the Locker Room TV standings theme. Home Page Editor tab removed.
-
-
-## v168 final roster room image update
-- Replaced Nick roster room with final roster-prominent Matthews/Raptors/AND1/Kawhi/Bautista theme.
-- Replaced Andrew roster room with corrected static roster Flyers/Gears theme.
-- Replaced Tyler roster room with Leafs/GoldenEye/tough-guy theme.
-- Replaced Chris roster room with Raptors/Mario Kart/March Madness theme.
-- Replaced Scott roster room with mystery/spy theme.
-- Added cache-busting image version v=168.
-
-
-## v169 roster room cleanup
-- Removed/hidden the old live clipboard roster overlays from roster-room/stall pages.
-- The static roster room images now act as the roster display.
-- Kept roster data and standings logic intact.
-
-
-## v170 roster room formatting update
-- Removed/hidden right-side numbered rank markers from static roster-room images.
-- Removed old top stall/owner links from roster-room view.
-- Added a Trophy Room themed right-side navigation stack:
-  - buttons for the four other owner rooms
-  - button back to Trophy Room Lobby
-- Kept static roster-room images as the main focal display.
-
-
-## v171 photo-only roster rooms
-- Removed the separate stall title/tab area.
-- Owner room pages now show the room photo as the main/only content.
-- Cropped/zoomed the photo to hide the unwanted numbered strip on the right.
-- Added five in-image navigation buttons on the right side:
-  - four other owner stalls
-  - Trophy Room Lobby
-
-
-## v172 hard photo-only stall renderer
-- Removed old visible stall header/top tab area, including "Andrew's Stall".
-- Removed old owner pill buttons from the top.
-- Removed visible 1-5 number strip/rank strip.
-- Room photo is now the page.
-- Navigation buttons are placed directly over the right side of the image:
-  - four other owners
-  - Trophy Room Lobby
-
-
-## v173 direct stall renderer replacement
-- Directly replaced the real renderStall HTML block.
-- Removed the visible stall header bar, Back to locker room button, owner pills, and roster <ol> that caused the 1-5 numbers.
-- Added in-photo navigation buttons:
-  - four other owner rooms
-  - Trophy Room Lobby
-
-
-## v174 direct verified fix
-- Directly replaced the actual renderStall function that still contained:
-  - "Back to locker room"
-  - "'s Stall"
-  - stall-toolbar
-  - quick-stall-select
-  - roster <ol> list that caused the visible 1-5 numbers
-- Verified those literal strings/classes are no longer present in index.html.
-- Owner stall view now renders only:
-  - static room photo
-  - four other owner buttons
-  - Trophy Room Lobby button
-
-
-## v175 mobile roster-room framing
-- Verified v174 mobile CSS was zooming room images to width:180% and translateX(-24%).
-- Replaced mobile zoom crop with full-width image display.
-- Added a narrow right-edge cover strip to hide the baked-in numbers while preserving the trophy case/room.
-- Kept the in-photo navigation buttons.
-
-
-## v176 mobile Trophy Room and home leaderboard cleanup
-- Verified the Trophy Room mobile layout is controlled by the v174 CSS.
-- Moved mobile roster-room navigation below the image into the open space.
-- Kept the full room photo visible on mobile.
-- Verified the home background/image layer came from v160 locker-TV home styling.
-- Removed the locker-room background image, props, TV shell, scanline overlays, and side cards.
-- Home page now shows a clean leaderboard foundation.
-
-
-## v177 basement chalkboard home leaderboard
-- Copied selected generated image into assets/images/home-leaderboard-basement-board.png.
-- Verified the live home leaderboard is still produced by the v160 renderer.
-- Kept the API/live leaderboard structure intact.
-- Added the image as the home leaderboard scene.
-- Positioned the live leaderboard over the chalkboard area.
-- Restyled the live leaderboard with chalk-like text.
-- Hid the old TV/background chrome while preserving sorting and row expansion behavior.
-
-
-## v178 showcase chalkboard overlay
-- Verified v177 image asset and live v160 renderer first.
-- Forced the generated image into a full visible pseudo-background on the home card.
-- Positioned the live API standings over the chalkboard area.
-- Removed the dark TV/table blocks that were hiding the image.
-- Made all leaderboard text inherit the same chalk-style font family used by the scorebug/title.
-- Preserved live API rendering, sorting, refresh, and expandable roster rows.
-
+Home → Enter Draft Room → choose your name → Enter Draft Lottery → I’m Ready.
 
-## v179 immersive home reset
-- Verified the actual dashboard section, tab/nav/header structure, and selected image asset first.
-- Rebuilt the Home page from scratch instead of layering over the old standings board.
-- Home now displays the selected generated image as the full immersive page.
-- Header image and top navigation are hidden while the Home tab is active.
-- Other sections/tabs remain in the file for later navigation work.
-- Disabled the old v160 home leaderboard renderer and v176/v177/v178 home CSS layers.
-- Left a transparent #leaderboardTable placeholder positioned on the chalkboard for the future clean leaderboard overlay.
+Everyone opens the same room. The commissioner can confirm all five managers when needed. Managers in the lottery see the same saved order revealed. Closing the finished lottery returns them to the draft; the first manager can pick. Someone arriving late loads the same official order and existing picks.
 
-
-## v180 full image + chalk leaderboard foundation
-- Verified the v179 dashboard, image asset, and remaining live leaderboard code first.
-- Changed the Home image from viewport-cover cropping to a contained aspect-ratio scene so the whole picture can be seen.
-- Added overlay navigation links back onto the image.
-- Kept #leaderboardTable on the chalkboard surface.
-- Styled existing live leaderboard output so explanatory panels/boxes are hidden and only transparent chalk-style standings text remains.
+The room refreshes about every 3.5 seconds while the draft is open. Presence updates about every 14 seconds and fades after roughly 45 seconds away. Hidden tabs pause polling. The results become shared as soon as a successful save completes, although another device can take one polling interval to display it.
 
+## End Season and history
 
-## v181 home image full-width framing
-- Verified v180 was limiting the image width with width: min(100vw, calc(100vh * 1.333333)).
-- Changed the immersive home scene to width: 100vw with the source image ratio preserved.
-- Removed the left/right empty bars by allowing the page to become taller than the viewport instead of shrinking to fit height.
-- Kept the leaderboard and navigation overlays positioned proportionally over the image.
+In the **live pool**, Nick’s **End Season** control:
 
+1. Requires a complete 60-pick draft.
+2. Fetches fresh regular-season statistics for the pool’s selected season.
+3. Recalculates every roster’s score using those statistics.
+4. Saves standings, champion/ties, rosters and player statistics, all picks, lottery results, scoring rules, and timestamps in shared history.
+5. Only after that save succeeds, opens the next season with empty picks and a fresh lottery.
+6. Downloads a JSON copy of the completed season.
 
-## v182 mockup chalkboard leaderboard/rosters
-- Verified the active home data renderer is the v156 themed rankings script and that it writes diagnostics to window.__lastSeasonApiDiagnostics.
-- Left the API/stat calculation intact.
-- Added a custom home chalkboard renderer that uses the live calculated rows from window.__lastSeasonApiDiagnostics.
-- Replaced the visible home overlay with the mockup layout:
-  - Standings on the left
-  - Rosters on the right
-  - 3 roster cards on top, 2 centered underneath
-  - Player Name + FPTS shown for each roster
-  - Team Goalies separated inside each roster card
-- Removed the boxed table look in favor of transparent chalk-style text.
+If fresh statistics cannot be verified, End Season fails without clearing the draft. It does not use the previous season’s draft-comparison points as final live-season scores.
 
+Use **Open history book → select a season → View saved rosters & picks** to inspect a saved record. Older historical seasons retain the information present in your original files; missing historical player details are not invented. Test seasons never enter the live all-time totals.
 
-## v183 roster font + Kessel chalk drawing
-- Verified v182 home chalkboard renderer and source image first.
-- Created assets/images/kessel-cup-chalk-drawing.png from the uploaded Kessel Cup photo.
-- Added the chalk-style Kessel drawing in the empty area below the standings.
-- Increased roster text sizes while keeping the layout inside the chalkboard overlay.
-- Preserved the API/stat calculation and v182 mockup renderer.
+Shared room/history records have no automatic expiry in this code and survive deployments. Keep the Redis database connected and retain the downloaded backups. **Download full backup** exports the current draft, lottery, and all history visible in that room. There is deliberately no live-history delete button.
 
+## Safe tests
 
-## v184 reference-style live home page
-- Verified the active home path first:
-  - v156 live/API renderer still calculates standings and rosters
-  - v182 home renderer reads window.__lastSeasonApiDiagnostics
-  - #leaderboardTable remains the live overlay target
-- Kept the clean chalkboard image as the page background so API text is not duplicated over fake static text.
-- Used the final generated image as a visual reference and extracted a better Kessel chalk drawing from it.
-- Restyled the live standings and roster overlay to more closely match the generated reference:
-  - better chalk spacing
-  - stronger Kessel drawing under standings
-  - centered roster cards
-  - bigger but contained roster text
-- Improved mobile by using the vertical viewport height instead of shrinking the whole scene too much.
+**Admin → Open test room** opens a separate shared rehearsal. Copy that room’s link onto your other device.
 
-v203 mobile rebuild:
-- Removed the drag/drop editor direction from the active build and rebuilt the mobile home board as a clean two-zone composition.
-- Desktop is preserved.
-- Mobile left zone: standings plus Kessel chalk art.
-- Mobile right zone: 3-over-2 vertical rosters with tighter, readable chalk text and balanced spacing.
+It has its own lottery, picks, chat, and archives. Its **End Test Season** uses the previous completed season’s statistics so you can exercise the full process before this season finishes. **Fill remaining test picks** avoids making all 60 selections manually. **Clear all test data** removes only that rehearsal’s picks, lottery, chat, and test archives. It cannot run against the live room.
 
+**Reset draft & lottery** clears the active room’s picks, lottery, and chat but retains its archived seasons. Resetting the live draft requires typing `RESET LIVE DRAFT`.
 
-## v208 update
-- Removed the old DOM/chalk-written Standings and Rosters headers from the home overlay because the new baked background already contains metal headers.
-- Hid the old cinematic header photo from the rest of the site pages.
-- Preserved the v207 baked background, draft/trophy hotspots, and jersey-to-roster-room hotspots.
+## NHL data
 
+The official NHL feeds already used by the project remain the source:
 
-## v214
-- Fixed the mobile standings movement by targeting the actual v203 inline mobile enforcer that was pinning `.v182-standings` to `top: 0` with inline `!important` styles.
-- Desktop and roster positions are preserved.
+- Statistics: `https://api.nhle.com/stats/rest/en`
+- Current roster membership: `https://api-web.nhle.com/v1/roster/{team}/current`
+- Player headshots and team logos: `https://assets.nhle.com`
 
+Instead of fetching the same summary reports sorted 13 different ways, the server loads complete skater and goalie summaries and paginates when necessary. It checks for truncated or duplicate rows. Team-specific goalie reports are requested when a traded goalie needs to be split between clubs.
 
-## v217
-- Trophy Room image resized to match Home page canvas dimensions (1448x1086).
-- Trophy Room top tab bar hidden while the Trophy Room is active.
-- Added Home-style bottom navigation inside the Trophy Room scene.
-- Preserved Flyers HOME jersey hotspot and roster-room door links.
+Team-goalie save percentage and GAA come from combined saves, shots, goals allowed, and time on ice. Team games use goalie starts when available, so relief appearances do not inflate them. Current roster membership supplies current teams and rookies; prior-season statistics remain clearly labelled as draft comparisons.
 
+Current-season statistics are cached for five minutes, completed-season statistics for six hours, and current rosters for twelve hours. Warm server requests share results; Redis retains the last successful update. Ordinary pages may show a labelled saved update during an NHL outage. End Season requires a fresh successful response. This is near-live season scoring, not a per-shot live game feed, and remains dependent on NHL feed availability.
 
-v219 changes:
-- Roster-room player links moved from side rail to bottom nav.
-- Trophy Room Lobby button removed from roster-room nav; the existing Championships area is now the back-to-Trophy-Room hotspot.
-- Trophy Room book hotspot added; opens an ancient Hockey History book overlay with saved 2024-2025 and 2023-2024 standings/team pages.
+## Storage and migration
 
----
+The backend accepts the same REST credential pairs as the original project:
 
-## Consolidated version notes
+- `KV_REST_API_URL` and `KV_REST_API_TOKEN`, or
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, or
+- `REDIS_REST_API_URL` and `REDIS_REST_API_TOKEN`.
 
-The old separate README-v### files were merged here so the project has one human notes file. These notes do not power the website.
+Keep these in Vercel, never in GitHub or this ZIP. Without shared storage, production shows an error instead of pretending that a browser-only save is shared.
 
+The first v259 room loads the old server draft and lottery when applicable. A previous deliberate reset or static archived-season fallback is respected. Legacy keys are left untouched as a migration backup. v259 writes its own versioned room key and uses atomic compare-and-set updates to prevent lost picks. Test rooms use different keys.
 
-### README-v218.txt
+If you roll code back after using v259, the old code will see its old storage snapshot, not newer v259 picks. Download a full backup before a rollback and do not mix old and new clients during a real draft. No recovery import is exposed in the public UI; the JSON backups are available for a deliberate recovery if needed.
 
-v218 diagnosis/fix
+Name selection is the trust-based arrangement requested for this friends’ pool. Selecting Nick exposes the commissioner controls; this is not password authentication.
 
-Problem: Trophy Room did not match Home page visual sizing.
-Cause: v217 changed the inner trophy image shell to 1448x1086, but the Trophy Room tab still did not mirror the Home page's full-width outer body/main/panel rules. Also v217 used width:min(100vw, calc(100vh*1.333333)), which intentionally creates side margins on wide desktop screens. Home v181 uses full viewport width on desktop and 100svh height on mobile.
+## Developer checks
 
-Fix: v218 adds a later, active-tab scoped override so #rosters uses the same outer shell behavior as Home:
-- desktop: shell is 100vw wide, stage is 100vw with 1448/1086 aspect ratio
-- mobile: stage height is 100svh with 1448/1086 aspect ratio
-- top trophy tab bar remains hidden
-- bottom nav, Home jersey hotspot, and door hotspots preserved
+With a modern Node.js installation:
 
+```sh
+npm test
+npm run preview:test
+```
 
-### README-v220.txt
+The local test preview is `http://127.0.0.1:8787/?room=test-local#draft`. It uses synthetic NHL players and temporary in-memory rooms. Synthetic fixtures are imported only by the test/preview scripts, never production API functions. Do not set `POOL_LOCAL_TEST` in Vercel.
 
-v220 fixes: Trophy Room mobile horizontal pan restored to match Home behavior; roster-room Championships shelf enlarged/clickable back to Trophy Room; Home added to bottom roster-room nav; Previous Season tab now includes static 2024-2025 and 2023-2024 archive data from supplied history sources.
+Validation performed for this ZIP: automated concurrent-pick, lottery, roster-limit, archive, stale-data refusal, test-isolation, pagination, migration, and scoring checks; JavaScript syntax, HTML IDs, asset references, and unchanged original image/history checks.
 
-
-### README-v222.txt
-
-v222 roster-room mobile redo
-
-Built from v220, not v221.
-
-Why v221 failed:
-- It used object-fit: cover and full viewport locking too broadly.
-- That cropped/zoomed the roster images on mobile.
-- It also affected desktop scroll behavior.
-
-v222 fix:
-- Desktop rules are untouched.
-- Mobile only:
-  - Roster room stage is 100svh high.
-  - Image is height:100svh and width:auto, so the full image height is visible.
-  - Stage allows horizontal panning instead of cropping the image.
-  - Bottom navigation floats fixed at the bottom.
-  - Script centers the wide image after render.
-
-
-### README-v223.txt
-
-v223
-
-Built from v222.
-Changed only assets/images/locker-stall-chris.png.
-Replaced Chris roster-room image with updated version showing two trophies on the Championships shelf.
-All layout/mobile fixes from v222 preserved.
-
-
-### README-v224.txt
-
-v224
-
-Built from v223.
-Changed only assets/images/locker-stall-chris.png.
-Replaced Chris roster-room image with the corrected two-trophy version with no dates on the trophies.
-All layout/mobile fixes and other site changes preserved.
-
-
-### README-v225.txt
-
-v225 changes:
-- Added a visible Trophy Room button to every owner roster/player room bottom navigation.
-- Fixed the Home page Trophy Room link and main Trophy Room tab so they always reset to the Trophy Room lobby instead of reopening the last owner roster room.
-- Left existing owner-room door links, Home links, roster images, and previous-season archive content unchanged.
-
-
-## Ricoh/Friends History Book Data
-
-The previous-season history for the book is now saved in `assets/data/pool-history.json`. This file is the clean source of truth for the history book instead of relying on history source text. To add a completed future season, copy one existing season object, update the `id`, `label`, `championOwnerId`, and `standings` rows, then redeploy/save the site.
-
-Each standings row uses:
-
-- `rank`
-- `ownerId`
-- `team`
-- `pts`
-- optional `skaters`, `goalies`, `skatersTotal`, `goaliesTotal` for deeper archive details
-
-## Permanent history data source
-
-The long-term history source is now stored in `assets/data/history.json` and mirrored in `assets/data/pool-history.json` for the current book code. Add completed future seasons there so the book/history pages can be updated from data instead of screenshots.
+Still to verify after upload: desktop/mobile rendering in your browsers, your existing production Redis connection, and real NHL responses from Vercel. This session’s preview browser could not open the local build, and the live NHL endpoint was unavailable from the review environment. The two-device guide covers those checks; do them in the test room first.

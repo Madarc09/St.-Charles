@@ -1,10 +1,11 @@
 {
-  "name": "custom-hockey-pool",
-  "version": "1.0.0",
+  "name": "basement-bar-league",
+  "version": "259.0.0",
   "private": true,
-  "description": "A Vercel-ready custom NHL pool draft and stats tracker.",
+  "description": "Shared NHL pool draft, lottery, chat and season history",
   "scripts": {
     "start": "vercel dev",
-    "deploy": "vercel --prod"
+    "test": "node --test tests/*.test.js",
+    "preview:test": "node scripts/dev-server.js"
   }
 }

@@ -1,147 +1,61 @@
-const STORAGE_KEY = process.env.DRAFT_STORAGE_KEY || 'hockey-pool:official-draft:v1';
-let MEMORY_DRAFT = null;
-
-function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_REST_API_TOKEN;
-  return { url, token, configured: Boolean(url && token) };
-}
-
-async function redisCommand(path) {
-  const { url, token, configured } = redisConfig();
-  if (!configured) return { configured: false, result: null };
-  const response = await fetch(`${url}${path}`, { headers: { Authorization: `Bearer ${token}` } });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Redis HTTP ${response.status}`);
-  return { configured: true, result: data.result };
-}
-
-async function getStoredDraft() {
-  const { configured } = redisConfig();
-  if (!configured) return { configured: false, draft: MEMORY_DRAFT, storage: 'server-memory', mode: 'temporary', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
-  const key = encodeURIComponent(STORAGE_KEY);
-  const data = await redisCommand(`/get/${key}`);
-  if (!data.result) return { configured: true, draft: null, storage: 'kv', mode: 'persistent' };
-  try {
-    return { configured: true, draft: typeof data.result === 'string' ? JSON.parse(data.result) : data.result, storage: 'kv', mode: 'persistent' };
-  } catch {
-    return { configured: true, draft: null, storage: 'kv', mode: 'persistent' };
-  }
-}
-
-async function setStoredDraft(draft) {
-  const { configured } = redisConfig();
-  if (!configured) {
-    MEMORY_DRAFT = draft;
-    return { configured: false, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
-  }
-  const key = encodeURIComponent(STORAGE_KEY);
-  const payload = encodeURIComponent(JSON.stringify(draft));
-  await redisCommand(`/set/${key}/${payload}`);
-  return { configured: true, storage: 'kv' };
-}
-
-async function clearStoredDraft() {
-  const { configured } = redisConfig();
-  if (!configured) {
-    MEMORY_DRAFT = null;
-    return { configured: false, storage: 'server-memory', warning: 'Persistent KV storage is not configured. Draft memory is temporary and may not sync across devices or deploys.' };
-  }
-  await redisCommand(`/del/${encodeURIComponent(STORAGE_KEY)}`);
-  return { configured: true, storage: 'kv' };
-}
-
-const allowedOwners = new Set(['nick', 'chris', 'andrew', 'tyler', 'scott']);
-const defaultOwners = [
-  { id: 'nick', name: 'Nick', teamName: 'Nick' },
-  { id: 'chris', name: 'Chris', teamName: 'Chris' },
-  { id: 'andrew', name: 'Andrew', teamName: 'Andrew' },
-  { id: 'tyler', name: 'Tyler', teamName: 'Tyler' },
-  { id: 'scott', name: 'Scott', teamName: 'Scott' }
-];
-
-function cleanDraft(input) {
-  const body = input && typeof input === 'object' ? input : {};
-  const owners = Array.isArray(body.owners) && body.owners.length ? body.owners : defaultOwners;
-  const cleanedOwners = owners.filter(o => allowedOwners.has(String(o.id))).map(o => ({
-    id: String(o.id),
-    teamName: String(o.teamName || o.name || o.id),
-    name: String(o.name || o.teamName || o.id)
-  }));
-  const draftOrder = Array.isArray(body.draftOrder) ? body.draftOrder.map(String).filter(id => allowedOwners.has(id)) : [];
-  const picks = Array.isArray(body.picks) ? body.picks : [];
-
-  const cleaned = {
-    owners: cleanedOwners.length ? cleanedOwners : defaultOwners,
-    draftOrder: draftOrder.length === 5 ? draftOrder : ['nick', 'chris', 'andrew', 'tyler', 'scott'],
-    picks: picks.map((p, index) => ({
-      pickNumber: Number(p.pickNumber || index + 1),
-      round: Number(p.round || 1),
-      slot: Number(p.slot || 1),
-      ownerId: String(p.ownerId || ''),
-      ownerName: String(p.ownerName || ''),
-      timestamp: String(p.timestamp || new Date().toISOString()),
-      player: {
-        id: String(p.player?.id || ''),
-        name: String(p.player?.name || (String(p.player?.position || '').toUpperCase() === 'TG' ? `${p.player?.nhlTeam || 'NHL'} Team Goalies` : 'Drafted Player')),
-        position: String(p.player?.position || ''),
-        nhlTeam: String(p.player?.nhlTeam || ''),
-        gamesPlayed: Number(p.player?.gamesPlayed || 0),
-        goals: Number(p.player?.goals || 0),
-        assists: Number(p.player?.assists || 0),
-        points: Number(p.player?.points || 0),
-        goalieGoals: Number(p.player?.goalieGoals || p.player?.goals || 0),
-        goalieAssists: Number(p.player?.goalieAssists || p.player?.assists || 0),
-        goalieWins: Number(p.player?.goalieWins || 0),
-        goalieShutouts: Number(p.player?.goalieShutouts || 0),
-        savePct: Number(p.player?.savePct || 0),
-        goalsAgainstAverage: Number(p.player?.goalsAgainstAverage || 0),
-        fantasyPoints: Number(p.player?.fantasyPoints || p.player?.fpts || 0),
-        fpts: Number(p.player?.fpts || p.player?.fantasyPoints || 0)
+const S=require('../lib/pool-store');
+const NHL=require('../lib/nhl-data');
+module.exports=async function(req,res){
+  S.headers(res);
+  try{
+    const room=S.roomName(req);
+    if(req.method==='GET')return res.status(200).json(S.publicRoom((await S.read(room)).state));
+    if(req.method!=='POST')throw S.error('Use the commissioner controls to change the draft.',405);
+    const b=S.body(req);S.owner(b.ownerId);
+    let selected=null,board=null;
+    if(b.action==='pick' || b.action==='auto-fill') {
+      if(b.action==='auto-fill'){S.commissioner(b);if(room==='live')throw S.error('Automatic fill is available only in a test room.');}
+      const {state}=await S.read(room);
+      const data=await NHL.board(state.draft.comparisonSeason);
+      board=data.players;
+      if(b.action==='pick'){selected=board.find(p=>p.id===String(b.playerId));if(!selected)throw S.error('This player is not on the available NHL board.');}
+    }
+    const {state}=await S.mutate(room,s=>{
+      const d=s.draft;
+      if(b.action==='presence'){s.presence[b.ownerId]=Date.now();return;}
+      if(b.action==='chat') {
+        const text=String(b.text||'').trim();if(!text || text.length>300 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text))throw S.error('Messages must be between 1 and 300 characters.');
+        if(s.messages.some(m=>m.requestId===b.requestId))return;
+        const last=[...s.messages].reverse().find(m=>m.ownerId===b.ownerId);
+        if(last && Date.now()-Date.parse(last.at)<1000)throw S.error('Give the room a moment before sending another message.',429);
+        s.messages.push({id:S.randomUUID(),ownerId:b.ownerId,text,at:new Date().toISOString(),requestId:String(b.requestId||'')});s.messages=s.messages.slice(-150);return;
       }
-    })).filter(p => allowedOwners.has(p.ownerId) && p.player.id),
-    updatedAt: new Date().toISOString()
-  };
-
-  // Preserve draft/reset metadata so a deliberate roster reset does not get
-  // overwritten by the static 2025-2026 history roster fallback on reload.
-  if (body.__manualRosterReset) cleaned.__manualRosterReset = true;
-  if (body.__rostersClearedAt) cleaned.__rostersClearedAt = String(body.__rostersClearedAt);
-  if (body.draftClosed === true) cleaned.draftClosed = true;
-  if (body.__seasonLockedRecord) cleaned.__seasonLockedRecord = String(body.__seasonLockedRecord);
-  if (body.__fromStaticSeasonRecord) cleaned.__fromStaticSeasonRecord = true;
-  return cleaned;
-}
-
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Cache-Control', 'no-store');
-
-  if (req.method === 'OPTIONS') return res.status(204).end();
-
-  try {
-    if (req.method === 'GET') {
-      const current = await getStoredDraft();
-      return res.status(200).json({ ok: true, ...current });
-    }
-
-    if (req.method === 'POST') {
-      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      const draft = cleanDraft(body);
-      const storage = await setStoredDraft(draft);
-      return res.status(200).json({ ok: true, ...storage, draft });
-    }
-
-    if (req.method === 'DELETE') {
-      const storage = await clearStoredDraft();
-      return res.status(200).json({ ok: true, ...storage, deleted: true });
-    }
-
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ ok: false, error: error.message || 'Draft storage failed' });
-  }
+      if(b.action==='pick') {
+        if(!/^[a-zA-Z0-9-]{8,80}$/.test(String(b.requestId||'')))throw S.error('Missing pick confirmation. Please try again.');
+        if(d.picks.some(p=>p.requestId===b.requestId))return;
+        S.revision(d,b.expectedRevision);
+        if(!s.lottery.finalized)throw S.error('Finish the draft lottery first.',409);
+        const pick=S.Core.currentPick(d);if(!pick)throw S.error('The draft is complete.',409);
+        if(pick.ownerId!==b.ownerId)throw S.error('It is not your pick yet.',409);
+        if(d.picks.some(p=>String(p.player.id)===selected.id))throw S.error('That player has already been drafted.',409);
+        const position=S.Core.bucket(selected);if(S.Core.counts(d,b.ownerId)[position]>=S.Core.RULES[position])throw S.error('That roster position is already full.',409);
+        d.picks.push({...pick,ownerName:S.owner(b.ownerId).name,player:selected,requestId:b.requestId,timestamp:new Date().toISOString()});
+        d.draftClosed=d.picks.length===60;d.__manualRosterReset=false;S.touch(d);return;
+      }
+      S.commissioner(b);S.revision(d,b.expectedRevision);
+      if(b.action==='auto-fill') {
+        if(room==='live')throw S.error('Automatic fill is available only in a test room.');
+        if(!s.lottery.finalized)throw S.error('Complete the test lottery first.');
+        const available=[...board].sort((a,b)=>S.Core.points(b)-S.Core.points(a));
+        while(d.picks.length<60){
+          const pick=S.Core.currentPick(d),counts=S.Core.counts(d,pick.ownerId),taken=new Set(d.picks.map(p=>p.player.id));
+          const player=available.find(p=>!taken.has(p.id)&&counts[S.Core.bucket(p)]<S.Core.RULES[S.Core.bucket(p)]);
+          if(!player)throw S.error('Not enough eligible players to fill the test draft.');
+          d.picks.push({...pick,ownerName:S.owner(pick.ownerId).name,player,requestId:S.randomUUID(),timestamp:new Date().toISOString()});
+        }
+        d.draftClosed=true;d.__manualRosterReset=false;S.touch(d);return;
+      }
+      if(b.action==='undo') {if(!d.picks.length)throw S.error('There are no picks to undo.');d.picks.pop();d.draftClosed=false;S.touch(d);return;}
+      if(b.action==='reset') {if(b.confirm!==(room==='live'?'RESET LIVE DRAFT':'RESET TEST'))throw S.error('Reset confirmation is required.');S.reset(s);return;}
+      if(b.action==='clear-tests') {if(room==='live')throw S.error('Open a test room to remove test data.');if(b.confirm!=='CLEAR TEST DATA')throw S.error('Test confirmation is required.');S.reset(s,{clearArchives:true});return;}
+      if(b.action==='season') {if(d.picks.length || s.lottery.phase!=='idle')throw S.error('Choose the season before starting the lottery.');if(!/^20\d{6}$/.test(b.seasonId)||Number(b.seasonId.slice(4))!==Number(b.seasonId.slice(0,4))+1)throw S.error('Choose a valid season.');d.seasonId=b.seasonId;d.comparisonSeason=S.Core.previousSeason(b.seasonId);S.touch(d);return;}
+      throw S.error('Unknown draft action.');
+    });
+    return res.status(200).json(S.publicRoom(state));
+  }catch(e){return S.sendError(res,e);}
 };
