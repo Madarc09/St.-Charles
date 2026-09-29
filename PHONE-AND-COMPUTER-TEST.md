@@ -65,3 +65,11 @@ When everything passes, share the normal homepage with your friends. Leave the r
 3. Draft/current rosters should keep using the shared picks; current-season FPTS should come from 2026-27 regular-season NHL totals.
 4. Leave a Home page open during games. Official NHL totals should refresh without a manual reload within roughly a minute of the NHL feed changing.
 5. Remember team-goalie FPTS only use W (2), A (5), G (10), SO (5). A goalie unit may correctly remain at 0 while its game is in progress or after a loss.
+
+
+## v267 live goal verification
+1. Deploy v267 and hard-refresh once. The script URLs now use `?v=267`, so normal reloads should also fetch the new bundle.
+2. Home should identify the pool as 2026–27 if the persisted live room had been stuck on 2025–26. Existing draft picks must remain intact.
+3. During a live NHL game with at least one goal, Home should show `LIVE NHL + LIVE GAME` and a non-zero `live goal(s)` count.
+4. A drafted scorer should receive his current fantasy points immediately (G=2, A=1, plus applicable bonuses).
+5. Verify on both phone and computer; the same shared room should show the same totals.

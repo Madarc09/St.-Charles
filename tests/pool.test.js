@@ -63,9 +63,13 @@ test('live GameCenter overlay shows an in-progress goal before season summary ca
  const scorer=data.players.find(p=>p.id===String(fixture.skaters[0].playerId));
  const helper=data.players.find(p=>p.id===String(fixture.skaters[1].playerId));
  assert.equal(data.liveOverlay,true);
+ assert.equal(data.liveGoalEvents,1); // score + GameCenter report the same event; count it once.
  assert.equal(scorer.goals,fixture.skaters[0].goals+1);
  assert.equal(helper.assists,fixture.skaters[1].assists+1);
  assert.equal(scorer.fpts,C.points(scorer));
+ // The daily score payload alone must be sufficient if GameCenter is briefly late.
+ const scoreOnly=NHL.goalsFrom({game:{id:77,goals:[{eventId:7,playerId:8477939,goalsToDate:1}]},landing:{}});
+ assert.equal(scoreOnly.length,1);assert.equal(String(scoreOnly[0].playerId),'8477939');
  // Also cover opening-night zero-row behavior: the live event must create the stat row.
  const opening=NHL.applyLive({players:[],goalies:[],teamGoalies:[],fetchedAt:new Date().toISOString()},{fetchedAt:new Date().toISOString(),standings:[],games:[{game:{id:1,season:Number(season),gameType:2,gameState:'LIVE',awayTeam:{abbrev:'MTL',score:0},homeTeam:{abbrev:'TOR',score:1}},landing:{gameState:'LIVE',awayTeam:{abbrev:'MTL',score:0},homeTeam:{abbrev:'TOR',score:1},scoring:[{goals:[{playerId:8479999,name:{default:'Opening Night Scorer'},teamAbbrev:{default:'TOR'},strength:'EV',goalsToDate:1,awayScore:0,homeScore:1,assists:[]}]}]}}]});
  const created=opening.players.find(p=>p.id==='8479999');
@@ -74,6 +78,9 @@ test('live GameCenter overlay shows an in-progress goal before season summary ca
 test('paged NHL responses and legacy migration preserve the intended room',async()=>{
  fixture.setPageLimit(25);
  try {const rows=await NHL.report('skater/summary','20232024');assert.equal(rows.length,130);assert.equal(new Set(rows.map(r=>r.playerId)).size,130);}finally{fixture.setPageLimit(Infinity);}
+ const staleLive=S.freshRoom('live');staleLive.draft.seasonId='20252026';staleLive.draft.comparisonSeason='20242025';staleLive.draft.picks=[{ownerId:'nick',player:{id:'8477939',position:'C'}}];
+ S.normalizeLiveSeason(staleLive,'live');assert.equal(staleLive.draft.seasonId,C.seasonId());assert.equal(staleLive.draft.comparisonSeason,C.previousSeason(C.seasonId()));
+ const futureLive=S.freshRoom('live');futureLive.draft.seasonId='20272028';S.normalizeLiveSeason(futureLive,'live');assert.equal(futureLive.draft.seasonId,'20272028');
  const order=C.OWNERS.map(o=>o.id),old={picks:[],draftOrder:order,__manualRosterReset:true,__rostersClearedAt:'2026-09-20T12:00:00Z'};
  const staleLottery={phase:'complete',order,finalized:true,requestedAt:'2026-09-19T12:00:00Z'};
  const locked={orderIds:order,locked:true,timestamp:'2026-09-19T12:00:00Z'};

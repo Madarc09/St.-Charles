@@ -145,3 +145,8 @@ Still to verify after upload: desktop/mobile rendering in your browsers, your ex
 
 ## v266 live GameCenter scoring
 Current-season standings now combine the NHL season-summary totals with the NHL GameCenter live scoring feed. Goals and assists can appear while a game is in progress, including opening-night scorers before the aggregate season report has created a row for them. The Home page checks about every 15 seconds.
+
+## v267 live scoring repair
+- The live room now auto-corrects an old persisted season (for example 2025-26) to the real current NHL season while the draft is still incomplete. Future seasons selected by the commissioner are never pulled backward.
+- Live goals are read from both the NHL daily score payload and GameCenter landing data, with event de-duplication.
+- The Home status now includes how many live goal events were detected, making feed-vs-scoring problems visible during a game.
