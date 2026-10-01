@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 process.env.POOL_LOCAL_TEST='1';
 const fixture=require('../scripts/fixture-nhl');fixture.install();
 const C=require('../assets/js/pool-core'),S=require('../lib/pool-store'),L=require('../lib/draft-lock');
-const View=require('../assets/js/season-board');
+const View=require('../assets/js/chalkboard');
 const handlers={draft:require('../api/draft'),lottery:require('../api/live-lottery'),history:require('../api/history')};
 const captured=require('../data/draft-history/20262027.json');
 const copy=x=>JSON.parse(JSON.stringify(x));
@@ -90,11 +90,11 @@ test('Redis commits the room and independent ledger atomically; a lost room reco
 });
 test('all players appear once in forwards / defence / goalies order without changing draft history',()=>{
  const before=JSON.stringify(captured.draft.picks),rows=C.standings(captured.draft,[]),html=View.render(rows,{...captured.draft,locked:true});
- assert.equal((html.match(/class="sb-roster"/g)||[]).length,5);assert.equal((html.match(/class="sb-position"/g)||[]).length,15);
+ assert.equal((html.match(/class="chalk-roster"/g)||[]).length,5);assert.equal((html.match(/class="chalk-position"/g)||[]).length,15);
  for(const row of rows){
   assert.deepEqual(row.players.map(C.bucket),[...Array(6).fill('F'),...Array(4).fill('D'),...Array(2).fill('G')]);
-  const card=View.rosterCard(row);assert.ok(card.indexOf('Forwards')<card.indexOf('Defence'));assert.ok(card.indexOf('Defence')<card.indexOf('Team goalies'));
-  assert.equal((card.match(/<th scope="row">/g)||[]).length,12);
+  const card=View.rosterCard(row);assert.ok(card.indexOf('Forwards')<card.indexOf('Defence'));assert.ok(card.indexOf('Defence')<card.indexOf('Goalies'));
+  assert.equal((card.match(/class="chalk-player"/g)||[]).length,12);
   for(const p of row.players)assert.ok(card.includes(p.name),p.name);
  }
  assert.ok(html.includes('New York Islanders Goalies'),'Never shorten the goalies to ambiguous “New Goalies”');

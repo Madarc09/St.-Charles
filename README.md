@@ -1,11 +1,11 @@
-# Basement Bar League — v269
+# Basement Bar League — v270
 
 ## Upload this update
 
 1. Keep the v268 ZIP and the separate **Completed-Draft-2026-2027-Backup.json**.
 2. Extract this ZIP and upload its **contents** into your existing GitHub repository, at the level that contains `index.html`. Include **all folders**, especially `lib` and `data/draft-history`.
 3. Keep the same Vercel project and the existing Redis environment variables. No new service or payment is needed.
-4. After Vercel deploys, refresh the home page. You should see **Final rosters locked** and all five rosters. The draft room should say **That’s a wrap**.
+4. After Vercel deploys, refresh the home page. You should see **Final draft locked** and all five rosters. The draft room should say **That’s a wrap**.
 5. Check the phone and computer using `PHONE-AND-COMPUTER-TEST.md`.
 
 This is a complete website replacement package with no build step and no runtime npm dependencies. Upload extracted files, not the ZIP itself. Do not deploy as GitHub Pages, which cannot run the API functions.
@@ -23,7 +23,7 @@ The real 2026–2027 live draft was captured from your existing website before t
 - If the active room is missing, its final draft can be recovered from the independent ledger or the packaged copy. Conflicting complete records stop with an error rather than silently overwriting selections.
 - Future live drafts automatically lock when all 60 picks are saved. Test rooms remain separate and resettable.
 
-The new lock takes effect when you deploy v269. The separate backup has already been created. Keep that backup and the protected data folder in later website updates.
+The new lock takes effect when you deploy v270. The separate backup has already been created. Keep that backup and the protected data folder in later website updates.
 
 ## Draft history versus End Season
 
@@ -37,19 +37,17 @@ At the actual end of the season, Nick can use **End Season** in Admin. It still 
 
 Selecting a manager name is the existing trust-based arrangement for this group; there are no new passwords. Select Nick from the name control in Admin to use commissioner tools without reopening the draft.
 
-## Home and artwork changes
+## Home restored to the original chalkboard
 
-- The familiar basement scene and clickable jersey entrances remain at the top.
-- Larger standings show each manager’s rank and fantasy points. Select a manager to jump to their roster.
-- All five roster cards display full names and current stat lines. Desktop uses multiple columns; phones show full-width cards.
-- Players are grouped as **Forwards → Defence → Team goalies**, alphabetically within each group.
-- Team-goalie names remain complete, including **New York Islanders Goalies**.
-- Nick’s home-page jersey reads **09**.
-- Tyler’s room has a **Sundin 13** jersey and matching helmet/nameplate.
-- Andrew’s room has a **Brière 48** jersey, helmet, framed picture and collectible puck.
-- The other three room images, existing historical files, lottery animation and NHL scoring implementation are unchanged from v268.
+v270 restores the entire basement background and the original home-page arrangement: standings on the left, five rosters in the familiar three-over-two layout on the right, with writing directly on the chalkboard. The cropped header, large standalone cards and separate dashboard from v269 are removed.
 
-The three image edits were made with the built-in image tool. Asset paths and exact prompts are listed in `ARTWORK-CHANGES.json`.
+The lettering uses the available chalkboard space more evenly and a locally included handwriting font. On a phone, **Enlarge chalkboard** opens the same standings and rosters at a readable size without changing the home-page scene. Close it to return to the room.
+
+Players still appear **Forwards → Defence → Goalies**, alphabetically within each group. Live points continue using the same data as v269. Goalies retain complete team identities, including New York Islanders.
+
+All other approved v269 changes remain: Nick’s **09** jersey, Tyler’s **Sundin 13** room, Andrew’s **Brière 48** room and memorabilia, final-draft lock, independent ledger and protected backup. The 60 saved picks, storage keys, backend, NHL scoring and historical records are unchanged from v269.
+
+The image edits and exact prompts from v269 remain in `ARTWORK-CHANGES.json`. v270 does not edit those images. The handwriting font is packaged in `assets/fonts` with its Open Font License.
 
 ## Keep tests separate
 

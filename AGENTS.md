@@ -9,3 +9,7 @@
 - Final draft records are separate from end-of-season statistics. End Season must archive before advancing and retain all protected draft records.
 - Keep tests in isolated test rooms. Never call reset, undo, auto-fill or End Season against the real pool while checking a release.
 - Run `npm test` after any storage, draft, scoring or history change. Preserve the latest full backup before changes.
+
+## Homepage design preference
+
+Keep the complete original basement background and live writing directly on its chalkboard. Retain standings on the left and the five rosters on the right. Improve fit and readability within that composition; do not replace it with a cropped hero or standalone dashboard cards.

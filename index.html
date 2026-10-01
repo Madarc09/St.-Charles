@@ -2564,7 +2564,7 @@
 
   <main class="shell">
     <section id="dashboard" class="panel active home-panel home-immersive-reset">
-      <div class="home-hero-crop"><article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
+      <article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
         <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=269" alt="Basement Bar League current champion chalkboard homepage scene">
         <div class="home-image-hotspots" aria-label="Homepage image links">
           <button class="home-image-hotspot home-image-hotspot-draft" type="button" data-tab="draft" aria-label="Enter the Draft Room"></button>
@@ -2579,19 +2579,15 @@
           <button class="home-image-link" type="button" data-tab="teams">Teams</button>
           <button class="home-image-link" type="button" data-tab="rules">Rules</button>
           <button class="home-image-link" type="button" data-tab="admin">Admin</button>
+          <button id="enlargeChalkboard" class="home-image-link" type="button" data-enlarge-chalkboard>Enlarge chalkboard</button>
         </nav>
-      </article></div>
-      <nav class="home-season-nav" aria-label="Pool navigation">
-        <button type="button" data-tab="draft" data-draft-entry-label>Draft room</button>
-        <button type="button" data-open-trophy-room data-tab="rosters">Trophy room</button>
-        <button type="button" data-tab="teams">Managers</button>
-        <button type="button" data-tab="rules">Rules</button>
-        <button type="button" data-tab="admin">Admin</button>
-      </nav>
-      <nav class="home-manager-links" aria-label="Roster rooms">
-        <button type="button" data-roster-owner="nick">Nick</button><button type="button" data-roster-owner="scott">Scott</button><button type="button" data-roster-owner="andrew">Andrew</button><button type="button" data-roster-owner="tyler">Tyler</button><button type="button" data-roster-owner="chris">Chris</button>
-      </nav>
-      <div id="seasonBoard" aria-label="Live league standings and rosters"><p>Loading your saved pool…</p></div>
+        <div id="seasonBoard" class="chalkboard" aria-label="Live leaderboard chalkboard overlay">
+          <div class="clean-loading-card">
+            <strong>Basement Bar League</strong>
+            <span>Loading live standings…</span>
+          </div>
+        </div>
+      </article>
     </section>
 
     <section id="draft" class="panel">
@@ -7213,15 +7209,16 @@
 
 
 
+<dialog id="enlargedChalkboard" class="chalk-enlarged" aria-labelledby="enlargedChalkboardTitle"><header><h2 id="enlargedChalkboardTitle">The chalkboard</h2><button type="button" data-close-chalkboard>Close</button></header><div id="enlargedChalkboardContent" class="chalkboard"></div></dialog>
 <dialog id="draftIdentityDialog" class="draft-identity-dialog" aria-labelledby="draftIdentityTitle"><div class="identity-inner"><span class="eyebrow">Welcome to draft night</span><h2 id="draftIdentityTitle">Who is this?</h2><p>Select your name to enter the room.</p><div id="draftIdentityChoices"></div><button id="cancelDraftIdentity" type="button">Back to Home</button></div></dialog>
 <aside id="draftChat" class="draft-chat" hidden><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">Draft chat <span id="chatUnread"></span></button><div id="chatPanel" hidden><div class="chat-heading"><strong>At the draft table</strong><button id="chatClose" type="button" aria-label="Minimize chat">×</button></div><div id="chatMessages" role="log" aria-live="polite" aria-label="Draft chat messages"></div><form id="chatForm"><label class="sr-only" for="chatInput">Message the room</label><input id="chatInput" maxlength="300" autocomplete="off" placeholder="Nice pick…"><button type="submit">Send</button></form><p id="chatStatus" role="status"></p></div></aside>
 <dialog id="seasonArchiveDialog" class="season-archive-dialog" aria-labelledby="seasonArchiveTitle"><header><h2 id="seasonArchiveTitle"></h2><button id="closeSeasonArchive" type="button" aria-label="Close season details">×</button></header><div id="seasonArchiveContent"></div><button id="downloadSeasonArchive" type="button">Download this season’s full record</button></dialog>
 <script defer src="assets/js/pool-core.js?v=269"></script>
-<script defer src="assets/js/season-board.js?v=269"></script>
+<script defer src="assets/js/chalkboard.js?v=270"></script>
 <script defer src="assets/js/app.js?v=269"></script>
 <script defer src="assets/js/lottery.js?v=262"></script>
 <link rel="stylesheet" href="assets/css/draft-room.css?v=260">
-<link rel="stylesheet" href="assets/css/season-board.css?v=269">
+<link rel="stylesheet" href="assets/css/chalkboard.css?v=270">
 
 </body>
 </html>

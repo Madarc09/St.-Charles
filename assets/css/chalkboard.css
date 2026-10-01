@@ -1,0 +1,80 @@
+/* v270: the whole original scene stays intact. Only its live lettering changes. */
+@font-face{font-family:'Pool Chalk';src:url('../fonts/PatrickHand-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+#dashboard #seasonBoard{
+ position:absolute!important;left:20.7%!important;top:37.8%!important;width:62.8%!important;height:40%!important;
+ margin:0!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+ z-index:4!important;pointer-events:auto!important;overflow:visible!important;
+ --chalk-player:.84vw;--chalk-row:1.04;--chalk-heading:1.15vw;--chalk-group:.62vw;--chalk-gap:.1vw;
+}
+.chalkboard,.chalkboard *{box-sizing:border-box}
+.chalkboard{font-family:'Pool Chalk','Chalkboard SE','Comic Sans MS',cursive!important;font-weight:400!important;color:#f1f0df;text-shadow:0 0 .5px #f7f5e15c,0 1px 1px #0008;line-height:1.05;letter-spacing:.005em}
+.chalkboard .chalk-layout{display:grid;grid-template-columns:32% minmax(0,1fr);gap:2.5%;width:100%;height:100%;align-items:start}
+.chalkboard .chalk-standings,.chalkboard .chalk-rosters{min-width:0;margin:0;padding:0;background:none;border:0;box-shadow:none}
+.chalkboard button{display:inline!important;font:inherit!important;font-weight:inherit!important;color:inherit!important;letter-spacing:inherit!important;text-transform:none!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-shadow:inherit!important;padding:0!important;margin:0!important;min-height:0!important;min-width:0!important;width:auto!important;cursor:pointer;line-height:inherit!important}
+.chalkboard button::before,.chalkboard button::after{display:none!important}
+.chalkboard button:hover{color:#fff1b2!important;text-decoration:underline;text-underline-offset:.16em}
+.chalkboard button:focus-visible{outline:1px dashed #fff1b2;outline-offset:3px}
+.chalkboard table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;background:none;margin:0}
+.chalkboard table tr,.chalkboard table th,.chalkboard table td{background:none!important;box-shadow:none!important;border:0;color:inherit;text-shadow:inherit;font-family:inherit;letter-spacing:0;text-transform:none;white-space:nowrap;text-align:center}
+.chalkboard table th:first-child{width:29%;text-align:left}
+.chalkboard table th:nth-child(2){width:21%}
+.chalkboard table th:nth-child(3),.chalkboard table th:nth-child(4){width:10%}
+.chalkboard table th:nth-child(5),.chalkboard table th:nth-child(6){width:15%}
+.chalkboard thead th{padding:0 .12vw .4vw;font-size:.82vw;font-weight:400;border-bottom:1px solid #eee9cf55}
+.chalkboard tbody th,.chalkboard tbody td{padding:.32vw .12vw;font-size:1.3vw;font-weight:400;line-height:1.1}
+.chalkboard .chalk-points{color:#f4e5b3}
+.chalkboard .chalk-saved{margin:.65vw 0 0;padding:0;font-size:.74vw;line-height:1.15;color:#d2d5ba;text-align:left}
+.chalkboard .chalk-roster-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:2.5%;row-gap:.4vw;width:100%;align-items:start}
+.chalkboard .chalk-roster{grid-column:span 2;min-width:0;background:none;border:0;border-radius:0;box-shadow:none;margin:0;padding:0;color:inherit}
+.chalkboard .chalk-roster:nth-child(4){grid-column:2/span 2}
+.chalkboard .chalk-roster:nth-child(5){grid-column:4/span 2}
+.chalkboard .chalk-roster header{display:flex;align-items:baseline;justify-content:space-between;gap:.35em;margin:0 0 .1vw;padding:0 0 .1vw;border-bottom:1px solid #eee9cf55}
+.chalkboard .chalk-roster h3{margin:0;padding:0;font:400 var(--chalk-heading)/1 'Pool Chalk',cursive;color:inherit;text-shadow:inherit;letter-spacing:0;text-transform:none}
+.chalkboard .chalk-roster header>span{font-size:.61vw;line-height:1;color:#d7d9c7}
+.chalkboard .chalk-position{margin:var(--chalk-gap) 0 0;padding:0;border:0;background:none}
+.chalkboard .chalk-position h4{margin:0 0 .035vw;padding:0;font:400 var(--chalk-group)/1.05 'Pool Chalk',cursive;color:#d8d1b6;letter-spacing:.045em;text-transform:uppercase;text-shadow:inherit}
+.chalkboard .chalk-player{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:baseline;column-gap:.3em;padding:0;margin:0;font-size:var(--chalk-player);line-height:var(--chalk-row);font-weight:400}
+.chalkboard .chalk-player>span:first-child{min-width:0;white-space:nowrap}
+.chalkboard .chalk-player>span:last-child{text-align:right;min-width:1.3em;font-variant-numeric:tabular-nums}
+.chalkboard .chalk-empty{font-size:var(--chalk-player);line-height:1.2;color:#c2c4b1}
+#dashboard .home-image-nav #enlargeChalkboard{font:400 clamp(11px,1.05vw,17px)/1.1 'Pool Chalk',cursive!important;min-height:30px;padding:5px 9px!important;background:#141916b8!important;color:#ede9cc!important;border:1px solid #d6c48a77!important;border-radius:3px!important}
+#dashboard .home-image-nav #enlargeChalkboard::before,#dashboard .home-image-nav #enlargeChalkboard::after{display:none!important}
+/* Phone: keep the complete room; its optional enlarged board uses the same lettering. */
+dialog.chalk-enlarged{width:min(1100px,96vw);max-width:96vw;max-height:94dvh;padding:22px 25px 30px;border:7px ridge #715333;border-radius:3px;background:radial-gradient(ellipse at 20% 10%,#29302a88,transparent 60%),#111714;color:#f1f0df;box-shadow:0 18px 90px #0009;overflow:auto}
+dialog.chalk-enlarged::backdrop{background:#000b}
+.chalk-enlarged>header{display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid #e6dec65c;padding-bottom:12px;margin-bottom:20px}
+.chalk-enlarged>header h2{font:400 30px/1.1 'Pool Chalk',cursive;margin:0;color:#eee8d5}
+.chalk-enlarged>header button{font:400 18px/1.1 'Pool Chalk',cursive!important;background:none!important;color:#f5edd7!important;border:1px solid #cabf9d!important;padding:8px 12px!important;border-radius:3px!important;min-height:40px}
+.chalk-enlarged>header button::before,.chalk-enlarged>header button::after{display:none!important}
+.chalk-enlarged .chalkboard{--chalk-player:19px;--chalk-row:1.15;--chalk-heading:25px;--chalk-group:13px;--chalk-gap:6px}
+.chalk-enlarged .chalk-layout{grid-template-columns:30% minmax(0,1fr);gap:4%;height:auto}
+.chalk-enlarged .chalkboard h2{font:400 26px/1.1 'Pool Chalk',cursive;text-decoration:underline;text-underline-offset:6px;color:#eee8d5;margin:0 0 20px;letter-spacing:0}
+.chalk-enlarged .chalk-roster-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 20px}
+.chalk-enlarged .chalk-roster,.chalk-enlarged .chalk-roster:nth-child(4),.chalk-enlarged .chalk-roster:nth-child(5){grid-column:auto}
+.chalk-enlarged .chalk-roster header{margin-bottom:8px;padding-bottom:5px}
+.chalk-enlarged .chalk-roster header>span{font-size:11px}
+.chalk-enlarged .chalk-position h4{margin-bottom:3px}
+.chalk-enlarged .chalkboard thead th{font-size:12px;padding:0 3px 8px}
+.chalk-enlarged .chalkboard tbody th,.chalk-enlarged .chalkboard tbody td{font-size:21px;padding:7px 3px}
+.chalk-enlarged .chalkboard .chalk-saved{font-size:15px;line-height:1.3;margin-top:14px}
+@media(max-width:700px){
+ dialog.chalk-enlarged{padding:16px 14px 25px;border-width:5px}
+ .chalk-enlarged .chalk-layout{display:block}
+ .chalk-enlarged .chalk-rosters{margin-top:28px}
+ .chalk-enlarged .chalk-roster-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+ .chalk-enlarged .chalkboard{--chalk-player:18px;--chalk-heading:26px;--chalk-group:13px}
+}
+@media(max-width:480px){.chalk-enlarged .chalk-roster-grid{grid-template-columns:1fr}.chalk-enlarged .chalkboard{--chalk-player:22px;--chalk-row:1.2;--chalk-group:15px;--chalk-gap:8px}}
+
+/* Approved v269 protection and archive presentation, unchanged. */
+#draft #closedDraftNotice{padding:30px;border:1px solid #c0a76f;border-radius:8px;background:#111b23;color:#eeeade;text-align:center}
+#draft #closedDraftNotice h2{font-size:30px;margin:0 0 10px}
+#draft #closedDraftNotice p{font-size:16px;line-height:1.6}
+#draft #closedDraftNotice .actions{justify-content:center;margin-top:20px;gap:10px}
+#draft.is-final-draft .draft-up-next,#draft.is-final-draft #cleanRosterNeedsPanel,#draft.is-final-draft #myDraftRoster,#draft.is-final-draft #v120TickerSystem{display:none!important}
+#admin .final-draft-status{padding:14px 16px;border:1px solid #7d8d60;border-radius:8px;background:#202b20;color:#d6e8c4;margin:15px 0;line-height:1.6}
+.final-draft-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:14px}
+.final-draft-groups h4{color:#e3c891;margin:12px 0 6px;font-size:13px}
+.final-draft-groups ol{padding-left:20px;line-height:1.7;font-size:14px}
+.final-draft-groups li small{color:#9eafbf;margin-left:5px}
+@media(max-width:700px){.final-draft-groups{grid-template-columns:1fr}#draft #closedDraftNotice{padding:22px 15px}}
