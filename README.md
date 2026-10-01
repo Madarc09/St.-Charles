@@ -1,161 +1,66 @@
-# v268 live stat lines in Roster Rooms
+# Basement Bar League — v269
 
-- Roster Rooms now use the same current-season player objects that power the Home standings.
-- Skaters display **GP, G, A, SHG, GWG, FPTS**.
-- Team-goalie entries display **GP, W, A, G, SO, FPTS**.
-- The roster board continues to populate automatically from saved shared-draft picks.
-- While a roster room is open, a live NHL stat refresh now re-renders that room so its stat line stays in sync with Home.
-- Browser asset version bumped to `?v=268` so the updated roster-room code is fetched after deploy.
+## Upload this update
 
-# v264 permanent Last Pick display
+1. Keep the v268 ZIP and the separate **Completed-Draft-2026-2027-Backup.json**.
+2. Extract this ZIP and upload its **contents** into your existing GitHub repository, at the level that contains `index.html`. Include **all folders**, especially `lib` and `data/draft-history`.
+3. Keep the same Vercel project and the existing Redis environment variables. No new service or payment is needed.
+4. After Vercel deploys, refresh the home page. You should see **Final rosters locked** and all five rosters. The draft room should say **That’s a wrap**.
+5. Check the phone and computer using `PHONE-AND-COMPUTER-TEST.md`.
 
-- Removed the rotating Draft Results ticker behavior.
-- The bottom draft panel now always shows only the most recent completed pick.
-- A new shared pick flashes **THE PICK IS IN**, reveals **MANAGER SELECTS PLAYER**, and then remains on screen until the next pick.
-- Opening the draft midway through immediately shows the latest saved pick without replaying the announcement.
-- Undo/reset updates the panel back to the newest remaining pick (or the waiting state when no picks remain).
-- Everything else from v263 is unchanged.
+This is a complete website replacement package with no build step and no runtime npm dependencies. Upload extracted files, not the ZIP itself. Do not deploy as GitHub Pages, which cannot run the API functions.
 
-# v263 pick reveal visibility fix
+## Your completed draft is preserved
 
-- Fixed the live ticker takeover going black after **THE PICK IS IN**.
-- The manager name, selected player, position/team and overall pick now render visibly during the reveal.
-- Added a CSS + JavaScript visibility fallback so the reveal cannot remain stuck at `opacity: 0`.
-- All v262 draft ticker, roster-room, puck button and shared-draft behavior is otherwise unchanged.
+The real 2026–2027 live draft was captured from your existing website before these edits. It contains **60 unique selections**, **five managers**, and **6 forwards / 4 defence / 2 team-goalie units per manager**. The actual pick sequence, player IDs, owners, lottery order and original pick timestamps are retained. Display sorting does not reorder the saved picks.
 
-# v262 live pick ticker takeover
+- `data/draft-history/20262027.json` is the protected copy included in this package and GitHub.
+- `data/draft-history/20262027-rosters.csv` is a readable roster list you can open in a spreadsheet.
+- The separate downloaded JSON backup also includes all three existing historical seasons.
+- The update keeps the exact Redis room key used by v268: its internal `v259` suffix is intentional and must never be changed just to match a release number.
+- On the first successful live load after deployment, the server locks the completed draft and saves an independent final-draft ledger in Redis alongside the room. Both save together, with no expiration.
+- The server rejects undo, reset, season changes, new picks and a new lottery for a locked live draft. Hiding buttons is only the visible part; the APIs enforce the same rules.
+- If the active room is missing, its final draft can be recovered from the independent ledger or the packaged copy. Conflicting complete records stop with an error rather than silently overwriting selections.
+- Future live drafts automatically lock when all 60 picks are saved. Test rooms remain separate and resettable.
 
-## Live pick announcement
-- Every newly saved shared draft pick temporarily takes over the bottom Draft Results ticker.
-- The ticker flashes **THE PICK IS IN**, then reveals **MANAGER SELECTS PLAYER** with the player/team details.
-- After the reveal, the normal rotating Draft Results ticker resumes automatically.
-- The announcement is driven from shared draft state, so other managers viewing the Draft Room see the same saved pick on their next live refresh.
-- Opening the page mid-draft does not replay an old pick as if it were new.
+The new lock takes effect when you deploy v269. The separate backup has already been created. Keep that backup and the protected data folder in later website updates.
 
+## Draft history versus End Season
 
-- Active Draft action is now a black hockey-puck button with white DRAFT text.
-- The previous Wait state now names the manager on the clock, for example “Nick is picking”.
-- Full-position and Saving states remain explicit.
-- All v260 roster-room/live-roster changes are retained.
+**Locking the draft does not end the season or freeze scores.** The home board and roster rooms continue using the existing live NHL statistics and scoring rules from v268.
 
-# Basement Bar League — v262
+Use **View draft record** on Home, in the closed draft room, or under Admin to see the final grouped rosters, lottery order and original sequence of all 60 picks. The record has its own download button and contains draft selections, not final season scores.
 
-The draft-room upgrade for your existing GitHub → Vercel website.
+At the actual end of the season, Nick can use **End Season** in Admin. It still requires fresh NHL statistics, saves final standings, player statistics, rosters and picks to the history book, then opens the next season. The separate final-draft record stays saved after this transition. If the fresh statistics request fails, the active season stays intact.
 
-## Upload to GitHub
+**Admin → Download full backup** now includes current draft, lottery, season history, every locked draft record and scoring rules. The public UI has no delete control for live season history or final draft records.
 
-1. Keep your previous ZIP or GitHub commit as a backup.
-2. Extract this ZIP. Upload its **contents** into the same GitHub repository folder that currently contains `index.html`. Do not upload the ZIP itself or put everything inside an extra nested folder.
-3. Include the new `lib` folder, all six files in `api`, the updated `assets` folder, `index.html`, `package.json`, and `vercel.json`. The scripts and tests can also stay in the repository.
-4. Keep your existing Vercel project and its Redis environment variables. No new paid service, API key, or database is introduced.
-5. Let Vercel deploy your GitHub change, then refresh the site on both devices. Follow `PHONE-AND-COMPUTER-TEST.md` before your real draft.
+Selecting a manager name is the existing trust-based arrangement for this group; there are no new passwords. Select Nick from the name control in Admin to use commissioner tools without reopening the draft.
 
-Use the same Vercel settings as your existing static site. This project has no build step or runtime npm dependencies. The root `index.html` is the homepage; `/api/*` are Vercel functions. Do not publish it as GitHub Pages, which cannot run those functions.
+## Home and artwork changes
 
-## What changed
+- The familiar basement scene and clickable jersey entrances remain at the top.
+- Larger standings show each manager’s rank and fantasy points. Select a manager to jump to their roster.
+- All five roster cards display full names and current stat lines. Desktop uses multiple columns; phones show full-width cards.
+- Players are grouped as **Forwards → Defence → Team goalies**, alphabetically within each group.
+- Team-goalie names remain complete, including **New York Islanders Goalies**.
+- Nick’s home-page jersey reads **09**.
+- Tyler’s room has a **Sundin 13** jersey and matching helmet/nameplate.
+- Andrew’s room has a **Brière 48** jersey, helmet, framed picture and collectible puck.
+- The other three room images, existing historical files, lottery animation and NHL scoring implementation are unchanged from v268.
 
-- **v260 roster-room update:** Draft/Wait buttons have stronger contrast on desktop and mobile. Owner-room navigation uses manager names again (Nick, Andrew, Tyler, Chris, Scott). Each locker room now overlays the roster currently saved in the shared draft, so new picks replace the baked previous-season player list automatically; opening a room refreshes the shared draft first.
-- Entering the draft room requires choosing Nick, Chris, Andrew, Tyler, or Scott. There is no automatic Nick selection and no password. The name is remembered in that browser tab; use the name button to change it.
-- The arena screen shows **Draft Lottery Results**, with all five positions set to **TBA** until the lottery is official.
-- The existing Bettman reveal sequence, ready check, online indicators, commissioner “Confirm for all managers,” skip, and replay are retained. Replay uses the saved order.
-- Lottery results, picks, presence, and chat are shared. The server checks whose turn it is, roster limits, duplicate players, and simultaneous requests.
-- **Roster Needs**, **Up Next**, a collapsible personal roster, and the Draft Results ticker remain. The old drafting-as selector and On Deck block are removed.
-- Player/team search includes all 32 team-goalie units. Position and team filters can be combined; sorting includes fantasy points, names, teams, goals, assists, games, goalie wins, save percentage, and GAA. Player rows no longer say “Real NHL API.”
-- A small collapsible chat sits above the ticker. It keeps the latest 150 messages for that room.
-- The draft has a new arena background. Existing home, trophy-room, owner-room images, and original historical season files are unchanged.
-- Broken duplicate draft controllers and unused controls were removed. Team and scoring rules now describe the actual 6F / 4D / 2 team-goalie draft.
+The three image edits were made with the built-in image tool. Asset paths and exact prompts are listed in `ARTWORK-CHANGES.json`.
 
-## Lottery and draft flow
+## Keep tests separate
 
-Home → Enter Draft Room → choose your name → Enter Draft Lottery → I’m Ready.
+**Admin → Open test room** opens the existing rehearsal room. Use the same test-room link on both devices. Test picks and test history never affect the live pool. **Clear all test data** works only in a test room.
 
-Everyone opens the same room. The commissioner can confirm all five managers when needed. Managers in the lottery see the same saved order revealed. Closing the finished lottery returns them to the draft; the first manager can pick. Someone arriving late loads the same official order and existing picks.
+A finished live draft cannot be reset. **End Season** is for the real end of the season, not a way to test this update.
 
-The room refreshes about every 3.5 seconds while the draft is open. Presence updates about every 14 seconds and fades after roughly 45 seconds away. Hidden tabs pause polling. The results become shared as soon as a successful save completes, although another device can take one polling interval to display it.
+## Technical checks
 
-## End Season and history
+Run `npm test` with a modern Node.js installation. The suite covers draft validation and races, NHL scoring and the live GameCenter overlay, archives, test-room isolation, protected final selections, rejection of edits, atomic room/ledger persistence, recovery, next-season transition, and roster display grouping.
 
-In the **live pool**, Nick’s **End Season** control:
+The automated checks passed for this package. All inline and external JavaScript was parsed, HTML IDs and local asset paths were checked, and the saved 60-pick record was compared against the original live capture. Desktop/mobile visual rendering still needs the short post-deployment check on your devices; the review browser could not preview the local build.
 
-1. Requires a complete 60-pick draft.
-2. Fetches fresh regular-season statistics for the pool’s selected season.
-3. Recalculates every roster’s score using those statistics.
-4. Saves standings, champion/ties, rosters and player statistics, all picks, lottery results, scoring rules, and timestamps in shared history.
-5. Only after that save succeeds, opens the next season with empty picks and a fresh lottery.
-6. Downloads a JSON copy of the completed season.
-
-If fresh statistics cannot be verified, End Season fails without clearing the draft. It does not use the previous season’s draft-comparison points as final live-season scores.
-
-Use **Open history book → select a season → View saved rosters & picks** to inspect a saved record. Older historical seasons retain the information present in your original files; missing historical player details are not invented. Test seasons never enter the live all-time totals.
-
-Shared room/history records have no automatic expiry in this code and survive deployments. Keep the Redis database connected and retain the downloaded backups. **Download full backup** exports the current draft, lottery, and all history visible in that room. There is deliberately no live-history delete button.
-
-## Safe tests
-
-**Admin → Open test room** opens a separate shared rehearsal. Copy that room’s link onto your other device.
-
-It has its own lottery, picks, chat, and archives. Its **End Test Season** uses the previous completed season’s statistics so you can exercise the full process before this season finishes. **Fill remaining test picks** avoids making all 60 selections manually. **Clear all test data** removes only that rehearsal’s picks, lottery, chat, and test archives. It cannot run against the live room.
-
-**Reset draft & lottery** clears the active room’s picks, lottery, and chat but retains its archived seasons. Resetting the live draft requires typing `RESET LIVE DRAFT`.
-
-## NHL data
-
-The official NHL feeds already used by the project remain the source:
-
-- Statistics: `https://api.nhle.com/stats/rest/en`
-- Current roster membership: `https://api-web.nhle.com/v1/roster/{team}/current`
-- Player headshots and team logos: `https://assets.nhle.com`
-
-Instead of fetching the same summary reports sorted 13 different ways, the server loads complete skater and goalie summaries and paginates when necessary. It checks for truncated or duplicate rows. Team-specific goalie reports are requested when a traded goalie needs to be split between clubs.
-
-Team-goalie save percentage and GAA come from combined saves, shots, goals allowed, and time on ice. Team games use goalie starts when available, so relief appearances do not inflate them. Current roster membership supplies current teams and rookies; prior-season statistics remain clearly labelled as draft comparisons.
-
-Current-season statistics are cached for five minutes, completed-season statistics for six hours, and current rosters for twelve hours. Warm server requests share results; Redis retains the last successful update. Ordinary pages may show a labelled saved update during an NHL outage. End Season requires a fresh successful response. This is near-live season scoring, not a per-shot live game feed, and remains dependent on NHL feed availability.
-
-## Storage and migration
-
-The backend accepts the same REST credential pairs as the original project:
-
-- `KV_REST_API_URL` and `KV_REST_API_TOKEN`, or
-- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, or
-- `REDIS_REST_API_URL` and `REDIS_REST_API_TOKEN`.
-
-Keep these in Vercel, never in GitHub or this ZIP. Without shared storage, production shows an error instead of pretending that a browser-only save is shared.
-
-The first v259 room loads the old server draft and lottery when applicable. A previous deliberate reset or static archived-season fallback is respected. Legacy keys are left untouched as a migration backup. v259 writes its own versioned room key and uses atomic compare-and-set updates to prevent lost picks. Test rooms use different keys.
-
-If you roll code back after using v259, the old code will see its old storage snapshot, not newer v259 picks. Download a full backup before a rollback and do not mix old and new clients during a real draft. No recovery import is exposed in the public UI; the JSON backups are available for a deliberate recovery if needed.
-
-Name selection is the trust-based arrangement requested for this friends’ pool. Selecting Nick exposes the commissioner controls; this is not password authentication.
-
-## Developer checks
-
-With a modern Node.js installation:
-
-```sh
-npm test
-npm run preview:test
-```
-
-The local test preview is `http://127.0.0.1:8787/?room=test-local#draft`. It uses synthetic NHL players and temporary in-memory rooms. Synthetic fixtures are imported only by the test/preview scripts, never production API functions. Do not set `POOL_LOCAL_TEST` in Vercel.
-
-Validation performed for this ZIP: automated concurrent-pick, lottery, roster-limit, archive, stale-data refusal, test-isolation, pagination, migration, and scoring checks; JavaScript syntax, HTML IDs, asset references, and unchanged original image/history checks.
-
-Still to verify after upload: desktop/mobile rendering in your browsers, your existing production Redis connection, and real NHL responses from Vercel. This session’s preview browser could not open the local build, and the live NHL endpoint was unavailable from the review environment. The two-device guide covers those checks; do them in the test room first.
-
-## v266 — live 2026–27 stat refresh
-- Current-season NHL totals now refresh in the browser about once per minute instead of every five minutes.
-- Current-season `/api/nhl` responses no longer sit in the CDN cache; the server uses a short shared NHL cache to protect the upstream feed while keeping all five managers current.
-- Returning to the Home board, bringing the tab back into view, or reconnecting triggers a current-stat check.
-- Home status now clearly says `LIVE NHL`, shows the last official NHL update time, and notes the ~60 second check cadence.
-- Draft comparison data remains previous-season data and historical-season caching remains long-lived.
-- Team-goalie scoring remains the league rule: W 2, A 5, G 10, SO 5. A goalie unit can therefore correctly show 0 FPTS while a game is still undecided or after a loss.
-
-
-## v266 live GameCenter scoring
-Current-season standings now combine the NHL season-summary totals with the NHL GameCenter live scoring feed. Goals and assists can appear while a game is in progress, including opening-night scorers before the aggregate season report has created a row for them. The Home page checks about every 15 seconds.
-
-## v267 live scoring repair
-- The live room now auto-corrects an old persisted season (for example 2025-26) to the real current NHL season while the draft is still incomplete. Future seasons selected by the commissioner are never pulled backward.
-- Live goals are read from both the NHL daily score payload and GameCenter landing data, with event de-duplication.
-- The Home status now includes how many live goal events were detected, making feed-vs-scoring problems visible during a game.
+`npm run preview:test` starts a local synthetic-data preview. It never connects to your production pool. Do not set `POOL_LOCAL_TEST` in Vercel.

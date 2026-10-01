@@ -41,9 +41,10 @@ test('shared draft, races, archive and test isolation',async()=>{
  const end=action('end-season',{expectedRevision:filled.draft.revision});const saved=await call('history',end);
  assert.equal(saved.status,200);assert.ok(saved.archived.standings.reduce((s,r)=>s+r.pts,0)>boardPoints);assert.equal(saved.archived.draftPicks.length,60);assert.equal(saved.draft.picks.length,0);assert.equal(saved.archived.testSeason,true);
  const again=await call('history',end);assert.equal(again.status,200);assert.equal((await call('history')).seasons.length,1);
- const live=await call('draft',null,'live');const realHistory=await call('history',null,'live');assert.equal(live.draft.picks.length,0);assert.equal(realHistory.seasons.length,3);
+ const live=await call('draft',null,'live');const realHistory=await call('history',null,'live');assert.equal(live.draft.picks.length,60);assert.equal(live.draft.locked,true);assert.equal(realHistory.seasons.length,3);
  const cleared=await call('draft',action('clear-tests',{expectedRevision:saved.draft.revision,confirm:'CLEAR TEST DATA'}));assert.equal(cleared.status,200);assert.equal((await call('history')).seasons.length,0);assert.deepEqual((await call('history',null,'live')).seasons,realHistory.seasons);
- assert.equal((await call('draft',action('clear-tests',{expectedRevision:0,confirm:'CLEAR TEST DATA'}),'live')).status,400);
+ assert.equal((await call('draft',action('clear-tests',{expectedRevision:live.draft.revision,confirm:'CLEAR TEST DATA'}),'live')).status,409);
+ assert.deepEqual((await call('draft',null,'live')).draft.picks,live.draft.picks);
  assert.equal((await call('draft',action('auto-fill',{expectedRevision:0}),'live')).status,400);
 });
 test('NHL totals, traded goalies, rookies, season scoring and snake turns',async()=>{

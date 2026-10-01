@@ -52,6 +52,10 @@
     const result = {F:0,D:0,G:0};
     (draft?.picks || []).filter(p=>p.ownerId===ownerId).forEach(p=>result[bucket(p.player)]++); return result;
   }
+  function sortRoster(players) {
+    const order={F:0,D:1,G:2};
+    return [...(players||[])].sort((a,b)=>order[bucket(a)]-order[bucket(b)] || String(a.name||'').localeCompare(String(b.name||'')));
+  }
   function standings(draft, players) {
     const map = new Map((players || []).map(p=>[String(p.id),p]));
     return OWNERS.map(o=>{
@@ -62,8 +66,8 @@
         const player = {...p.player,...zero,...(stat || {})};
         player.fpts = player.fantasyPoints = points(player); return player;
       });
-      return {ownerId:o.id,ownerName:o.name,team:o.teamName,teamName:o.teamName,players:roster,pts:roster.reduce((s,p)=>s+points(p),0),total:roster.reduce((s,p)=>s+points(p),0)};
+      return {ownerId:o.id,ownerName:o.name,team:o.teamName,teamName:o.teamName,players:sortRoster(roster),pts:roster.reduce((s,p)=>s+points(p),0),total:roster.reduce((s,p)=>s+points(p),0)};
     }).sort((a,b)=>b.pts-a.pts || a.ownerName.localeCompare(b.ownerName)).map((r,i,rows)=>({...r,rank:i && r.pts===rows[i-1].pts ? rows.findIndex(x=>x.pts===r.pts)+1 : i+1}));
   }
-  return {OWNERS,TEAMS,RULES,SCORING,num,text,bucket,seasonId,previousSeason,seasonLabel,points,skater,teamGoalies,currentPick,counts,standings};
+  return {OWNERS,TEAMS,RULES,SCORING,num,text,bucket,seasonId,previousSeason,seasonLabel,points,skater,teamGoalies,currentPick,counts,sortRoster,standings};
 });

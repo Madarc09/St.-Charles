@@ -3,8 +3,8 @@ const NHL=require('../lib/nhl-data');
 module.exports=async function(req,res){
   S.headers(res);
   try{
-    const room=S.roomName(req);let {state}=await S.read(room);
-    if(req.method==='GET')return res.status(200).json({ok:true,room,seasons:room==='live'?[...S.staticSeasons(),...state.archives]:state.archives,protectedSeasons:S.staticSeasons().map(s=>s.id)});
+    const room=S.roomName(req);let {state}=await S.preserved(room);
+    if(req.method==='GET')return res.status(200).json({ok:true,room,seasons:room==='live'?[...S.staticSeasons(),...state.archives]:state.archives,finalDrafts:state.finalDrafts||[],protectedSeasons:S.staticSeasons().map(s=>s.id)});
     if(req.method!=='POST')throw S.error('Method not allowed.',405);
     const b=S.body(req);S.commissioner(b);
     if(b.action!=='end-season')throw S.error('Unknown history action.');
@@ -25,7 +25,7 @@ module.exports=async function(req,res){
       const record={id:room==='live'?season:`${season}-test-${S.randomUUID().slice(0,8)}`,seasonId:season,label:`${S.Core.seasonLabel(season)} ${room==='live'?'Regular Season':'Test Season'}`,testSeason:room!=='live',savedAt:new Date().toISOString(),source:'NHL regular season',statsSeason:statSeason,statsUpdatedAt:stats.fetchedAt,scoring:S.Core.SCORING,rosterRules:S.Core.RULES,championOwnerId:standings.filter(r=>r.rank===1).length===1?standings[0].ownerId:null,championOwnerIds:standings.filter(r=>r.rank===1).map(r=>r.ownerId),standings,rosters:Object.fromEntries(standings.map(r=>[r.ownerId,r.players])),draftPicks:s.draft.picks,lottery:s.lottery,requestId:b.requestId};
       s.archives.push(record);
       const start=Number(season.slice(0,4))+1;
-      S.reset(s,{season:room==='live'?`${start}${start+1}`:season});return record;
+      S.reset(s,{season:room==='live'?`${start}${start+1}`:season,archivedSeason:season});return record;
     });
     return res.status(200).json({...S.publicRoom(result.state),archived:result.result});
   }catch(e){return S.sendError(res,e);}

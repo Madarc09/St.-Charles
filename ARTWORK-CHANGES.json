@@ -1,0 +1,20 @@
+{
+  "mode": "Built-in image generation tool; three edits of existing project assets",
+  "assets": [
+    {
+      "asset": "tyler",
+      "prompt": "Use case: precise-object-edit. Edit target: the attached Tyler hockey locker room website background. Replace only the hanging Toronto Maple Leafs DOMI 28 jersey on the left with a MATS SUNDIN jersey, reading SUNDIN and number 13 on the back and 13 on both sleeves. Also make the matching helmet number 13 and the small plaque above the jersey read MATS SUNDIN. Preserve the exact room layout, camera, proportions, blue lighting, TYLER header, central board and its frame, championship compartment, GoldenEye props, and all other objects. Same full uncropped image, exact same aspect ratio. No interface elements added.",
+      "path": "assets/images/locker-stall-tyler.png"
+    },
+    {
+      "asset": "andrew",
+      "prompt": "Use case: precise-object-edit. Edit target: attached Andrew Philadelphia Flyers hockey locker room website background. Andrew wants more Daniel Briere memorabilia. Replace the left hanging MARTONE 88 jersey with an authentic style Flyers BRIERE 48 jersey, name BRIERE and number 48 clearly rendered, with matching 48 helmet above. Add a small framed Daniel Briere hockey action photograph and a collectible BRIERE 48 puck on the right middle shelf, alongside the existing Gears of War display. Preserve exact room geometry, central roster board placement and frame, ANDREW header, warm orange lighting, trophy and championship area, other props. Keep the full uncropped image and same aspect ratio. No UI added.",
+      "path": "assets/images/locker-stall-andrew.png"
+    },
+    {
+      "asset": "home",
+      "prompt": "Use case: precise-object-edit. Edit target: attached basement hockey pool homepage background. Change ONLY the number on Nick's hanging jersey (second hanging area from left, marked NICK): replace the large back number 23 with 09, and make visible sleeve numbers match 09. Preserve NICK lettering, jersey fabric/colours, all other people's jerseys and numbers, central ANDREW champion display, chalkboard, title plaques, neon sign, props, room, image dimensions, camera and composition. No changes anywhere else, no cropping.",
+      "path": "assets/images/home-leaderboard-basement-board.png"
+    }
+  ]
+}

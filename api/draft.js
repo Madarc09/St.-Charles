@@ -4,13 +4,15 @@ module.exports=async function(req,res){
   S.headers(res);
   try{
     const room=S.roomName(req);
-    if(req.method==='GET')return res.status(200).json(S.publicRoom((await S.read(room)).state));
+    if(req.method==='GET')return res.status(200).json(S.publicRoom((await S.preserved(room)).state));
     if(req.method!=='POST')throw S.error('Use the commissioner controls to change the draft.',405);
     const b=S.body(req);S.owner(b.ownerId);
     let selected=null,board=null;
     if(b.action==='pick' || b.action==='auto-fill') {
       if(b.action==='auto-fill'){S.commissioner(b);if(room==='live')throw S.error('Automatic fill is available only in a test room.');}
       const {state}=await S.read(room);
+      if(b.action==='pick' && state.draft.picks.some(p=>p.requestId===b.requestId))return res.status(200).json(S.publicRoom(state));
+      S.assertEditable(state);
       const data=await NHL.board(state.draft.comparisonSeason);
       board=data.players;
       if(b.action==='pick'){selected=board.find(p=>p.id===String(b.playerId));if(!selected)throw S.error('This player is not on the available NHL board.');}
@@ -28,6 +30,7 @@ module.exports=async function(req,res){
       if(b.action==='pick') {
         if(!/^[a-zA-Z0-9-]{8,80}$/.test(String(b.requestId||'')))throw S.error('Missing pick confirmation. Please try again.');
         if(d.picks.some(p=>p.requestId===b.requestId))return;
+        S.assertEditable(s);
         S.revision(d,b.expectedRevision);
         if(!s.lottery.finalized)throw S.error('Finish the draft lottery first.',409);
         const pick=S.Core.currentPick(d);if(!pick)throw S.error('The draft is complete.',409);
@@ -38,6 +41,7 @@ module.exports=async function(req,res){
         d.draftClosed=d.picks.length===60;d.__manualRosterReset=false;S.touch(d);return;
       }
       S.commissioner(b);S.revision(d,b.expectedRevision);
+      S.assertEditable(s);
       if(b.action==='auto-fill') {
         if(room==='live')throw S.error('Automatic fill is available only in a test room.');
         if(!s.lottery.finalized)throw S.error('Complete the test lottery first.');

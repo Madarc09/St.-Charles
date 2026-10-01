@@ -1,0 +1,102 @@
+/* v269: keep the basement and jersey entrances; let the live board grow naturally. */
+#dashboard .home-hero-crop{height:29vw;max-height:520px;overflow:hidden;position:relative;border-bottom:2px solid #866039;background:#080909}
+#dashboard .home-hero-crop .home-immersive-scene{height:75vw!important;min-height:0!important;max-height:none!important;aspect-ratio:4/3!important}
+#dashboard .home-hero-crop .home-image-nav{display:none!important}
+#dashboard .home-season-nav{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:12px 18px;background:#0d100f;border-bottom:1px solid #554128;position:relative;z-index:2}
+#dashboard .home-season-nav button{padding:10px 15px!important;min-height:42px!important;border:1px solid #615139!important;border-radius:5px!important;background:#191e1b!important;color:#f8e7c5!important;font:600 13px/1.25 system-ui,sans-serif!important;letter-spacing:0!important;text-shadow:none!important;text-transform:none!important;box-shadow:none!important}
+#dashboard .home-season-nav button:hover{border-color:#d7b570!important;background:#272d27!important}
+#dashboard .home-season-nav button::before,#dashboard .home-season-nav button::after{display:none!important}
+#dashboard .home-manager-links{display:none}
+#dashboard #seasonBoard{position:relative;width:min(1480px,100%);margin:0 auto;padding:32px clamp(16px,3vw,48px) 24px;box-sizing:border-box;color:#f2f0e8;font:15px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif;text-shadow:none;background:radial-gradient(ellipse at 0 0,#26302a66,transparent 60%),#111613}
+#seasonBoard *,#seasonBoard *::before,#seasonBoard *::after{box-sizing:border-box}
+#seasonBoard h1,#seasonBoard h2,#seasonBoard h3,#seasonBoard h4,#seasonBoard p{margin:0;letter-spacing:normal;text-shadow:none;color:inherit;text-transform:none}
+#seasonBoard h1{font:600 clamp(26px,3vw,42px)/1.15 Georgia,serif;color:#f6edda}
+#seasonBoard h2{font:600 21px/1.3 Georgia,serif;color:#f6edda}
+#seasonBoard .sb-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:32px}
+#seasonBoard .sb-eyebrow{font-size:11px;letter-spacing:.16em;color:#d1b685;margin-bottom:9px}
+#seasonBoard .sb-draft-status{display:flex;align-items:flex-end;flex-direction:column;gap:9px;font-size:12px;color:#b8d0b5}
+#seasonBoard button{font:600 13px/1.3 system-ui,sans-serif!important;letter-spacing:0!important;text-transform:none!important;text-shadow:none!important;box-shadow:none!important;cursor:pointer;border:1px solid #75603b!important;border-radius:5px!important;padding:10px 14px!important;background:#242b24!important;color:#f7ead0!important;min-height:40px!important}
+#seasonBoard button::before,#seasonBoard button::after{display:none!important}
+#seasonBoard button:hover{background:#344031!important;border-color:#dab777!important}
+#seasonBoard :is(a,button):focus-visible,#seasonBoard .sb-roster:focus{outline:2px solid #eed099;outline-offset:4px}
+#seasonBoard .sb-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:15px;margin-bottom:15px}
+#seasonBoard .sb-section-heading>span{color:#acb4a9;font-size:12px}
+#seasonBoard .sb-ranks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+#seasonBoard .sb-ranks li{margin:0;padding:0;border:1px solid #4a503f;border-radius:6px;background:linear-gradient(145deg,#242d24,#1b231d)}
+#seasonBoard .sb-ranks li:first-child{border-color:#ba9256;background:linear-gradient(145deg,#413d29,#282b20)}
+#seasonBoard .sb-ranks a{display:grid;grid-template-columns:24px 1fr;gap:12px 8px;padding:18px 14px;text-decoration:none;color:#eeeade}
+#seasonBoard .sb-ranks a:hover{background:#ffffff08}
+#seasonBoard .sb-rank{font-size:12px;color:#c6ad7f;padding-top:4px;font-variant-numeric:tabular-nums}
+#seasonBoard .sb-manager{font-size:18px;font-weight:650;line-height:1.2}
+#seasonBoard .sb-manager small{display:block;font-size:11px;font-weight:400;margin-top:6px;color:#bbc2b7}
+#seasonBoard .sb-score{grid-column:2;display:flex;align-items:baseline;gap:7px;font-size:36px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:#f3d599}
+#seasonBoard .sb-score small{font-size:10px;letter-spacing:.06em;color:#bdb797;font-weight:500}
+#seasonBoard .sb-rosters-heading{margin-top:36px;padding-top:28px;border-top:1px solid #3d4839}
+#seasonBoard .sb-rosters-heading p{font-size:13px;color:#b9c1b4;margin-top:6px}
+#seasonBoard .sb-roster-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+#seasonBoard .sb-roster{min-width:0;border:1px solid #61543a;border-radius:7px;background:linear-gradient(130deg,#222920,#171e19);box-shadow:0 12px 25px #0003;scroll-margin-top:18px;padding:20px 17px 14px}
+#seasonBoard .sb-roster>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:17px;border-bottom:1px solid #645237;margin-bottom:18px}
+#seasonBoard .sb-roster>header h3{font:600 28px/1.15 Georgia,serif;color:#faf0d6}
+#seasonBoard .sb-roster>header p{font-size:11px;color:#b7bda8;margin-bottom:5px}
+#seasonBoard .sb-roster-total{text-align:right;display:flex;flex-direction:column}
+#seasonBoard .sb-roster-total strong{font-size:31px;line-height:1.1;color:#f2d595;font-variant-numeric:tabular-nums}
+#seasonBoard .sb-roster-total span{font-size:10px;letter-spacing:.08em;color:#c6bf9e}
+#seasonBoard .sb-position{margin-top:18px}
+#seasonBoard .sb-position h4{display:flex;align-items:center;justify-content:space-between;color:#cfb785;font-size:12px;font-weight:600;letter-spacing:.055em;text-transform:uppercase;margin-bottom:6px}
+#seasonBoard .sb-position h4 span{color:#889483;font-size:10px;letter-spacing:0}
+#seasonBoard .sb-position table{display:table;width:100%;table-layout:fixed;border-collapse:collapse;border-spacing:0;background:none;margin:0;min-width:0;color:#f2f0e8}
+#seasonBoard .sb-position thead{display:table-header-group}
+#seasonBoard .sb-position tbody{display:table-row-group}
+#seasonBoard .sb-position tr{display:table-row;background:none;border:0}
+#seasonBoard .sb-position th,#seasonBoard .sb-position td{display:table-cell;border:0;border-bottom:1px solid #ffffff0c;background:none;padding:8px 2px;vertical-align:middle;text-align:center;font-size:13px;font-weight:400;line-height:1.2;white-space:normal;overflow:visible;font-variant-numeric:tabular-nums}
+#seasonBoard .sb-position th:first-child{width:46%;text-align:left;padding-left:0;padding-right:9px}
+#seasonBoard .sb-position thead th{font-size:9px;font-weight:500;color:#aab69f;white-space:nowrap;padding:7px 0;border-bottom:1px solid #ffffff20;letter-spacing:0}
+#seasonBoard .sb-position tbody th span{display:block;font-size:14px;font-weight:550;overflow-wrap:break-word;line-height:1.3}
+#seasonBoard .sb-position tbody th{text-transform:none;letter-spacing:0;color:#f2f0e8;text-shadow:none}
+#seasonBoard .sb-position tbody th small{display:block;font-size:9px;color:#a8b3a0;line-height:1.3;margin-top:3px;font-weight:400}
+#seasonBoard .sb-position td.sb-points{color:#f8db9c;font-weight:750;font-size:14px}
+#seasonBoard .sb-position .sb-empty{text-align:left;padding:14px 0;color:#939e8e;font-size:13px}
+#seasonBoard .sb-room-link{width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+#seasonBoard .sb-legend{font-size:11px;color:#aab39f;border-top:1px solid #414c3b;margin-top:26px;padding-top:18px;line-height:1.9}
+#dashboard #homeStatsStatus{position:static!important;width:100%!important;margin:0!important;padding:12px 18px 24px!important;background:#111613!important;color:#b7c3ad!important;text-align:center!important;font:12px/1.5 system-ui,sans-serif!important}
+#draft #closedDraftNotice{padding:30px;border:1px solid #c0a76f;border-radius:8px;background:#111b23;color:#eeeade;text-align:center}
+#draft #closedDraftNotice h2{font-size:30px;margin:0 0 10px}
+#draft #closedDraftNotice p{font-size:16px;line-height:1.6}
+#draft #closedDraftNotice .actions{justify-content:center;margin-top:20px;gap:10px}
+#draft.is-final-draft .draft-up-next,#draft.is-final-draft #cleanRosterNeedsPanel,#draft.is-final-draft #myDraftRoster,#draft.is-final-draft #v120TickerSystem{display:none!important}
+#admin .final-draft-status{padding:14px 16px;border:1px solid #7d8d60;border-radius:8px;background:#202b20;color:#d6e8c4;margin:15px 0;line-height:1.6}
+.final-draft-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:14px}
+.final-draft-groups h4{color:#e3c891;margin:12px 0 6px;font-size:13px}
+.final-draft-groups ol{padding-left:20px;line-height:1.7;font-size:14px}
+.final-draft-groups li small{color:#9eafbf;margin-left:5px}
+@media(max-width:1200px){#seasonBoard .sb-roster-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#seasonBoard .sb-roster-grid .sb-roster:last-child{grid-column:1/-1;max-width:calc(50% - 10px);width:100%;justify-self:center}}
+@media(max-width:700px){
+ #dashboard .home-hero-crop{height:30vw;max-height:none}
+ #dashboard .home-season-nav{gap:6px;padding:10px}
+ #dashboard .home-season-nav button{font-size:12px!important;padding:9px 11px!important}
+ #dashboard .home-manager-links{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;background:#121713;padding:7px 8px 12px}
+ #dashboard .home-manager-links button{background:none!important;border:0!important;box-shadow:none!important;color:#d9cba9!important;font:500 12px/1.2 system-ui,sans-serif!important;min-height:36px;padding:8px!important;text-transform:none!important;letter-spacing:0!important}
+ #dashboard .home-manager-links button::before,#dashboard .home-manager-links button::after{display:none!important}
+ #dashboard #seasonBoard{padding:25px 13px 20px}
+ #seasonBoard .sb-heading{align-items:flex-start;flex-direction:column;gap:18px;margin-bottom:26px}
+ #seasonBoard .sb-draft-status{flex-direction:row;align-items:center;justify-content:space-between;width:100%;font-size:11px}
+ #seasonBoard .sb-draft-status button{font-size:12px!important}
+ #seasonBoard .sb-section-heading{align-items:flex-start;gap:6px;flex-direction:column}
+ #seasonBoard .sb-section-heading>span{font-size:11px}
+ #seasonBoard .sb-ranks{grid-template-columns:1fr;gap:7px}
+ #seasonBoard .sb-ranks a{grid-template-columns:26px 1fr auto;align-items:center;padding:12px 15px;gap:10px}
+ #seasonBoard .sb-rank{padding:0}
+ #seasonBoard .sb-manager{font-size:18px}
+ #seasonBoard .sb-manager small{font-size:11px;margin-top:3px}
+ #seasonBoard .sb-score{grid-column:3;font-size:30px}
+ #seasonBoard .sb-roster-grid{grid-template-columns:1fr;gap:18px}
+ #seasonBoard .sb-roster-grid .sb-roster:last-child{grid-column:auto;max-width:none}
+ #seasonBoard .sb-roster{padding:20px 12px 13px}
+ #seasonBoard .sb-position th:first-child{width:46%;padding-right:7px}
+ #seasonBoard .sb-position tbody th span{font-size:14px}
+ #seasonBoard .sb-position th,#seasonBoard .sb-position td{font-size:12px;padding:9px 1px}
+ #seasonBoard .sb-position td.sb-points{font-size:14px}
+ #seasonBoard .sb-rosters-heading{margin-top:28px}
+ .final-draft-groups{grid-template-columns:1fr}
+ #draft #closedDraftNotice{padding:22px 15px}
+}

@@ -22,16 +22,16 @@
   window.__currentLiveDraft=data.draft;window.__presenceMap=data.presence||{};
   if((previousSeason&&previousSeason!==data.draft.comparisonSeason)||(boardSeason&&boardSeason!==data.draft.comparisonSeason)){players=[];boardSeason='';boardPayload=null;boardToken++;boardBusy=false;boardError='';}
   if(statsSeason&&statsSeason!==data.draft.seasonId){liveStats=null;statsSeason='';lastStats=0;}
-  const hs=JSON.stringify(data.historySummary||[]);if(hs!==historySig){historySig=hs;loadHistory().catch(()=>{});}
+  const hs=JSON.stringify([data.historySummary||[],data.finalDrafts||[]]);if(hs!==historySig){historySig=hs;loadHistory().catch(()=>{});}
   render();renderHome();window.liveLottery?.renderState(data.state).catch(error=>toast(error.message));return data;
  }
  async function request(path,body){return apply(await json(endpoint(path),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ownerId,...body})}));}
  async function refresh(){if(refreshJob)return refreshJob;refreshJob=(async()=>{try{return apply(await json(endpoint('draft')));}catch(e){connectionError=e.message;render();throw e;}finally{refreshJob=null;}})();return refreshJob;}
- async function loadHistory(){const d=await json(endpoint('history'));window.__sharedHistorySeasons=d.seasons||[];window.refreshHockeyHistoryBook?.();$('historySaveStatus').textContent=`${d.seasons.length} ${testMode?'test':'permanent'} seasons saved.`;return d;}
+ async function loadHistory(){const d=await json(endpoint('history'));window.__sharedHistorySeasons=d.seasons||[];window.__finalDraftRecords=d.finalDrafts||[];window.refreshHockeyHistoryBook?.();$('historySaveStatus').textContent=`${d.seasons.length} ${testMode?'test':'permanent'} seasons saved. ${d.finalDrafts?.length||0} final draft records protected.`;const list=$('savedFinalDrafts');if(list)list.innerHTML=(d.finalDrafts||[]).map(r=>`<button type="button" data-view-final-draft="${esc(r.seasonId)}">${esc(C.seasonLabel(r.seasonId))} final draft</button>`).join('');return d;}
  async function heartbeat(){if(!ownerId||!inDraft()||document.hidden||Date.now()-lastHeartbeat<14000)return;lastHeartbeat=Date.now();try{await request('draft',{action:'presence'});}catch(e){connectionError=e.message;render();}}
  function schedule(){clearTimeout(poll);poll=setTimeout(async()=>{if(!document.hidden){await refresh().catch(()=>{});await heartbeat();refreshScores();}schedule();},inDraft()?3500:15000);}
  function ensureIdentity(){if(ownerId)return true;const m=$('draftIdentityDialog');if(m&&!m.open)m.showModal();return false;}
- function syncPage(){const active=inDraft();document.body.classList.toggle('v259-draft-active',active);document.body.classList.toggle('v259-test-mode',testMode);if(active)ensureIdentity();else{if($('draftIdentityDialog').open)$('draftIdentityDialog').close();if(App.lotteryOpen){App.lotteryOpen=false;$('liveLotteryOverlay').hidden=true;}}$('draftChat').hidden=!active||!ownerId;renderAdmin();if(active)render();}
+ function syncPage(){const active=inDraft(),closed=!!state?.draft.locked;document.body.classList.toggle('v259-draft-active',active);document.body.classList.toggle('v259-test-mode',testMode);if(active&&state&&!closed)ensureIdentity();else{if($('draftIdentityDialog').open)$('draftIdentityDialog').close();if(App.lotteryOpen){App.lotteryOpen=false;$('liveLotteryOverlay').hidden=true;}}$('draftChat').hidden=!active||!ownerId||closed;renderAdmin();if(active)render();}
  function activate(id){document.querySelectorAll('main > section.panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.body.dataset.activeTab=id;document.body.classList.toggle('v180-home-active',id==='dashboard');syncPage();schedule();if(id==='draft'){refresh().catch(()=>{});heartbeat();}if(id==='dashboard')refreshScores();window.scrollTo({top:0,behavior:'instant'});}
  function chooseIdentity(id){if(!C.OWNERS.some(o=>o.id===id))return;ownerId=id;remember(identityKey,id);$('draftIdentityDialog').close();lastHeartbeat=0;boardSig='';chatSig='';render();renderAdmin();heartbeat();}
  function render(){
@@ -39,9 +39,13 @@
   $('changeDraftName').textContent=ownerId?`${name(ownerId)} · change`:'Choose your name';$('roomModeBadge').textContent=testMode?'TEST ROOM':'LIVE POOL';
   $('draftConnection').textContent=connectionError||(state?`${testMode?'Test room · ':''}${state.draft.picks.length}/60 picks saved · Everyone shares this room`:'Connecting to the room…');$('draftConnection').classList.toggle('has-error',!!connectionError);
   const l=state?.state,d=state?.draft,done=!!l?.finalized,order=done?l.order:[];
+  const closed=!!d?.locked;$('draft').classList.toggle('is-final-draft',closed);$('closedDraftNotice').hidden=!closed;$('draftTitle').textContent=closed?'Draft complete':'Draft night';
+  if(closed&&$('draftIdentityDialog').open)$('draftIdentityDialog').close();
+  if(inDraft()&&state&&!closed)ensureIdentity();
+  document.querySelectorAll('[data-draft-entry-label]').forEach(el=>el.textContent=closed?'Final draft':'Draft room');
   $('lotteryOrderResults').innerHTML=Array.from({length:5},(_,i)=>`<div><span>${i+1}</span><strong>${esc(order[i]?name(order[i]):'TBA')}</strong></div>`).join('');
   $('lotteryStateCaption').textContent=done?'The order is official':l?.phase==='waiting'?`${l.joined.length}/5 managers ready`:l?.phase==='revealing'?'The reveal is underway':'Waiting for the lottery';
-  $('runLiveLotteryBtn').hidden=done;$('runLiveLotteryBtn').disabled=!state||!ownerId||!!connectionError;$('runLiveLotteryBtn').textContent=l?.phase==='revealing'?'Return to Lottery':'Enter Draft Lottery';$('replayLotteryBtn').hidden=!done;
+  $('runLiveLotteryBtn').hidden=done||closed;$('runLiveLotteryBtn').disabled=!state||!ownerId||!!connectionError;$('runLiveLotteryBtn').textContent=l?.phase==='revealing'?'Return to Lottery':'Enter Draft Lottery';$('replayLotteryBtn').hidden=!done||closed;
   $('draftSeasonLabel').textContent=d?`${C.seasonLabel(d.seasonId)} season${testMode?' · Rehearsal':''}`:'';
   window.renderRosterNeeds?.(d||{picks:[]},ownerId,name(ownerId));
   const next=done?C.currentPick(d):null;
@@ -49,10 +53,10 @@
   const strip=[];if(done)for(let i=d.picks.length;i<Math.min(60,d.picks.length+10);i++){const p=C.currentPick({...d,picks:Array(i)});strip.push(`<span class="${i===d.picks.length?'current':''}"><b>${p.pickNumber}.</b> ${esc(name(p.ownerId))}</span>`);}
   $('cleanDraftOrderStrip').innerHTML=strip.join('')||'<span>TBA after the lottery</span>';
   $('draftWaitingNotice').hidden=done;$('draftWaitingNotice').textContent=connectionError||'Enter the draft lottery to get started. Player selections open when the order is saved.';
-  $('draftPlayerSection').hidden=!done||!ownerId;$('draftChat').hidden=!inDraft()||!ownerId;
+  $('draftPlayerSection').hidden=!done||!ownerId||closed;$('draftChat').hidden=!inDraft()||!ownerId||closed;
   const own=d?.picks.filter(p=>p.ownerId===ownerId)||[];$('myDraftCount').textContent=`${own.length} / 12`;
-  const rs=ownerId+JSON.stringify(own.map(p=>p.player.id));if(rs!==rosterSig){rosterSig=rs;$('myDraftPlayers').innerHTML=own.length?own.map(p=>`<span><b>${esc(p.player.position)}</b> ${esc(p.player.name)}</span>`).join(''):'Your picks will appear here.';}
-  if(done&&ownerId&&inDraft()&&boardSeason!==d.comparisonSeason&&!boardBusy&&!boardError)loadPlayers();
+  const rs=ownerId+JSON.stringify(own.map(p=>p.player.id));if(rs!==rosterSig){rosterSig=rs;$('myDraftPlayers').innerHTML=own.length?C.sortRoster(own.map(p=>p.player)).map(p=>`<span><b>${esc(p.position)}</b> ${esc(p.name)}</span>`).join(''):'Your picks will appear here.';}
+  if(done&&!closed&&ownerId&&inDraft()&&boardSeason!==d.comparisonSeason&&!boardBusy&&!boardError)loadPlayers();
   const sig=[d?.revision,ownerId,boardBusy,boardError,connectionError,players.length,$('draftPosition').value,$('draftTeam').value,$('draftSearch').value,$('draftSort').value,limit,pickBusy].join('|');if(sig!==boardSig){boardSig=sig;renderBoard();}
   renderChat();renderAdmin();if(d)window.liveLottery?.renderLiveDraftTicker(d);
  }
@@ -79,8 +83,30 @@
  }
  function toggleChat(open){chatOpen=open;$('chatPanel').hidden=!open;$('chatToggle').setAttribute('aria-expanded',String(open));renderChat();if(open){$('chatMessages').scrollTop=$('chatMessages').scrollHeight;$('chatInput').focus();}}
  async function refreshScores(force=false){if(!state||statsBusy||(!force&&Date.now()-lastStats<LIVE_STATS_REFRESH_MS))return;const season=state.draft.seasonId;statsBusy=true;lastStats=Date.now();try{const data=await json(`/api/nhl?season=${season}`);if(state.draft.seasonId===season){liveStats=data;statsSeason=season;homeSig='';renderHome();}}catch(e){if($('homeStatsStatus'))$('homeStatsStatus').textContent=liveStats?'Showing the last saved NHL update.':'Current-season points could not be loaded. Try again shortly.';}finally{statsBusy=false;}}
- function renderHome(){if(!state)return;const d=state.draft,sig=`${d.revision}|${liveStats?.fetchedAt||''}|${d.seasonId}`;if(sig===homeSig)return;homeSig=sig;const rows=C.standings(d,statsSeason===d.seasonId?liveStats?.players:[]);rows.forEach(r=>{const s=r.players.filter(p=>C.bucket(p)!=='G'),g=r.players.filter(p=>C.bucket(p)==='G');while(s.length<10)s.push({name:'TBA',position:'F',fpts:0});while(g.length<2)g.push({name:'TBA',position:'TG',fpts:0});r.players=[...s,...g];});window.__lastSeasonApiDiagnostics={rows,season:d.seasonId,usedApi:!!liveStats,source:'shared-room-v268'};document.dispatchEvent(new CustomEvent('pool:live-stats-updated',{detail:window.__lastSeasonApiDiagnostics}));window.renderV182HomeChalkboard?.();window.__v243BuildMobileHomeRosterChart?.();let status=$('homeStatsStatus');if(!status){status=document.createElement('div');status.id='homeStatsStatus';$('dashboard').appendChild(status);}status.textContent=`${testMode?'TEST ROOM · ':''}${C.seasonLabel(d.seasonId)}${liveStats?' · '+(liveStats.stale?'Saved update · ':'')+'LIVE NHL'+(liveStats.liveOverlay?' + LIVE GAME':'')+(Number.isFinite(Number(liveStats.liveGoalEvents))?' · '+Number(liveStats.liveGoalEvents)+' live goal'+(Number(liveStats.liveGoalEvents)===1?'':'s'):'')+' · updated '+new Date(liveStats.fetchedAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'})+' · checks about every 15 sec':' · Connecting to live NHL stats…'}`;}
- function renderAdmin(){if(!$('adminRoomDescription'))return;$('adminRoomDescription').textContent=testMode?'Test room: all actions here apply only to this rehearsal.':'Live pool: shared by all five managers.';$('commissionerGate').hidden=ownerId==='nick';$('commissionerActions').hidden=ownerId!=='nick';$('returnLiveRoom').hidden=!testMode;$('openSharedTestRoom').hidden=testMode;$('clearTestSeasonsBtn').hidden=!testMode;$('autoFillTestDraft').hidden=!testMode;$('endSeasonBtn').textContent=testMode?'End Test Season':'End Season';$('resetSharedRoom').textContent=testMode?'Reset test draft & lottery':'Reset live draft & lottery';if(state&&document.activeElement!==$('adminSeason'))$('adminSeason').value=state.draft.seasonId;$('commissionerActions').querySelectorAll('button').forEach(b=>b.disabled=adminBusy||!state||!!connectionError);}
+ function renderHome(){
+  if(!state)return;
+  const d=state.draft,sig=`${d.revision}|${liveStats?.fetchedAt||''}|${d.seasonId}|${!!d.locked}`;
+  if(sig===homeSig)return;homeSig=sig;
+  const rows=C.standings(d,statsSeason===d.seasonId?liveStats?.players:[]);
+  window.__lastSeasonApiDiagnostics={rows,season:d.seasonId,usedApi:!!liveStats,source:'shared-room-v269'};
+  document.dispatchEvent(new CustomEvent('pool:live-stats-updated',{detail:window.__lastSeasonApiDiagnostics}));
+  window.renderSeasonBoard?.(rows,d);
+  let status=$('homeStatsStatus');if(!status){status=document.createElement('div');status.id='homeStatsStatus';$('dashboard').appendChild(status);}
+  status.textContent=`${testMode?'TEST ROOM · ':''}${C.seasonLabel(d.seasonId)}${liveStats?' · '+(liveStats.stale?'Saved update · ':'')+'LIVE NHL'+(liveStats.liveOverlay?' + LIVE GAME':'')+(Number.isFinite(Number(liveStats.liveGoalEvents))?' · '+Number(liveStats.liveGoalEvents)+' live goal'+(Number(liveStats.liveGoalEvents)===1?'':'s'):'')+' · updated '+new Date(liveStats.fetchedAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'})+' · checks about every 15 sec':' · Connecting to live NHL stats…'}`;
+ }
+ function renderAdmin(){
+  if(!$('adminRoomDescription'))return;const locked=!!state?.draft.locked;
+  $('adminRoomDescription').textContent=testMode?'Test room: all actions here apply only to this rehearsal.':'Live pool: shared by all five managers.';
+  $('commissionerGate').hidden=ownerId==='nick';$('commissionerActions').hidden=ownerId!=='nick';
+  $('returnLiveRoom').hidden=!testMode;$('openSharedTestRoom').hidden=testMode;$('clearTestSeasonsBtn').hidden=!testMode;$('autoFillTestDraft').hidden=!testMode;
+  $('endSeasonBtn').textContent=testMode?'End Test Season':'End Season';$('resetSharedRoom').textContent=testMode?'Reset test draft & lottery':'Reset live draft & lottery';
+  if(state&&document.activeElement!==$('adminSeason'))$('adminSeason').value=state.draft.seasonId;
+  $('commissionerActions').querySelectorAll('button').forEach(b=>b.disabled=adminBusy||!state||!!connectionError);
+  ['undoSharedPick','resetSharedRoom','setPoolSeason','testJoinAllLotteryAdminBtn'].forEach(id=>$(id).disabled=locked||$(id).disabled);
+  $('adminSeason').disabled=locked||adminBusy;
+  $('finalDraftStatus').hidden=!locked;
+  if(locked)$('finalDraftStatus').textContent=`${C.seasonLabel(state.draft.seasonId)}: all 60 selections are locked and backed up. The draft room is closed. Live scoring continues; use End Season only when the season is over.`;
+ }
  async function adminAction(action){
   if(ownerId!=='nick'||adminBusy)return;const body={action,expectedRevision:state.draft.revision};
   if(action==='reset'){const expected=testMode?'RESET TEST':'RESET LIVE DRAFT';if(prompt(`This clears ${testMode?'test':'live'} picks, chat and lottery. Archived seasons are kept. Type ${expected} to confirm.`)!==expected)return;body.confirm=expected;}
@@ -92,6 +118,16 @@
   adminBusy=true;renderAdmin();try{const data=await request(action==='end-season'?'history':'draft',body);if(['reset','clear-tests','end-season'].includes(action)){App.lotteryOpen=false;$('liveLotteryOverlay').hidden=true;boardError='';}if(data.archived){download(`${data.archived.id}-season-backup.json`,data.archived);toast('Season archived for everyone. A backup has also been downloaded.');await loadHistory();}else toast(action==='clear-tests'?'Test data cleared. Permanent history is unchanged.':'Shared room updated.');refreshScores(true);}catch(e){toast(e.message);await refresh().catch(()=>{});}finally{adminBusy=false;render();}
  }
  function download(filename,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ async function showFinalDraft(seasonId){
+  const history=await loadHistory(),records=history.finalDrafts||[];
+  const record=records.find(r=>r.seasonId===(seasonId||state?.draft.seasonId))||records.at(-1);
+  if(!record){toast('There is no locked draft record yet.');return;}
+  const draft=record.draft,dialog=$('seasonArchiveDialog');
+  $('seasonArchiveTitle').textContent=`${C.seasonLabel(record.seasonId)} · Final draft`;
+  $('seasonArchiveContent').innerHTML=`<p class="archive-note">60 final selections · Locked ${esc(new Date(record.lockedAt).toLocaleDateString())}. This record preserves draft selections; season points continue to update.</p><p class="archive-note">Lottery: ${draft.draftOrder.map((id,i)=>`${i+1}. ${esc(name(id))}`).join(' · ')}</p>${C.OWNERS.map(o=>`<section class="archive-roster"><h3>${esc(o.name)}</h3><div class="final-draft-groups">${[['F','Forwards'],['D','Defence'],['G','Team goalies']].map(([bucket,label])=>`<div><h4>${label}</h4><ol>${C.sortRoster(draft.picks.filter(p=>p.ownerId===o.id).map(p=>p.player)).filter(p=>C.bucket(p)===bucket).map(p=>`<li>${esc(p.name)} <small>${esc(p.nhlTeam)}</small></li>`).join('')}</ol></div>`).join('')}</div></section>`).join('')}<details class="archive-picks"><summary>Original draft order · all 60 picks</summary><ol>${draft.picks.map(p=>`<li>${esc(name(p.ownerId))} · ${esc(p.player.name)} <small>${esc(p.player.position)} · ${esc(p.player.nhlTeam)}</small></li>`).join('')}</ol></details>`;
+  $('downloadSeasonArchive').textContent='Download this final draft backup';$('downloadSeasonArchive').onclick=()=>download(`final-draft-${record.seasonId}.json`,record);
+  if(!dialog.open)dialog.showModal();
+ }
  function showArchive(season){
   const dialog=$('seasonArchiveDialog');if(!season||!dialog)return;
   const label=season.label||C.seasonLabel(season.seasonId||season.id);
@@ -102,7 +138,7 @@
   }).join('');
   const picks=season.draftPicks||[];
   $('seasonArchiveContent').innerHTML=`<p class="archive-note">${season.testSeason?'TEST SEASON · ':''}${season.savedAt?'Saved '+esc(new Date(season.savedAt).toLocaleString()):'Original saved season record'}</p><div class="archive-roster-grid">${rosterHtml}</div>${picks.length?`<details class="archive-picks"><summary>All ${picks.length} draft picks</summary><ol>${picks.map(p=>`<li>Round ${p.round} · ${esc(name(p.ownerId))} · ${esc(p.player.name)}</li>`).join('')}</ol></details>`:''}`;
-  $('downloadSeasonArchive').onclick=()=>download(`${season.id}-season-backup.json`,season);
+  $('downloadSeasonArchive').textContent='Download this season’s full record';$('downloadSeasonArchive').onclick=()=>download(`${season.id}-season-backup.json`,season);
   if(!dialog.open)dialog.showModal();
  }
  function roomLink(which){const u=new URL(location.href);u.search='';if(which!=='live')u.searchParams.set('room',which);u.hash='draft';return u.href;}
@@ -116,17 +152,17 @@
   $('cleanDraftBoard').addEventListener('click',e=>{const p=e.target.closest('[data-pick-player]');if(p&&!p.disabled)pick(p.dataset.pickPlayer);if(e.target.id==='retryBoard'){boardError='';loadPlayers();}});
   $('chatToggle').onclick=()=>toggleChat(!chatOpen);$('chatClose').onclick=()=>toggleChat(false);$('chatForm').onsubmit=async e=>{e.preventDefault();const input=$('chatInput'),text=input.value.trim();if(!text)return;const b=e.target.querySelector('button');b.disabled=true;try{await request('draft',{action:'chat',text,requestId:uuid()});input.value='';$('chatStatus').textContent='';$('chatMessages').scrollTop=$('chatMessages').scrollHeight;}catch(error){$('chatStatus').textContent=error.message;}finally{b.disabled=false;}};
   $('openSharedTestRoom').onclick=()=>location.assign(roomLink('test-rehearsal'));$('returnLiveRoom').onclick=()=>location.assign(roomLink('live'));$('copyRoomLink').onclick=copyLink;$('openSharedHistory').onclick=()=>window.openHockeyHistoryBook?.();
-  $('closeSeasonArchive').onclick=()=>$('seasonArchiveDialog').close();
-  $('exportSharedBackup').onclick=async()=>{try{const [d,h]=await Promise.all([refresh(),loadHistory()]);download(`basement-bar-${room}-${new Date().toISOString().slice(0,10)}.json`,{version:265,room,savedAt:new Date().toISOString(),draft:d.draft,lottery:d.state,history:h.seasons,scoring:C.SCORING,rosterRules:C.RULES});toast('Full backup downloaded.');}catch(e){toast(e.message);}};
+  $('closeSeasonArchive').onclick=()=>$('seasonArchiveDialog').close();$('chooseCommissioner').onclick=()=>$('draftIdentityDialog').showModal();
+  $('exportSharedBackup').onclick=async()=>{try{const [d,h]=await Promise.all([refresh(),loadHistory()]);download(`basement-bar-${room}-${new Date().toISOString().slice(0,10)}.json`,{version:269,room,savedAt:new Date().toISOString(),draft:d.draft,lottery:d.state,history:h.seasons,finalDrafts:h.finalDrafts||[],scoring:C.SCORING,rosterRules:C.RULES});toast('Full backup downloaded.');}catch(e){toast(e.message);}};
   for(const [id,action] of Object.entries({undoSharedPick:'undo',resetSharedRoom:'reset',clearTestSeasonsBtn:'clear-tests',endSeasonBtn:'end-season',setPoolSeason:'season',autoFillTestDraft:'auto-fill'}))$(id).onclick=()=>adminAction(action);
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-tab], [data-tab-jump]');if(b){const id=b.dataset.tab||b.dataset.tabJump;if($(id)){e.preventDefault();activate(id);}}});
+  document.addEventListener('click',e=>{const record=e.target.closest('[data-view-final-draft]');if(record){e.preventDefault();showFinalDraft(record.dataset.viewFinalDraft).catch(error=>toast(error.message));return;}const b=e.target.closest('[data-tab], [data-tab-jump]');if(b){const id=b.dataset.tab||b.dataset.tabJump;if($(id)){e.preventDefault();activate(id);}}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh().catch(()=>{});heartbeat();refreshScores(true);}schedule();});window.addEventListener('online',()=>{refresh().catch(()=>{});heartbeat();refreshScores(true);});
   document.addEventListener('error',e=>{if(e.target.tagName==='IMG'&&e.target.closest('#cleanDraftBoard'))e.target.style.visibility='hidden';},true);
   $('teamManagerList').innerHTML=C.OWNERS.map(o=>`<article class="card"><h3>${o.name}</h3><p>${esc(o.teamName)}</p><p class="muted">6 forwards · 4 defense · 2 team goalies</p></article>`).join('');
   $('poolRulesContent').innerHTML='<article class="card"><h3>Draft</h3><p>Five managers. Twelve rounds in snake order. Each roster has 6 forwards, 4 defensemen and 2 NHL team-goalie units.</p><p>A player or team-goalie unit can be drafted once. Only the manager on the clock can make the next pick.</p></article><article class="card"><h3>Fantasy points</h3><p>Skaters: goals 2 · assists 1 · shorthanded goals +5 · game-winning goals +5.</p><p>Team goalies: wins 2 · assists 5 · goals 10 · shutouts 5. Each unit includes that NHL club’s goalie statistics, including the correct portions of traded goalies’ seasons.</p><p>Regular season only. The draft board uses the previous season for comparison. Home standings use the current pool season.</p></article>';
   new MutationObserver(syncPage).observe($('draft'),{attributes:true,attributeFilter:['class']});
  }
- const App=window.PoolApp={get ownerId(){return ownerId;},get state(){return state;},get inDraft(){return inDraft();},testMode,room,lotteryOpen:false,ensureIdentity,refresh,request,render,loadHistory,showArchive,toast,activate};
+ const App=window.PoolApp={get ownerId(){return ownerId;},get state(){return state;},get inDraft(){return inDraft();},showFinalDraft,testMode,room,lotteryOpen:false,ensureIdentity,refresh,request,render,loadHistory,showArchive,toast,activate};
  window.officialDraftApi={load:async()=>state?.draft||(await refresh()).draft,describe:()=>connectionError||'Saved for everyone',updateSourceStatus:()=>{}};window.renderDraftRoomLottery=()=>render();
  async function init(){bind();syncPage();await refresh().catch(()=>{});refreshScores(true);schedule();if(location.hash==='#draft')activate('draft');}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

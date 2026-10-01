@@ -929,7 +929,7 @@
      Uses live API data from v156 diagnostics; only the Kessel chalk drawing is image-based. */
 
   #dashboard .home-immersive-image {
-    content: url('assets/images/home-leaderboard-basement-board.png?v=207') !important;
+    content: url('assets/images/home-leaderboard-basement-board.png?v=269') !important;
   }
 
   #leaderboardTable.home-chalk-leaderboard-overlay {
@@ -2123,7 +2123,7 @@
 <style id="v206-baked-background-hotspots-and-clean-home-links">
   /* v206: baked final background with image-map style links and no bottom Draft/Trophy pills. */
   #dashboard .home-immersive-image {
-    content: url('assets/images/home-leaderboard-basement-board.png?v=207') !important;
+    content: url('assets/images/home-leaderboard-basement-board.png?v=269') !important;
   }
 
   #dashboard .home-image-hotspots {
@@ -2564,8 +2564,8 @@
 
   <main class="shell">
     <section id="dashboard" class="panel active home-panel home-immersive-reset">
-      <article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
-        <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=207" alt="Basement Bar League current champion chalkboard homepage scene">
+      <div class="home-hero-crop"><article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
+        <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=269" alt="Basement Bar League current champion chalkboard homepage scene">
         <div class="home-image-hotspots" aria-label="Homepage image links">
           <button class="home-image-hotspot home-image-hotspot-draft" type="button" data-tab="draft" aria-label="Enter the Draft Room"></button>
           <button class="home-image-hotspot home-image-hotspot-trophy" type="button" data-open-trophy-room data-tab="rosters" aria-label="Enter the Trophy Room"></button>
@@ -2580,24 +2580,30 @@
           <button class="home-image-link" type="button" data-tab="rules">Rules</button>
           <button class="home-image-link" type="button" data-tab="admin">Admin</button>
         </nav>
-        <div id="leaderboardTable" class="home-chalk-leaderboard-overlay" aria-label="Live leaderboard chalkboard overlay">
-          <div class="clean-loading-card">
-            <strong>Basement Bar League</strong>
-            <span>Loading live standings…</span>
-          </div>
-        </div>
-      </article>
+      </article></div>
+      <nav class="home-season-nav" aria-label="Pool navigation">
+        <button type="button" data-tab="draft" data-draft-entry-label>Draft room</button>
+        <button type="button" data-open-trophy-room data-tab="rosters">Trophy room</button>
+        <button type="button" data-tab="teams">Managers</button>
+        <button type="button" data-tab="rules">Rules</button>
+        <button type="button" data-tab="admin">Admin</button>
+      </nav>
+      <nav class="home-manager-links" aria-label="Roster rooms">
+        <button type="button" data-roster-owner="nick">Nick</button><button type="button" data-roster-owner="scott">Scott</button><button type="button" data-roster-owner="andrew">Andrew</button><button type="button" data-roster-owner="tyler">Tyler</button><button type="button" data-roster-owner="chris">Chris</button>
+      </nav>
+      <div id="seasonBoard" aria-label="Live league standings and rosters"><p>Loading your saved pool…</p></div>
     </section>
 
     <section id="draft" class="panel">
   <div id="cleanDraftRoom" class="arena-draft">
-    <header class="draft-masthead"><div><span class="eyebrow">BASEMENT BAR LEAGUE</span><h1>Draft night</h1></div><div class="draft-room-meta"><span id="roomModeBadge">Live pool</span><button id="changeDraftName" type="button">Choose your name</button></div></header>
+    <header class="draft-masthead"><div><span class="eyebrow">BASEMENT BAR LEAGUE</span><h1 id="draftTitle">Draft night</h1></div><div class="draft-room-meta"><span id="roomModeBadge">Live pool</span><button id="changeDraftName" type="button">Choose your name</button></div></header>
     <div id="draftConnection" role="status" aria-live="polite">Connecting to the room…</div>
     <div class="arena-hero">
       <div id="draftRoomLotteryTop" class="arena-lottery-screen"><h2>Draft Lottery Results</h2><div id="lotteryOrderResults" class="lottery-order-results"></div><p id="lotteryStateCaption">Waiting for the lottery</p></div>
       <div class="arena-lottery-entry"><button id="runLiveLotteryBtn" class="primary" type="button">Enter Draft Lottery</button><button id="replayLotteryBtn" type="button" hidden>Replay Lottery</button><p id="draftSeasonLabel"></p></div>
     </div>
     <div class="arena-draft-desk">
+      <section id="closedDraftNotice" hidden><span class="eyebrow">FINAL ROSTERS</span><h2>That’s a wrap.</h2><p>All 60 selections are saved and locked. The draft room is closed for this season.<br>Follow your players and live points on the home board.</p><div class="actions"><button type="button" data-view-final-draft>View final rosters &amp; draft order</button><button type="button" data-tab="dashboard">Back to season board</button></div></section>
       <div id="cleanRosterNeedsPanel" class="clean-roster-needs-panel"></div>
       <section class="draft-up-next"><div class="draft-turn-heading"><h2>Up Next</h2><span id="currentDraftTurn"></span></div><div id="cleanDraftOrderStrip" class="clean-draft-order-strip"></div></section>
       <details id="myDraftRoster" class="draft-my-roster"><summary>My drafted roster <span id="myDraftCount">0 / 12</span></summary><div id="myDraftPlayers"></div></details>
@@ -2630,8 +2636,8 @@
 
     <section id="admin" class="panel"><div class="section-head"><div><p class="eyebrow">Commissioner desk</p><h2>Season &amp; draft controls</h2><p id="adminRoomDescription"></p></div></div>
   <div class="grid two"><article class="card"><h3>Test together</h3><p>Open the same test-room link on your phone and computer. It has its own lottery, picks, chat, and test history.</p><div class="actions"><button id="openSharedTestRoom" class="primary" type="button">Open test room</button><button id="copyRoomLink" type="button">Copy this room’s link</button><button id="returnLiveRoom" type="button" hidden>Return to live pool</button></div><input id="shareRoomLink" readonly aria-label="Room link" hidden></article>
-  <article class="card"><h3>History &amp; backup</h3><p>End Season saves final NHL statistics, standings, rosters, lottery results, and every pick before opening the next season.</p><div class="actions"><button id="openSharedHistory" type="button">Open history book</button><button id="exportSharedBackup" type="button">Download full backup</button></div><p id="historySaveStatus" role="status"></p></article></div>
-  <article id="commissionerControls" class="card"><h3>Nick’s controls</h3><p id="commissionerGate">Choose Nick in the draft room to use these controls.</p><div id="commissionerActions" hidden><label>Season <select id="adminSeason"></select></label><button id="setPoolSeason" type="button">Set season</button><div class="actions admin-draft-actions"><button id="testJoinAllLotteryAdminBtn" type="button">Confirm for all managers</button><button id="undoSharedPick" type="button">Undo last pick</button><button id="autoFillTestDraft" type="button" hidden>Fill remaining test picks</button><button id="endSeasonBtn" class="primary" type="button">End Season</button><button id="resetSharedRoom" class="danger" type="button">Reset draft &amp; lottery</button><button id="clearTestSeasonsBtn" class="danger" type="button" hidden>Clear all test data</button></div><p class="muted">Draft resets do not delete archived seasons. Clear all test data is available only inside a test room.</p></div></article>
+  <article class="card"><h3>History &amp; backup</h3><p>End Season saves final NHL statistics, standings, rosters, lottery results, and every pick before opening the next season.</p><div class="actions"><button id="openSharedHistory" type="button">Open history book</button><button id="exportSharedBackup" type="button">Download full backup</button></div><div id="savedFinalDrafts" class="actions"></div><p id="historySaveStatus" role="status"></p></article></div>
+  <article id="commissionerControls" class="card"><h3>Nick’s controls</h3><p id="finalDraftStatus" class="final-draft-status" hidden></p><p id="commissionerGate">Choose your name to use commissioner controls. <button id="chooseCommissioner" type="button">Choose name</button></p><div id="commissionerActions" hidden><label>Season <select id="adminSeason"></select></label><button id="setPoolSeason" type="button">Set season</button><div class="actions admin-draft-actions"><button id="testJoinAllLotteryAdminBtn" type="button">Confirm for all managers</button><button id="undoSharedPick" type="button">Undo last pick</button><button id="autoFillTestDraft" type="button" hidden>Fill remaining test picks</button><button id="endSeasonBtn" class="primary" type="button">End Season</button><button id="resetSharedRoom" class="danger" type="button">Reset draft &amp; lottery</button><button id="clearTestSeasonsBtn" class="danger" type="button" hidden>Clear all test data</button></div><p class="muted">Draft resets do not delete archived seasons. Clear all test data is available only inside a test room.</p></div></article>
 </section>
   
     <div id="liveLotteryOverlay" class="live-lottery-overlay rebuilt-lottery-overlay" hidden>
@@ -2782,14 +2788,14 @@
         ready:true
       },
       andrew: {
-        image:'assets/images/locker-stall-andrew.png?v=168',
+        image:'assets/images/locker-stall-andrew.png?v=269',
         number:'88',
         jersey:'Porter Martone',
         theme:'Flyers • Gears of War • gritty orange/black',
         ready:true
       },
       tyler: {
-        image:'assets/images/locker-stall-tyler.png?v=168',
+        image:'assets/images/locker-stall-tyler.png?v=269',
         number:'13',
         jersey:'Domi / Clark',
         theme:'Leafs tough guys • GoldenEye 007',
@@ -3015,10 +3021,10 @@
       return `<section class="v260-roster-section"><h3>${label}</h3>${header}${rows}</section>`;
     }
     function renderLiveRosterBoard(ownerId, roster){
-      const safeRoster = liveRosterStats(ownerId, roster);
+      const safeRoster = window.PoolCore.sortRoster(liveRosterStats(ownerId, roster));
       return `<div class="v260-live-roster" aria-label="Current saved roster with live season statistics">
         ${rosterBoardSection(safeRoster, 'F', 'FORWARDS', 6)}
-        ${rosterBoardSection(safeRoster, 'D', 'DEFENSE', 4)}
+        ${rosterBoardSection(safeRoster, 'D', 'DEFENCE', 4)}
         ${rosterBoardSection(safeRoster, 'G', 'GOALIES', 2)}
       </div>`;
     }
@@ -4291,7 +4297,7 @@
   }
 
   document.addEventListener('click', function(event){
-    var btn = event.target.closest && event.target.closest('.home-image-hotspot-owner[data-roster-owner]');
+    var btn = event.target.closest && event.target.closest('[data-roster-owner]');
     if (!btn) return;
     event.preventDefault();
     event.stopPropagation();
@@ -5269,7 +5275,7 @@
 
   document.addEventListener('click', function(e){
     if (!e.target || !e.target.closest) return;
-    if (e.target.closest('[data-enter-door], .home-image-hotspot-owner[data-roster-owner], [data-walk-stall], [data-lobby-enter], [data-door-id]')) {
+    if (e.target.closest('[data-enter-door], [data-roster-owner], [data-walk-stall], [data-lobby-enter], [data-door-id]')) {
       markRealOwnerIntent();
     }
   }, true);
@@ -7210,10 +7216,12 @@
 <dialog id="draftIdentityDialog" class="draft-identity-dialog" aria-labelledby="draftIdentityTitle"><div class="identity-inner"><span class="eyebrow">Welcome to draft night</span><h2 id="draftIdentityTitle">Who is this?</h2><p>Select your name to enter the room.</p><div id="draftIdentityChoices"></div><button id="cancelDraftIdentity" type="button">Back to Home</button></div></dialog>
 <aside id="draftChat" class="draft-chat" hidden><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">Draft chat <span id="chatUnread"></span></button><div id="chatPanel" hidden><div class="chat-heading"><strong>At the draft table</strong><button id="chatClose" type="button" aria-label="Minimize chat">×</button></div><div id="chatMessages" role="log" aria-live="polite" aria-label="Draft chat messages"></div><form id="chatForm"><label class="sr-only" for="chatInput">Message the room</label><input id="chatInput" maxlength="300" autocomplete="off" placeholder="Nice pick…"><button type="submit">Send</button></form><p id="chatStatus" role="status"></p></div></aside>
 <dialog id="seasonArchiveDialog" class="season-archive-dialog" aria-labelledby="seasonArchiveTitle"><header><h2 id="seasonArchiveTitle"></h2><button id="closeSeasonArchive" type="button" aria-label="Close season details">×</button></header><div id="seasonArchiveContent"></div><button id="downloadSeasonArchive" type="button">Download this season’s full record</button></dialog>
-<script defer src="assets/js/pool-core.js?v=268"></script>
-<script defer src="assets/js/app.js?v=268"></script>
+<script defer src="assets/js/pool-core.js?v=269"></script>
+<script defer src="assets/js/season-board.js?v=269"></script>
+<script defer src="assets/js/app.js?v=269"></script>
 <script defer src="assets/js/lottery.js?v=262"></script>
 <link rel="stylesheet" href="assets/css/draft-room.css?v=260">
+<link rel="stylesheet" href="assets/css/season-board.css?v=269">
 
 </body>
 </html>

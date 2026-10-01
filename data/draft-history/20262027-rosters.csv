@@ -1,0 +1,61 @@
+Manager,Position group,Player,NHL team,Player ID,Overall draft pick
+Nick,Forwards,Connor Bedard,CHI,8484144,29
+Nick,Forwards,Connor McDavid,EDM,8478402,2
+Nick,Forwards,Leo Carlsson,ANA,8484153,32
+Nick,Forwards,Sidney Crosby,PIT,8471675,49
+Nick,Forwards,Tim Stützle,OTT,8482116,52
+Nick,Forwards,Wyatt Johnston,DAL,8482740,22
+Nick,Defence,Evan Bouchard,EDM,8480803,9
+Nick,Defence,John Carlson,TBL,8474590,59
+Nick,Defence,Moritz Seider,DET,8481542,39
+Nick,Defence,Quinn Hughes,MIN,8480800,19
+Nick,Team goalies,Colorado Avalanche Goalies,COL,TG-COL,12
+Nick,Team goalies,Dallas Stars Goalies,DAL,TG-DAL,42
+Chris,Forwards,David Pastrnak,BOS,8477956,13
+Chris,Forwards,Kyle Connor,WPG,8478398,43
+Chris,Forwards,Macklin Celebrini,SJS,8484801,3
+Chris,Forwards,Nick Suzuki,MTL,8480018,38
+Chris,Forwards,Tage Thompson,BUF,8479420,28
+Chris,Forwards,William Nylander,TOR,8477939,23
+Chris,Defence,Josh Morrissey,WPG,8477504,33
+Chris,Defence,Matthew Schaefer,NYI,8485366,8
+Chris,Defence,Rasmus Dahlin,BUF,8480839,18
+Chris,Defence,Roman Josi,NSH,8474600,58
+Chris,Team goalies,Tampa Bay Lightning Goalies,TBL,TG-TBL,53
+Chris,Team goalies,Washington Capitals Goalies,WSH,TG-WSH,48
+Andrew,Forwards,Beckett Sennecke,ANA,8484762,55
+Andrew,Forwards,Cole Caufield,MTL,8481540,5
+Andrew,Forwards,Jack Eichel,VGK,8478403,56
+Andrew,Forwards,Kirill Kaprizov,MIN,8478864,6
+Andrew,Forwards,Nick Schmaltz,UTA,8477951,25
+Andrew,Forwards,Seth Jarvis,CAR,8482093,45
+Andrew,Defence,Bowen Byram,CHI,8481524,36
+Andrew,Defence,Jackson LaCombe,ANA,8481605,35
+Andrew,Defence,Lane Hutson,MTL,8483457,16
+Andrew,Defence,Zach Werenski,CBJ,8478460,15
+Andrew,Team goalies,Carolina Hurricanes Goalies,CAR,TG-CAR,46
+Andrew,Team goalies,Minnesota Wild Goalies,MIN,TG-MIN,26
+Tyler,Forwards,Adrian Kempe,LAK,8477960,54
+Tyler,Forwards,Auston Matthews,TOR,8479318,14
+Tyler,Forwards,Cutter Gauthier,ANA,8483445,34
+Tyler,Forwards,Jason Robertson,DAL,8480027,17
+Tyler,Forwards,Mark Scheifele,WPG,8476460,24
+Tyler,Forwards,Nikita Kucherov,TBL,8476453,4
+Tyler,Defence,Cale Makar,COL,8480069,7
+Tyler,Defence,Darren Raddysh,TOR,8478178,27
+Tyler,Defence,Jake Sanderson,OTT,8482105,37
+Tyler,Defence,Zayne Parekh,CGY,8484768,44
+Tyler,Team goalies,Montreal Canadiens Goalies,MTL,TG-MTL,57
+Tyler,Team goalies,New York Islanders Goalies,NYI,TG-NYI,47
+Scott,Forwards,Jake Guentzel,TBL,8477404,31
+Scott,Forwards,Leon Draisaitl,EDM,8477934,11
+Scott,Forwards,Martin Necas,COL,8480039,20
+Scott,Forwards,Matt Boldy,MIN,8481557,21
+Scott,Forwards,Nathan MacKinnon,COL,8477492,1
+Scott,Forwards,Sam Reinhart,FLA,8477933,41
+Scott,Defence,Charlie McAvoy,BOS,8479325,51
+Scott,Defence,Erik Karlsson,PIT,8474578,40
+Scott,Defence,Jakob Chychrun,WSH,8479345,10
+Scott,Defence,Miro Heiskanen,DAL,8480036,30
+Scott,Team goalies,Buffalo Sabres Goalies,BUF,TG-BUF,60
+Scott,Team goalies,Toronto Maple Leafs Goalies,TOR,TG-TOR,50

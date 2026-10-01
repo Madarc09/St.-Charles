@@ -3,10 +3,11 @@ module.exports=async function(req,res){
   S.headers(res);
   try{
     const room=S.roomName(req);
-    if(req.method==='GET')return res.status(200).json(S.publicRoom((await S.read(room)).state));
+    if(req.method==='GET')return res.status(200).json(S.publicRoom((await S.preserved(room)).state));
     if(req.method!=='POST')throw S.error('Reset the lottery together with its draft in Admin.',405);
     const b=S.body(req);S.owner(b.ownerId);
     const {state}=await S.mutate(room,s=>{
+      S.assertEditable(s);
       const l=s.lottery;s.presence[b.ownerId]=Date.now();
       if(b.action==='start') {
         if(l.phase!=='idle')return;
