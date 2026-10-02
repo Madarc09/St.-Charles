@@ -20,4 +20,4 @@ http.createServer(async(req,res)=>{
   if(!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404).end();return;}
   res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');res.setHeader('Cache-Control','no-store');fs.createReadStream(file).pipe(res);
  }catch(e){res.writeHead(500,{'Content-Type':'application/json'}).end(JSON.stringify({ok:false,error:e.message}));}
-}).listen(port,'0.0.0.0',()=>console.log(`Local fixture preview: http://127.0.0.1:${port}/?room=test-local#draft`));
+}).listen(port,'127.0.0.1',()=>console.log(`Local fixture preview: http://127.0.0.1:${port}/?room=test-local#draft`));

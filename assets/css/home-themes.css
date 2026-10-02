@@ -1,0 +1,73 @@
+/* Add each theme's variables to both its root selector and preview selector. */
+:root[data-pool-theme="ice"],[data-preview-theme="ice"]{
+ --pool-bg:#e8f2f9;--pool-panel:#f5faff;--pool-ink:#102b48;--pool-muted:#425e77;
+ --pool-stripe:#e8f2fa;--pool-line:#bed2e2;--pool-accent:#bd162d;--pool-accent-bg:#fff0f1;
+ --pool-heading-font:Impact,'Arial Narrow',sans-serif;--pool-font:system-ui,sans-serif;--pool-font-size:17px;
+ --pool-radius:8px;--pool-shadow:0 3px 0 #b7d6ea,0 10px 24px #426b8218;--pool-edge:#8cb5d4;
+ --pool-body-background:linear-gradient(#f5faffb8,#edf5faed),url('../images/themes/rink-lines.svg');
+}
+:root[data-pool-theme="arena"],[data-preview-theme="arena"]{
+ --pool-bg:#10151b;--pool-panel:#121a22;--pool-ink:#f5f1e8;--pool-muted:#b6c2ce;
+ --pool-stripe:#18222d;--pool-line:#465563;--pool-accent:#ffc05c;--pool-accent-bg:#27261e;
+ --pool-heading-font:Impact,'Arial Narrow',sans-serif;--pool-font:system-ui,sans-serif;--pool-font-size:17px;
+ --pool-radius:3px;--pool-shadow:0 0 0 4px #202a33,0 0 0 5px #52616b,0 12px 26px #0008;--pool-edge:#5c6872;
+ --pool-body-background:linear-gradient(#0a11194d,#0c121cdb 80%),url('../images/draft-arena.webp');
+}
+:root[data-pool-theme="press"],[data-preview-theme="press"]{
+ --pool-bg:#e9ddc3;--pool-panel:#f5ecd9;--pool-ink:#28221c;--pool-muted:#63513c;
+ --pool-stripe:#ede1c9;--pool-line:#b3a184;--pool-accent:#aa2134;--pool-accent-bg:#f6e5d9;
+ --pool-heading-font:Georgia,'Times New Roman',serif;--pool-font:Georgia,'Times New Roman',serif;--pool-font-size:18px;
+ --pool-radius:0px;--pool-shadow:0 3px 12px #49311914;--pool-edge:#8d775b;
+ --pool-body-background:repeating-linear-gradient(0deg,#a7906312 0,#a7906312 1px,transparent 1px,transparent 4px),linear-gradient(100deg,#eee1c6,#f7efdf 45%,#e9ddc5);
+}
+:root[data-pool-theme="chalkboard"],[data-preview-theme="chalkboard"]{
+ --pool-bg:#102b22;--pool-panel:#143b2d;--pool-ink:#f3efda;--pool-muted:#d5d3bb;
+ --pool-stripe:#193f31;--pool-line:#94a18780;--pool-accent:#ffe27d;--pool-accent-bg:#214b38;
+ --pool-heading-font:'Pool Chalk',cursive;--pool-font:'Pool Chalk',cursive;--pool-font-size:20px;
+ --pool-radius:3px;--pool-shadow:0 2px 0 #87603e,0 0 0 4px #644b33,0 12px 24px #0004;--pool-edge:#8c6744;
+ --pool-body-background:linear-gradient(#14372733,#0b241fe6),url('../images/themes/playbook.svg');
+}
+:root[data-pool-theme="arcade"],[data-preview-theme="arcade"]{
+ --pool-bg:#080f2a;--pool-panel:#0b1735;--pool-ink:#f1f7ff;--pool-muted:#b4c7e8;
+ --pool-stripe:#102041;--pool-line:#284c72;--pool-accent:#5af6ff;--pool-accent-bg:#123348;
+ --pool-heading-font:'Courier New',monospace;--pool-font:system-ui,sans-serif;--pool-font-size:17px;
+ --pool-radius:0px;--pool-shadow:0 0 0 2px #409dce,4px 4px 0 #ac2cb0,0 0 22px #1b5fd63d;--pool-edge:#57ebff;
+ --pool-body-background:linear-gradient(#090d2580,#090f25db),url('../images/themes/arcade-rink.svg');
+}
+html[data-pool-theme="ice"] .pool-page-body{background-size:cover,100% 1150px;background-repeat:no-repeat,repeat-y}
+html[data-pool-theme="ice"] .pool-board-heading h2{letter-spacing:.025em}
+html[data-pool-theme="ice"] .pool-roster-heading{padding:10px 14px;margin:-16px -16px 14px;background:#102b48;color:#fff;border:0;border-bottom:4px solid #d43243;border-radius:7px 7px 0 0}
+html[data-pool-theme="ice"] .pool-roster-heading h3{color:#fff}
+html[data-pool-theme="ice"] .pool-roster-heading .pool-room-arrow{color:#c6d9e9}
+html[data-pool-theme="ice"] .pool-roster-heading .pool-roster-total{color:#c6d9e9}
+html[data-pool-theme="ice"] .pool-roster-heading .pool-roster-total b{color:#fff}
+html[data-pool-theme="ice"] .pool-roster[data-owner="andrew"] .pool-roster-heading{background:#a74412}
+html[data-pool-theme="arena"] .pool-page-body{background-attachment:fixed}
+html[data-pool-theme="arena"] .pool-board-heading,html[data-pool-theme="arena"] .pool-roster-heading{border-bottom-color:#b83436}
+html[data-pool-theme="arena"] .pool-board-heading h2{color:#f0dfbe;letter-spacing:.06em}
+html[data-pool-theme="arena"] .pool-fpts-cell{font-family:'Courier New',monospace}
+html[data-pool-theme="arena"] .pool-roster{border:2px solid #667480}
+html[data-pool-theme="arena"] .pool-roster-heading:before{content:'';width:6px;height:32px;background:#db4d40;box-shadow:0 0 14px #fa493e88;flex:none}
+html[data-pool-theme="arena"] .pool-roster-heading h3{flex:1}
+html[data-pool-theme="press"] .pool-board-heading{border-top:2px solid #aa2134;border-bottom:5px double #aa2134;padding:14px 0 12px}
+html[data-pool-theme="press"] .pool-standings,html[data-pool-theme="press"] .pool-roster{border:0}
+html[data-pool-theme="press"] .pool-roster-heading{border-bottom:3px double #38271a}
+html[data-pool-theme="press"] .pool-position h4{font-family:Georgia,serif;color:#aa2134}
+html[data-pool-theme="press"] .pool-roster-heading h3{letter-spacing:0}
+html[data-pool-theme="chalkboard"] .pool-page-body{background-size:cover,100% 1100px;background-repeat:no-repeat,repeat-y}
+html[data-pool-theme="chalkboard"] .pool-board-heading{border-bottom:2px dashed #a3ad88}
+html[data-pool-theme="chalkboard"] .pool-board-heading h2{font-weight:400}
+html[data-pool-theme="chalkboard"] .pool-stat-table th,html[data-pool-theme="chalkboard"] .pool-stat-table td{text-shadow:0 .4px #fff3}
+html[data-pool-theme="chalkboard"] .pool-roster-heading h3{font-weight:400}
+html[data-pool-theme="arcade"] .pool-page-body{background-size:cover,960px auto;background-repeat:no-repeat,repeat}
+html[data-pool-theme="arcade"] .pool-board-heading h2{font-weight:900;letter-spacing:.035em;text-shadow:2px 2px #cc3bab,-1px -1px #38e1f8}
+html[data-pool-theme="arcade"] .pool-board-heading{border-color:#cf3cb8}
+html[data-pool-theme="arcade"] .pool-roster-heading{border-color:#58efff}
+html[data-pool-theme="arcade"] .pool-roster[data-owner="andrew"] .pool-roster-heading{border-color:#ff913b}
+html[data-pool-theme="arcade"] .pool-roster-heading h3{font-size:28px;font-weight:900;text-shadow:2px 2px #a12896}
+html[data-pool-theme="arcade"] .pool-theme-swatch{box-shadow:inset 0 0 0 1px #f265db}
+@media(max-width:700px){
+ html[data-pool-theme="arena"] .pool-page-body{background-attachment:scroll}
+ html[data-pool-theme="ice"] .pool-roster-heading{margin:-12px -12px 14px}
+ html[data-pool-theme="arcade"] .pool-board-heading h2{font-size:29px}
+}

@@ -4,7 +4,8 @@
   <!-- V147 WALKABLE LOCKER ROOM ALL STALLS -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hockey Pool 1998 Basement Draft Room</title>
+  <title>Hockey Pool</title>
+  <script src="assets/js/home-themes.js?v=271"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=262" />
 
 <style id="v154-season-diagnostics-style">
@@ -2563,36 +2564,40 @@
   </nav>
 
   <main class="shell">
-    <section id="dashboard" class="panel active home-panel home-immersive-reset">
-      <article class="home-immersive-scene" aria-label="Basement Bar League homepage scene">
-        <img class="home-immersive-image" src="assets/images/home-leaderboard-basement-board.png?v=269" alt="Basement Bar League current champion chalkboard homepage scene">
-        <div class="home-image-hotspots" aria-label="Homepage image links">
-          <button class="home-image-hotspot home-image-hotspot-draft" type="button" data-tab="draft" aria-label="Enter the Draft Room"></button>
-          <button class="home-image-hotspot home-image-hotspot-trophy" type="button" data-open-trophy-room data-tab="rosters" aria-label="Enter the Trophy Room"></button>
-          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-nick" type="button" data-roster-owner="nick" aria-label="Open Nick's roster room"></button>
-          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-scott" type="button" data-roster-owner="scott" aria-label="Open Scott's roster room"></button>
-          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-andrew" type="button" data-roster-owner="andrew" aria-label="Open Andrew's roster room"></button>
-          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-tyler" type="button" data-roster-owner="tyler" aria-label="Open Tyler's roster room"></button>
-          <button class="home-image-hotspot home-image-hotspot-owner home-image-hotspot-owner-chris" type="button" data-roster-owner="chris" aria-label="Open Chris's roster room"></button>
-        </div>
-        <nav class="home-image-nav" aria-label="Homepage navigation">
-          <button class="home-image-link" type="button" data-tab="teams">Teams</button>
-          <button class="home-image-link" type="button" data-tab="rules">Rules</button>
-          <button class="home-image-link" type="button" data-tab="admin">Admin</button>
-          <button id="enlargeChalkboard" class="home-image-link" type="button" data-enlarge-chalkboard>Enlarge chalkboard</button>
-        </nav>
-        <div id="seasonBoard" class="chalkboard" aria-label="Live leaderboard chalkboard overlay">
-          <div class="clean-loading-card">
-            <strong>Basement Bar League</strong>
-            <span>Loading live standings…</span>
+    <section id="dashboard" class="panel active pool-home">
+      <nav class="pool-header" aria-label="Draft room, roster rooms and trophy room">
+        <img class="pool-header-image" src="assets/images/home-leaderboard-basement-board.png?v=269" width="1448" height="1086" alt="" fetchpriority="high" aria-hidden="true">
+          <button type="button" class="pool-image-link pool-nav-draft" data-tab="draft" aria-label="Enter the Draft Room" title="Enter the Draft Room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Draft Room</span></button>
+          <button type="button" class="pool-image-link pool-nav-nick" data-roster-owner="nick" aria-label="Open Nick’s roster room" title="Open Nick’s roster room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Nick</span></button>
+          <button type="button" class="pool-image-link pool-nav-scott" data-roster-owner="scott" aria-label="Open Scott’s roster room" title="Open Scott’s roster room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Scott</span></button>
+          <button type="button" class="pool-image-link pool-nav-andrew" data-roster-owner="andrew" aria-label="Open Andrew’s roster room — current champion" title="Open Andrew’s roster room — current champion"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Current champion</span></button>
+          <button type="button" class="pool-image-link pool-nav-tyler" data-roster-owner="tyler" aria-label="Open Tyler’s roster room" title="Open Tyler’s roster room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Tyler</span></button>
+          <button type="button" class="pool-image-link pool-nav-chris" data-roster-owner="chris" aria-label="Open Chris’s roster room" title="Open Chris’s roster room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Chris</span></button>
+          <button type="button" class="pool-image-link pool-nav-trophy" data-open-trophy-room data-tab="rosters" aria-label="Enter the Trophy Room" title="Enter the Trophy Room"><span class="pool-nav-art" aria-hidden="true"></span><span class="pool-nav-label" aria-hidden="true">Trophy Room</span></button>
+      </nav>
+      <div class="pool-page-body"><div class="pool-page-inner">
+        <div class="pool-board-toolbar">
+          <p id="homeStatsStatus" role="status">Connecting to live NHL stats…</p>
+          <div class="pool-toolbar-actions">
+            <button type="button" class="pool-btn" data-enlarge-chalkboard>Enlarge board ↗</button>
+            <button type="button" class="pool-btn" data-pool-theme-picker>Theme: <span data-current-theme>Coach’s Chalkboard</span></button>
           </div>
         </div>
-      </article>
+        <div id="seasonBoard" class="pool-board" aria-label="Live standings and all five rosters"><div class="pool-loading"><div><strong>Standings</strong>Loading your saved pool…</div></div></div>
+        <footer class="pool-home-footer">
+          <nav class="pool-footer-nav" aria-label="More pages">
+            <button class="pool-btn" type="button" data-tab="teams">Teams</button>
+            <button class="pool-btn" type="button" data-tab="rules">Rules</button>
+            <button class="pool-btn" type="button" data-tab="admin">Admin</button>
+          </nav>
+          <div class="pool-theme-footer"><button class="pool-btn" type="button" data-pool-theme-picker>Choose your theme · <span data-current-theme>Coach’s Chalkboard</span></button><small>Remembered in this browser.</small></div>
+        </footer>
+      </div></div>
     </section>
 
     <section id="draft" class="panel">
   <div id="cleanDraftRoom" class="arena-draft">
-    <header class="draft-masthead"><div><span class="eyebrow">BASEMENT BAR LEAGUE</span><h1 id="draftTitle">Draft night</h1></div><div class="draft-room-meta"><span id="roomModeBadge">Live pool</span><button id="changeDraftName" type="button">Choose your name</button></div></header>
+    <header class="draft-masthead"><div><span class="eyebrow">HOCKEY POOL</span><h1 id="draftTitle">Draft night</h1></div><div class="draft-room-meta"><span id="roomModeBadge">Live pool</span><button id="changeDraftName" type="button">Choose your name</button></div></header>
     <div id="draftConnection" role="status" aria-live="polite">Connecting to the room…</div>
     <div class="arena-hero">
       <div id="draftRoomLotteryTop" class="arena-lottery-screen"><h2>Draft Lottery Results</h2><div id="lotteryOrderResults" class="lottery-order-results"></div><p id="lotteryStateCaption">Waiting for the lottery</p></div>
@@ -3507,7 +3512,7 @@
     const diag = window.__lastSeasonApiDiagnostics;
     if (!diag || !Array.isArray(diag.rows) || !diag.rows.length) {
       if (!host.querySelector(".v182-loading") && !host.querySelector(".v182-chalk-layout")) {
-        host.innerHTML = `<div class="v182-loading">Basement Bar League<br>Loading the shared pool…</div>`;
+        host.innerHTML = `<div class="v182-loading">Hockey Pool<br>Loading the shared pool…</div>`;
       }
       return false;
     }
@@ -7209,16 +7214,19 @@
 
 
 
-<dialog id="enlargedChalkboard" class="chalk-enlarged" aria-labelledby="enlargedChalkboardTitle"><header><h2 id="enlargedChalkboardTitle">The chalkboard</h2><button type="button" data-close-chalkboard>Close</button></header><div id="enlargedChalkboardContent" class="chalkboard"></div></dialog>
+<dialog id="enlargedChalkboard" class="pool-board-dialog" aria-labelledby="enlargedChalkboardTitle"><header class="pool-dialog-heading"><h2 id="enlargedChalkboardTitle">Full standings board</h2><button class="pool-btn" type="button" data-close-chalkboard>Close</button></header><div id="enlargedChalkboardContent" class="pool-board"><p>Loading your saved pool…</p></div></dialog>
+<dialog id="poolThemeDialog" class="pool-theme-dialog" aria-labelledby="poolThemeTitle"><header class="pool-dialog-heading"><h2 id="poolThemeTitle">Choose your theme</h2><button class="pool-btn" type="button" data-close-theme-picker>Done</button></header><fieldset id="poolThemeOptions" class="pool-theme-options" aria-label="Homepage theme"></fieldset><p id="themeSaveStatus" role="status">Remembered in this browser. Everyone else keeps their own choice.</p></dialog>
 <dialog id="draftIdentityDialog" class="draft-identity-dialog" aria-labelledby="draftIdentityTitle"><div class="identity-inner"><span class="eyebrow">Welcome to draft night</span><h2 id="draftIdentityTitle">Who is this?</h2><p>Select your name to enter the room.</p><div id="draftIdentityChoices"></div><button id="cancelDraftIdentity" type="button">Back to Home</button></div></dialog>
 <aside id="draftChat" class="draft-chat" hidden><button id="chatToggle" type="button" aria-expanded="false" aria-controls="chatPanel">Draft chat <span id="chatUnread"></span></button><div id="chatPanel" hidden><div class="chat-heading"><strong>At the draft table</strong><button id="chatClose" type="button" aria-label="Minimize chat">×</button></div><div id="chatMessages" role="log" aria-live="polite" aria-label="Draft chat messages"></div><form id="chatForm"><label class="sr-only" for="chatInput">Message the room</label><input id="chatInput" maxlength="300" autocomplete="off" placeholder="Nice pick…"><button type="submit">Send</button></form><p id="chatStatus" role="status"></p></div></aside>
 <dialog id="seasonArchiveDialog" class="season-archive-dialog" aria-labelledby="seasonArchiveTitle"><header><h2 id="seasonArchiveTitle"></h2><button id="closeSeasonArchive" type="button" aria-label="Close season details">×</button></header><div id="seasonArchiveContent"></div><button id="downloadSeasonArchive" type="button">Download this season’s full record</button></dialog>
 <script defer src="assets/js/pool-core.js?v=269"></script>
-<script defer src="assets/js/chalkboard.js?v=270"></script>
+<script defer src="assets/js/home-board.js?v=271"></script>
 <script defer src="assets/js/app.js?v=269"></script>
 <script defer src="assets/js/lottery.js?v=262"></script>
 <link rel="stylesheet" href="assets/css/draft-room.css?v=260">
-<link rel="stylesheet" href="assets/css/chalkboard.css?v=270">
+<link rel="stylesheet" href="assets/css/draft-protection.css?v=271">
+<link rel="stylesheet" href="assets/css/home-board.css?v=271">
+<link rel="stylesheet" href="assets/css/home-themes.css?v=271">
 
 </body>
 </html>

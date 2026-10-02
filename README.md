@@ -1,64 +1,49 @@
-# Basement Bar League — v270
+# Hockey Pool — v271
 
 ## Upload this update
 
-1. Keep the v268 ZIP and the separate **Completed-Draft-2026-2027-Backup.json**.
-2. Extract this ZIP and upload its **contents** into your existing GitHub repository, at the level that contains `index.html`. Include **all folders**, especially `lib` and `data/draft-history`.
-3. Keep the same Vercel project and the existing Redis environment variables. No new service or payment is needed.
-4. After Vercel deploys, refresh the home page. You should see **Final draft locked** and all five rosters. The draft room should say **That’s a wrap**.
-5. Check the phone and computer using `PHONE-AND-COMPUTER-TEST.md`.
+1. Keep the previous website ZIP and your separate Completed-Draft-2026-2027-Backup.json.
+2. Extract this ZIP and upload its CONTENTS into the existing GitHub repository at the level containing index.html. Include every folder, especially lib and data/draft-history.
+3. Keep the same Vercel project, domain and Redis environment variables. There is no new service, payment, build step or runtime npm dependency.
+4. After Vercel deploys, refresh Home. Open **Choose your theme** beside Teams / Rules / Admin at the bottom, or **Theme** above the standings.
+5. Follow PHONE-AND-COMPUTER-TEST.md for the short device check.
 
-This is a complete website replacement package with no build step and no runtime npm dependencies. Upload extracted files, not the ZIP itself. Do not deploy as GitHub Pages, which cannot run the API functions.
+## Five themes, one live pool
 
-## Your completed draft is preserved
+- Ice Level: bright ice, navy lettering and red totals.
+- Arena Scoreboard: dark arena, steel frames and amber totals.
+- The Sports Page: vintage paper and hockey box scores.
+- Coach’s Chalkboard: green chalkboard with handwritten lettering. This is the initial default.
+- Arcade Hockey: retro hockey graphics, cyan and magenta.
 
-The real 2026–2027 live draft was captured from your existing website before these edits. It contains **60 unique selections**, **five managers**, and **6 forwards / 4 defence / 2 team-goalie units per manager**. The actual pick sequence, player IDs, owners, lottery order and original pick timestamps are retained. Display sorting does not reorder the saved picks.
+Selecting a theme changes it immediately and saves the choice in this browser. Closing/reopening the page or browser keeps that choice. Another device or browser has its own independent choice. Two tabs in the same browser follow the same saved preference. Clearing this website’s browser data resets the choice; private browsing or blocked storage may only keep it for the visit. The chooser explains if a save was blocked.
 
-- `data/draft-history/20262027.json` is the protected copy included in this package and GitHub.
-- `data/draft-history/20262027-rosters.csv` is a readable roster list you can open in a spreadsheet.
-- The separate downloaded JSON backup also includes all three existing historical seasons.
-- The update keeps the exact Redis room key used by v268: its internal `v259` suffix is intentional and must never be changed just to match a release number.
-- On the first successful live load after deployment, the server locks the completed draft and saves an independent final-draft ledger in Redis alongside the room. Both save together, with no expiration.
-- The server rejects undo, reset, season changes, new picks and a new lottery for a locked live draft. Hiding buttons is only the visible part; the APIs enforce the same rules.
-- If the active room is missing, its final draft can be recovered from the independent ledger or the packaged copy. Conflicting complete records stop with an error rather than silently overwriting selections.
-- Future live drafts automatically lock when all 60 picks are saved. Test rooms remain separate and resettable.
+Theme selection never calls a pool API, changes a manager identity or modifies a draft. It remains independent of login, seasons and future website version numbers. Continue using the same website domain to retain the browser’s preference.
 
-The new lock takes effect when you deploy v270. The separate backup has already been created. Keep that backup and the protected data folder in later website updates.
+## Readable standings and full roster tables
 
-## Draft history versus End Season
+All five themes use the same live data and scoring renderer. Standings show Manager, G (2 FPTS), A (1 FPT), SHG (5 FPTS), GWG (5 FPTS), Goalie FPTS and total FPTS. Skater G/A totals exclude goalie goals/assists, whose different weights are counted in Goalie FPTS.
 
-**Locking the draft does not end the season or freeze scores.** The home board and roster rooms continue using the existing live NHL statistics and scoring rules from v268.
+Every roster displays all 12 selections, grouped Forwards, Defence and Team Goalies. Skaters show the same weighted headings. Team goalies show W (2 FPTS), A (5 FPTS), G (10 FPTS), SO (5 FPTS), FPTS. The fantasy points and live NHL polling remain those of the existing shared scoring system; the images’ illustrative scores were not imported.
 
-Use **View draft record** on Home, in the closed draft room, or under Admin to see the final grouped rosters, lottery order and original sequence of all 60 picks. The record has its own download button and contains draft selections, not final season scores.
+On a phone the header image links reflow and roster tables stack. Names and numbers stay at normal reading size. Swipe a table horizontally to inspect all columns; its name and final-point columns stay pinned. Live stat refreshes retain the table’s horizontal scroll position. Enlarge board opens the same live board in a larger dialog with the currently selected theme.
 
-At the actual end of the season, Nick can use **End Season** in Admin. It still requires fresh NHL statistics, saves final standings, player statistics, rosters and picks to the history book, then opens the next season. The separate final-draft record stays saved after this transition. If the fresh statistics request fails, the active season stays intact.
+The original header PNG and every approved roster-room image are unchanged. CSS windows show the existing draft sign, Nick 09 / Scott 81 / Tyler 91 / Chris 34 navy-and-cream jerseys, Andrew’s prominent orange 28 championship display and the trophy-room link. There is no added league branding or Back to the Bar link. Tyler’s Sundin and Andrew’s Brière updates remain.
 
-**Admin → Download full backup** now includes current draft, lottery, season history, every locked draft record and scoring rules. The public UI has no delete control for live season history or final draft records.
+See ADDING-THEMES.md to add another theme. One registry entry and a scoped CSS block add its chooser option automatically; no duplicate page or scoring logic is required.
 
-Selecting a manager name is the existing trust-based arrangement for this group; there are no new passwords. Select Nick from the name control in Admin to use commissioner tools without reopening the draft.
+## The completed draft remains protected
 
-## Home restored to the original chalkboard
+The real 2026–2027 60-pick draft remains in data/draft-history/20262027.json, with its CSV roster list and SHA256 record. Original player IDs, owners, lottery order and pick sequence are unchanged. The backend, NHL scoring, Redis room key and independent locked-draft ledger are unchanged from v270. The internal v259 storage suffix and existing record format names are intentional compatibility identifiers; do not rename them to match this release.
 
-v270 restores the entire basement background and the original home-page arrangement: standings on the left, five rosters in the familiar three-over-two layout on the right, with writing directly on the chalkboard. The cropped header, large standalone cards and separate dashboard from v269 are removed.
+The completed live draft stays closed and rejects undo/reset/new picks. The home board and roster rooms continue collecting live scores. View record opens the saved draft without reopening it.
 
-The lettering uses the available chalkboard space more evenly and a locally included handwriting font. On a phone, **Enlarge chalkboard** opens the same standings and rosters at a readable size without changing the home-page scene. Close it to return to the room.
+End Season is still for the real end of the season: it archives final standings, player stats, rosters and picks before advancing, while retaining the locked draft record. Do not use End Season to test a theme. Admin → Download full backup includes the current pool, lottery, history and locked draft records. Keep that backup outside the website.
 
-Players still appear **Forwards → Defence → Goalies**, alphabetically within each group. Live points continue using the same data as v269. Goalies retain complete team identities, including New York Islanders.
+## Verification
 
-All other approved v269 changes remain: Nick’s **09** jersey, Tyler’s **Sundin 13** room, Andrew’s **Brière 48** room and memorabilia, final-draft lock, independent ledger and protected backup. The 60 saved picks, storage keys, backend, NHL scoring and historical records are unchanged from v269.
+Automated checks cover isolated browser preferences, reload persistence, early saved-theme selection, blocked/invalid storage, goalie/scorer totals, every player appearing once, unchanged draft ownership, atomic draft protection, archive retention, NHL scoring and live game overlays. JavaScript syntax, local asset references, HTML IDs and the ZIP contents are checked before delivery.
 
-The image edits and exact prompts from v269 remain in `ARTWORK-CHANGES.json`. v270 does not edit those images. The handwriting font is packaged in `assets/fonts` with its Open Font License.
+The local preview browser blocked localhost with ERR_BLOCKED_BY_CLIENT, so desktop/mobile visual verification must be completed after deployment using the included checklist. No changes were made to the live pool during this work.
 
-## Keep tests separate
-
-**Admin → Open test room** opens the existing rehearsal room. Use the same test-room link on both devices. Test picks and test history never affect the live pool. **Clear all test data** works only in a test room.
-
-A finished live draft cannot be reset. **End Season** is for the real end of the season, not a way to test this update.
-
-## Technical checks
-
-Run `npm test` with a modern Node.js installation. The suite covers draft validation and races, NHL scoring and the live GameCenter overlay, archives, test-room isolation, protected final selections, rejection of edits, atomic room/ledger persistence, recovery, next-season transition, and roster display grouping.
-
-The automated checks passed for this package. All inline and external JavaScript was parsed, HTML IDs and local asset paths were checked, and the saved 60-pick record was compared against the original live capture. Desktop/mobile visual rendering still needs the short post-deployment check on your devices; the review browser could not preview the local build.
-
-`npm run preview:test` starts a local synthetic-data preview. It never connects to your production pool. Do not set `POOL_LOCAL_TEST` in Vercel.
+Run npm test with modern Node.js. npm run preview:test starts a loopback-only local preview using synthetic NHL data and isolated in-process storage. Do not set POOL_LOCAL_TEST in Vercel.

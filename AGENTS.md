@@ -10,6 +10,16 @@
 - Keep tests in isolated test rooms. Never call reset, undo, auto-fill or End Season against the real pool while checking a release.
 - Run `npm test` after any storage, draft, scoring or history change. Preserve the latest full backup before changes.
 
-## Homepage design preference
+## Homepage themes (approved October 2, 2026)
 
-Keep the complete original basement background and live writing directly on its chalkboard. Retain standings on the left and the five rosters on the right. Improve fit and readability within that composition; do not replace it with a cropped hero or standalone dashboard cards.
+The user approved replacing the old fixed-size lower scene with five responsive themes: Ice Level, Arena Scoreboard, The Sports Page, Coach’s Chalkboard and Arcade Hockey. This supersedes the earlier whole-background chalkboard restriction.
+
+Preserve the actual original header artwork: neon draft link, four navy/cream jerseys (Nick 09, Scott 81, Tyler 91, Chris 34), prominent orange Andrew 28 championship display, and trophy link. CSS windows may resize/reflow that original art for phones. Never regenerate or recolour the header.
+
+Do not add Basement Bar League branding or a Back to the Bar link: that is a different league.
+
+Theme choice belongs only to this browser’s localStorage, under the permanent hockey-pool:home-theme:v1 key. Never send it to the pool API or store it with a manager or draft. Keep theme changes presentation-only and the stats shared by every theme.
+
+All standings and roster columns show the scoring weights in their headings. Separate skater goals/assists from goalie stats; use the shared PoolCore scoring. Group roster copies Forwards, Defence, Team Goalies. Keep normal-sized mobile text with horizontal table scrolling.
+
+Read ADDING-THEMES.md before adding a theme. Keep the registry and CSS extensible, and preserve the existing theme IDs across versions.

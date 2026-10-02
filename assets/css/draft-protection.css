@@ -1,0 +1,12 @@
+/* Approved v269 protection and archive presentation, unchanged. */
+#draft #closedDraftNotice{padding:30px;border:1px solid #c0a76f;border-radius:8px;background:#111b23;color:#eeeade;text-align:center}
+#draft #closedDraftNotice h2{font-size:30px;margin:0 0 10px}
+#draft #closedDraftNotice p{font-size:16px;line-height:1.6}
+#draft #closedDraftNotice .actions{justify-content:center;margin-top:20px;gap:10px}
+#draft.is-final-draft .draft-up-next,#draft.is-final-draft #cleanRosterNeedsPanel,#draft.is-final-draft #myDraftRoster,#draft.is-final-draft #v120TickerSystem{display:none!important}
+#admin .final-draft-status{padding:14px 16px;border:1px solid #7d8d60;border-radius:8px;background:#202b20;color:#d6e8c4;margin:15px 0;line-height:1.6}
+.final-draft-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:14px}
+.final-draft-groups h4{color:#e3c891;margin:12px 0 6px;font-size:13px}
+.final-draft-groups ol{padding-left:20px;line-height:1.7;font-size:14px}
+.final-draft-groups li small{color:#9eafbf;margin-left:5px}
+@media(max-width:700px){.final-draft-groups{grid-template-columns:1fr}#draft #closedDraftNotice{padding:22px 15px}}

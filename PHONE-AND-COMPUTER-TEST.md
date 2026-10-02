@@ -1,17 +1,16 @@
-# Check v270 after upload
+# Check v271 on your phone and computer
 
-Your live draft is finished. These first checks are read-only.
+These checks do not change the draft or season.
 
-1. Open Home on your computer and phone after the Vercel deploy finishes. Refresh once.
-2. Confirm the board says **Final draft locked** and all five managers have 12 players, grouped into 6 forwards, 4 defence and 2 goalie units.
-3. Confirm **Nick has Connor McDavid**, **Chris has Macklin Celebrini**, **Andrew has Cole Caufield**, **Tyler has Nikita Kucherov**, and **Scott has Nathan MacKinnon**. These are checks against the captured real draft, not test data.
-4. Click **View draft record**. Check the original pick order and download the final-draft backup on at least one device.
-5. Open the draft room. It should say the draft is complete, show the saved lottery results, and offer the read-only record. There should be no player-picking controls.
-6. Open Admin and choose Nick. Undo, reset and season-changing controls should be disabled. **Do not press End Season now.** Live scoring is still running.
-7. Open Tyler’s room (Sundin 13), Andrew’s room (Brière 48), and return Home (Nick 09). Check that room links and the restored chalkboard work on both devices.
-8. On your phone, use **Enlarge chalkboard** and confirm all names are readable, then close it to return to the full basement scene.
-9. Keep the v270 ZIP and the separate completed-draft JSON backup outside the website.
+1. Open the deployed website on your phone and computer. Refresh once after Vercel finishes.
+2. On the phone, choose Arcade Hockey from Choose your theme near the bottom links (or Theme above the standings). On the computer, choose Ice Level. Confirm the two screens retain their separate choices.
+3. Close and reopen each browser page. The phone should still use Arcade Hockey and the computer Ice Level. Try another theme at any time; changes save immediately. Clearing site data or using private browsing can reset this preference.
+4. Check all five choices. Confirm the same players and points appear in every theme. There should be no example/sample scores.
+5. On the phone, swipe a standings or roster table horizontally. Names and final FPTS remain visible while the middle stats scroll. Check the last column and long goalie-team names. The whole page should not scroll sideways.
+6. Check that all five roster sections show 6 forwards, then 4 defence, then 2 team-goalie units. Stat headings include their scoring weights.
+7. Check the original header links: draft, trophy room and each jersey. Andrew remains the large orange 28 champion; Nick 09, Scott 81, Tyler 91 and Chris 34 retain the original navy-and-cream artwork.
+8. Use Enlarge board, then close it. Its theme and live data should match the page. The manager names still open their roster rooms.
+9. Confirm the home board says Final draft locked and 60/60 saved. View record should show the original completed draft. Spot-check Nick: Connor McDavid; Chris: Macklin Celebrini; Andrew: Cole Caufield; Tyler: Nikita Kucherov; Scott: Nathan MacKinnon.
+10. The draft room should remain closed. Keep your existing completed-draft backup. Do not press End Season or reset anything as part of this appearance check.
 
-## Optional rehearsal
-
-Use **Admin → Open test room**, and send that exact test-room URL to your second device. Confirm both say **TEST ROOM** before making test picks. Existing lottery, automatic test fill, End Test Season and Clear all test data remain available there. Return to the live pool afterwards; its final rosters must be unchanged.
+For any future draft rehearsal use Admin → Open test room on both devices and verify both clearly say TEST ROOM. Live data never needs to be reset to test appearance.
