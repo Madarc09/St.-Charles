@@ -1,0 +1,22 @@
+V280 HOME REBUILD
+=================
+
+This replaces the Home page control architecture from v279.
+
+STANDINGS
+- Always titled STANDINGS and centered.
+- Default: Season totals.
+- Today's Totals button changes ONLY the standings board.
+- In Today mode the button changes to Season Totals.
+
+ROSTER COMPARISON
+- Default: Season totals.
+- Tonight's Matchup changes ONLY the roster cards.
+- In Tonight mode the button changes to Season Totals.
+- Left/right arrow buttons change only the team on that side.
+- No manager dropdowns.
+
+Implementation note:
+The browser loads a new home-board-v280.js file so old cached Home controllers cannot remain active.
+
+All 18 automated tests pass.

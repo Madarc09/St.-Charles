@@ -113,7 +113,8 @@ test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games c
   assert.equal(today[0].ownerId,'andrew');
   assert.equal(today[0]._today.total,3);
   const html=Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season',standingsMode:'today'},live);
-  assert.ok(html.includes('Today’s Totals'));
+  assert.ok(html.includes('Season Totals'));
+  assert.ok(html.includes('<h2>Standings</h2>'));
   const managerAt=html.indexOf('>Manager</th>');
   const fptsAt=html.indexOf('pool-fpts-first',managerAt);
   const goalsAt=html.indexOf('>Goals</span>',managerAt);
@@ -126,20 +127,22 @@ test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games c
   assert.ok(card.includes('LAST 25'));
 });
 
-test('v278 keeps roster Tonight mode separate from standings Today mode and exposes reliable team selectors', () => {
+test('v280 exposes independent standings and roster controls with arrow-only team selection', () => {
   const rows = [
     { ownerId:'nick', ownerName:'Nick', rank:1, total:2, players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}] },
     { ownerId:'andrew', ownerName:'Andrew', rank:2, total:1, players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL',goals:0,assists:1,shortHandedGoals:0,gameWinningGoals:0}] }
   ];
   const live={today:{date:'2026-10-02',games:[{id:1,state:'LIVE',away:'MTL',home:'TOR',awayScore:0,homeScore:1,period:1,timeRemaining:'10:00'}],players:{'1':{goals:1},'2':{}},teamGoalies:{}}};
-  const season = Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season',standingsMode:'season'},live);
-  assert.ok(season.includes('data-roster-mode'));
-  assert.ok(season.includes('data-standings-mode'));
-  assert.ok(season.includes('data-compare-select'));
-  assert.ok(season.includes('ROSTER VIEW · INDEPENDENT FROM STANDINGS'));
-  const tonight = Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'tonight',standingsMode:'season'},live);
-  assert.ok(tonight.includes('Tonight’s Matchup'));
-  assert.ok(tonight.includes('>Standings</h2>'), 'roster Tonight mode leaves standings in season mode');
+  const draft={seasonId:'20262027',picks:[],locked:false};
+  const season = Board.render(rows,draft,{left:'nick',right:'andrew',mode:'season',standingsMode:'season'},live);
+  assert.ok(season.includes('data-v280-roster-toggle'));
+  assert.ok(season.includes('data-v280-standings-toggle'));
+  assert.ok(season.includes('data-v280-compare-shift'));
+  assert.ok(!season.includes('data-compare-select'));
+  assert.ok(!season.includes('BASEMENT BAR LEAGUE'));
+  const tonight = Board.render(rows,draft,{left:'nick',right:'andrew',mode:'tonight',standingsMode:'season'},live);
+  assert.ok(tonight.includes('Season Totals'));
+  assert.ok(tonight.includes('<h2>Standings</h2>'), 'roster Tonight mode leaves standings title and season mode alone');
 });
 
 test('v278 card removes league branding and uses the 1996 black-and-white profile structure', () => {
@@ -151,7 +154,7 @@ test('v278 card removes league branding and uses the 1996 black-and-white profil
 });
 
 
-test('v279 roster and standings components render independently and roster toggle label flips to Season Totals', () => {
+test('v280 roster and standings renderers are independent by construction', () => {
   const rows = [
     { ownerId:'nick', ownerName:'Nick', rank:1, total:2, players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}] },
     { ownerId:'andrew', ownerName:'Andrew', rank:2, total:1, players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL',goals:0,assists:1,shortHandedGoals:0,gameWinningGoals:0}] },
@@ -163,12 +166,13 @@ test('v279 roster and standings components render independently and roster toggl
   const standingsToday=Board.renderStandings(rows,draft,'today',live);
   const rostersSeason=Board.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'season'},live);
   const rostersTonight=Board.renderRosters(rows,draft,{left:'nick',right:'scott',mode:'tonight'},live);
-  assert.ok(standingsSeason.includes('>Standings</h2>'));
-  assert.ok(standingsToday.includes('Today’s Totals'));
+  assert.ok(standingsSeason.includes('<h2>Standings</h2>'));
+  assert.ok(standingsSeason.includes('Today’s Totals'));
+  assert.ok(standingsToday.includes('Season Totals'));
   assert.ok(rostersSeason.includes('Tonight’s Matchup'));
-  assert.ok(rostersSeason.includes('value="andrew" selected'));
+  assert.ok(rostersSeason.includes('>Andrew</strong>'));
   assert.ok(rostersTonight.includes('Season Totals'));
-  assert.ok(rostersTonight.includes('value="scott" selected'));
-  assert.ok(!rostersTonight.includes('data-standings-mode'));
-  assert.ok(!standingsToday.includes('data-roster-mode'));
+  assert.ok(rostersTonight.includes('>Scott</strong>'));
+  assert.ok(!rostersTonight.includes('data-v280-standings-toggle'));
+  assert.ok(!standingsToday.includes('data-v280-roster-toggle'));
 });

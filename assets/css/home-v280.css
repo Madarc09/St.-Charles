@@ -1,0 +1,54 @@
+/* v280 — rebuilt Home controls. Standings and roster comparison are visually and functionally separate. */
+body.v180-home-active #dashboard .pool-v280-dashboard{display:block!important}
+body.v180-home-active #dashboard .pool-v280-standings-host,
+body.v180-home-active #dashboard .pool-v280-rosters-host{position:relative!important;isolation:isolate!important}
+
+/* STANDINGS: centered title, one local toggle underneath. */
+body.v180-home-active #dashboard .pool-v280-standings .pool-v280-standings-header{
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:10px!important;padding:13px 14px 12px!important;text-align:center!important;
+  border-bottom:1px solid rgba(68,222,255,.38)!important;
+  background:linear-gradient(180deg,rgba(5,24,39,.96),rgba(5,17,28,.9))!important;
+}
+body.v180-home-active #dashboard .pool-v280-standings .pool-v280-standings-header h2{
+  margin:0!important;color:#eefbff!important;font:900 clamp(35px,4vw,56px)/.95 Impact,'Arial Narrow',sans-serif!important;
+  letter-spacing:.08em!important;text-transform:uppercase!important;text-shadow:0 0 13px rgba(70,225,255,.55)!important;
+}
+body.v180-home-active #dashboard .pool-v280-standings-controls{display:flex!important;justify-content:center!important;width:100%!important}
+body.v180-home-active #dashboard .pool-v280-standings-toggle{
+  position:relative!important;z-index:5!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;
+  min-height:44px!important;padding:8px 18px!important;border:1px solid rgba(73,215,245,.58)!important;border-radius:999px!important;
+  background:#071d2b!important;color:#77e9ff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 0 18px rgba(35,200,238,.13)!important;
+  font:800 13px/1 system-ui,sans-serif!important;letter-spacing:.05em!important;text-transform:uppercase!important;pointer-events:auto!important;
+}
+body.v180-home-active #dashboard .pool-v280-standings-toggle[aria-pressed="true"]{border-color:#ffd15a!important;color:#ffe38c!important;background:#2a2108!important}
+
+/* ROSTER COMPARISON: completely separate controls. */
+body.v180-home-active #dashboard .pool-v280-rosters{margin-top:28px!important}
+body.v180-home-active #dashboard .pool-v280-roster-header,
+body.v180-home-active #dashboard .pool-v280-mobile-roster-header{text-align:center!important}
+body.v180-home-active #dashboard .pool-v280-roster-header>div,
+body.v180-home-active #dashboard .pool-v280-mobile-roster-header>div{display:flex!important;flex-direction:column!important;align-items:center!important}
+body.v180-home-active #dashboard .pool-v280-roster-header h2,
+body.v180-home-active #dashboard .pool-v280-mobile-roster-header h2{margin:0!important}
+body.v180-home-active #dashboard .pool-v280-roster-header span,
+body.v180-home-active #dashboard .pool-v280-mobile-roster-header span{margin-top:5px!important;color:#7db9ce!important;font:800 10px/1 system-ui,sans-serif!important;letter-spacing:.15em!important;text-transform:uppercase!important}
+body.v180-home-active #dashboard .pool-v280-roster-switch{position:relative!important;z-index:5!important;pointer-events:auto!important}
+body.v180-home-active #dashboard .pool-v280-roster-switch button{pointer-events:auto!important}
+
+/* Manager controls are arrows + fixed name only. No dropdown. */
+body.v180-home-active #dashboard .pool-v280-picker{position:relative!important;z-index:6!important}
+body.v180-home-active #dashboard .pool-v280-picker>div{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important}
+body.v180-home-active #dashboard .pool-v280-picker button{cursor:pointer!important;pointer-events:auto!important;position:relative!important;z-index:7!important}
+body.v180-home-active #dashboard .pool-v280-picker strong{display:block!important;width:100%!important;text-align:center!important}
+
+/* Keep controls from old themes from visually sitting over the rebuilt controls. */
+body.v180-home-active #dashboard .pool-v280-standings .pool-module-title,
+body.v180-home-active #dashboard .pool-v280-rosters .pool-roster-control-label{display:none!important}
+
+@media (max-width:700px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v280-standings-header{padding:10px 8px!important;gap:8px!important}
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v280-standings-header h2{font-size:34px!important}
+  body.v180-home-active #dashboard .pool-v280-standings-toggle{min-height:40px!important;padding:7px 14px!important;font-size:11px!important}
+  body.v180-home-active #dashboard .pool-v280-rosters{margin-top:18px!important}
+}
