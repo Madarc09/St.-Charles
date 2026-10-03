@@ -6,17 +6,18 @@
   else { root.PoolThemes = api; api.mount(root); }
 })(typeof window !== 'undefined' ? window : this, function () {
   'use strict';
-  // Add a theme here and its matching selectors in home-themes.css.
+  // Add a theme here and its matching selectors in home-skins-v292.css.
   // IDs and the storage key are permanent, independent of website releases.
   const themes = Object.freeze([
-    { id: 'ice', name: 'Ice Level', description: 'Bright ice, navy lettering and red totals.' },
-    { id: 'arena', name: 'Arena Scoreboard', description: 'Dark steel and warm amber scores.' },
-    { id: 'press', name: 'The Sports Page', description: 'Vintage paper and hockey box scores.' },
-    { id: 'chalkboard', name: "Coach's Chalkboard", description: 'Green chalkboard and handwritten scores.' },
-    { id: 'arcade', name: 'Arcade Hockey', description: 'Retro hockey with cyan and magenta.' }
+    { id: 'original', name: 'Original Home', description: 'Page 1 · Your current room and arena boards.' },
+    { id: 'ice', name: 'Frostline', description: 'Page 2 · Frozen timber, northern lights and blue ice.' },
+    { id: 'arena', name: 'Heritage Hall', description: 'Page 3 · Walnut, brass and a warm championship glow.' },
+    { id: 'press', name: 'The Press Box', description: 'Page 4 · Vintage newsprint, cream paper and ink.' },
+    { id: 'midnight', name: 'Neon Ice', description: 'Page 5 · Luminous displays and midnight-blue glass.' },
+    { id: 'arcade', name: 'Arcade Hockey', description: 'Page 6 · Detailed pixel art and retro scoreboard type.' }
   ].map(Object.freeze));
   const storageKey = 'hockey-pool:home-theme:v1';
-  const defaultTheme = 'chalkboard';
+  const defaultTheme = 'original';
   const normalize = id => themes.some(t => t.id === id) ? id : defaultTheme;
   function read(storage) {
     try { return normalize(storage && storage.getItem(storageKey)); }
@@ -36,9 +37,18 @@
     try { storage = win.localStorage; } catch (_) { storage = null; }
     let current = read(storage);
     // Runs synchronously in <head>, before the first paint.
-    doc.documentElement.dataset.poolTheme = current;
+    // v274–291 shared geometry was tuned against this legacy base. Keep it fixed;
+    // the independent skin attribute changes artwork, colors and font families only.
+    doc.documentElement.dataset.poolTheme = 'chalkboard';
+    doc.documentElement.dataset.homeSkin = current;
     function sync(saved) {
       const theme = themes.find(t => t.id === current);
+      const header = doc.querySelector?.('.pool-header-image');
+      if (header) {
+        const src = current === 'original' ? 'assets/images/home-leaderboard-basement-board.png?v=269'
+          : 'assets/images/themes/v292/' + current + '.webp';
+        if (header.getAttribute('src') !== src) header.setAttribute('src', src);
+      }
       doc.querySelectorAll('[data-current-theme]').forEach(el => { el.textContent = theme.name; });
       doc.querySelectorAll('input[name="pool-home-theme"]').forEach(input => {
         input.checked = input.value === current;
@@ -52,7 +62,7 @@
     function select(id, persist) {
       current = normalize(id);
       const result = persist ? write(storage, current) : { saved: undefined };
-      doc.documentElement.dataset.poolTheme = current;
+      doc.documentElement.dataset.homeSkin = current;
       sync(result.saved);
     }
     function ready() {

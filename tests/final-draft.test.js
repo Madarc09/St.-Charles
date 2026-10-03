@@ -52,6 +52,10 @@ test('End Season retains the immutable draft record and archives the picks befor
  const body={action:'end-season',ownerId:'nick',expectedRevision:before.draft.revision,requestId:'final-season-preservation'};
  const end=await call('history',body);assert.equal(end.status,200);assert.equal(end.draft.seasonId,'20272028');assert.equal(end.draft.picks.length,0);
  assert.deepEqual(end.archived.draftPicks,before.draft.picks);
+ assert.equal(end.archived.botTeam.ownerId,'bot');assert.equal(end.archived.botTeam.players.length,12);
+ assert.deepEqual(end.archived.botTeam.selection,require('../data/bot-teams/20262027.json'));
+ assert.equal(end.archived.standings.length,5,'BOT snapshot does not rewrite human championship history');
+ assert.equal(end.archived.rosters.bot,undefined);
  const history=await call('history');assert.equal(history.finalDrafts[0].fingerprint,fingerprint);assert.equal(history.seasons.length,4);
  assert.deepEqual(history.finalDrafts[0].draft.picks,before.draft.picks);
  assert.equal((await call('history',body)).status,200);assert.equal((await call('history')).seasons.length,4);

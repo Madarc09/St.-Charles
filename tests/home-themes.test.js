@@ -11,11 +11,11 @@ const memory = () => {
 };
 test('theme survives new page instances while two different browsers keep independent choices', () => {
   const phone = memory(), computer = memory(), friendsPhone = memory();
-  assert.equal(Themes.read(phone), 'chalkboard');
+  assert.equal(Themes.read(phone), 'original');
   for (const theme of Themes.themes) {
     assert.equal(Themes.write(phone, theme.id).saved, true);
     assert.equal(Themes.read(phone), theme.id);
-    assert.equal(Themes.read(friendsPhone), 'chalkboard');
+    assert.equal(Themes.read(friendsPhone), 'original');
   }
   Themes.write(computer, 'press');
   Themes.write(friendsPhone, 'ice');
@@ -51,22 +51,22 @@ test('saved theme is applied before DOM readiness and radio changes update it wi
   };
   const win = { document: doc, localStorage: storage, addEventListener(name, cb) { winEvents[name] = cb; }, fetch() { throw Error('Theme must not contact a server'); } };
   Themes.mount(win);
-  assert.equal(doc.documentElement.dataset.poolTheme, 'press', 'No flash of the default theme');
+  assert.equal(doc.documentElement.dataset.homeSkin, 'press', 'No flash of the default theme');
   docEvents.DOMContentLoaded();
   assert.ok(options.innerHTML.includes('Arcade Hockey'));
   assert.equal(inputs.filter(i => i.checked).length, 1);
   docEvents.change({ target: inputs.find(i => i.value === 'arena') });
   assert.equal(Themes.read(storage), 'arena');
-  assert.equal(doc.documentElement.dataset.poolTheme, 'arena');
-  assert.equal(name.textContent, 'Arena Scoreboard');
+  assert.equal(doc.documentElement.dataset.homeSkin, 'arena');
+  assert.equal(name.textContent, 'Heritage Hall');
   // A second tab in the SAME browser follows the device's saved preference.
   Themes.write(storage, 'ice');
   winEvents.storage({ key: Themes.storageKey });
-  assert.equal(doc.documentElement.dataset.poolTheme, 'ice');
+  assert.equal(doc.documentElement.dataset.homeSkin, 'ice');
   // Closing/reopening the browser creates a new document using the same storage.
   const fresh = { ...doc, documentElement: { dataset: {} } };
   Themes.mount({ ...win, document: fresh });
-  assert.equal(fresh.documentElement.dataset.poolTheme, 'ice');
+  assert.equal(fresh.documentElement.dataset.homeSkin, 'ice');
 });
 test('standings separate goalie stats so displayed stat contributions match the unchanged scoring total', () => {
   const players = [

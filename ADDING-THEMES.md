@@ -1,17 +1,15 @@
-# Adding another theme
+# Adding another homepage skin
 
-All five themes use one live board. A theme only changes appearance; it does not own a roster, season, identity or score.
+The active v292 release has six options. Page 1 is the unmodified v291 presentation. The five new choices share its board structure, controls and responsive layout.
 
-1. Add one entry to the themes array in assets/js/home-themes.js. Give it a permanent, unique lowercase id, a name and a short description.
-2. Add a matching block to assets/css/home-themes.css. Copy an existing theme block and change its colour, font and background variables. Include both selectors: :root[data-pool-theme="your-id"] and [data-preview-theme="your-id"]. The second selector makes its chooser preview match.
-3. Add any extra decoration under html[data-pool-theme="your-id"] selectors. Keep it scoped to the homepage, board and theme chooser. Put new background assets in assets/images/themes. v272 may use a high-detail approved reference image as a frame/visual plate, but sample names/numbers must be covered by the live HTML table. Never make a changing score depend on pixels in the artwork.
-4. Bump the cache query on the two changed files in index.html. Do not rename existing theme ids or change the localStorage key when increasing the website version.
-5. Run npm test, then check a wide screen and a 390px phone layout. Choose the new theme, reload and verify it remains selected. Check a separate browser still retains its own choice.
+1. Add a permanent ID, name and description to `assets/js/home-themes.js`.
+2. Add matching artwork under `assets/images/themes/`. Current lossless WebP plates are 1448 × 1086: the upper band contains the seven navigation images; the rest is a blank themed texture. Preserve the order and centres of the navigation targets. Never bake live stats into the art.
+3. Add variables under `html[data-home-skin="ID"], [data-preview-theme="ID"]` in `assets/css/home-skins-v292.css`. Set the artwork path, measured upper-band height, colours and font families. Use the existing shared skin rules.
+4. Update the image path mapping in `home-themes.js` if the new asset uses another folder. Current alternate IDs load from `assets/images/themes/v292/`.
+5. Check desktop and mobile, including header click targets, long names, date tabs, standings and roster comparisons. Theme changes must never contact the pool API or affect data.
 
-The chooser generates itself from the registry. There is no need to add new HTML options, duplicate a page, touch the shared pool API or copy the board renderer.
+Keep `data-pool-theme="chalkboard"` fixed. It supplies the legacy layout foundation; **only `data-home-skin` changes**. Do not add widths, row heights, grids, breakpoints or motion to the shared board when adding artwork.
 
-Keep the original header image unchanged. Its desktop and mobile image windows are in home-board.css. Preserve all manager names, jersey numbers/colours and Andrew’s prominent championship display.
+The permanent preference key is `hockey-pool:home-theme:v1`. Choices stay in each browser. The retired chalkboard choice and unrecognised IDs fall back to Original Home. Existing ice/arena/press/arcade preferences retain their IDs. Do not rename IDs or the storage key between releases.
 
-The storage key is hockey-pool:home-theme:v1. It intentionally does not include a release, season, manager id or shared room. Storage belongs to this website’s origin and browser profile. A different browser or device gets an independent preference. Clearing site data resets it; private browsing may only keep it for the current session. Existing saved preferences remain valid after normal GitHub/Vercel updates on the same domain.
-
-home-board.js is the sole renderer. PoolCore remains the source for scoring weights, position grouping and fantasy points. Stat updates preserve horizontal table scroll and keyboard focus. Never make a theme depend on a separate scoring formula.
+`docs/theme-artwork-prompts.json` records the five image-generation prompts. `npm test` covers theme persistence, assets and shared data/controls. Actual device inspection remains necessary for visual changes.

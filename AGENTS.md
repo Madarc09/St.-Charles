@@ -10,11 +10,13 @@
 - Keep tests in isolated test rooms. Never call reset, undo, auto-fill or End Season against the real pool while checking a release.
 - Run `npm test` after any storage, draft, scoring or history change. Preserve the latest full backup before changes.
 
-## Homepage themes (approved October 2, 2026)
+## Homepage themes (latest approval October 3, 2026)
 
-The user approved replacing the old fixed-size lower scene with five responsive themes: Ice Level, Arena Scoreboard, The Sports Page, Coach’s Chalkboard and Arcade Hockey. This supersedes the earlier whole-background chalkboard restriction.
+The v291 layout, framing, controls, responsive breakpoints, scrolling and motion are approved. Preserve them. Page 1, Original Home, retains the existing artwork and presentation. Five additional skins may reinterpret the header artwork, background, colours and fonts without redesigning the layout.
 
-Preserve the actual original header artwork: neon draft link, four navy/cream jerseys (Nick 09, Scott 81, Tyler 91, Chris 34), prominent orange Andrew 28 championship display, and trophy link. CSS windows may resize/reflow that original art for phones. Never regenerate or recolour the header.
+Keep all seven header links and destinations: Draft Room, Nick 09, Scott 81, prominent orange Andrew 28 champion, Tyler 91, Chris 34 and Trophy Room. The four other jerseys remain navy/cream. New artwork belongs only to the five alternate themes. This latest approval supersedes the earlier ban on regenerating theme header art.
+
+`data-pool-theme="chalkboard"` intentionally remains fixed: legacy CSS uses it for v291 geometry. New skins use `data-home-skin`. Do not change the legacy attribute when selecting a skin. Active files are `home-themes.js`, `home-skins-v292.css` and `home-board-v292.js`.
 
 Do not add Basement Bar League branding or a Back to the Bar link: that is a different league.
 
@@ -23,3 +25,9 @@ Theme choice belongs only to this browser’s localStorage, under the permanent 
 All standings and roster columns show the scoring weights in their headings. Separate skater goals/assists from goalie stats; use the shared PoolCore scoring. Group roster copies Forwards, Defence, Team Goalies. Keep normal-sized mobile text with horizontal table scrolling.
 
 Read ADDING-THEMES.md before adding a theme. Keep the registry and CSS extensible, and preserve the existing theme IDs across versions.
+
+## Fixed BOT competitor
+
+`data/bot-teams/20262027.json` is the canonical locked BOT roster. Preserve it; never automatically redraft or replace its players. Regenerate its browser copy with `node scripts/build-bot-roster.js` if the canonical format needs maintenance. The original human draft must remain untouched.
+
+BOT is a separate standings competitor, not a sixth draft manager. Do not add it to Core.OWNERS, identity, lottery, pick order or roster rooms. It uses 6F/4D/2 team goalies and the exact shared scoring. It activates only for the matching locked 2026–27 human draft and refuses all player conflicts. End Season retains its result in the optional botTeam snapshot without rewriting human trophy/championship records. A future season needs a separately approved BOT roster.

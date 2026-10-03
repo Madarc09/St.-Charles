@@ -1,0 +1,165 @@
+{
+  "format": "hockey-pool-fixed-bot-roster",
+  "schemaVersion": 1,
+  "seasonId": "20262027",
+  "ownerId": "bot",
+  "ownerName": "BOT",
+  "teamName": "The Spare Parts",
+  "selectedAt": "2026-10-03",
+  "locked": true,
+  "scoringStart": "season-start",
+  "selectionPolicy": "Prior three completed NHL seasons plus preseason outlooks only; current-season results excluded from selection. All regular-season points count equally with human rosters.",
+  "rules": {
+    "F": 6,
+    "D": 4,
+    "G": 2
+  },
+  "humanSelections": [
+    "andrew:8477951",
+    "andrew:8478403",
+    "andrew:8478460",
+    "andrew:8478864",
+    "andrew:8481524",
+    "andrew:8481540",
+    "andrew:8481605",
+    "andrew:8482093",
+    "andrew:8483457",
+    "andrew:8484762",
+    "andrew:TG-CAR",
+    "andrew:TG-MIN",
+    "chris:8474600",
+    "chris:8477504",
+    "chris:8477939",
+    "chris:8477956",
+    "chris:8478398",
+    "chris:8479420",
+    "chris:8480018",
+    "chris:8480839",
+    "chris:8484801",
+    "chris:8485366",
+    "chris:TG-TBL",
+    "chris:TG-WSH",
+    "nick:8471675",
+    "nick:8474590",
+    "nick:8478402",
+    "nick:8480800",
+    "nick:8480803",
+    "nick:8481542",
+    "nick:8482116",
+    "nick:8482740",
+    "nick:8484144",
+    "nick:8484153",
+    "nick:TG-COL",
+    "nick:TG-DAL",
+    "scott:8474578",
+    "scott:8477404",
+    "scott:8477492",
+    "scott:8477933",
+    "scott:8477934",
+    "scott:8479325",
+    "scott:8479345",
+    "scott:8480036",
+    "scott:8480039",
+    "scott:8481557",
+    "scott:TG-BUF",
+    "scott:TG-TOR",
+    "tyler:8476453",
+    "tyler:8476460",
+    "tyler:8477960",
+    "tyler:8478178",
+    "tyler:8479318",
+    "tyler:8480027",
+    "tyler:8480069",
+    "tyler:8482105",
+    "tyler:8483445",
+    "tyler:8484768",
+    "tyler:TG-MTL",
+    "tyler:TG-NYI"
+  ],
+  "players": [
+    {
+      "id": "8479542",
+      "name": "Brandon Hagel",
+      "position": "L",
+      "nhlTeam": "TBL",
+      "type": "skater"
+    },
+    {
+      "id": "8478427",
+      "name": "Sebastian Aho",
+      "position": "C",
+      "nhlTeam": "CAR",
+      "type": "skater"
+    },
+    {
+      "id": "8478550",
+      "name": "Artemi Panarin",
+      "position": "L",
+      "nhlTeam": "LAK",
+      "type": "skater"
+    },
+    {
+      "id": "8482699",
+      "name": "Dylan Guenther",
+      "position": "R",
+      "nhlTeam": "UTA",
+      "type": "skater"
+    },
+    {
+      "id": "8478420",
+      "name": "Mikko Rantanen",
+      "position": "R",
+      "nhlTeam": "DAL",
+      "type": "skater"
+    },
+    {
+      "id": "8476887",
+      "name": "Filip Forsberg",
+      "position": "L",
+      "nhlTeam": "NSH",
+      "type": "skater"
+    },
+    {
+      "id": "8479323",
+      "name": "Adam Fox",
+      "position": "D",
+      "nhlTeam": "NYR",
+      "type": "skater"
+    },
+    {
+      "id": "8479410",
+      "name": "Mikhail Sergachev",
+      "position": "D",
+      "nhlTeam": "UTA",
+      "type": "skater"
+    },
+    {
+      "id": "8477447",
+      "name": "Shea Theodore",
+      "position": "D",
+      "nhlTeam": "VGK",
+      "type": "skater"
+    },
+    {
+      "id": "8480865",
+      "name": "Noah Dobson",
+      "position": "D",
+      "nhlTeam": "MTL",
+      "type": "skater"
+    },
+    {
+      "id": "TG-FLA",
+      "name": "Florida Panthers Goalies",
+      "position": "TG",
+      "nhlTeam": "FLA",
+      "type": "teamGoalie"
+    },
+    {
+      "id": "TG-OTT",
+      "name": "Ottawa Senators Goalies",
+      "position": "TG",
+      "nhlTeam": "OTT",
+      "type": "teamGoalie"
+    }
+  ]
+}

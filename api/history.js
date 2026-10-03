@@ -1,5 +1,6 @@
 const S=require('../lib/pool-store');
 const NHL=require('../lib/nhl-data');
+const Bot=require('../assets/js/bot-team');
 module.exports=async function(req,res){
   S.headers(res);
   try{
@@ -23,6 +24,12 @@ module.exports=async function(req,res){
       if(s.archives.some(a=>a.seasonId===season && room==='live'))throw S.error('This season is already archived.');
       const standings=S.Core.standings(s.draft,stats.players);
       const record={id:room==='live'?season:`${season}-test-${S.randomUUID().slice(0,8)}`,seasonId:season,label:`${S.Core.seasonLabel(season)} ${room==='live'?'Regular Season':'Test Season'}`,testSeason:room!=='live',savedAt:new Date().toISOString(),source:'NHL regular season',statsSeason:statSeason,statsUpdatedAt:stats.fetchedAt,scoring:S.Core.SCORING,rosterRules:S.Core.RULES,championOwnerId:standings.filter(r=>r.rank===1).length===1?standings[0].ownerId:null,championOwnerIds:standings.filter(r=>r.rank===1).map(r=>r.ownerId),standings,rosters:Object.fromEntries(standings.map(r=>[r.ownerId,r.players])),draftPicks:s.draft.picks,lottery:s.lottery,requestId:b.requestId};
+      // Keep the extra BOT result with the season, independent of human champions,
+      // original draft picks, and the five manager roster-room/history records.
+      if(room==='live'){
+        const bot=Bot.row(s.draft,stats.players);
+        if(bot)record.botTeam={...bot,selection:Bot.record,archivedAt:record.savedAt};
+      }
       s.archives.push(record);
       const start=Number(season.slice(0,4))+1;
       S.reset(s,{season:room==='live'?`${start}${start+1}`:season,archivedSeason:season});return record;
