@@ -1,0 +1,9 @@
+V281 PLAYER CARD UPDATE
+
+- Restores full-color player/team imagery.
+- Moves player name into the top card header between card number and stripe graphic.
+- Adds NHL draft team / round / pick from the NHL player profile.
+- Adds fantasy draft team / round / pick from the saved pool draft.
+- Always renders five recent-game rows; unplayed rows show TBP / TO BE PLAYED.
+- Team-goalie cards keep their multi-goalie photo layout and add fantasy draft metadata.
+- Home standings/roster comparison behavior from v280 is unchanged.

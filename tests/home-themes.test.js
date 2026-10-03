@@ -121,7 +121,7 @@ test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games c
   assert.ok(managerAt>=0 && fptsAt>managerAt && goalsAt>fptsAt,'FPTS is the first stat after identity');
   assert.ok(html.includes('data-player-card'));
   const card=Board.cardMarkup({type:'skater',season:'20262027',player:{id:'1',name:'Nick Skater',team:'TOR',position:'C',headshot:'x',teamLogo:'y'},last5:[{date:'2026-10-01',label:'vs MTL',goals:1,assists:2,shortHandedGoals:0,gameWinningGoals:1,fpts:9}],last10:{games:10,goals:3,assists:4,shortHandedGoals:0,gameWinningGoals:1,fpts:15},last25:{games:25,goals:9,assists:12,shortHandedGoals:1,gameWinningGoals:2,fpts:45}});
-  assert.ok(card.includes('1996 SERIES'));
+  assert.ok(card.includes('LAST 5 GAMES'));
   assert.ok(card.includes('LAST 5 GAMES'));
   assert.ok(card.includes('LAST 10'));
   assert.ok(card.includes('LAST 25'));
@@ -145,11 +145,14 @@ test('v280 exposes independent standings and roster controls with arrow-only tea
   assert.ok(tonight.includes('<h2>Standings</h2>'), 'roster Tonight mode leaves standings title and season mode alone');
 });
 
-test('v278 card removes league branding and uses the 1996 black-and-white profile structure', () => {
-  const card=Board.cardMarkup({type:'skater',season:'20262027',player:{id:'8478402',name:'Test Player',team:'TOR',position:'C',headshot:'x',teamLogo:'y'},last5:[{date:'2026-10-02',label:'vs MTL',goals:1,assists:1,shortHandedGoals:0,gameWinningGoals:0,fpts:3}],last10:{fpts:8},last25:{fpts:20}});
+test('v281 card restores colour-era structure, draft history copy, and five filled game rows', () => {
+  const card=Board.cardMarkup({type:'skater',season:'20262027',player:{id:'8478402',name:'Test Player',team:'TOR',position:'C',headshot:'x',teamLogo:'y',nhlDraft:{team:'TOR',teamName:'Toronto Maple Leafs',round:1,pick:7,overallPick:7}},fantasyDraft:{teamName:'Glizzy Disposal',ownerName:'Nick',round:2,pick:3,overallPick:8},last5:[{date:'2026-10-02',label:'vs MTL',goals:1,assists:1,shortHandedGoals:0,gameWinningGoals:0,fpts:3}],last10:{fpts:8},last25:{fpts:20}});
   assert.ok(!card.includes('BASEMENT BAR'));
-  assert.ok(card.includes('1996 SERIES'));
-  assert.ok(card.includes('pool-opc-nameplate'));
+  assert.ok(card.includes('pool-opc-top-name'));
+  assert.ok(card.includes('Test Player'));
+  assert.ok(card.includes('Drafted in the NHL by the Toronto Maple Leafs — Round 1, Pick 7.'));
+  assert.ok(card.includes('Fantasy drafted by Glizzy Disposal — Round 2, Pick 3.'));
+  assert.equal((card.match(/TO BE PLAYED/g)||[]).length,4);
   assert.ok(card.includes('pool-opc-position'));
 });
 

@@ -1,0 +1,80 @@
+/* v281 — full-colour 1996-inspired recent-games card refinements. */
+.pool-opc-card{
+  --opc-blue:#173f79!important;
+  --opc-red:#b3262f!important;
+  background:#f7f4e9!important;
+}
+.pool-opc-brand{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) 112px!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-height:52px!important;
+  padding:8px 16px!important;
+  background:#faf9f2!important;
+  border-bottom:5px solid #111!important;
+}
+.pool-opc-brand:after{display:none!important}
+.pool-opc-number{color:#111!important;font:900 25px/1 Arial,sans-serif!important;letter-spacing:.06em!important}
+.pool-opc-top-name{
+  min-width:0!important;
+  color:#111!important;
+  font:900 clamp(18px,3vw,28px)/1 "Arial Narrow",Arial,sans-serif!important;
+  letter-spacing:.025em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.pool-opc-stripes{
+  display:block!important;
+  height:34px!important;
+  background:repeating-linear-gradient(135deg,#111 0 6px,transparent 6px 13px)!important;
+  clip-path:polygon(22% 0,100% 0,100% 100%,0 100%)!important;
+}
+.pool-opc-photo{background:linear-gradient(145deg,#dce5ef,#9dafc4)!important}
+.pool-opc-photo img{filter:none!important}
+.pool-opc-logo-block img{filter:none!important}
+.pool-opc-goalie-collage figure{background:linear-gradient(145deg,#dce5ef,#9dafc4)!important}
+.pool-opc-goalie-collage img{filter:none!important}
+.pool-opc-goalie-collage figcaption{background:rgba(8,20,38,.88)!important;color:#fff!important}
+.pool-opc-draft-copy{
+  margin:7px 0 8px!important;
+  padding:7px 9px!important;
+  border-top:2px solid #111!important;
+  border-bottom:2px solid #111!important;
+  background:#fff!important;
+  color:#080808!important;
+}
+.pool-opc-draft-line{
+  margin:0!important;
+  color:#080808!important;
+  font:800 10px/1.3 Arial,Helvetica,sans-serif!important;
+  letter-spacing:.01em!important;
+}
+.pool-opc-draft-line+.pool-opc-draft-line{margin-top:3px!important}
+.pool-opc-fantasy-draft{font-weight:900!important}
+.pool-card-last-five tr.is-tbp td{
+  background:#f1f0e9!important;
+  color:#454545!important;
+  font-style:italic!important;
+}
+.pool-card-last-five tr.is-tbp td:first-child strong{color:#111!important;letter-spacing:.08em!important}
+.pool-card-last-five tr.is-tbp td:nth-child(2){font-size:9px!important;letter-spacing:.06em!important}
+
+@media (min-width:621px){
+  .pool-opc-brand{min-height:46px!important;padding:6px 14px!important;grid-template-columns:auto minmax(0,1fr) 96px!important}
+  .pool-opc-number{font-size:21px!important}
+  .pool-opc-top-name{font-size:22px!important}
+  .pool-opc-stripes{height:28px!important}
+  .pool-opc-draft-copy{margin:5px 0 6px!important;padding:5px 7px!important}
+  .pool-opc-draft-line{font-size:9px!important}
+}
+@media (max-width:620px){
+  .pool-opc-brand{grid-template-columns:auto minmax(0,1fr) 72px!important;gap:8px!important;min-height:40px!important;padding:5px 9px!important}
+  .pool-opc-number{font-size:17px!important}
+  .pool-opc-top-name{font-size:17px!important}
+  .pool-opc-stripes{height:24px!important}
+  .pool-opc-draft-copy{margin:5px 0 6px!important;padding:5px 6px!important}
+  .pool-opc-draft-line{font-size:8px!important;line-height:1.25!important}
+}
