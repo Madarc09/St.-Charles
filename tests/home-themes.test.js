@@ -179,3 +179,14 @@ test('v280 roster and standings renderers are independent by construction', () =
   assert.ok(!rostersTonight.includes('data-v280-standings-toggle'));
   assert.ok(!standingsToday.includes('data-v280-roster-toggle'));
 });
+
+test('v282 player card includes NHL bio details and current drafted-player FPTS rank', () => {
+  const card=Board.cardMarkup({
+    type:'skater',season:'20262027',
+    player:{id:'8477939',name:'William Nylander',team:'TOR',position:'R',headshot:'x',teamLogo:'y',
+      bio:{jerseyNumber:88,heightInInches:72,weightInPounds:204,shootsCatches:'R',birthDate:'1996-05-01',birthCity:'Calgary',birthCountry:'CAN'},
+      nhlDraft:{team:'TOR',teamName:'Toronto Maple Leafs',round:1,pick:8,overallPick:8}},
+    fantasyDraft:{teamName:'Glizzy Disposal',round:1,pick:2},fantasyRank:{rank:4,fieldSize:50,fpts:12,scope:'skaters'},last5:[],last10:{},last25:{}
+  });
+  for (const text of ['JERSEY','#88','HEIGHT','6&#39; 0&quot;','WEIGHT','204 lbs','SHOOTS','Right','Calgary, Canada','May 1, 1996','AGE','R · Toronto Maple Leafs · RANKED #4 IN FANTASY PTS']) assert.ok(card.includes(text), text);
+});
