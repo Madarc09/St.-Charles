@@ -1,4 +1,4 @@
-/* One live board for every theme. Uses the existing scoring and shared pool. */
+/* v273: live neon arena home board. Data remains shared with the existing pool/scoring system. */
 (function (root, factory) {
   'use strict';
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./pool-core'));
@@ -24,6 +24,24 @@
         update(doc.getElementById('enlargedChalkboardContent'), view.render(rows, draft));
     };
     doc.addEventListener('click', event => {
+      const jump = event.target.closest('[data-roster-jump]');
+      if (jump) {
+        event.preventDefault();
+        const board = jump.closest('.pool-board') || doc;
+        const target = board.querySelector('.pool-roster[data-owner="' + CSS.escape(jump.dataset.rosterJump) + '"]');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        target?.classList.add('pool-roster-pulse');
+        root.setTimeout(() => target?.classList.remove('pool-roster-pulse'), 750);
+        return;
+      }
+      const shift = event.target.closest('[data-roster-shift]');
+      if (shift) {
+        event.preventDefault();
+        const board = shift.closest('.pool-board') || doc;
+        const track = board.querySelector('.pool-roster-track');
+        if (track) track.scrollBy({ left: Number(shift.dataset.rosterShift || 1) * Math.max(280, track.clientWidth * .82), behavior: 'smooth' });
+        return;
+      }
       const dialog = doc.getElementById('enlargedChalkboard');
       if (!dialog) return;
       if (event.target.closest('[data-enlarge-chalkboard]')) {
@@ -41,11 +59,11 @@
   const fmt = value => C.num(value).toLocaleString('en-CA', { maximumFractionDigits: 2 });
   const skaterColumns = [
     ['goals', 'G', 'Goals'], ['assists', 'A', 'Assists'],
-    ['shortHandedGoals', 'SHG', 'Shorthanded goals'], ['gameWinningGoals', 'GWG', 'Game-winning goals']
+    ['shortHandedGoals', 'SHG', 'Shorthanded Goals'], ['gameWinningGoals', 'GWG', 'Game-Winning Goals']
   ];
   const goalieColumns = [
-    ['goalieWins', 'W', 'Wins'], ['goalieAssists', 'A', 'Goalie assists'],
-    ['goalieGoals', 'G', 'Goalie goals'], ['goalieShutouts', 'SO', 'Shutouts']
+    ['goalieWins', 'W', 'Wins'], ['goalieAssists', 'A', 'Assists'],
+    ['goalieGoals', 'G', 'Goals'], ['goalieShutouts', 'SO', 'Shutouts']
   ];
   function stat(p, key) {
     if (key === 'goalieAssists') return C.num(p.goalieAssists ?? p.assists);
@@ -53,10 +71,17 @@
     if (key === 'shortHandedGoals') return C.num(p.shortHandedGoals ?? p.shGoals);
     return C.num(p[key]);
   }
+  function contribution(value, key) { return C.num(value) * C.num(C.SCORING[key]); }
+  function weighted(value, key) {
+    return '<span class="pool-stat-count">' + fmt(value) + '</span><span class="pool-stat-contribution">(' + fmt(contribution(value, key)) + ')</span>';
+  }
+  function heading(key, short, full) {
+    const weight = C.SCORING[key];
+    return '<th scope="col"><span class="pool-head-long">' + esc(full) + '</span><span class="pool-head-short">' + esc(short) + '</span>' +
+      '<small>(' + fmt(weight) + ' ' + (weight === 1 ? 'FPT' : 'FPTS') + ')</small></th>';
+  }
   function headers(columns, first) {
-    return '<th class="pool-name-cell" scope="col">' + first + '</th>' + columns.map(([key, label, full]) =>
-      '<th scope="col"><abbr title="' + full + '">' + label + '</abbr><small>(' + C.SCORING[key] + ' ' + (C.SCORING[key] === 1 ? 'FPT' : 'FPTS') + ')</small></th>'
-    ).join('');
+    return '<th class="pool-name-cell" scope="col">' + first + '</th>' + columns.map(([key, short, full]) => heading(key, short, full)).join('');
   }
   function summary(row) {
     const skaters = row.players.filter(p => C.bucket(p) !== 'G');
@@ -67,23 +92,25 @@
   function rosterGroup(players, bucket, label, ownerId) {
     const roster = C.sortRoster(players).filter(p => C.bucket(p) === bucket);
     const columns = bucket === 'G' ? goalieColumns : skaterColumns;
-    const table = '<table class="pool-stat-table pool-roster-table"><caption class="pool-visually-hidden">' + esc(label) + ' stats. Weights in headings are fantasy points per stat.</caption>' +
-      '<thead><tr>' + headers(columns, bucket === 'G' ? 'Team' : 'Player Name') + '<th class="pool-fpts-cell" scope="col">FPTS</th></tr></thead><tbody>' +
+    const first = bucket === 'G' ? 'Team Goalies' : 'Player Name';
+    const table = '<table class="pool-stat-table pool-roster-table"><caption class="pool-visually-hidden">' + esc(label) + ' stats. The number in parentheses is the fantasy-point contribution from that category.</caption>' +
+      '<thead><tr>' + headers(columns, first) + '<th class="pool-fpts-cell" scope="col">FPTS <small>TOTAL</small></th></tr></thead><tbody>' +
       (roster.map(p =>
         '<tr class="pool-player" data-player-id="' + esc(p.id) + '">' +
         '<th class="pool-name-cell" scope="row" title="' + esc(p.name) + '">' +
         esc(bucket === 'G' ? String(p.name).replace(/\s+Goalies$/i, '') : p.name) +
-        '</th>' + columns.map(([key]) => '<td>' + fmt(stat(p, key)) + '</td>').join('') +
+        '</th>' + columns.map(([key]) => '<td>' + weighted(stat(p, key), key) + '</td>').join('') +
         '<td class="pool-fpts-cell">' + fmt(C.points(p)) + '</td></tr>'
       ).join('') || '<tr><td colspan="6" class="pool-empty">No selections yet.</td></tr>') + '</tbody></table>';
-    return '<section class="pool-position" data-position="' + bucket + '"><h4>' + label + '</h4>' +
-      '<div class="pool-stat-scroll" data-scroll-key="' + esc(ownerId || '') + '-' + bucket + '" role="region" aria-label="' + esc(label) + ' statistics, scroll for all columns" tabindex="0">' + table + '</div></section>';
+    return '<section class="pool-position" data-position="' + bucket + '"><h4><span>' + esc(label) + '</span><em>' + roster.length + '</em></h4>' +
+      '<div class="pool-stat-scroll" data-scroll-key="' + esc(ownerId || '') + '-' + bucket + '" role="region" aria-label="' + esc(label) + ' statistics" tabindex="0">' + table + '</div></section>';
   }
   function rosterCard(row) {
-    return '<article class="pool-roster" data-owner="' + esc(row.ownerId) + '" aria-label="' + esc(row.ownerName) + '’s roster">' +
-      '<header class="pool-roster-heading"><h3><button type="button" data-roster-owner="' + esc(row.ownerId) +
+    const champion = row.ownerId === 'andrew' ? ' data-champion="true"' : '';
+    return '<article class="pool-roster"' + champion + ' data-owner="' + esc(row.ownerId) + '" aria-label="' + esc(row.ownerName) + '’s roster">' +
+      '<header class="pool-roster-heading"><div><span class="pool-roster-kicker">MANAGER ROSTER</span><h3><button type="button" data-roster-owner="' + esc(row.ownerId) +
       '" data-board-focus="roster-' + esc(row.ownerId) + '" title="Open ' + esc(row.ownerName) + '’s roster room">' + esc(row.ownerName) +
-      ' <span class="pool-room-arrow" aria-hidden="true">↗</span></button></h3><span class="pool-roster-total"><b>' + fmt(row.total) + '</b> FPTS</span></header>' +
+      ' <span class="pool-room-arrow" aria-hidden="true">↗</span></button></h3></div><span class="pool-roster-total"><b>' + fmt(row.total) + '</b><small>FPTS</small></span></header>' +
       rosterGroup(row.players, 'F', 'Forwards', row.ownerId) +
       rosterGroup(row.players, 'D', 'Defence', row.ownerId) +
       rosterGroup(row.players, 'G', 'Team Goalies', row.ownerId) + '</article>';
@@ -91,25 +118,28 @@
   function render(rows, draft) {
     const rosterOrder = ['nick', 'andrew', 'scott', 'chris', 'tyler'];
     const ordered = rosterOrder.map(id => rows.find(row => row.ownerId === id)).filter(Boolean);
-    const table = '<table class="pool-stat-table pool-standings-table"><caption class="pool-visually-hidden">Manager standings. G, A, SHG and GWG are skater totals. Goalie FPTS is added to get the final FPTS.</caption><thead><tr>' +
-      headers(skaterColumns, 'Manager') + '<th scope="col">Goalie<small>FPTS</small></th><th class="pool-fpts-cell" scope="col">FPTS</th></tr></thead><tbody>' +
+    const table = '<table class="pool-stat-table pool-standings-table"><caption class="pool-visually-hidden">Manager standings. Parentheses show the fantasy points earned from each scoring category.</caption><thead><tr>' +
+      '<th class="pool-rank-cell" scope="col">#</th>' + headers(skaterColumns, 'Manager') + '<th scope="col">Goalie<small>FPTS</small></th><th class="pool-fpts-cell" scope="col">Total<small>FPTS</small></th></tr></thead><tbody>' +
       rows.map(row => {
         const totals = summary(row);
-        return '<tr><th class="pool-name-cell" scope="row"><button type="button" data-roster-owner="' + esc(row.ownerId) +
-          '" data-board-focus="standing-' + esc(row.ownerId) + '"><span class="pool-rank">' + fmt(row.rank) + '</span>' + esc(row.ownerName) +
-          '</button></th>' + skaterColumns.map(([key]) => '<td>' + fmt(totals[key]) + '</td>').join('') +
-          '<td>' + fmt(totals.goalieFpts) + '</td><td class="pool-fpts-cell">' + fmt(row.total) + '</td></tr>';
+        return '<tr><td class="pool-rank-cell"><span class="pool-rank-badge">' + fmt(row.rank) + '</span></td><th class="pool-name-cell" scope="row"><button type="button" data-roster-owner="' + esc(row.ownerId) +
+          '" data-board-focus="standing-' + esc(row.ownerId) + '">' + esc(row.ownerName) + '</button></th>' + skaterColumns.map(([key]) => '<td>' + weighted(totals[key], key) + '</td>').join('') +
+          '<td><strong class="pool-goalie-total">' + fmt(totals.goalieFpts) + '</strong></td><td class="pool-fpts-cell">' + fmt(row.total) + '</td></tr>';
       }).join('') + '</tbody></table>';
-    return '<div class="pool-board-layout"><section class="pool-standings" aria-label="League standings">' +
-      '<div class="pool-board-heading"><h2>Standings</h2><span class="pool-season">' + esc(C.seasonLabel(draft.seasonId)) + '</span></div>' +
-      '<p class="pool-swipe-hint">Swipe tables sideways to see every stat.</p>' +
-      '<div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings, scroll for all stat columns" tabindex="0">' + table + '</div>' +
-      '<p class="pool-board-note">G, A, SHG and GWG count skater stats. Goalie FPTS completes the total.</p>' +
-      '<p class="pool-draft-record">' + (draft.locked ?
-        '<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · ' + (draft.picks?.length || 60) + '/60 saved · View record ↗</button>' :
-        (draft.picks?.length || 0) + '/60 picks saved') + '</p></section>' +
-      '<section class="pool-rosters" aria-label="All five manager rosters"><div class="pool-board-heading"><h2>Rosters</h2><span class="pool-roster-count">6 forwards · 4 defence · 2 team goalies</span></div>' +
-      '<div class="pool-roster-grid">' + ordered.map(rosterCard).join('') + '</div></section></div>';
+    const managerNav = ordered.map(row => '<button type="button" data-roster-jump="' + esc(row.ownerId) + '">' + esc(row.ownerName) + '</button>').join('');
+    return '<div class="pool-v273-dashboard">' +
+      '<section class="pool-standings pool-neon-module" aria-label="League standings">' +
+        '<header class="pool-module-title"><div class="pool-title-streak"></div><div><span class="pool-module-kicker">BASEMENT BAR LEAGUE · ' + esc(C.seasonLabel(draft.seasonId)) + '</span><h2>Standings</h2></div><span class="pool-live-chip">LIVE</span></header>' +
+        '<div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings statistics" tabindex="0">' + table + '</div>' +
+        '<div class="pool-module-foot"><span>Numbers in parentheses = fantasy points earned from that stat.</span><span>' + (draft.picks?.length || 0) + '/60 draft picks saved</span></div>' +
+      '</section>' +
+      '<section class="pool-rosters" aria-label="Manager rosters">' +
+        '<header class="pool-rosters-mast"><button type="button" class="pool-roster-arrow" data-roster-shift="-1" aria-label="Previous rosters">‹</button><div><span>LIVE TEAM CARDS</span><h2>Rosters</h2></div><button type="button" class="pool-roster-arrow" data-roster-shift="1" aria-label="Next rosters">›</button></header>' +
+        '<nav class="pool-roster-jumpbar" aria-label="Jump to manager roster">' + managerNav + '</nav>' +
+        '<div class="pool-roster-track" data-scroll-key="roster-track">' + ordered.map(rosterCard).join('') + '</div>' +
+      '</section>' +
+      '<div class="pool-v273-record">' + (draft.locked ? '<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · View complete draft record ↗</button>' : '<span>Draft in progress · live rosters update automatically</span>') + '</div>' +
+    '</div>';
   }
   return { render, rosterCard, rosterGroup, summary, stat };
 });

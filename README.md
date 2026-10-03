@@ -47,3 +47,13 @@ Automated checks cover isolated browser preferences, reload persistence, early s
 The local container could not complete a Chromium screenshot run reliably, so desktop/mobile visual verification should still be completed after deployment using the included checklist. No changes were made to the live pool, scoring, draft record or Redis data during this artwork pass.
 
 Run npm test with modern Node.js. npm run preview:test starts a loopback-only local preview using synthetic NHL data and isolated in-process storage. Do not set POOL_LOCAL_TEST in Vercel.
+
+## v273 — Neon arena home rebuild
+- The existing interactive header (Draft / manager jerseys / Trophy Room) is preserved.
+- Home standings and roster presentation are rebuilt as a real responsive interface rather than reference-image plates.
+- Standings show manager rank, Goals, Assists, SHG, GWG, goalie FPTS and total FPTS. Every skater category displays `stat count (fantasy points contributed)` using the unchanged shared scoring constants.
+- Roster cards show the same weighted skater categories for all forwards and defence, plus team-goalie W/A/G/SO with their goalie scoring weights and total FPTS.
+- Desktop rosters are large two-up cards in a horizontal snap track; mobile shows one large roster card at a time with swipe/arrows and manager jump controls.
+- Current champion Andrew receives a warm red/orange card treatment while the league board remains cyan/blue neon.
+- Theme-picker UI is intentionally hidden on Home for this release so v273 can be refined as one approved theme before additional themes are reintroduced.
+- No changes were made to scoring rules, NHL data collection, Redis/shared draft state, final-draft integrity, roster ownership, or season history.

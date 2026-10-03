@@ -14,3 +14,14 @@ These checks do not change the draft or season.
 10. The draft room should remain closed. Keep your existing completed-draft backup. Do not press End Season or reset anything as part of this appearance check.
 
 For any future draft rehearsal use Admin → Open test room on both devices and verify both clearly say TEST ROOM. Live data never needs to be reset to test appearance.
+
+## v273 neon arena home rebuild
+- [ ] Desktop: existing header image and all Draft / manager / Trophy Room hit targets still work.
+- [ ] Desktop: standings spans the page without crushed columns; each stat reads like `3 (6)` and total FPTS is visually emphasized.
+- [ ] Desktop: roster area shows large side-by-side cards; horizontal scroll/arrows expose all five managers.
+- [ ] Desktop: Nick/Scott/Tyler/Chris use cyan treatment; Andrew uses champion red/orange treatment.
+- [ ] Desktop: each skater roster has Player Name, G, A, SHG, GWG and FPTS; each goalie row has Team Goalies, W, A, G, SO and FPTS.
+- [ ] Mobile: standings scrolls sideways rather than shrinking the stat text into unreadable columns.
+- [ ] Mobile: one roster card occupies the useful width at a time; swipe/arrows and manager chips navigate all five.
+- [ ] Clicking a manager in standings or the roster heading still opens that manager's roster room.
+- [ ] Live NHL status and stat refresh continue to update without changing the visual layout.
