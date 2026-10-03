@@ -1,11 +1,11 @@
-/* v275: live neon arena home board with desktop head-to-head roster comparison. */
+/* v276: neon arena home board with player headshots + live Tonight's Matchup comparison. */
 (function (root, factory) {
   'use strict';
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./pool-core'));
   else {
     const view = factory(root.PoolCore);
     let latest = null, signature = '';
-    const compare = { left: 'nick', right: 'andrew' };
+    const compare = { left: 'nick', right: 'andrew', mode: 'season' };
     const doc = root.document;
 
     function availableIds(rows) {
@@ -19,6 +19,7 @@
       if (!ids.includes(compare.right) || (compare.right === compare.left && ids.length > 1)) {
         compare.right = ids.find(id => id !== compare.left) || ids[0];
       }
+      if (!['season', 'tonight'].includes(compare.mode)) compare.mode = 'season';
     }
     function update(host, html) {
       if (!host) return;
@@ -31,21 +32,29 @@
     function renderLatest() {
       if (!latest) return;
       normalizeCompare(latest.rows);
-      const html = view.render(latest.rows, latest.draft, compare);
+      const html = view.render(latest.rows, latest.draft, compare, latest.live);
       update(doc.getElementById('seasonBoard'), html);
       if (doc.getElementById('enlargedChalkboard')?.open)
         update(doc.getElementById('enlargedChalkboardContent'), html);
     }
-    root.renderSeasonBoard = function (rows, draft) {
-      latest = { rows, draft };
+    root.renderSeasonBoard = function (rows, draft, live) {
+      latest = { rows, draft, live: live || null };
       normalizeCompare(rows);
-      const next = JSON.stringify([rows, draft.seasonId, !!draft.locked, draft.picks?.length]);
+      const next = JSON.stringify([rows, draft.seasonId, !!draft.locked, draft.picks?.length, live?.fetchedAt || '', live?.today?.date || '']);
       if (signature === next) return;
       signature = next;
       renderLatest();
     };
 
     doc.addEventListener('click', event => {
+      const mode = event.target.closest('[data-compare-mode]');
+      if (mode && latest) {
+        event.preventDefault();
+        compare.mode = compare.mode === 'tonight' ? 'season' : 'tonight';
+        renderLatest();
+        return;
+      }
+
       const compareShift = event.target.closest('[data-compare-shift]');
       if (compareShift && latest) {
         event.preventDefault();
@@ -91,7 +100,7 @@
         event.preventDefault();
         if (latest) {
           normalizeCompare(latest.rows);
-          update(doc.getElementById('enlargedChalkboardContent'), view.render(latest.rows, latest.draft, compare));
+          update(doc.getElementById('enlargedChalkboardContent'), view.render(latest.rows, latest.draft, compare, latest.live));
         }
         if (!dialog.open) dialog.showModal();
       }
@@ -135,6 +144,20 @@
     const totals = Object.fromEntries(skaterColumns.map(([key]) => [key, skaters.reduce((sum, p) => sum + stat(p, key), 0)]));
     return { ...totals, goalieFpts: goalies.reduce((sum, p) => sum + C.points(p), 0) };
   }
+  function initials(name) {
+    return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || '?';
+  }
+  function playerImage(p) {
+    const goalie = C.bucket(p) === 'G';
+    const teamLogo = 'https://assets.nhle.com/logos/nhl/svg/' + encodeURIComponent(p.nhlTeam || '') + '_light.svg';
+    const src = goalie ? teamLogo : 'https://assets.nhle.com/mugs/nhl/latest/' + encodeURIComponent(p.id || '') + '.png';
+    return '<span class="pool-player-avatar ' + (goalie ? 'is-team-logo' : '') + '"><span aria-hidden="true">' + esc(initials(goalie ? p.nhlTeam : p.name)) + '</span><img class="pool-player-headshot" src="' + esc(src) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+      (goalie ? '' : '<img class="pool-player-team-badge" src="' + esc(teamLogo) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">') + '</span>';
+  }
+  function identity(p, goalie) {
+    const label = goalie ? String(p.name || '').replace(/\s+Goalies$/i, '') : p.name;
+    return '<span class="pool-player-identity">' + playerImage(p) + '<span class="pool-player-copy"><strong>' + esc(label) + '</strong><small>' + esc(p.nhlTeam || '') + '</small></span></span>';
+  }
   function rosterGroup(players, bucket, label, ownerId, instance) {
     const roster = C.sortRoster(players).filter(p => C.bucket(p) === bucket);
     const columns = bucket === 'G' ? goalieColumns : skaterColumns;
@@ -143,8 +166,7 @@
       '<thead><tr>' + headers(columns, first) + '<th class="pool-fpts-cell" scope="col">FPTS <small>TOTAL</small></th></tr></thead><tbody>' +
       (roster.map(p =>
         '<tr class="pool-player" data-player-id="' + esc(p.id) + '">' +
-        '<th class="pool-name-cell" scope="row" title="' + esc(p.name) + '">' +
-        esc(bucket === 'G' ? String(p.name).replace(/\s+Goalies$/i, '') : p.name) +
+        '<th class="pool-name-cell" scope="row" title="' + esc(p.name) + '">' + identity(p, bucket === 'G') +
         '</th>' + columns.map(([key]) => '<td>' + weighted(stat(p, key), key) + '</td>').join('') +
         '<td class="pool-fpts-cell">' + fmt(C.points(p)) + '</td></tr>'
       ).join('') || '<tr><td colspan="6" class="pool-empty">No selections yet.</td></tr>') + '</tbody></table>';
@@ -163,6 +185,63 @@
       rosterGroup(row.players, 'D', 'Defence', row.ownerId, instance) +
       rosterGroup(row.players, 'G', 'Team Goalies', row.ownerId, instance) + '</article>';
   }
+
+  function gameForTeam(team, live) {
+    return (live?.today?.games || []).find(game => game.away === team || game.home === team) || null;
+  }
+  function gameStatus(game, team) {
+    if (!game) return '';
+    const opponent = game.away === team ? game.home : game.away;
+    const venue = game.away === team ? '@ ' : 'vs ';
+    const state = String(game.state || '').toUpperCase();
+    if (['FINAL', 'OFF'].includes(state)) return venue + opponent + ' · FINAL ' + fmt(game.awayScore) + '–' + fmt(game.homeScore);
+    if (!['FUT', 'PRE'].includes(state)) {
+      const period = game.period ? 'P' + game.period : 'LIVE';
+      const clock = game.timeRemaining ? ' ' + game.timeRemaining : '';
+      return venue + opponent + ' · ' + period + clock + ' · ' + fmt(game.awayScore) + '–' + fmt(game.homeScore);
+    }
+    if (game.startTimeUTC) {
+      const time = new Date(game.startTimeUTC).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+      return venue + opponent + ' · ' + time;
+    }
+    return venue + opponent + ' · Tonight';
+  }
+  function todayLine(p, live) {
+    if (C.bucket(p) === 'G') {
+      const row = live?.today?.teamGoalies?.[p.nhlTeam] || {};
+      return { position: 'TG', goalieWins: stat(row, 'goalieWins'), goalieAssists: stat(row, 'goalieAssists'), goalieGoals: stat(row, 'goalieGoals'), goalieShutouts: stat(row, 'goalieShutouts'), fpts: C.points({ position: 'TG', ...row }) };
+    }
+    const row = live?.today?.players?.[String(p.id)] || {};
+    return { goals: stat(row, 'goals'), assists: stat(row, 'assists'), shortHandedGoals: stat(row, 'shortHandedGoals'), gameWinningGoals: stat(row, 'gameWinningGoals'), fpts: C.points(row) };
+  }
+  function matchupRows(row, live, bucket) {
+    return C.sortRoster(row.players).filter(p => C.bucket(p) === bucket && gameForTeam(p.nhlTeam, live));
+  }
+  function matchupGroup(row, live, bucket, label, instance) {
+    const roster = matchupRows(row, live, bucket);
+    const goalie = bucket === 'G';
+    const columns = goalie ? goalieColumns : skaterColumns;
+    const table = '<table class="pool-stat-table pool-roster-table pool-matchup-table"><caption class="pool-visually-hidden">' + esc(label) + ' playing tonight and live fantasy stats for today.</caption>' +
+      '<thead><tr>' + headers(columns, goalie ? 'Team Goalies' : 'Player Name') + '<th class="pool-fpts-cell" scope="col">TODAY <small>FPTS</small></th></tr></thead><tbody>' +
+      (roster.map(p => {
+        const line = todayLine(p, live), game = gameForTeam(p.nhlTeam, live);
+        return '<tr class="pool-player pool-tonight-player" data-player-id="' + esc(p.id) + '"><th class="pool-name-cell" scope="row">' +
+          '<span class="pool-player-identity">' + playerImage(p) + '<span class="pool-player-copy"><strong>' + esc(goalie ? String(p.name).replace(/\s+Goalies$/i, '') : p.name) + '</strong><small>' + esc(gameStatus(game, p.nhlTeam)) + '</small></span></span>' +
+          '</th>' + columns.map(([key]) => '<td>' + weighted(stat(line, key), key) + '</td>').join('') + '<td class="pool-fpts-cell">' + fmt(line.fpts) + '</td></tr>';
+      }).join('') || '<tr><td colspan="6" class="pool-empty pool-tonight-empty">No drafted ' + esc(label.toLowerCase()) + ' are scheduled tonight.</td></tr>') + '</tbody></table>';
+    return '<section class="pool-position pool-matchup-position" data-position="' + bucket + '"><h4><span>' + esc(label) + ' Tonight</span><em>' + roster.length + '</em></h4>' +
+      '<div class="pool-stat-scroll" data-scroll-key="' + esc((instance || 'tonight') + '-' + row.ownerId + '-' + bucket) + '" role="region" aria-label="' + esc(label) + ' playing tonight" tabindex="0">' + table + '</div></section>';
+  }
+  function matchupCard(row, live, compareRole) {
+    if (!row) return '';
+    const champion = row.ownerId === 'andrew' ? ' data-champion="true"' : '';
+    const compareAttr = compareRole ? ' data-compare-role="' + esc(compareRole) + '"' : '';
+    const all = ['F', 'D', 'G'].flatMap(bucket => matchupRows(row, live, bucket));
+    const todayTotal = all.reduce((sum, p) => sum + todayLine(p, live).fpts, 0);
+    return '<article class="pool-roster pool-matchup-card"' + compareAttr + champion + ' data-owner="' + esc(row.ownerId) + '" aria-label="' + esc(row.ownerName) + ' tonight">' +
+      '<header class="pool-roster-heading"><div><span class="pool-roster-kicker">TONIGHT’S MATCHUP</span><h3>' + esc(row.ownerName) + '</h3><small class="pool-tonight-count">' + all.length + ' drafted selection' + (all.length === 1 ? '' : 's') + ' scheduled</small></div><span class="pool-roster-total"><b>' + fmt(todayTotal) + '</b><small>TODAY FPTS</small></span></header>' +
+      matchupGroup(row, live, 'F', 'Forwards', 'tonight') + matchupGroup(row, live, 'D', 'Defence', 'tonight') + matchupGroup(row, live, 'G', 'Team Goalies', 'tonight') + '</article>';
+  }
   function comparePicker(side, row) {
     if (!row) return '';
     return '<div class="pool-compare-picker" data-compare-picker="' + side + '">' +
@@ -171,10 +250,18 @@
       '<button type="button" data-compare-shift="1" data-compare-side="' + side + '" aria-label="Next manager on ' + side + '">›</button>' +
     '</div>';
   }
-  function render(rows, draft, compareState) {
+  function modeSwitch(mode, live) {
+    const tonight = mode === 'tonight';
+    const games = live?.today?.games?.length || 0;
+    return '<div class="pool-matchup-switch"><button type="button" data-compare-mode aria-pressed="' + (tonight ? 'true' : 'false') + '">' +
+      '<span class="pool-matchup-switch-icon" aria-hidden="true">' + (tonight ? '↩' : '⚡') + '</span><span><strong>' + (tonight ? 'Season Rosters' : 'Tonight’s Matchup') + '</strong><small>' +
+      (tonight ? 'Return to full-season comparison' : (games ? games + ' NHL game' + (games === 1 ? '' : 's') + ' on today’s slate' : 'Live NHL game-day view')) + '</small></span></button></div>';
+  }
+  function render(rows, draft, compareState, live) {
     const rosterOrder = ['nick', 'andrew', 'scott', 'chris', 'tyler'];
     const ordered = rosterOrder.map(id => rows.find(row => row.ownerId === id)).filter(Boolean);
-    const requested = compareState || { left: 'nick', right: 'andrew' };
+    const requested = compareState || { left: 'nick', right: 'andrew', mode: 'season' };
+    const mode = requested.mode === 'tonight' ? 'tonight' : 'season';
     const left = ordered.find(row => row.ownerId === requested.left) || ordered[0];
     const right = ordered.find(row => row.ownerId === requested.right && row.ownerId !== left?.ownerId) || ordered.find(row => row.ownerId !== left?.ownerId) || left;
     const table = '<table class="pool-stat-table pool-standings-table"><caption class="pool-visually-hidden">Manager standings. Parentheses show the fantasy points earned from each scoring category.</caption><thead><tr>' +
@@ -186,8 +273,11 @@
           '<td><strong class="pool-goalie-total">' + fmt(totals.goalieFpts) + '</strong></td><td class="pool-fpts-cell">' + fmt(row.total) + '</td></tr>';
       }).join('') + '</tbody></table>';
     const managerNav = ordered.map(row => '<button type="button" data-roster-jump="' + esc(row.ownerId) + '">' + esc(row.ownerName) + '</button>').join('');
+    const cards = ordered.map(row => mode === 'tonight'
+      ? matchupCard(row, live, row.ownerId === left?.ownerId ? 'left' : (row.ownerId === right?.ownerId ? 'right' : ''))
+      : rosterCard(row, 'roster', row.ownerId === left?.ownerId ? 'left' : (row.ownerId === right?.ownerId ? 'right' : ''))).join('');
 
-    return '<div class="pool-v273-dashboard pool-v275-dashboard">' +
+    return '<div class="pool-v273-dashboard pool-v275-dashboard pool-v276-dashboard" data-view-mode="' + mode + '">' +
       '<section class="pool-standings pool-neon-module" aria-label="League standings">' +
         '<header class="pool-module-title"><div class="pool-title-streak"></div><div><span class="pool-module-kicker">BASEMENT BAR LEAGUE · ' + esc(C.seasonLabel(draft.seasonId)) + '</span><h2>Standings</h2></div><span class="pool-live-chip">LIVE</span></header>' +
         '<div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings statistics" tabindex="0">' + table + '</div>' +
@@ -195,17 +285,18 @@
       '</section>' +
       '<section class="pool-rosters" aria-label="Manager rosters">' +
         '<div class="pool-rosters-desktop-controls">' +
-          '<header class="pool-rosters-mast pool-compare-mast"><div><span>HEAD-TO-HEAD TEAM VIEW</span><h2>Roster Comparison</h2></div></header>' +
+          '<header class="pool-rosters-mast pool-compare-mast"><div><span>' + (mode === 'tonight' ? 'LIVE GAME-DAY VIEW' : 'HEAD-TO-HEAD TEAM VIEW') + '</span><h2>' + (mode === 'tonight' ? 'Tonight’s Matchup' : 'Roster Comparison') + '</h2></div></header>' +
+          modeSwitch(mode, live) +
           '<div class="pool-compare-toolbar">' + comparePicker('left', left) + '<span class="pool-versus" aria-hidden="true">VS</span>' + comparePicker('right', right) + '</div>' +
         '</div>' +
         '<div class="pool-rosters-mobile-controls">' +
-          '<header class="pool-rosters-mast"><button type="button" class="pool-roster-arrow" data-roster-shift="-1" aria-label="Previous roster">‹</button><div><span>LIVE TEAM CARDS</span><h2>Rosters</h2></div><button type="button" class="pool-roster-arrow" data-roster-shift="1" aria-label="Next roster">›</button></header>' +
-          '<nav class="pool-roster-jumpbar" aria-label="Jump to manager roster">' + managerNav + '</nav>' +
+          '<header class="pool-rosters-mast"><button type="button" class="pool-roster-arrow" data-roster-shift="-1" aria-label="Previous roster">‹</button><div><span>' + (mode === 'tonight' ? 'TONIGHT’S ACTIVE PLAYERS' : 'LIVE TEAM CARDS') + '</span><h2>' + (mode === 'tonight' ? 'Tonight' : 'Rosters') + '</h2></div><button type="button" class="pool-roster-arrow" data-roster-shift="1" aria-label="Next roster">›</button></header>' +
+          modeSwitch(mode, live) + '<nav class="pool-roster-jumpbar" aria-label="Jump to manager roster">' + managerNav + '</nav>' +
         '</div>' +
-        '<div class="pool-roster-track pool-v275-roster-track" data-scroll-key="roster-track">' + ordered.map(row => rosterCard(row, 'roster', row.ownerId === left?.ownerId ? 'left' : (row.ownerId === right?.ownerId ? 'right' : ''))).join('') + '</div>' +
+        '<div class="pool-roster-track pool-v275-roster-track pool-v276-roster-track" data-scroll-key="roster-track">' + cards + '</div>' +
       '</section>' +
       '<div class="pool-v273-record">' + (draft.locked ? '<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · View complete draft record ↗</button>' : '<span>Draft in progress · live rosters update automatically</span>') + '</div>' +
     '</div>';
   }
-  return { render, rosterCard, rosterGroup, summary, stat };
+  return { render, rosterCard, rosterGroup, matchupCard, matchupGroup, summary, stat, gameForTeam, todayLine };
 });

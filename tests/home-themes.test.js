@@ -82,3 +82,23 @@ test('standings separate goalie stats so displayed stat contributions match the 
   assert.ok(html.includes('New York Islanders Goalies'));
   assert.ok(!html.includes('SAMPLE DATA'));
 });
+
+test('roster cards include NHL player art and Tonight matchup renders only scheduled selections', () => {
+  const row = {
+    ownerId:'nick', ownerName:'Nick', rank:1, total:2,
+    players:[
+      {id:'8479999',name:'Test Maple Leaf',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0},
+      {id:'TG-TOR',name:'Toronto Maple Leafs Goalies',position:'TG',nhlTeam:'TOR',goalieWins:0,goalieAssists:0,goalieGoals:0,goalieShutouts:0}
+    ]
+  };
+  const live={fetchedAt:'2026-10-02T23:00:00Z',today:{date:'2026-10-02',games:[{id:1,state:'LIVE',away:'MTL',home:'TOR',awayScore:0,homeScore:1,period:2,timeRemaining:'10:00'}],players:{'8479999':{goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}},teamGoalies:{TOR:{goalieWins:0,goalieAssists:0,goalieGoals:0,goalieShutouts:0}}}};
+  const seasonHtml=Board.render([row],{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'nick',mode:'season'},live);
+  assert.ok(seasonHtml.includes('assets.nhle.com/mugs/nhl/latest/8479999.png'));
+  assert.ok(seasonHtml.includes('assets.nhle.com/logos/nhl/svg/TOR_light.svg'));
+  assert.ok(seasonHtml.includes('Tonight’s Matchup'));
+  const tonightHtml=Board.render([row],{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'nick',mode:'tonight'},live);
+  assert.ok(tonightHtml.includes('Test Maple Leaf'));
+  assert.ok(tonightHtml.includes('vs MTL'));
+  assert.ok(tonightHtml.includes('TODAY'));
+  assert.equal(Board.todayLine(row.players[0],live).fpts,2);
+});

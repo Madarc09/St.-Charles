@@ -65,6 +65,9 @@ test('live GameCenter overlay shows an in-progress goal before season summary ca
  const helper=data.players.find(p=>p.id===String(fixture.skaters[1].playerId));
  assert.equal(data.liveOverlay,true);
  assert.equal(data.liveGoalEvents,1); // score + GameCenter report the same event; count it once.
+ assert.equal(data.today.games.length,1);
+ assert.equal(data.today.players[String(fixture.skaters[0].playerId)].goals,1);
+ assert.equal(data.today.players[String(fixture.skaters[1].playerId)].assists,1);
  assert.equal(scorer.goals,fixture.skaters[0].goals+1);
  assert.equal(helper.assists,fixture.skaters[1].assists+1);
  assert.equal(scorer.fpts,C.points(scorer));

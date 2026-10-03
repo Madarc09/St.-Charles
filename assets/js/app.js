@@ -90,7 +90,7 @@
   const rows=C.standings(d,statsSeason===d.seasonId?liveStats?.players:[]);
   window.__lastSeasonApiDiagnostics={rows,season:d.seasonId,usedApi:!!liveStats,source:'shared-room-v269'};
   document.dispatchEvent(new CustomEvent('pool:live-stats-updated',{detail:window.__lastSeasonApiDiagnostics}));
-  window.renderSeasonBoard?.(rows,d);
+  window.renderSeasonBoard?.(rows,d,liveStats);
   let status=$('homeStatsStatus');if(!status){status=document.createElement('div');status.id='homeStatsStatus';$('dashboard').appendChild(status);}
   status.textContent=`${testMode?'TEST ROOM · ':''}${C.seasonLabel(d.seasonId)}${liveStats?' · '+(liveStats.stale?'Saved update · ':'')+'LIVE NHL'+(liveStats.liveOverlay?' + LIVE GAME':'')+(Number.isFinite(Number(liveStats.liveGoalEvents))?' · '+Number(liveStats.liveGoalEvents)+' live goal'+(Number(liveStats.liveGoalEvents)===1?'':'s'):'')+' · updated '+new Date(liveStats.fetchedAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit', second:'2-digit'})+' · checks about every 15 sec':' · Connecting to live NHL stats…'}`;
  }
