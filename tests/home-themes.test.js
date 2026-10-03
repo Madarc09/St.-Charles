@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const Themes = require('../assets/js/home-themes');
 const Board = require('../assets/js/home-board');
 const C = require('../assets/js/pool-core');
@@ -189,4 +191,25 @@ test('v282 player card includes NHL bio details and current drafted-player FPTS 
     fantasyDraft:{teamName:'Glizzy Disposal',round:1,pick:2},fantasyRank:{rank:4,fieldSize:50,fpts:12,scope:'skaters'},last5:[],last10:{},last25:{}
   });
   for (const text of ['JERSEY','#88','HEIGHT','6&#39; 0&quot;','WEIGHT','204 lbs','SHOOTS','Right','Calgary, Canada','May 1, 1996','AGE','R · Toronto Maple Leafs · RANKED #4 IN FANTASY PTS']) assert.ok(card.includes(text), text);
+});
+
+
+test('v283 binds both desktop and mobile roster-mode buttons', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../assets/js/home-board-v283.js'), 'utf8');
+  assert.ok(source.includes("host.querySelectorAll('[data-v280-roster-toggle]').forEach"));
+  assert.ok(!source.includes("const toggle = host.querySelector('[data-v280-roster-toggle]')"));
+  const rows = [
+    { ownerId:'nick', ownerName:'Nick', rank:1, total:0, players:[] },
+    { ownerId:'andrew', ownerName:'Andrew', rank:2, total:0, players:[] }
+  ];
+  const html = Board.renderRosters(rows,{seasonId:'20262027',picks:[]},{left:'nick',right:'andrew',mode:'season'},{today:{games:[]}});
+  assert.equal((html.match(/data-v280-roster-toggle/g)||[]).length, 2, 'desktop and mobile each render their own Tonight button');
+});
+
+test('v283 browser-side fantasy rank uses PoolCore instead of undefined factory C', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../assets/js/home-board-v283.js'), 'utf8');
+  const browserController = source.split("})(typeof window !== 'undefined' ? window : this, function (C) {")[0];
+  assert.ok(browserController.includes('const core = root.PoolCore;'));
+  assert.ok(browserController.includes('core?.points?.(player)'));
+  assert.ok(!/\bC\.points\s*\(/.test(browserController));
 });
