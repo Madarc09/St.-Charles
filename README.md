@@ -94,3 +94,17 @@ Run npm test with modern Node.js. npm run preview:test starts a loopback-only lo
 - Position/team/fantasy rank moved directly beneath the photo/bio panel.
 - Current-season totals added above the Last 5 game log.
 - Existing v283 mobile Tonight matchup and Home control fixes remain unchanged.
+
+
+
+## v290 — Mobile weekly/monthly roster rankings
+- Brings the v289 Roster Comparison masthead rankings to phones.
+- Mobile now shows Current View plus compact This Week and This Month manager rankings above the roster carousel.
+- Existing mobile matchup toggle, manager navigation, swipe behavior and roster cards are unchanged.
+
+## v289 — Roster comparison masthead + week/month rankings
+- Desktop Roster Comparison header now mirrors the Standings masthead: title on the left, current view centered below it, and its matchup/season toggle in the same left block.
+- The middle header panel ranks all five managers by fantasy points earned during the current Monday–Sunday week.
+- The right header panel ranks all five managers by fantasy points earned during the current calendar month.
+- Weekly/monthly totals use NHL game-level stats for completed prior days plus the existing live GameCenter totals for the current day, so in-progress scoring is included without double-counting.
+- Mobile Roster Comparison layout is intentionally unchanged.

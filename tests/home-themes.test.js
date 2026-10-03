@@ -285,3 +285,89 @@ test('v287 standings masthead makes current mode explicit and ranks drafted skat
   assert.ok(today.includes('TODAY’S SCORES'));
   assert.ok(today.includes('View Season Standings'));
 });
+
+test('v288 roster comparison makes season vs dated daily matchup view explicit', () => {
+  const V288 = require('../assets/js/home-board-v288');
+  const rows = [
+    {ownerId:'nick',ownerName:'Nick',rank:1,total:10,players:[]},
+    {ownerId:'andrew',ownerName:'Andrew',rank:2,total:8,players:[]}
+  ];
+  const draft={seasonId:'20262027',picks:[],locked:false};
+  const live={today:{date:'2026-10-03',players:{},teamGoalies:{},games:[{away:'TOR',home:'MTL'}]}};
+  assert.equal(V288.matchupDateLabel(live,false),'Saturday October 3rd');
+  assert.equal(V288.rosterCurrentView('season',live),'SEASON TOTALS');
+  assert.equal(V288.rosterCurrentView('tonight',live),'SATURDAY OCTOBER 3RD MATCHUPS');
+  const season=V288.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'season'},live);
+  assert.ok(season.includes('Current View'));
+  assert.ok(season.includes('SEASON TOTALS'));
+  assert.ok(season.includes('View Saturday October 3rd Matchups'));
+  const tonight=V288.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'tonight'},live);
+  assert.ok(tonight.includes('SATURDAY OCTOBER 3RD MATCHUPS'));
+  assert.ok(tonight.includes('View Season Totals'));
+});
+
+test('v289 roster masthead ranks fantasy teams for this week and this month without changing mobile controls', () => {
+  const V289 = require('../assets/js/home-board-v289');
+  const rows = [
+    {ownerId:'nick',ownerName:'Nick',teamName:'Glizzy Disposal',rank:1,total:10,players:[
+      {id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR'},
+      {id:'TG-TOR',name:'Toronto Maple Leafs Goalies',position:'TG',nhlTeam:'TOR'}
+    ]},
+    {ownerId:'andrew',ownerName:'Andrew',teamName:'Between The Pipes',rank:2,total:8,players:[
+      {id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL'}
+    ]}
+  ];
+  const live={
+    today:{date:'2026-10-03',games:[],players:{},teamGoalies:{}},
+    periods:{
+      week:{players:{'1':{fpts:6},'2':{fpts:8}},teamGoalies:{TOR:{fpts:4}}},
+      month:{players:{'1':{fpts:12},'2':{fpts:9}},teamGoalies:{TOR:{fpts:3}}}
+    }
+  };
+  const week=V289.periodTeamRankings(rows,live.periods.week);
+  assert.equal(week[0].ownerId,'nick');
+  assert.equal(week[0]._periodFpts,10);
+  const month=V289.periodTeamRankings(rows,live.periods.month);
+  assert.equal(month[0].ownerId,'nick');
+  assert.equal(month[0]._periodFpts,15);
+  const html=V289.renderRosters(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season'},live);
+  assert.ok(html.includes('pool-v289-roster-mast'));
+  assert.ok(html.includes('This Week'));
+  assert.ok(html.includes('This Month'));
+  assert.ok(html.includes('Glizzy Disposal'));
+  assert.ok(html.includes('Between The Pipes'));
+  assert.equal((html.match(/data-v280-roster-toggle/g)||[]).length,2,'desktop and mobile retain separate roster-mode buttons');
+});
+
+test('v289 NHL period bounds use Monday-start week and calendar month', () => {
+  const NHL = require('../lib/nhl-data');
+  assert.deepEqual(NHL.periodDateBounds('2026-10-03'), {
+    date:'2026-10-03', weekStart:'2026-09-28', monthStart:'2026-10-01', pastEnd:'2026-10-02'
+  });
+});
+
+
+test('v290 mobile roster header includes this week and this month rankings', () => {
+  const V290 = require('../assets/js/home-board-v290');
+  const rows = [
+    {ownerId:'nick',ownerName:'Nick',teamName:'Glizzy Disposal',rank:1,total:10,players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR'}]},
+    {ownerId:'andrew',ownerName:'Andrew',teamName:'Between The Pipes',rank:2,total:8,players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL'}]}
+  ];
+  const live={
+    today:{date:'2026-10-03',games:[],players:{},teamGoalies:{}},
+    periods:{
+      week:{players:{'1':{fpts:6},'2':{fpts:8}},teamGoalies:{}},
+      month:{players:{'1':{fpts:12},'2':{fpts:9}},teamGoalies:{}}
+    }
+  };
+  const html=V290.renderRosters(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season'},live);
+  assert.ok(html.includes('pool-v290-mobile-roster-mast'));
+  const mobileStart=html.indexOf('pool-v290-mobile-roster-mast');
+  const mobileEnd=html.indexOf('</header>',mobileStart);
+  const mobile=html.slice(mobileStart,mobileEnd);
+  assert.ok(mobile.includes('This Week'));
+  assert.ok(mobile.includes('This Month'));
+  assert.ok(mobile.includes('Glizzy Disposal'));
+  assert.ok(mobile.includes('Between The Pipes'));
+  assert.equal((html.match(/data-v280-roster-toggle/g)||[]).length,2,'desktop and mobile each retain one roster-mode button');
+});
