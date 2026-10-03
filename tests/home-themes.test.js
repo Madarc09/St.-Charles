@@ -115,7 +115,7 @@ test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games c
   assert.equal(today[0].ownerId,'andrew');
   assert.equal(today[0]._today.total,3);
   const html=Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season',standingsMode:'today'},live);
-  assert.ok(html.includes('Season Totals'));
+  assert.ok(html.includes('View Season Standings'));
   assert.ok(html.includes('<h2>Standings</h2>'));
   const managerAt=html.indexOf('>Manager</th>');
   const fptsAt=html.indexOf('pool-fpts-first',managerAt);
@@ -153,7 +153,7 @@ test('v281 card restores colour-era structure, draft history copy, and five fill
   assert.ok(card.includes('pool-opc-top-name'));
   assert.ok(card.includes('Test Player'));
   assert.ok(card.includes('Drafted in the NHL by the Toronto Maple Leafs — Round 1, Pick 7.'));
-  assert.ok(card.includes('Fantasy drafted by Glizzy Disposal — Round 2, Pick 3.'));
+  assert.ok(card.includes('Fantasy drafted by Nick — Round 2, Pick 3.'));
   assert.equal((card.match(/TO BE PLAYED/g)||[]).length,4);
   assert.ok(card.includes('pool-opc-position'));
 });
@@ -172,8 +172,8 @@ test('v280 roster and standings renderers are independent by construction', () =
   const rostersSeason=Board.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'season'},live);
   const rostersTonight=Board.renderRosters(rows,draft,{left:'nick',right:'scott',mode:'tonight'},live);
   assert.ok(standingsSeason.includes('<h2>Standings</h2>'));
-  assert.ok(standingsSeason.includes('Today’s Totals'));
-  assert.ok(standingsToday.includes('Season Totals'));
+  assert.ok(standingsSeason.includes('View Today’s Totals'));
+  assert.ok(standingsToday.includes('View Season Standings'));
   assert.ok(rostersSeason.includes('Tonight’s Matchup'));
   assert.ok(rostersSeason.includes('>Andrew</strong>'));
   assert.ok(rostersTonight.includes('Season Totals'));
@@ -236,4 +236,52 @@ test('v284 card integrates crest with bio, places rank before draft copy, and ad
   const lastFiveAt=card.indexOf('LAST 5 GAMES');
   assert.ok(heroEnd>=0 && positionAt>heroEnd && draftAt>positionAt && totalsAt>draftAt && lastFiveAt>totalsAt);
   assert.equal((card.match(/TO BE PLAYED/g)||[]).length,5);
+});
+
+
+test('v286 fantasy draft copy resolves fantasy team names back to manager names and bio crest is oversized/lower', () => {
+  const V286 = require('../assets/js/home-board-v286');
+  const card = V286.cardMarkup({
+    type:'skater', season:'20262027',
+    player:{id:'1',name:'Test Player',team:'SJS',position:'C',headshot:'x',teamLogo:'y',bio:{},nhlDraft:{undrafted:true}},
+    fantasyDraft:{teamName:'Glizzy Disposal',round:3,pick:4},
+    fantasyRank:{rank:1}, seasonTotals:{}, last5:[], last10:{}, last25:{}
+  });
+  assert.ok(card.includes('Fantasy drafted by Nick — Round 3, Pick 4.'));
+  assert.ok(!card.includes('Fantasy drafted by Glizzy Disposal'));
+  const css = fs.readFileSync(path.join(__dirname, '../assets/css/home-v286.css'), 'utf8');
+  assert.ok(css.includes('width:min(92%,178px)!important'));
+  assert.ok(css.includes('height:94px!important'));
+  assert.ok(css.includes('top:14px!important'));
+  assert.ok(css.includes('padding:107px 9px 7px!important'));
+});
+
+
+test('v287 standings masthead makes current mode explicit and ranks drafted skaters/goalie tandems', () => {
+  const V287 = require('../assets/js/home-board-v287');
+  const rows = [
+    {ownerId:'nick',ownerName:'Nick',rank:1,total:30,players:[
+      {id:'1',name:'Alpha Skater',position:'C',nhlTeam:'TOR',goals:5,assists:2,shortHandedGoals:0,gameWinningGoals:0},
+      {id:'TG-TOR',name:'Toronto Maple Leafs Goalies',position:'TG',nhlTeam:'TOR',goalieWins:4,goalieAssists:0,goalieGoals:0,goalieShutouts:0}
+    ]},
+    {ownerId:'scott',ownerName:'Scott',rank:2,total:20,players:[
+      {id:'2',name:'Beta Skater',position:'C',nhlTeam:'COL',goals:2,assists:1,shortHandedGoals:0,gameWinningGoals:0},
+      {id:'TG-COL',name:'Colorado Avalanche Goalies',position:'TG',nhlTeam:'COL',goalieWins:2,goalieAssists:0,goalieGoals:0,goalieShutouts:0}
+    ]}
+  ];
+  const draft={seasonId:'20262027',picks:[],locked:false};
+  const season=V287.renderStandings(rows,draft,'season',{today:{players:{},teamGoalies:{},games:[]}});
+  assert.ok(season.includes('CURRENT VIEW') || season.includes('Current View'));
+  assert.ok(season.includes('SEASON STANDINGS'));
+  assert.ok(season.includes('View Today’s Totals'));
+  assert.ok(season.includes('Top 5 Skaters'));
+  assert.ok(season.includes('Top 5 Goalie Tandems'));
+  assert.ok(season.includes('Drafted by Nick'));
+  assert.ok(season.includes('Toronto Maple Leafs'));
+  const leaders=V287.topFantasyEntries(rows,false);
+  assert.equal(leaders[0].player.name,'Alpha Skater');
+  assert.equal(leaders[0].ownerName,'Nick');
+  const today=V287.renderStandings(rows,draft,'today',{today:{players:{},teamGoalies:{},games:[]}});
+  assert.ok(today.includes('TODAY’S SCORES'));
+  assert.ok(today.includes('View Season Standings'));
 });

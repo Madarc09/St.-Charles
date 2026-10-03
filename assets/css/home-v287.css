@@ -1,0 +1,184 @@
+/* v287 — standings masthead: explicit current view + compact season leaders. */
+body.v180-home-active #dashboard .pool-v280-standings .pool-v287-standings-header{
+  display:grid!important;
+  grid-template-columns:minmax(230px,.86fr) minmax(310px,1.1fr) minmax(310px,1.1fr)!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  gap:14px!important;
+  padding:14px 16px!important;
+  text-align:left!important;
+  background:linear-gradient(180deg,rgba(4,23,38,.98),rgba(4,16,27,.94))!important;
+  border-bottom:1px solid rgba(68,222,255,.38)!important;
+}
+body.v180-home-active #dashboard .pool-v287-standings-heading{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  padding:4px 12px 4px 2px!important;
+  border-right:1px solid rgba(75,203,232,.23)!important;
+}
+body.v180-home-active #dashboard .pool-v280-standings .pool-v287-standings-heading h2{
+  margin:0 0 10px!important;
+  text-align:left!important;
+  color:#f2fcff!important;
+  font:900 clamp(34px,3.2vw,50px)/.92 Impact,'Arial Narrow',sans-serif!important;
+  letter-spacing:.065em!important;
+  text-transform:uppercase!important;
+  text-shadow:0 0 14px rgba(70,225,255,.45)!important;
+}
+body.v180-home-active #dashboard .pool-v287-current-view{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:3px!important;
+  margin-bottom:9px!important;
+}
+body.v180-home-active #dashboard .pool-v287-current-view span{
+  color:#6fabc2!important;
+  font:900 8px/1 system-ui,sans-serif!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+}
+body.v180-home-active #dashboard .pool-v287-current-view strong{
+  color:#ffd25d!important;
+  font:900 15px/1.1 system-ui,sans-serif!important;
+  letter-spacing:.055em!important;
+  text-transform:uppercase!important;
+}
+body.v180-home-active #dashboard .pool-v287-standings-heading .pool-v280-standings-controls{
+  width:auto!important;
+  justify-content:flex-start!important;
+}
+body.v180-home-active #dashboard .pool-v287-standings-heading .pool-v280-standings-toggle{
+  min-height:38px!important;
+  padding:7px 13px!important;
+  font-size:10px!important;
+  letter-spacing:.04em!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  padding:3px 2px!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5.is-goalies{
+  padding-left:14px!important;
+  border-left:1px solid rgba(75,203,232,.23)!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5-title{
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  margin:0 0 6px!important;
+  padding:0 4px 5px!important;
+  border-bottom:1px solid rgba(77,213,242,.35)!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5-title h3{
+  margin:0!important;
+  color:#9beeff!important;
+  font:900 12px/1 system-ui,sans-serif!important;
+  letter-spacing:.07em!important;
+  text-transform:uppercase!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5.is-goalies .pool-v287-top5-title h3{color:#ffd25d!important}
+body.v180-home-active #dashboard .pool-v287-top5-title span{
+  flex:0 0 auto!important;
+  color:#638fa2!important;
+  font:800 7px/1 system-ui,sans-serif!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 ol{
+  list-style:none!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  gap:2px!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:19px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-height:24px!important;
+  padding:2px 4px!important;
+  border-bottom:1px solid rgba(114,189,215,.10)!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li>b{
+  color:#5a9fb8!important;
+  font:900 9px/1 system-ui,sans-serif!important;
+  text-align:center!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li>span{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:1px!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li strong{
+  display:block!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#eef9fc!important;
+  font:850 10px/1.1 system-ui,sans-serif!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li span small{
+  color:#759caf!important;
+  font:700 7.5px/1.1 system-ui,sans-serif!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li>em{
+  display:flex!important;
+  align-items:baseline!important;
+  gap:3px!important;
+  color:#ffd25d!important;
+  font:900 11px/1 system-ui,sans-serif!important;
+  font-style:normal!important;
+  white-space:nowrap!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li>em small{
+  color:#7da1b0!important;
+  font:800 6px/1 system-ui,sans-serif!important;
+}
+body.v180-home-active #dashboard .pool-v287-top5 li.is-empty{opacity:.42!important}
+
+@media (max-width:1000px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v287-standings-header{
+    grid-template-columns:minmax(210px,.8fr) minmax(0,1fr) minmax(0,1fr)!important;
+    gap:9px!important;padding:12px 10px!important;
+  }
+  body.v180-home-active #dashboard .pool-v287-standings-heading{padding-right:8px!important}
+  body.v180-home-active #dashboard .pool-v287-top5.is-goalies{padding-left:9px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li{grid-template-columns:16px minmax(0,1fr) auto!important;gap:4px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li strong{font-size:8.5px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li span small{font-size:6.5px!important}
+}
+@media (max-width:700px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v287-standings-header{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+    padding:11px 9px!important;
+  }
+  body.v180-home-active #dashboard .pool-v287-standings-heading{
+    grid-column:1/-1!important;
+    border-right:0!important;
+    border-bottom:1px solid rgba(75,203,232,.23)!important;
+    padding:0 0 10px!important;
+  }
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v287-standings-heading h2{font-size:34px!important;margin-bottom:7px!important}
+  body.v180-home-active #dashboard .pool-v287-current-view strong{font-size:13px!important}
+  body.v180-home-active #dashboard .pool-v287-top5{padding:0!important;justify-content:start!important}
+  body.v180-home-active #dashboard .pool-v287-top5.is-goalies{padding-left:8px!important;border-left:1px solid rgba(75,203,232,.23)!important}
+  body.v180-home-active #dashboard .pool-v287-top5-title{align-items:flex-start!important;flex-direction:column!important;gap:2px!important}
+  body.v180-home-active #dashboard .pool-v287-top5-title h3{font-size:9px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li{grid-template-columns:14px minmax(0,1fr)!important;min-height:26px!important;padding:2px 1px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li>em{grid-column:2!important;font-size:9px!important;margin-top:-1px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li strong{font-size:8px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li span small{font-size:6px!important}
+}

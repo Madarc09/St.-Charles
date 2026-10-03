@@ -1,0 +1,7 @@
+V287 standings masthead update
+- Standings title left-aligned
+- Explicit CURRENT VIEW label: SEASON STANDINGS / TODAY'S SCORES
+- Toggle label describes the destination: View Today's Totals / View Season Standings
+- Top 5 drafted skaters by current season FPTS with manager
+- Top 5 drafted team-goalie tandems by current season FPTS with manager
+- Standings table and roster comparison logic otherwise unchanged
