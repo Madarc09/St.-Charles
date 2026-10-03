@@ -371,3 +371,39 @@ test('v290 mobile roster header includes this week and this month rankings', () 
   assert.ok(mobile.includes('Between The Pipes'));
   assert.equal((html.match(/data-v280-roster-toggle/g)||[]).length,2,'desktop and mobile each retain one roster-mode button');
 });
+
+test('v291 roster comparison supports independent Season Yesterday Today Tomorrow views', () => {
+  const V291 = require('../assets/js/home-board-v291');
+  const rows=[
+    {ownerId:'nick',ownerName:'Nick',teamName:'Glizzy Disposal',rank:1,total:2,players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}]},
+    {ownerId:'andrew',ownerName:'Andrew',teamName:'Between The Pipes',rank:2,total:1,players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL',goals:0,assists:1,shortHandedGoals:0,gameWinningGoals:0}]}
+  ];
+  const live={
+    today:{date:'2026-10-03',games:[{id:2,state:'LIVE',away:'MTL',home:'TOR',awayScore:0,homeScore:1}],players:{'1':{goals:1}},teamGoalies:{}},
+    matchups:{
+      yesterday:{date:'2026-10-02',games:[{id:1,state:'FINAL',away:'TOR',home:'OTT',awayScore:2,homeScore:1}],players:{'1':{goals:1,assists:1}},teamGoalies:{}},
+      today:{date:'2026-10-03',games:[{id:2,state:'LIVE',away:'MTL',home:'TOR',awayScore:0,homeScore:1}],players:{'1':{goals:1}},teamGoalies:{}},
+      tomorrow:{date:'2026-10-04',games:[{id:3,state:'FUT',away:'TOR',home:'BOS',awayScore:0,homeScore:0}],players:{},teamGoalies:{}}
+    },
+    periods:{week:{players:{},teamGoalies:{}},month:{players:{},teamGoalies:{}}}
+  };
+  const draft={seasonId:'20262027',picks:[]};
+  const season=V291.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'season'},live);
+  for(const mode of ['season','yesterday','today','tomorrow']) assert.ok(season.includes('data-v291-roster-mode="'+mode+'"'));
+  assert.ok(!season.includes('Glizzy Disposal'));
+  assert.ok(!season.includes('Between The Pipes'));
+  const yesterday=V291.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'yesterday'},live);
+  assert.ok(yesterday.includes('FRIDAY OCTOBER 2ND MATCHUPS'));
+  assert.equal(V291.dailyLine(rows[0].players[0],live,'yesterday').fpts,3);
+  const tomorrow=V291.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'tomorrow'},live);
+  assert.ok(tomorrow.includes('SUNDAY OCTOBER 4TH MATCHUPS'));
+  assert.ok(tomorrow.includes('@ BOS'));
+  assert.equal(V291.dailyLine(rows[0].players[0],live,'tomorrow').fpts,0);
+});
+
+test('v291 adjacent matchup date helper crosses day boundaries safely', () => {
+  const NHL = require('../lib/nhl-data');
+  assert.equal(NHL.shiftIsoDate('2026-10-03',-1),'2026-10-02');
+  assert.equal(NHL.shiftIsoDate('2026-10-03',1),'2026-10-04');
+  assert.equal(NHL.shiftIsoDate('2026-03-01',-1),'2026-02-28');
+});
