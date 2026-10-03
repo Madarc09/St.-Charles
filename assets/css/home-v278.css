@@ -1,0 +1,255 @@
+/* v278 — independent roster/standings live controls + repaired desktop compare controls
+   + responsive black/white 1996-style player cards. */
+
+/* Make it unmistakable that Tonight's Matchup belongs to the roster comparison only. */
+body.v180-home-active #dashboard .pool-roster-control-label{
+  margin:0 auto 4px!important;
+  color:#639aae!important;
+  text-align:center!important;
+  font:800 7px/1.2 var(--v273-font)!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+body.v180-home-active #dashboard .pool-roster-mode-switch{position:relative!important;z-index:3!important}
+body.v180-home-active #dashboard .pool-standings-actions{position:relative!important;z-index:3!important}
+
+/* The desktop manager name is a real select now, so arrows AND direct selection work. */
+@media (min-width:701px){
+  body.v180-home-active #dashboard .pool-compare-picker>div{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:center!important;
+    min-width:0!important;
+    padding:0 7px!important;
+  }
+  body.v180-home-active #dashboard .pool-compare-select{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0 24px 0 4px!important;
+    border:0!important;
+    outline:0!important;
+    background-color:transparent!important;
+    color:#f3fbff!important;
+    font:900 clamp(24px,2vw,33px)/1 Impact,'Arial Narrow',sans-serif!important;
+    letter-spacing:.045em!important;
+    text-align:center!important;
+    text-align-last:center!important;
+    text-transform:uppercase!important;
+    cursor:pointer!important;
+    appearance:auto!important;
+    box-shadow:none!important;
+  }
+  body.v180-home-active #dashboard .pool-compare-select option{
+    background:#071a28!important;
+    color:#fff!important;
+    font-family:Arial,sans-serif!important;
+    font-size:16px!important;
+  }
+  body.v180-home-active #dashboard .pool-compare-picker button{position:relative!important;z-index:4!important;pointer-events:auto!important}
+}
+
+/* --- Player card modal ---
+   The supplied reference is essentially white card stock, hard black geometry,
+   grayscale player art and a dense black stat sheet. Keep the phone proportions,
+   but prevent the desktop card from ever falling below the viewport. */
+.pool-player-card-dialog{
+  width:min(94vw,680px)!important;
+  max-width:680px!important;
+  max-height:calc(100dvh - 18px)!important;
+  margin:auto!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:#050505!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+.pool-player-card-dialog::backdrop{background:rgba(0,0,0,.86)!important;backdrop-filter:blur(6px)!important}
+.pool-card-dialog-shell{position:relative!important;padding:10px!important;min-height:0!important}
+.pool-card-close{
+  position:sticky!important;
+  float:right!important;
+  top:2px!important;
+  right:2px!important;
+  z-index:60!important;
+  width:38px!important;height:38px!important;
+  margin:0 0 -38px auto!important;
+  border:3px solid #fff!important;border-radius:50%!important;
+  background:#050505!important;color:#fff!important;
+  font:900 25px/1 Arial,sans-serif!important;
+  box-shadow:0 3px 12px rgba(0,0,0,.5)!important;
+}
+.pool-opc-card{
+  --opc-ink:#080808;
+  --opc-paper:#f8f8f4;
+  --opc-rule:#202020;
+  position:relative!important;
+  overflow:hidden!important;
+  border:7px solid #f7f7f2!important;
+  background:var(--opc-paper)!important;
+  color:var(--opc-ink)!important;
+  box-shadow:0 18px 55px rgba(0,0,0,.6),inset 0 0 0 2px #111!important;
+  font-family:"Arial Narrow",Arial,Helvetica,sans-serif!important;
+}
+.pool-opc-card:before{
+  content:""!important;
+  position:absolute!important;inset:0!important;pointer-events:none!important;
+  opacity:.09!important;
+  background-image:radial-gradient(#111 .55px,transparent .7px)!important;
+  background-size:3px 3px!important;
+  mix-blend-mode:multiply!important;
+}
+.pool-opc-card:after{
+  content:""!important;
+  position:absolute!important;z-index:1!important;pointer-events:none!important;
+  left:-28px!important;bottom:96px!important;width:100px!important;height:250px!important;
+  background:repeating-linear-gradient(145deg,#111 0 7px,transparent 7px 17px)!important;
+  clip-path:polygon(0 0,45% 0,100% 100%,55% 100%)!important;
+  opacity:.9!important;
+}
+.pool-opc-brand{
+  position:relative!important;z-index:5!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  min-height:43px!important;
+  padding:6px 19px 4px!important;
+  border:0!important;
+  background:#f8f8f4!important;
+  color:#090909!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+.pool-opc-brand:after{
+  content:""!important;position:absolute!important;right:-18px!important;top:0!important;width:145px!important;height:100%!important;
+  background:repeating-linear-gradient(135deg,#111 0 6px,transparent 6px 14px)!important;
+  clip-path:polygon(28% 0,100% 0,100% 100%,0 100%)!important;opacity:.95!important
+}
+.pool-opc-brand span{position:relative!important;z-index:2!important;color:#111!important;font:900 25px/1 Arial,sans-serif!important;letter-spacing:.06em!important}
+.pool-opc-brand em{position:relative!important;z-index:3!important;margin-right:12px!important;color:#fff!important;font:900 12px/1 Arial,sans-serif!important;letter-spacing:.18em!important;text-transform:uppercase!important}
+.pool-opc-frame{
+  position:relative!important;z-index:3!important;
+  padding:0 20px 14px 48px!important;
+  border:0!important;
+  background:#f8f8f4!important;
+}
+.pool-opc-hero{
+  position:relative!important;
+  min-height:190px!important;
+  margin:0 0 9px!important;
+  border:6px solid #111!important;
+  border-left-width:10px!important;
+  background:#d1d1ce!important;
+  clip-path:polygon(5% 0,100% 0,100% 88%,95% 100%,0 100%,0 17%)!important;
+}
+.pool-opc-photo{height:190px!important;border:0!important;background:linear-gradient(145deg,#d8d8d5,#969693)!important}
+.pool-opc-photo img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;filter:grayscale(1) contrast(1.12)!important}
+.pool-opc-logo-block{
+  position:absolute!important;left:10px!important;bottom:9px!important;z-index:5!important;
+  display:grid!important;place-items:center!important;
+  width:86px!important;height:70px!important;
+  border:3px solid #111!important;background:#fff!important;
+}
+.pool-opc-logo-block img{width:68px!important;height:58px!important;object-fit:contain!important;filter:grayscale(1) contrast(1.15)!important}
+.pool-opc-nameplate{
+  position:absolute!important;z-index:5!important;left:108px!important;bottom:10px!important;right:14px!important;
+  padding:5px 10px 4px!important;
+  background:rgba(248,248,244,.95)!important;
+  border-top:3px solid #111!important;
+  color:#080808!important;
+}
+.pool-opc-nameplate span{display:block!important;color:#222!important;font:700 11px/1 Arial,sans-serif!important;letter-spacing:.02em!important;text-transform:uppercase!important}
+.pool-opc-nameplate strong{display:block!important;color:#050505!important;font:900 clamp(24px,4vw,34px)/.95 Arial,sans-serif!important;letter-spacing:.015em!important;text-transform:uppercase!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.pool-opc-position{
+  margin:0 0 7px!important;
+  padding:4px 7px 3px!important;
+  border-top:4px solid #111!important;border-bottom:1px solid #111!important;
+  color:#050505!important;
+  font:900 16px/1 Arial,sans-serif!important;
+  letter-spacing:.16em!important;text-transform:uppercase!important;
+}
+
+/* Black ink on white stock: fix the hard-to-read inherited theme colours. */
+.pool-card-last-five h4,.pool-card-rolling h4{
+  margin:0!important;padding:5px 8px!important;
+  background:#111!important;color:#fff!important;
+  font:900 12px/1 Arial,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase!important
+}
+.pool-card-table-scroll{overflow-x:auto!important;border:2px solid #111!important;border-top:0!important;background:#fff!important}
+.pool-card-last-five table{width:100%!important;min-width:0!important;border-collapse:collapse!important;background:#fff!important;color:#050505!important;font-size:11px!important}
+.pool-card-last-five th,.pool-card-last-five td{
+  padding:5px 6px!important;border-right:1px solid #555!important;border-bottom:1px solid #777!important;
+  background:#fff!important;color:#050505!important;text-align:center!important;white-space:nowrap!important;font-weight:700!important
+}
+.pool-card-last-five th{background:#ecece8!important;color:#050505!important;font-size:9px!important;font-weight:900!important;letter-spacing:.045em!important}
+.pool-card-last-five td:nth-child(1),.pool-card-last-five td:nth-child(2){color:#050505!important}
+.pool-card-last-five td:nth-child(2){text-align:left!important;font-weight:900!important}
+.pool-card-last-five td strong{color:#050505!important;font-size:13px!important;font-weight:900!important}
+.pool-card-last-five tr.is-live td{background:#e5e5df!important;color:#050505!important}
+.pool-card-last-five td small{display:block!important;color:#050505!important;font-size:7px!important;font-weight:900!important;letter-spacing:.08em!important}
+.pool-card-rolling{margin-top:8px!important}
+.pool-card-rolling>div{display:grid!important;grid-template-columns:1fr 1fr!important;border:2px solid #111!important;border-top:0!important}
+.pool-card-roll{padding:8px 10px!important;background:#fff!important;color:#050505!important}
+.pool-card-roll+.pool-card-roll{border-left:1px solid #111!important}
+.pool-card-roll span{display:block!important;color:#222!important;font-size:9px!important;font-weight:900!important;letter-spacing:.09em!important}
+.pool-card-roll strong{display:block!important;margin:2px 0!important;color:#050505!important;font:900 19px/1 Arial,sans-serif!important}
+.pool-card-roll small{display:block!important;color:#050505!important;font-size:9px!important;line-height:1.3!important;font-weight:700!important}
+.pool-opc-card>footer{
+  position:relative!important;z-index:5!important;
+  display:flex!important;justify-content:space-between!important;gap:12px!important;
+  padding:7px 16px 6px 48px!important;
+  background:#f8f8f4!important;border-top:4px solid #111!important;color:#111!important;
+  font-size:8px!important;font-weight:900!important;letter-spacing:.08em!important;text-transform:uppercase!important
+}
+.pool-opc-card>footer strong{color:#111!important}
+
+/* Team-goalie version keeps the same card language, with multiple actual goalie photos. */
+.pool-opc-card.is-goalie-unit{--opc-ink:#080808!important}
+.pool-opc-card.is-goalie-unit .pool-opc-brand{background:#f8f8f4!important;border:0!important}
+.pool-opc-goalie-collage{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))!important;gap:2px!important;
+  min-height:185px!important;height:185px!important;padding:0!important;border:0!important;background:#aaa!important
+}
+.pool-opc-goalie-collage figure{position:relative!important;margin:0!important;min-height:185px!important;overflow:hidden!important;background:#bdbdb9!important}
+.pool-opc-goalie-collage img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;filter:grayscale(1) contrast(1.12)!important}
+.pool-opc-goalie-collage figcaption{position:absolute!important;left:0!important;right:0!important;bottom:0!important;padding:4px!important;background:#111!important;color:#fff!important;text-align:center!important;font-size:8px!important;font-weight:900!important;text-transform:uppercase!important}
+.pool-card-no-photo{display:grid!important;place-items:center!important;min-height:175px!important;background:#ddd!important;color:#111!important;font-weight:900!important}
+
+/* Desktop card is intentionally compact so the whole physical-card shape stays in view. */
+@media (min-width:621px){
+  .pool-player-card-dialog{width:min(88vw,640px)!important;max-width:640px!important}
+  .pool-card-dialog-shell{padding:7px!important}
+  .pool-opc-hero{min-height:168px!important}
+  .pool-opc-photo{height:168px!important}
+  .pool-opc-goalie-collage,.pool-opc-goalie-collage figure{height:168px!important;min-height:168px!important}
+  .pool-opc-frame{padding-bottom:10px!important}
+  .pool-card-last-five th,.pool-card-last-five td{padding:4px 5px!important}
+  .pool-card-roll{padding:7px 9px!important}
+}
+
+/* Preserve the phone fit, but keep the new black ink readable. */
+@media (max-width:620px){
+  .pool-player-card-dialog{width:98vw!important;max-width:98vw!important;max-height:calc(100dvh - 8px)!important}
+  .pool-card-dialog-shell{padding:5px!important}
+  .pool-card-close{width:34px!important;height:34px!important;margin-bottom:-34px!important;font-size:22px!important}
+  .pool-opc-card{border-width:5px!important}
+  .pool-opc-brand{min-height:36px!important;padding:5px 12px 3px!important}
+  .pool-opc-brand span{font-size:18px!important}.pool-opc-brand em{font-size:9px!important}
+  .pool-opc-frame{padding:0 9px 9px 30px!important}
+  .pool-opc-card:after{left:-42px!important;bottom:82px!important;width:78px!important}
+  .pool-opc-hero{min-height:190px!important;border-width:4px!important;border-left-width:7px!important}
+  .pool-opc-photo{height:190px!important}
+  .pool-opc-logo-block{left:7px!important;bottom:7px!important;width:68px!important;height:57px!important;border-width:2px!important}
+  .pool-opc-logo-block img{width:54px!important;height:46px!important}
+  .pool-opc-nameplate{left:82px!important;right:9px!important;bottom:7px!important;padding:4px 6px!important}
+  .pool-opc-nameplate span{font-size:8px!important}.pool-opc-nameplate strong{font-size:21px!important}
+  .pool-opc-position{font-size:12px!important;letter-spacing:.1em!important}
+  .pool-card-last-five table{min-width:500px!important}
+  .pool-card-last-five th,.pool-card-last-five td{color:#050505!important;background:#fff!important}
+  .pool-card-rolling>div{grid-template-columns:1fr!important}
+  .pool-card-roll+.pool-card-roll{border-left:0!important;border-top:1px solid #111!important}
+  .pool-opc-goalie-collage{grid-template-columns:repeat(auto-fit,minmax(90px,1fr))!important;min-height:180px!important;height:180px!important}
+  .pool-opc-goalie-collage figure{min-height:180px!important;height:180px!important}
+  .pool-opc-card>footer{padding:6px 7px 5px 30px!important;font-size:7px!important}
+  body.v180-home-active #dashboard .pool-roster-control-label{display:none!important}
+}

@@ -125,3 +125,27 @@ test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games c
   assert.ok(card.includes('LAST 10'));
   assert.ok(card.includes('LAST 25'));
 });
+
+test('v278 keeps roster Tonight mode separate from standings Today mode and exposes reliable team selectors', () => {
+  const rows = [
+    { ownerId:'nick', ownerName:'Nick', rank:1, total:2, players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}] },
+    { ownerId:'andrew', ownerName:'Andrew', rank:2, total:1, players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL',goals:0,assists:1,shortHandedGoals:0,gameWinningGoals:0}] }
+  ];
+  const live={today:{date:'2026-10-02',games:[{id:1,state:'LIVE',away:'MTL',home:'TOR',awayScore:0,homeScore:1,period:1,timeRemaining:'10:00'}],players:{'1':{goals:1},'2':{}},teamGoalies:{}}};
+  const season = Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season',standingsMode:'season'},live);
+  assert.ok(season.includes('data-roster-mode'));
+  assert.ok(season.includes('data-standings-mode'));
+  assert.ok(season.includes('data-compare-select'));
+  assert.ok(season.includes('ROSTER VIEW · STANDINGS ABOVE ARE INDEPENDENT'));
+  const tonight = Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'tonight',standingsMode:'season'},live);
+  assert.ok(tonight.includes('Tonight’s Matchup'));
+  assert.ok(tonight.includes('>Standings</h2>'), 'roster Tonight mode leaves standings in season mode');
+});
+
+test('v278 card removes league branding and uses the 1996 black-and-white profile structure', () => {
+  const card=Board.cardMarkup({type:'skater',season:'20262027',player:{id:'8478402',name:'Test Player',team:'TOR',position:'C',headshot:'x',teamLogo:'y'},last5:[{date:'2026-10-02',label:'vs MTL',goals:1,assists:1,shortHandedGoals:0,gameWinningGoals:0,fpts:3}],last10:{fpts:8},last25:{fpts:20}});
+  assert.ok(!card.includes('BASEMENT BAR'));
+  assert.ok(card.includes('1996 SERIES'));
+  assert.ok(card.includes('pool-opc-nameplate'));
+  assert.ok(card.includes('pool-opc-position'));
+});
