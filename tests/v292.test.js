@@ -144,6 +144,6 @@ test('six device-local themes load real artwork while retaining the legacy layou
   api.select('original');assert.equal(attrs.src,'assets/images/home-leaderboard-basement-board.png?v=269');
   const index=read('index.html');
   assert.ok(index.indexOf('bot-roster-20262027.js')<index.indexOf('bot-team.js'));
-  assert.ok(index.indexOf('bot-team.js')<index.indexOf('home-board-v292.js'));
+  assert.ok(index.indexOf('bot-team.js')<index.indexOf('home-board-v293.js'));
   assert.ok(index.indexOf('home-v291.css')<index.indexOf('home-skins-v292.css'));
 });

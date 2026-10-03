@@ -1,6 +1,6 @@
 # Adding another homepage skin
 
-The active v292 release has six options. Page 1 is the unmodified v291 presentation. The five new choices share its board structure, controls and responsive layout.
+The active v293 release has six options. Page 1 is the unmodified v291 presentation. The five new choices share its board structure, controls and responsive layout.
 
 1. Add a permanent ID, name and description to `assets/js/home-themes.js`.
 2. Add matching artwork under `assets/images/themes/`. Current lossless WebP plates are 1448 × 1086: the upper band contains the seven navigation images; the rest is a blank themed texture. Preserve the order and centres of the navigation targets. Never bake live stats into the art.
@@ -13,3 +13,5 @@ Keep `data-pool-theme="chalkboard"` fixed. It supplies the legacy layout foundat
 The permanent preference key is `hockey-pool:home-theme:v1`. Choices stay in each browser. The retired chalkboard choice and unrecognised IDs fall back to Original Home. Existing ice/arena/press/arcade preferences retain their IDs. Do not rename IDs or the storage key between releases.
 
 `docs/theme-artwork-prompts.json` records the five image-generation prompts. `npm test` covers theme persistence, assets and shared data/controls. Actual device inspection remains necessary for visual changes.
+
+The chooser now renders each real header image with a small HTML scoreboard preview. Its corrective styles are in `home-fixes-v293.css`. A new theme inherits its preview colors from the same skin variables. Do not restore old `--pool-standings-art` preview backgrounds.

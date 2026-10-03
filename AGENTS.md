@@ -16,7 +16,7 @@ The v291 layout, framing, controls, responsive breakpoints, scrolling and motion
 
 Keep all seven header links and destinations: Draft Room, Nick 09, Scott 81, prominent orange Andrew 28 champion, Tyler 91, Chris 34 and Trophy Room. The four other jerseys remain navy/cream. New artwork belongs only to the five alternate themes. This latest approval supersedes the earlier ban on regenerating theme header art.
 
-`data-pool-theme="chalkboard"` intentionally remains fixed: legacy CSS uses it for v291 geometry. New skins use `data-home-skin`. Do not change the legacy attribute when selecting a skin. Active files are `home-themes.js`, `home-skins-v292.css` and `home-board-v292.js`.
+`data-pool-theme="chalkboard"` intentionally remains fixed: legacy CSS uses it for v291 geometry. New skins use `data-home-skin`. Do not change the legacy attribute when selecting a skin. Active files are `home-themes.js`, `home-skins-v292.css`, `home-fixes-v293.css` and `home-board-v293.js`.
 
 Do not add Basement Bar League branding or a Back to the Bar link: that is a different league.
 
@@ -31,3 +31,13 @@ Read ADDING-THEMES.md before adding a theme. Keep the registry and CSS extensibl
 `data/bot-teams/20262027.json` is the canonical locked BOT roster. Preserve it; never automatically redraft or replace its players. Regenerate its browser copy with `node scripts/build-bot-roster.js` if the canonical format needs maintenance. The original human draft must remain untouched.
 
 BOT is a separate standings competitor, not a sixth draft manager. Do not add it to Core.OWNERS, identity, lottery, pick order or roster rooms. It uses 6F/4D/2 team goalies and the exact shared scoring. It activates only for the matching locked 2026–27 human draft and refuses all player conflicts. End Season retains its result in the optional botTeam snapshot without rewriting human trophy/championship records. A future season needs a separately approved BOT roster.
+
+## Ranking and contrast corrections (v293)
+
+Both Top 5 panels and player-card fantasy ranks compare the full available skater/team-goalie pool, including unowned players. Label those entries “Undrafted in our pool”. Use the same draft-board catalogue for identities only; current-season stats supply all points. Individual goalies are not draftable units. Keep manager standings limited to their actual rosters. Display SHG and GWG as abbreviations on all devices.
+
+Press Box colors in home-fixes-v293.css intentionally use #dashboard #seasonBoard to win against legacy important selectors. Preserve the contrast on odd/even rows and FPTS cells. Previews use the actual theme banners plus small HTML scoreboard samples, not legacy reference chalkboard images.
+
+## The Dream Team (comparison only)
+
+The Dream Team is a dynamic, hypothetical comparison roster, separate from the fixed BOT competitor. Recompute the best 6F/4D/2TG from the full pool using current-season fantasy points on each stats refresh. Already-owned players are eligible. Never add this team to Core.OWNERS, standings, weekly/monthly rankings, saved rosters, ownership labels, season archives, draft history or roster rooms. Keep it available through the existing comparison controls on desktop and mobile. Selecting a daily comparison view does not change the season-based selection criteria.

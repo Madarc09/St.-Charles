@@ -1,0 +1,8 @@
+# v293 validation
+
+- Reproduced the reported problems on the live v292 small update: old styles overrode Press Box row colors, and theme thumbnails still resolved to legacy reference artwork.
+- All 45 automated cases pass across the five test files. Eight new cases verify unowned leaders, the full 32-team goalie field, shared player-card ranks, ties, duplicate identities, zero-game players, current-season-only scoring, catalogue caching, abbreviations and new preview markup. They also verify the Dream Team's best 6F/4D/2TG selection, changes after a stats refresh, comparison access, input immutability, and exclusion from standings, period rankings and ownership.
+- Static CSS cascade checks applied every local stylesheet and inline style to actual rendered board markup at 390px and 1280px. Checked ordinary board text achieved at least 5.69:1 contrast against its solid color surface. Unsupported scrollbar/backdrop pseudo-elements were excluded. This is a stylesheet calculation, not a rendered-browser accessibility audit.
+- Each of the six preview headers resolves to its own current asset. Original uses the original header; Neon Ice uses midnight.webp. No new artwork was needed.
+- Human draft record, BOT manifest, shared scoring, NHL collector, storage, draft locks and history API remain byte-identical to v292 small. No live draft mutation, reset or End Season was performed.
+- The current browser blocks local previews, so the assembled v293 page was not screenshot-validated. Live v292 was inspected to confirm the defects; final phone/desktop appearance should be checked after deployment.

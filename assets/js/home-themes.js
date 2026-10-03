@@ -70,7 +70,7 @@
       if (options) options.innerHTML = themes.map(t =>
         '<label class="pool-theme-choice" data-preview-theme="' + t.id + '">' +
           '<input type="radio" name="pool-home-theme" value="' + t.id + '">' +
-          '<span class="pool-theme-swatch" aria-hidden="true"><b>STANDINGS</b><i></i><i></i><i></i><em>FPTS</em></span>' +
+          '<span class="pool-theme-swatch" aria-hidden="true"><span class="pool-theme-preview-header"></span><span class="pool-theme-preview-board"><span class="pool-theme-preview-title">STANDINGS <b>FPTS</b></span><span class="pool-theme-preview-row"><i></i><b>—</b></span><span class="pool-theme-preview-row"><i></i><b>—</b></span><span class="pool-theme-preview-row"><i></i><b>—</b></span></span></span>' +
           '<span class="pool-theme-name">' + t.name + '</span>' +
           '<span class="pool-theme-description">' + t.description + '</span>' +
           '<span class="pool-theme-selected" aria-hidden="true">✓ Selected</span>' +
