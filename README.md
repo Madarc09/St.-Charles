@@ -1,4 +1,4 @@
-# Hockey Pool — v272
+# Hockey Pool — v277
 
 ## Upload this update
 
@@ -73,3 +73,17 @@ Run npm test with modern Node.js. npm run preview:test starts a loopback-only lo
 - Player/team names are frozen on the left while roster stat tables scroll horizontally.
 - Standings rank + manager columns are also frozen during horizontal scrolling.
 - No scoring, NHL, Redis, draft, history, or roster ownership logic changed.
+
+
+## v276 — player art + Tonight's Matchup
+- Draft-style NHL player headshots and team-logo badges appear in roster rows.
+- Desktop comparison and mobile carousel can switch to a live Tonight's Matchup view using the existing NHL live feed.
+
+## v277 — Today standings + recent-game collectible cards
+- Standings can switch between season totals and TODAY'S TOTALS, ranked by fantasy points earned today.
+- Total FPTS is the first stat after the frozen identity column in standings, season rosters, and Tonight's Matchup tables.
+- Mobile roster-card headers center the manager name with previous/next arrows on the card itself; the Tonight's Active Players mast no longer has duplicate arrows.
+- Clicking/tapping any skater opens a 1996-series cream-card game log with the last five games individually and rolling Last 10 / Last 25 totals.
+- Clicking/tapping a team-goalie unit opens a distinct multi-goalie card showing NHL headshots for goalies who have appeared for that club, plus the team unit's recent-game fantasy totals.
+- Recent-game data is loaded on demand from NHL player game logs; live today scoring is layered in when available.
+- No scoring weights, draft ownership, final-draft protection, Redis keys, or season-history behavior changed.

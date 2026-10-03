@@ -1,0 +1,93 @@
+/* v277 — Today's totals, FPTS-first stat sheets, mobile roster arrows, and 1996-series player cards. */
+body.v180-home-active #dashboard .pool-standings-actions{display:flex!important;align-items:center!important;gap:9px!important;margin-left:auto!important}
+body.v180-home-active #dashboard .pool-standings-mode{
+  display:flex!important;align-items:center!important;gap:7px!important;min-height:34px!important;padding:5px 11px!important;border:1px solid #2c809e!important;border-radius:999px!important;
+  background:linear-gradient(180deg,#0d3042,#071823)!important;color:#dff9ff!important;font:900 9px/1 var(--v273-font)!important;letter-spacing:.05em!important;text-transform:uppercase!important;cursor:pointer!important
+}
+body.v180-home-active #dashboard .pool-standings-mode[aria-pressed="true"]{border-color:#e4ad43!important;background:linear-gradient(180deg,#46320e,#1d1709)!important;color:#ffe5a1!important}
+body.v180-home-active #dashboard .pool-standings-mode>span{font-size:14px!important}
+body.v180-home-active #dashboard .pool-fpts-first{color:#ffd35a!important;background:rgba(126,86,9,.14)!important;font-weight:900!important}
+body.v180-home-active #dashboard .pool-stat-table thead .pool-fpts-first{background:#32270b!important;color:#ffe172!important}
+body.v180-home-active #dashboard .pool-player-card-trigger{display:flex!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;padding:0!important;border:0!important;background:transparent!important;color:inherit!important;text-align:left!important;cursor:pointer!important;box-shadow:none!important}
+body.v180-home-active #dashboard .pool-player-card-trigger:focus-visible{outline:2px solid #62eaff!important;outline-offset:2px!important;border-radius:5px!important}
+body.v180-home-active #dashboard .pool-player-card-trigger:hover .pool-player-copy strong{color:#7ceeff!important;text-decoration:underline!important;text-underline-offset:2px!important}
+body.v180-home-active #dashboard .pool-mobile-card-arrow{display:none!important}
+body.v180-home-active #dashboard .pool-mobile-roster-total{display:none!important}
+
+@media (max-width:700px){
+  body.v180-home-active #dashboard .pool-module-title{gap:6px!important;flex-wrap:wrap!important}
+  body.v180-home-active #dashboard .pool-standings-actions{gap:5px!important}
+  body.v180-home-active #dashboard .pool-standings-mode{min-height:30px!important;padding:4px 8px!important;font-size:7.5px!important}
+  body.v180-home-active #dashboard .pool-live-chip{font-size:7px!important}
+  body.v180-home-active #dashboard .pool-mobile-rosters-mast{display:block!important;text-align:center!important}
+  body.v180-home-active #dashboard .pool-mobile-rosters-mast>div{width:100%!important;text-align:center!important}
+  body.v180-home-active #dashboard .pool-roster-heading{
+    display:grid!important;grid-template-columns:38px minmax(0,1fr) 38px!important;align-items:center!important;min-height:70px!important;padding:7px 6px!important;text-align:center!important
+  }
+  body.v180-home-active #dashboard .pool-roster-heading-center{min-width:0!important;text-align:center!important}
+  body.v180-home-active #dashboard .pool-roster-heading-center h3,body.v180-home-active #dashboard .pool-roster-heading-center h3 button{text-align:center!important;width:100%!important;justify-content:center!important}
+  body.v180-home-active #dashboard .pool-roster-heading .pool-roster-total{display:none!important}
+  body.v180-home-active #dashboard .pool-mobile-card-arrow{
+    display:grid!important;place-items:center!important;width:34px!important;height:46px!important;padding:0!important;border:0!important;background:transparent!important;color:#72efff!important;font:900 34px/1 system-ui!important;box-shadow:none!important;cursor:pointer!important
+  }
+  body.v180-home-active #dashboard .pool-mobile-roster-total{display:block!important;margin-top:4px!important;color:#ffd45c!important;font:900 8px/1 var(--v273-font)!important;letter-spacing:.08em!important}
+  body.v180-home-active #dashboard .pool-room-arrow{display:none!important}
+  body.v180-home-active #dashboard .pool-matchup-card .pool-tonight-count{margin-top:3px!important}
+  body.v180-home-active #dashboard .pool-roster-table{min-width:590px!important}
+  body.v180-home-active #dashboard .pool-roster-table .pool-name-cell{min-width:158px!important;width:158px!important;max-width:158px!important}
+}
+
+/* Player card modal — a cream-stock, gold-band 1990s hockey-card homage with live data. */
+.pool-player-card-dialog{width:min(94vw,760px);max-width:760px;padding:0;border:0;background:transparent;color:#111;overflow:visible}
+.pool-player-card-dialog::backdrop{background:rgba(0,7,12,.82);backdrop-filter:blur(7px)}
+.pool-card-dialog-shell{position:relative;padding:18px}
+.pool-card-close{position:absolute;z-index:30;right:3px;top:2px;width:42px;height:42px;border:2px solid #eee8d7;border-radius:50%;background:#172134;color:#fff;font:700 28px/1 system-ui;box-shadow:0 5px 15px rgba(0,0,0,.45);cursor:pointer}
+.pool-card-loading,.pool-card-error{min-height:360px;display:grid;place-items:center;align-content:center;gap:14px;padding:40px;border:12px solid #eee7d2;background:#faf6e9;color:#20263a;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.pool-card-loading span{width:42px;height:42px;border:4px solid #d7cda9;border-top-color:#254c8c;border-radius:50%;animation:pool-card-spin .8s linear infinite}
+@keyframes pool-card-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.pool-card-loading span{animation:none}}
+.pool-opc-card{--opc-blue:#193b72;--opc-red:#a3262d;position:relative;overflow:hidden;border:12px solid #f3eddc;background:#f7f1df;color:#121625;box-shadow:0 26px 80px rgba(0,0,0,.62),inset 0 0 0 1px #c8bc93;font-family:Arial,Helvetica,sans-serif}
+.pool-opc-card:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(90deg,rgba(60,45,18,.04) 1px,transparent 1px),linear-gradient(rgba(60,45,18,.035) 1px,transparent 1px);background-size:4px 4px;mix-blend-mode:multiply}
+.pool-opc-brand{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:10px 18px 8px;border-bottom:3px solid var(--opc-blue);background:linear-gradient(90deg,#d8c58e,#f1dfaa 48%,#d6bd79);font-family:Georgia,serif}
+.pool-opc-brand span{font-size:18px;font-weight:700;letter-spacing:.02em}
+.pool-opc-brand em{font-size:22px;color:#a0282d;font-family:"Brush Script MT",cursive;font-weight:700;letter-spacing:.02em}
+.pool-opc-frame{position:relative;z-index:2;padding:12px 14px 14px;border-left:3px solid var(--opc-blue);border-right:3px solid var(--opc-blue)}
+.pool-opc-photo{height:250px;overflow:hidden;border:2px solid #1f3660;background:linear-gradient(145deg,#d7dbe1,#8ea2bd)}
+.pool-opc-photo img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:saturate(.96) contrast(1.04)}
+.pool-opc-id{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:8px 0 10px;padding:8px 11px;border:2px solid var(--opc-blue);background:#fffdf6}
+.pool-opc-id>div{min-width:0}
+.pool-opc-id strong{display:block;font:900 clamp(22px,4vw,36px)/.92 "Arial Narrow",Arial,sans-serif;text-transform:uppercase;letter-spacing:.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pool-opc-id span{display:block;margin-top:3px;color:#666050;font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.pool-opc-id img{width:54px;height:54px;object-fit:contain;flex:0 0 54px}
+.pool-card-last-five h4,.pool-card-rolling h4{margin:0;padding:5px 8px;background:var(--opc-blue);color:#fff;font:900 12px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.pool-card-table-scroll{overflow-x:auto;border:2px solid var(--opc-blue);border-top:0}
+.pool-card-last-five table{width:100%;min-width:540px;border-collapse:collapse;background:#fffdf6;font-size:11px}
+.pool-card-last-five th,.pool-card-last-five td{padding:7px 8px;border-right:1px solid #b7b08e;border-bottom:1px solid #cfc7a8;text-align:center;white-space:nowrap}
+.pool-card-last-five th{background:#e8e1c8;color:#21304e;font-size:9px;letter-spacing:.06em}
+.pool-card-last-five td:nth-child(2){text-align:left;font-weight:800}
+.pool-card-last-five td strong{color:#ae2933;font-size:14px}
+.pool-card-last-five tr.is-live{background:#fff3c7}
+.pool-card-last-five td small{display:block;color:#c3282e;font-size:7px;font-weight:900;letter-spacing:.08em}
+.pool-card-rolling{margin-top:10px}
+.pool-card-rolling>div{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--opc-blue);border-top:0}
+.pool-card-roll{padding:11px 12px;background:#fffdf6}
+.pool-card-roll+ .pool-card-roll{border-left:1px solid #aaa17e}
+.pool-card-roll span{display:block;color:#6b6554;font-size:9px;font-weight:800;letter-spacing:.09em}
+.pool-card-roll strong{display:block;margin:3px 0;color:#a3262d;font:900 22px/1 Arial,sans-serif}
+.pool-card-roll small{display:block;color:#1d2b43;font-size:9px;line-height:1.35}
+.pool-opc-card>footer{position:relative;z-index:2;display:flex;justify-content:space-between;gap:12px;padding:7px 16px;background:#ede5cd;border-top:2px solid #b5a97e;color:#5d584b;font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.pool-opc-card>footer strong{color:#17386c}
+.pool-opc-card.is-goalie-unit{--opc-blue:#6d2227;--opc-red:#17386c}
+.pool-opc-card.is-goalie-unit .pool-opc-brand{border-bottom-color:#6d2227;background:linear-gradient(90deg,#c8b477,#f2deb0 50%,#c7a762)}
+.pool-opc-goalie-collage{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:4px;min-height:230px;padding:5px;border:2px solid var(--opc-blue);background:linear-gradient(145deg,#b2b9c3,#677785)}
+.pool-opc-goalie-collage figure{position:relative;margin:0;min-height:220px;overflow:hidden;background:linear-gradient(#d8dde1,#86949e)}
+.pool-opc-goalie-collage img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.pool-opc-goalie-collage figcaption{position:absolute;left:0;right:0;bottom:0;padding:5px 4px;background:rgba(17,23,32,.82);color:#fff;text-align:center;font-size:9px;font-weight:800;text-transform:uppercase}
+.pool-card-no-photo{display:grid;place-items:center;color:#fff;font-weight:800;min-height:200px}
+@media(max-width:620px){
+  .pool-player-card-dialog{width:98vw}.pool-card-dialog-shell{padding:8px}.pool-card-close{right:0;top:0;width:38px;height:38px}
+  .pool-opc-card{border-width:8px}.pool-opc-brand{padding:8px 11px 6px}.pool-opc-brand span{font-size:13px}.pool-opc-brand em{font-size:17px}
+  .pool-opc-frame{padding:8px;border-left-width:2px;border-right-width:2px}.pool-opc-photo{height:190px}.pool-opc-id{padding:6px 8px}.pool-opc-id strong{font-size:23px}.pool-opc-id img{width:42px;height:42px;flex-basis:42px}
+  .pool-card-last-five table{min-width:500px}.pool-card-rolling>div{grid-template-columns:1fr}.pool-card-roll+.pool-card-roll{border-left:0;border-top:1px solid #aaa17e}
+  .pool-opc-goalie-collage{grid-template-columns:repeat(auto-fit,minmax(90px,1fr));min-height:180px}.pool-opc-goalie-collage figure{min-height:175px}.pool-opc-card>footer{font-size:7px;padding:6px 8px}
+}

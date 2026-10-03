@@ -102,3 +102,26 @@ test('roster cards include NHL player art and Tonight matchup renders only sched
   assert.ok(tonightHtml.includes('TODAY'));
   assert.equal(Board.todayLine(row.players[0],live).fpts,2);
 });
+
+test('v277 puts FPTS first, ranks Today totals, and renders retro recent-games cards', () => {
+  const rows = [
+    { ownerId:'nick', ownerName:'Nick', rank:1, total:7, players:[{id:'1',name:'Nick Skater',position:'C',nhlTeam:'TOR',goals:1,assists:0,shortHandedGoals:0,gameWinningGoals:0}] },
+    { ownerId:'andrew', ownerName:'Andrew', rank:2, total:6, players:[{id:'2',name:'Andrew Skater',position:'C',nhlTeam:'MTL',goals:0,assists:1,shortHandedGoals:0,gameWinningGoals:0}] }
+  ];
+  const live={today:{date:'2026-10-02',games:[],players:{'1':{goals:0,assists:0,shortHandedGoals:0,gameWinningGoals:0},'2':{goals:1,assists:1,shortHandedGoals:0,gameWinningGoals:0}},teamGoalies:{}}};
+  const today=Board.todayStandingRows(rows,live);
+  assert.equal(today[0].ownerId,'andrew');
+  assert.equal(today[0]._today.total,3);
+  const html=Board.render(rows,{seasonId:'20262027',picks:[],locked:false},{left:'nick',right:'andrew',mode:'season',standingsMode:'today'},live);
+  assert.ok(html.includes('Today’s Totals'));
+  const managerAt=html.indexOf('>Manager</th>');
+  const fptsAt=html.indexOf('pool-fpts-first',managerAt);
+  const goalsAt=html.indexOf('>Goals</span>',managerAt);
+  assert.ok(managerAt>=0 && fptsAt>managerAt && goalsAt>fptsAt,'FPTS is the first stat after identity');
+  assert.ok(html.includes('data-player-card'));
+  const card=Board.cardMarkup({type:'skater',season:'20262027',player:{id:'1',name:'Nick Skater',team:'TOR',position:'C',headshot:'x',teamLogo:'y'},last5:[{date:'2026-10-01',label:'vs MTL',goals:1,assists:2,shortHandedGoals:0,gameWinningGoals:1,fpts:9}],last10:{games:10,goals:3,assists:4,shortHandedGoals:0,gameWinningGoals:1,fpts:15},last25:{games:25,goals:9,assists:12,shortHandedGoals:1,gameWinningGoals:2,fpts:45}});
+  assert.ok(card.includes('1996 SERIES'));
+  assert.ok(card.includes('LAST 5 GAMES'));
+  assert.ok(card.includes('LAST 10'));
+  assert.ok(card.includes('LAST 25'));
+});

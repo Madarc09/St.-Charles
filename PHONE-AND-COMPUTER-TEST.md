@@ -40,3 +40,12 @@ For any future draft rehearsal use Admin → Open test room on both devices and 
 - Mobile (<=700px): all five rosters remain available one card at a time in the horizontal carousel.
 - Roster tables: horizontally scroll G/A/SHG/GWG/FPTS and confirm Player Name / Team Goalies stays pinned on the left.
 - Standings: horizontally scroll and confirm rank + manager stay pinned on the left.
+
+
+## v277 Today / card checks
+- [ ] Standings: Today’s Totals switches to today-only rankings and Season Totals switches back.
+- [ ] Standings and roster tables: FPTS is the first stat after the frozen manager/player name.
+- [ ] Mobile: manager name is centered in each roster card header with one arrow on each side; no extra arrows flank Tonight’s Active Players.
+- [ ] Tap a skater name/headshot: a 1996-series card opens with five individual recent games plus Last 10 and Last 25 totals.
+- [ ] Tap a team-goalie row: the goalie-unit card shows headshots for goalies with appearances and the unit's recent game totals.
+- [ ] Close cards by X or tapping the dark backdrop; roster/standings scroll positions should remain intact.
