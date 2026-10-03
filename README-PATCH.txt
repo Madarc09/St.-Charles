@@ -1,16 +1,12 @@
-V277 -> V278 PATCH
+V278 -> V279 PATCH
 
-Copy these files over the matching paths in the existing v277 GitHub repository.
+Copy these files over the matching files in the existing GitHub repository.
 Do not delete the rest of the repository.
 
-Changes:
-- Tonight's Matchup only changes roster cards.
-- Today's Totals only changes standings.
-- Desktop comparison manager arrows repaired and manager dropdown added.
-- Desktop player-card modal constrained to viewport.
-- Player card restyled toward black/white 1996 hockey-card reference.
-- Basement Bar branding removed from player card.
-- Recent-game table text forced to readable black ink.
-- Team-goalie cards retain actual goalie appearance photos.
-
-17 automated tests pass.
+Functional fix:
+- Standings and roster comparison now have independent render/state paths.
+- Today's Totals changes standings only.
+- Tonight's Matchup changes roster cards only.
+- Roster toggle changes to Season Totals while Tonight mode is active.
+- Desktop left/right team arrows and manager selectors update roster comparison only.
+- Selecting the team already on the other side swaps the comparison sides.

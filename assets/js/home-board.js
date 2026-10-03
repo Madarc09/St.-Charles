@@ -1,24 +1,29 @@
-/* v278: independent standings/roster live modes, reliable team comparison controls, and responsive retro player cards. */
+/* v279: hard-separate standings state from roster-comparison state; roster controls never redraw standings. */
 (function (root, factory) {
   'use strict';
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./pool-core'));
   else {
     const view = factory(root.PoolCore);
     let latest = null, signature = '';
-    const compare = { left: 'nick', right: 'andrew', mode: 'season', standingsMode: 'season' };
+    const rosterState = { left: 'nick', right: 'andrew', mode: 'season' };
+    const standingsState = { mode: 'season' };
     const doc = root.document;
 
     function availableIds(rows) {
       const preferred = ['nick', 'andrew', 'scott', 'chris', 'tyler'];
       return preferred.filter(id => rows.some(row => row.ownerId === id));
     }
-    function normalizeCompare(rows) {
+    function normalizeRoster(rows) {
       const ids = availableIds(rows);
       if (!ids.length) return;
-      if (!ids.includes(compare.left)) compare.left = ids[0];
-      if (!ids.includes(compare.right) || (compare.right === compare.left && ids.length > 1)) compare.right = ids.find(id => id !== compare.left) || ids[0];
-      if (!['season', 'tonight'].includes(compare.mode)) compare.mode = 'season';
-      if (!['season', 'today'].includes(compare.standingsMode)) compare.standingsMode = 'season';
+      if (!ids.includes(rosterState.left)) rosterState.left = ids[0];
+      if (!ids.includes(rosterState.right)) rosterState.right = ids.find(id => id !== rosterState.left) || ids[0];
+      if (ids.length > 1 && rosterState.right === rosterState.left) rosterState.right = ids.find(id => id !== rosterState.left) || ids[0];
+      if (!['season', 'tonight'].includes(rosterState.mode)) rosterState.mode = 'season';
+      if (!['season', 'today'].includes(standingsState.mode)) standingsState.mode = 'season';
+    }
+    function combinedState() {
+      return { left: rosterState.left, right: rosterState.right, mode: rosterState.mode, standingsMode: standingsState.mode };
     }
     function update(host, html) {
       if (!host) return;
@@ -28,20 +33,60 @@
       host.querySelectorAll('[data-scroll-key]').forEach(el => { el.scrollLeft = scroll.get(el.dataset.scrollKey) || 0; });
       if (focus) Array.from(host.querySelectorAll('[data-board-focus]')).find(el => el.dataset.boardFocus === focus)?.focus({ preventScroll: true });
     }
-    function renderLatest() {
+    function boardRoots() {
+      const roots = [];
+      const main = doc.getElementById('seasonBoard');
+      if (main) roots.push(main);
+      const dialog = doc.getElementById('enlargedChalkboard');
+      const enlarged = doc.getElementById('enlargedChalkboardContent');
+      if (dialog?.open && enlarged) roots.push(enlarged);
+      return roots;
+    }
+    function syncRootModes(rootEl) {
+      const dashboard = rootEl?.querySelector?.('.pool-v279-dashboard,.pool-v278-dashboard');
+      if (!dashboard) return;
+      dashboard.dataset.viewMode = rosterState.mode;
+      dashboard.dataset.standingsMode = standingsState.mode;
+    }
+    function renderAll() {
       if (!latest) return;
-      normalizeCompare(latest.rows);
-      const html = view.render(latest.rows, latest.draft, compare, latest.live);
-      update(doc.getElementById('seasonBoard'), html);
-      if (doc.getElementById('enlargedChalkboard')?.open) update(doc.getElementById('enlargedChalkboardContent'), html);
+      normalizeRoster(latest.rows);
+      const html = view.render(latest.rows, latest.draft, combinedState(), latest.live);
+      boardRoots().forEach(host => { update(host, html); syncRootModes(host); });
+    }
+    function renderRostersOnly() {
+      if (!latest) return;
+      normalizeRoster(latest.rows);
+      let updated = false;
+      boardRoots().forEach(rootEl => {
+        const host = rootEl.querySelector('[data-pool-rosters-host]');
+        if (!host) return;
+        update(host, view.renderRosters(latest.rows, latest.draft, rosterState, latest.live));
+        syncRootModes(rootEl);
+        updated = true;
+      });
+      if (!updated) renderAll();
+    }
+    function renderStandingsOnly() {
+      if (!latest) return;
+      normalizeRoster(latest.rows);
+      let updated = false;
+      boardRoots().forEach(rootEl => {
+        const host = rootEl.querySelector('[data-pool-standings-host]');
+        if (!host) return;
+        update(host, view.renderStandings(latest.rows, latest.draft, standingsState.mode, latest.live));
+        syncRootModes(rootEl);
+        updated = true;
+      });
+      if (!updated) renderAll();
     }
     root.renderSeasonBoard = function (rows, draft, live) {
       latest = { rows, draft, live: live || null };
-      normalizeCompare(rows);
+      normalizeRoster(rows);
       const next = JSON.stringify([rows, draft.seasonId, !!draft.locked, draft.picks?.length, live?.fetchedAt || '', live?.today?.date || '']);
       if (signature === next) return;
       signature = next;
-      renderLatest();
+      renderAll();
     };
 
     function ensureCardDialog() {
@@ -73,56 +118,76 @@
         content.innerHTML = '<div class="pool-card-error"><strong>Card temporarily unavailable</strong><p>' + view.escape(error.message || 'Try again shortly.') + '</p></div>';
       }
     }
+    function setRosterSide(side, requested) {
+      if (!latest) return;
+      const ids = availableIds(latest.rows);
+      if (!ids.includes(requested)) return;
+      const other = side === 'left' ? 'right' : 'left';
+      if (ids.length > 1 && requested === rosterState[other]) {
+        const previous = rosterState[side];
+        rosterState[side] = requested;
+        rosterState[other] = ids.includes(previous) ? previous : (ids.find(id => id !== requested) || requested);
+      } else rosterState[side] = requested;
+      renderRostersOnly();
+    }
 
     doc.addEventListener('change', event => {
       const select = event.target.closest?.('[data-compare-select]');
       if (!select || !latest) return;
+      event.stopPropagation();
       const side = select.dataset.compareSide === 'right' ? 'right' : 'left';
-      const other = side === 'left' ? 'right' : 'left';
-      const ids = availableIds(latest.rows);
-      const requested = String(select.value || '');
-      if (!ids.includes(requested)) return;
-      compare[side] = requested;
-      if (ids.length > 1 && compare[side] === compare[other]) compare[other] = ids.find(id => id !== requested) || compare[other];
-      renderLatest();
+      setRosterSide(side, String(select.value || ''));
     }, true);
 
     doc.addEventListener('click', event => {
-      const card = event.target.closest('[data-player-card]');
+      const card = event.target.closest?.('[data-player-card]');
       if (card) { event.preventDefault(); openPlayerCard(card); return; }
-      if (event.target.closest('[data-close-player-card]')) { doc.getElementById('playerStatCardDialog')?.close(); return; }
+      if (event.target.closest?.('[data-close-player-card]')) { doc.getElementById('playerStatCardDialog')?.close(); return; }
 
-      const standingsMode = event.target.closest('[data-standings-mode]');
-      if (standingsMode && latest) { event.preventDefault(); compare.standingsMode = compare.standingsMode === 'today' ? 'season' : 'today'; renderLatest(); return; }
-
-      const rosterMode = event.target.closest('[data-roster-mode]');
-      if (rosterMode && latest) {
-        event.preventDefault();
-        event.stopPropagation();
-        compare.mode = compare.mode === 'tonight' ? 'season' : 'tonight';
-        renderLatest();
+      const standingsMode = event.target.closest?.('[data-standings-mode]');
+      if (standingsMode && latest) {
+        event.preventDefault(); event.stopPropagation();
+        standingsState.mode = standingsState.mode === 'today' ? 'season' : 'today';
+        renderStandingsOnly();
         return;
       }
 
-      const compareShift = event.target.closest('[data-compare-shift]');
-      if (compareShift && latest) {
-        event.preventDefault();
-        const side = compareShift.dataset.compareSide === 'right' ? 'right' : 'left', other = side === 'left' ? 'right' : 'left', ids = availableIds(latest.rows);
-        if (!ids.length) return;
-        const delta = Number(compareShift.dataset.compareShift || 1) < 0 ? -1 : 1;
-        let index = Math.max(0, ids.indexOf(compare[side])), candidate = compare[side];
-        for (let attempts = 0; attempts < ids.length; attempts++) { index = (index + delta + ids.length) % ids.length; candidate = ids[index]; if (ids.length === 1 || candidate !== compare[other]) break; }
-        compare[side] = candidate; renderLatest(); return;
+      const rosterMode = event.target.closest?.('[data-roster-mode]');
+      if (rosterMode && latest) {
+        event.preventDefault(); event.stopPropagation();
+        rosterState.mode = rosterState.mode === 'tonight' ? 'season' : 'tonight';
+        renderRostersOnly();
+        return;
       }
 
-      const jump = event.target.closest('[data-roster-jump]');
+      const compareShift = event.target.closest?.('[data-compare-shift]');
+      if (compareShift && latest) {
+        event.preventDefault(); event.stopPropagation();
+        const side = compareShift.dataset.compareSide === 'right' ? 'right' : 'left';
+        const other = side === 'left' ? 'right' : 'left';
+        const ids = availableIds(latest.rows);
+        if (!ids.length) return;
+        const delta = Number(compareShift.dataset.compareShift || 1) < 0 ? -1 : 1;
+        let index = Math.max(0, ids.indexOf(rosterState[side])), candidate = rosterState[side];
+        for (let attempts = 0; attempts < ids.length; attempts++) {
+          index = (index + delta + ids.length) % ids.length;
+          candidate = ids[index];
+          if (ids.length === 1 || candidate !== rosterState[other]) break;
+        }
+        rosterState[side] = candidate;
+        renderRostersOnly();
+        return;
+      }
+
+      const jump = event.target.closest?.('[data-roster-jump]');
       if (jump) {
         event.preventDefault();
         const board = jump.closest('.pool-board') || doc, mobileZone = jump.closest('.pool-rosters') || board;
         const target = Array.from(mobileZone.querySelectorAll('.pool-roster[data-owner]')).find(el => el.dataset.owner === jump.dataset.rosterJump);
-        target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); target?.classList.add('pool-roster-pulse'); root.setTimeout(() => target?.classList.remove('pool-roster-pulse'), 750); return;
+        target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        target?.classList.add('pool-roster-pulse'); root.setTimeout(() => target?.classList.remove('pool-roster-pulse'), 750); return;
       }
-      const shift = event.target.closest('[data-roster-shift]');
+      const shift = event.target.closest?.('[data-roster-shift]');
       if (shift) {
         event.preventDefault();
         const zone = shift.closest('.pool-rosters') || shift.closest('.pool-board') || doc, track = zone.querySelector('.pool-roster-track');
@@ -130,10 +195,12 @@
       }
       const dialog = doc.getElementById('enlargedChalkboard');
       if (!dialog) return;
-      if (event.target.closest('[data-enlarge-chalkboard]')) {
-        event.preventDefault(); if (latest) { normalizeCompare(latest.rows); update(doc.getElementById('enlargedChalkboardContent'), view.render(latest.rows, latest.draft, compare, latest.live)); } if (!dialog.open) dialog.showModal();
+      if (event.target.closest?.('[data-enlarge-chalkboard]')) {
+        event.preventDefault();
+        if (latest) { normalizeRoster(latest.rows); update(doc.getElementById('enlargedChalkboardContent'), view.render(latest.rows, latest.draft, combinedState(), latest.live)); }
+        if (!dialog.open) dialog.showModal();
       }
-      if (event.target.closest('[data-close-chalkboard]') || (dialog.open && event.target.closest('[data-roster-owner], [data-view-final-draft]'))) dialog.close();
+      if (event.target.closest?.('[data-close-chalkboard]') || (dialog.open && event.target.closest?.('[data-roster-owner], [data-view-final-draft]'))) dialog.close();
     }, true);
   }
 })(typeof window !== 'undefined' ? window : this, function (C) {
@@ -168,14 +235,39 @@
   function matchupGroup(row,live,bucket,label,instance){const roster=matchupRows(row,live,bucket),goalie=bucket==='G',columns=goalie?goalieColumns:skaterColumns;const table='<table class="pool-stat-table pool-roster-table pool-matchup-table"><caption class="pool-visually-hidden">'+esc(label)+' playing tonight and live fantasy stats for today.</caption><thead><tr><th class="pool-name-cell" scope="col">'+(goalie?'Team Goalies':'Player Name')+'</th><th class="pool-fpts-cell pool-fpts-first" scope="col">TODAY <small>FPTS</small></th>'+statHeaders(columns)+'</tr></thead><tbody>'+(roster.map(p=>{const line=todayLine(p,live),game=gameForTeam(p.nhlTeam,live);return '<tr class="pool-player pool-tonight-player" data-player-id="'+esc(p.id)+'"><th class="pool-name-cell" scope="row">'+cardTrigger(p,goalie,gameStatus(game,p.nhlTeam))+'</th><td class="pool-fpts-cell pool-fpts-first">'+fmt(line.fpts)+'</td>'+columns.map(([key])=>'<td>'+weighted(stat(line,key),key)+'</td>').join('')+'</tr>';}).join('')||'<tr><td colspan="6" class="pool-empty pool-tonight-empty">No drafted '+esc(label.toLowerCase())+' are scheduled tonight.</td></tr>')+'</tbody></table>';return '<section class="pool-position pool-matchup-position" data-position="'+bucket+'"><h4><span>'+esc(label)+' Tonight</span><em>'+roster.length+'</em></h4><div class="pool-stat-scroll" data-scroll-key="'+esc((instance||'tonight')+'-'+row.ownerId+'-'+bucket)+'" role="region" aria-label="'+esc(label)+' playing tonight" tabindex="0">'+table+'</div></section>';}
   function matchupCard(row,live,compareRole){if(!row)return'';const champion=row.ownerId==='andrew'?' data-champion="true"':'',compareAttr=compareRole?' data-compare-role="'+esc(compareRole)+'"':'',all=['F','D','G'].flatMap(bucket=>matchupRows(row,live,bucket)),todayTotal=all.reduce((s,p)=>s+todayLine(p,live).fpts,0);return '<article class="pool-roster pool-matchup-card"'+compareAttr+champion+' data-owner="'+esc(row.ownerId)+'" aria-label="'+esc(row.ownerName)+' tonight"><header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center"><span class="pool-roster-kicker">TONIGHT’S MATCHUP</span><h3>'+esc(row.ownerName)+'</h3><small class="pool-tonight-count">'+all.length+' drafted selection'+(all.length===1?'':'s')+' scheduled</small><small class="pool-mobile-roster-total">'+fmt(todayTotal)+' TODAY FPTS</small></div><span class="pool-roster-total"><b>'+fmt(todayTotal)+'</b><small>TODAY FPTS</small></span>'+mobileCardArrow(1)+'</header>'+matchupGroup(row,live,'F','Forwards','tonight')+matchupGroup(row,live,'D','Defence','tonight')+matchupGroup(row,live,'G','Team Goalies','tonight')+'</article>';}
   function comparePicker(side,row,rows){if(!row)return'';const options=(rows||[]).map(r=>'<option value="'+esc(r.ownerId)+'"'+(r.ownerId===row.ownerId?' selected':'')+'>'+esc(r.ownerName)+'</option>').join('');return '<div class="pool-compare-picker" data-compare-picker="'+side+'"><button type="button" data-compare-shift="-1" data-compare-side="'+side+'" aria-label="Previous manager on '+side+'">‹</button><div><span>'+(side==='left'?'TEAM ONE':'TEAM TWO')+'</span><select class="pool-compare-select" data-compare-select data-compare-side="'+side+'" aria-label="Choose '+(side==='left'?'team one':'team two')+' manager">'+options+'</select></div><button type="button" data-compare-shift="1" data-compare-side="'+side+'" aria-label="Next manager on '+side+'">›</button></div>';}
-  function modeSwitch(mode,live){const tonight=mode==='tonight',games=live?.today?.games?.length||0;return '<div class="pool-matchup-switch pool-roster-mode-switch"><button type="button" data-roster-mode aria-pressed="'+(tonight?'true':'false')+'"><span class="pool-matchup-switch-icon" aria-hidden="true">'+(tonight?'↩':'⚡')+'</span><span><strong>'+(tonight?'Season Rosters':'Tonight’s Matchup')+'</strong><small>'+(tonight?'Return roster cards to season totals':(games?games+' NHL game'+(games===1?'':'s')+' on today’s slate':'Live roster stats for tonight only'))+'</small></span></button></div>';}
-  function standingsSwitch(mode){const today=mode==='today';return '<button type="button" class="pool-standings-mode" data-standings-mode aria-pressed="'+(today?'true':'false')+'"><span aria-hidden="true">'+(today?'↩':'☀')+'</span><strong>'+(today?'Season Totals':'Today’s Totals')+'</strong></button>';}
-  function render(rows,draft,compareState,live){
-    const rosterOrder=['nick','andrew','scott','chris','tyler'],ordered=rosterOrder.map(id=>rows.find(r=>r.ownerId===id)).filter(Boolean),requested=compareState||{left:'nick',right:'andrew',mode:'season',standingsMode:'season'},mode=requested.mode==='tonight'?'tonight':'season',standingsMode=requested.standingsMode==='today'?'today':'season',left=ordered.find(r=>r.ownerId===requested.left)||ordered[0],right=ordered.find(r=>r.ownerId===requested.right&&r.ownerId!==left?.ownerId)||ordered.find(r=>r.ownerId!==left?.ownerId)||left;
+  function modeSwitch(mode,live){
+    const tonight=mode==='tonight',games=live?.today?.games?.length||0;
+    return '<div class="pool-matchup-switch pool-roster-mode-switch"><button type="button" data-roster-mode aria-pressed="'+(tonight?'true':'false')+'"><span class="pool-matchup-switch-icon" aria-hidden="true">'+(tonight?'↩':'⚡')+'</span><span><strong>'+(tonight?'Season Totals':'Tonight’s Matchup')+'</strong><small>'+(tonight?'Switch these roster cards back to season totals':(games?games+' NHL game'+(games===1?'':'s')+' on today’s slate':'Show live stats for tonight’s active roster players'))+'</small></span></button></div>';
+  }
+  function standingsSwitch(mode){
+    const today=mode==='today';
+    return '<button type="button" class="pool-standings-mode" data-standings-mode aria-pressed="'+(today?'true':'false')+'"><span aria-hidden="true">'+(today?'↩':'☀')+'</span><strong>'+(today?'Season Totals':'Today’s Totals')+'</strong></button>';
+  }
+  function orderedRows(rows){
+    const rosterOrder=['nick','andrew','scott','chris','tyler'];
+    return rosterOrder.map(id=>rows.find(r=>r.ownerId===id)).filter(Boolean);
+  }
+  function renderStandings(rows,draft,mode,live){
+    const standingsMode=mode==='today'?'today':'season';
     const displayRows=standingsMode==='today'?todayStandingRows(rows,live):rows;
-    const table='<table class="pool-stat-table pool-standings-table"><caption class="pool-visually-hidden">'+(standingsMode==='today'?'Today’s manager totals':'Manager season standings')+'. Parentheses show fantasy points earned from each scoring category.</caption><thead><tr><th class="pool-rank-cell" scope="col">#</th><th class="pool-name-cell" scope="col">Manager</th><th class="pool-fpts-cell pool-fpts-first" scope="col">Total<small>FPTS</small></th>'+statHeaders(skaterColumns)+'<th scope="col">Goalie<small>FPTS</small></th></tr></thead><tbody>'+displayRows.map(row=>{const totals=standingsMode==='today'?row._today:summary(row),rank=standingsMode==='today'?row._todayRank:row.rank,total=standingsMode==='today'?totals.total:row.total;return '<tr><td class="pool-rank-cell"><span class="pool-rank-badge">'+fmt(rank)+'</span></td><th class="pool-name-cell" scope="row"><button type="button" data-roster-owner="'+esc(row.ownerId)+'" data-board-focus="standing-'+esc(row.ownerId)+'">'+esc(row.ownerName)+'</button></th><td class="pool-fpts-cell pool-fpts-first">'+fmt(total)+'</td>'+skaterColumns.map(([key])=>'<td>'+weighted(totals[key],key)+'</td>').join('')+'<td><strong class="pool-goalie-total">'+fmt(totals.goalieFpts)+'</strong></td></tr>';}).join('')+'</tbody></table>';
-    const managerNav=ordered.map(row=>'<button type="button" data-roster-jump="'+esc(row.ownerId)+'">'+esc(row.ownerName)+'</button>').join(''),cards=ordered.map(row=>mode==='tonight'?matchupCard(row,live,row.ownerId===left?.ownerId?'left':(row.ownerId===right?.ownerId?'right':'')):rosterCard(row,'roster',row.ownerId===left?.ownerId?'left':(row.ownerId===right?.ownerId?'right':''))).join('');
-    return '<div class="pool-v273-dashboard pool-v275-dashboard pool-v276-dashboard pool-v277-dashboard pool-v278-dashboard" data-view-mode="'+mode+'" data-standings-mode="'+standingsMode+'"><section class="pool-standings pool-neon-module" aria-label="League standings"><header class="pool-module-title"><div class="pool-title-streak"></div><div><span class="pool-module-kicker">BASEMENT BAR LEAGUE · '+esc(C.seasonLabel(draft.seasonId))+'</span><h2>'+(standingsMode==='today'?'Today’s Totals':'Standings')+'</h2></div><div class="pool-standings-actions">'+standingsSwitch(standingsMode)+'<span class="pool-live-chip">LIVE</span></div></header><div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings statistics" tabindex="0">'+table+'</div><div class="pool-module-foot"><span>'+(standingsMode==='today'?'Live points earned today only.':'Numbers in parentheses = fantasy points earned from that stat.')+'</span><span>'+(draft.picks?.length||0)+'/60 draft picks saved</span></div></section><section class="pool-rosters" aria-label="Manager rosters"><div class="pool-rosters-desktop-controls"><header class="pool-rosters-mast pool-compare-mast"><div><span>'+(mode==='tonight'?'LIVE GAME-DAY VIEW':'HEAD-TO-HEAD TEAM VIEW')+'</span><h2>'+(mode==='tonight'?'Tonight’s Matchup':'Roster Comparison')+'</h2></div></header><div class="pool-roster-control-label">ROSTER VIEW · STANDINGS ABOVE ARE INDEPENDENT</div>'+modeSwitch(mode,live)+'<div class="pool-compare-toolbar">'+comparePicker('left',left,ordered)+'<span class="pool-versus" aria-hidden="true">VS</span>'+comparePicker('right',right,ordered)+'</div></div><div class="pool-rosters-mobile-controls"><header class="pool-rosters-mast pool-mobile-rosters-mast"><div><span>'+(mode==='tonight'?'TONIGHT’S ACTIVE PLAYERS':'LIVE TEAM CARDS')+'</span><h2>'+(mode==='tonight'?'Tonight':'Rosters')+'</h2></div></header>'+modeSwitch(mode,live)+'<nav class="pool-roster-jumpbar" aria-label="Jump to manager roster">'+managerNav+'</nav></div><div class="pool-roster-track pool-v275-roster-track pool-v276-roster-track" data-scroll-key="roster-track">'+cards+'</div></section><div class="pool-v273-record">'+(draft.locked?'<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · View complete draft record ↗</button>':'<span>Draft in progress · live rosters update automatically</span>')+'</div></div>';
+    const table='<table class="pool-stat-table pool-standings-table"><caption class="pool-visually-hidden">'+(standingsMode==='today'?'Today’s manager totals':'Manager season standings')+'. Parentheses show fantasy points earned from each scoring category.</caption><thead><tr><th class="pool-rank-cell" scope="col">#</th><th class="pool-name-cell" scope="col">Manager</th><th class="pool-fpts-cell pool-fpts-first" scope="col">Total<small>FPTS</small></th>'+statHeaders(skaterColumns)+'<th scope="col">Goalie<small>FPTS</small></th></tr></thead><tbody>'+displayRows.map(row=>{
+      const totals=standingsMode==='today'?row._today:summary(row),rank=standingsMode==='today'?row._todayRank:row.rank,total=standingsMode==='today'?totals.total:row.total;
+      return '<tr><td class="pool-rank-cell"><span class="pool-rank-badge">'+fmt(rank)+'</span></td><th class="pool-name-cell" scope="row"><button type="button" data-roster-owner="'+esc(row.ownerId)+'" data-board-focus="standing-'+esc(row.ownerId)+'">'+esc(row.ownerName)+'</button></th><td class="pool-fpts-cell pool-fpts-first">'+fmt(total)+'</td>'+skaterColumns.map(([key])=>'<td>'+weighted(totals[key],key)+'</td>').join('')+'<td><strong class="pool-goalie-total">'+fmt(totals.goalieFpts)+'</strong></td></tr>';
+    }).join('')+'</tbody></table>';
+    return '<section class="pool-standings pool-neon-module" aria-label="League standings"><header class="pool-module-title"><div class="pool-title-streak"></div><div><span class="pool-module-kicker">BASEMENT BAR LEAGUE · '+esc(C.seasonLabel(draft.seasonId))+'</span><h2>'+(standingsMode==='today'?'Today’s Totals':'Standings')+'</h2></div><div class="pool-standings-actions">'+standingsSwitch(standingsMode)+'<span class="pool-live-chip">LIVE</span></div></header><div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings statistics" tabindex="0">'+table+'</div><div class="pool-module-foot"><span>'+(standingsMode==='today'?'Live points earned today only.':'Numbers in parentheses = fantasy points earned from that stat.')+'</span><span>'+(draft.picks?.length||0)+'/60 draft picks saved</span></div></section>';
+  }
+  function renderRosters(rows,draft,rosterState,live){
+    const ordered=orderedRows(rows),requested=rosterState||{left:'nick',right:'andrew',mode:'season'},mode=requested.mode==='tonight'?'tonight':'season';
+    const left=ordered.find(r=>r.ownerId===requested.left)||ordered[0];
+    const right=ordered.find(r=>r.ownerId===requested.right&&r.ownerId!==left?.ownerId)||ordered.find(r=>r.ownerId!==left?.ownerId)||left;
+    const managerNav=ordered.map(row=>'<button type="button" data-roster-jump="'+esc(row.ownerId)+'">'+esc(row.ownerName)+'</button>').join('');
+    const cards=ordered.map(row=>mode==='tonight'?matchupCard(row,live,row.ownerId===left?.ownerId?'left':(row.ownerId===right?.ownerId?'right':'')):rosterCard(row,'roster',row.ownerId===left?.ownerId?'left':(row.ownerId===right?.ownerId?'right':''))).join('');
+    return '<section class="pool-rosters" aria-label="Manager rosters"><div class="pool-rosters-desktop-controls"><header class="pool-rosters-mast pool-compare-mast"><div><span>'+(mode==='tonight'?'LIVE GAME-DAY VIEW':'HEAD-TO-HEAD TEAM VIEW')+'</span><h2>'+(mode==='tonight'?'Tonight’s Matchup':'Roster Comparison')+'</h2></div></header><div class="pool-roster-control-label">ROSTER VIEW · INDEPENDENT FROM STANDINGS</div>'+modeSwitch(mode,live)+'<div class="pool-compare-toolbar">'+comparePicker('left',left,ordered)+'<span class="pool-versus" aria-hidden="true">VS</span>'+comparePicker('right',right,ordered)+'</div></div><div class="pool-rosters-mobile-controls"><header class="pool-rosters-mast pool-mobile-rosters-mast"><div><span>'+(mode==='tonight'?'TONIGHT’S ACTIVE PLAYERS':'LIVE TEAM CARDS')+'</span><h2>'+(mode==='tonight'?'Tonight':'Rosters')+'</h2></div></header>'+modeSwitch(mode,live)+'<nav class="pool-roster-jumpbar" aria-label="Jump to manager roster">'+managerNav+'</nav></div><div class="pool-roster-track pool-v275-roster-track pool-v276-roster-track" data-scroll-key="roster-track">'+cards+'</div></section>';
+  }
+  function render(rows,draft,compareState,live){
+    const requested=compareState||{left:'nick',right:'andrew',mode:'season',standingsMode:'season'};
+    const mode=requested.mode==='tonight'?'tonight':'season',standingsMode=requested.standingsMode==='today'?'today':'season';
+    return '<div class="pool-v273-dashboard pool-v275-dashboard pool-v276-dashboard pool-v277-dashboard pool-v278-dashboard pool-v279-dashboard" data-view-mode="'+mode+'" data-standings-mode="'+standingsMode+'"><div data-pool-standings-host>'+renderStandings(rows,draft,standingsMode,live)+'</div><div data-pool-rosters-host>'+renderRosters(rows,draft,{left:requested.left,right:requested.right,mode},live)+'</div><div class="pool-v273-record">'+(draft.locked?'<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · View complete draft record ↗</button>':'<span>Draft in progress · live rosters update automatically</span>')+'</div></div>';
   }
   function dateLabel(v){const s=String(v||'');if(!/^\d{4}-\d{2}-\d{2}/.test(s))return s||'—';const [y,m,d]=s.slice(0,10).split('-').map(Number);return new Intl.DateTimeFormat('en-CA',{month:'short',day:'numeric'}).format(new Date(y,m-1,d));}
   function cardStatsTable(data){const goalie=data.type==='teamGoalie',cols=goalie?goalieColumns:skaterColumns;return '<div class="pool-card-last-five"><h4>LAST 5 GAMES</h4><div class="pool-card-table-scroll"><table><thead><tr><th>DATE</th><th>GAME</th><th>FPTS</th>'+cols.map(([,short])=>'<th>'+esc(short)+'</th>').join('')+'</tr></thead><tbody>'+(data.last5||[]).map(g=>'<tr'+(g.live?' class="is-live"':'')+'><td>'+esc(dateLabel(g.date))+(g.live?'<small>LIVE</small>':'')+'</td><td>'+esc(g.label||('vs '+(g.opponent||'')))+'</td><td><strong>'+fmt(g.fpts)+'</strong></td>'+cols.map(([key])=>'<td>'+fmt(stat(g,key))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></div>';}
@@ -187,5 +279,5 @@
     return '<article class="pool-opc-card '+(goalie?'is-goalie-unit':'')+'"><header class="pool-opc-brand"><span>#'+esc(cardNumber||'96')+'</span><em>1996 SERIES</em></header><div class="pool-opc-frame"><div class="pool-opc-hero">'+hero+'<div class="pool-opc-logo-block"><img src="'+esc(logo||'')+'" alt="" onerror="this.style.display=\'none\'"></div><div class="pool-opc-nameplate"><span>'+esc(goalie?'TEAM GOALIE UNIT':team)+'</span><strong>'+esc(name)+'</strong></div></div><div class="pool-opc-position">'+esc(goalie?'GOALTENDER UNIT':((identity?.position||'PLAYER')+' · '+team))+'</div>'+cardStatsTable(data)+'<div class="pool-card-rolling"><h4>RECENT FORM</h4><div>'+rollingBlock('LAST 10',data.last10,goalie)+rollingBlock('LAST 25',data.last25,goalie)+'</div></div></div><footer><span>'+esc(C.seasonLabel(data.season||''))+'</span><strong>FANTASY GAME LOG</strong><span>'+esc(goalie?team:'#'+(identity?.id||''))+'</span></footer></article>';
   }
 
-  return {render,rosterCard,rosterGroup,matchupCard,matchupGroup,summary,stat,gameForTeam,todayLine,todaySummary,todayStandingRows,cardMarkup,escape:esc};
+  return {render,renderStandings,renderRosters,rosterCard,rosterGroup,matchupCard,matchupGroup,summary,stat,gameForTeam,todayLine,todaySummary,todayStandingRows,cardMarkup,escape:esc};
 });
