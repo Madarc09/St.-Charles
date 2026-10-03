@@ -25,3 +25,11 @@ For any future draft rehearsal use Admin → Open test room on both devices and 
 - [ ] Mobile: one roster card occupies the useful width at a time; swipe/arrows and manager chips navigate all five.
 - [ ] Clicking a manager in standings or the roster heading still opens that manager's roster room.
 - [ ] Live NHL status and stat refresh continue to update without changing the visual layout.
+
+## v274 desktop arena polish
+- [ ] Desktop roster rows stay dark (no white legacy-theme zebra rows).
+- [ ] Andrew and other managers share the same dark table body; manager/champion color is trim only.
+- [ ] Roster table headers read G / A / SHG / GWG without collision at 1280px desktop width.
+- [ ] FPTS column is consistently gold across all roster cards.
+- [ ] Two roster cards remain readable side-by-side on typical desktop widths.
+- [ ] Mobile layout/spacing/colors remain identical to v273.

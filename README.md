@@ -57,3 +57,11 @@ Run npm test with modern Node.js. npm run preview:test starts a loopback-only lo
 - Current champion Andrew receives a warm red/orange card treatment while the league board remains cyan/blue neon.
 - Theme-picker UI is intentionally hidden on Home for this release so v273 can be refined as one approved theme before additional themes are reintroduced.
 - No changes were made to scoring rules, NHL data collection, Redis/shared draft state, final-draft integrity, roster ownership, or season history.
+
+## v274 — Desktop arena polish
+- Leaves the approved v273 phone layout unchanged.
+- Removes the legacy theme zebra-striping that leaked bright rows into the desktop roster tables.
+- Uses one dark arena-steel body palette across every manager card; cyan/orange are trim accents rather than full-card fills.
+- Uses a consistent gold FPTS column for every manager.
+- Uses compact G / A / SHG / GWG roster headers on desktop so two-card layouts remain readable.
+- Keeps two roster cards side-by-side on normal desktop widths and falls back to one large card only on narrower tablet/laptop widths.
