@@ -1,12 +1,12 @@
-# Check v271 on your phone and computer
+# Check v272 on your phone and computer
 
 These checks do not change the draft or season.
 
 1. Open the deployed website on your phone and computer. Refresh once after Vercel finishes.
 2. On the phone, choose Arcade Hockey from Choose your theme near the bottom links (or Theme above the standings). On the computer, choose Ice Level. Confirm the two screens retain their separate choices.
 3. Close and reopen each browser page. The phone should still use Arcade Hockey and the computer Ice Level. Try another theme at any time; changes save immediately. Clearing site data or using private browsing can reset this preference.
-4. Check all five choices. Confirm the same players and points appear in every theme. There should be no example/sample scores.
-5. On the phone, swipe a standings or roster table horizontally. Names and final FPTS remain visible while the middle stats scroll. Check the last column and long goalie-team names. The whole page should not scroll sideways.
+4. Check all five choices. Confirm the same players and points appear in every theme. The high-detail frames should match the approved concept art: arcade neon, arena steel, chalkboard, newspaper and modern ice. No example/sample scores should remain visible behind the live table.
+5. On the phone, confirm the top locker-room art is one compact horizontal strip and the standings/roster panels use the phone artwork rather than a squeezed desktop panel. All current columns should remain readable and the whole page must not scroll sideways.
 6. Check that all five roster sections show 6 forwards, then 4 defence, then 2 team-goalie units. Stat headings include their scoring weights.
 7. Check the original header links: draft, trophy room and each jersey. Andrew remains the large orange 28 champion; Nick 09, Scott 81, Tyler 91 and Chris 34 retain the original navy-and-cream artwork.
 8. Use Enlarge board, then close it. Its theme and live data should match the page. The manager names still open their roster rooms.

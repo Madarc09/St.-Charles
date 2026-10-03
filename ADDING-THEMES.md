@@ -4,7 +4,7 @@ All five themes use one live board. A theme only changes appearance; it does not
 
 1. Add one entry to the themes array in assets/js/home-themes.js. Give it a permanent, unique lowercase id, a name and a short description.
 2. Add a matching block to assets/css/home-themes.css. Copy an existing theme block and change its colour, font and background variables. Include both selectors: :root[data-pool-theme="your-id"] and [data-preview-theme="your-id"]. The second selector makes its chooser preview match.
-3. Add any extra decoration under html[data-pool-theme="your-id"] selectors. Keep it scoped to the homepage, board and theme chooser. Put new background assets in assets/images/themes. Keep text and scores as HTML, never embedded in a background image.
+3. Add any extra decoration under html[data-pool-theme="your-id"] selectors. Keep it scoped to the homepage, board and theme chooser. Put new background assets in assets/images/themes. v272 may use a high-detail approved reference image as a frame/visual plate, but sample names/numbers must be covered by the live HTML table. Never make a changing score depend on pixels in the artwork.
 4. Bump the cache query on the two changed files in index.html. Do not rename existing theme ids or change the localStorage key when increasing the website version.
 5. Run npm test, then check a wide screen and a 390px phone layout. Choose the new theme, reload and verify it remains selected. Check a separate browser still retains its own choice.
 
