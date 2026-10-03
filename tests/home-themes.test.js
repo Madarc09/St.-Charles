@@ -213,3 +213,27 @@ test('v283 browser-side fantasy rank uses PoolCore instead of undefined factory 
   assert.ok(browserController.includes('core?.points?.(player)'));
   assert.ok(!/\bC\.points\s*\(/.test(browserController));
 });
+
+test('v284 card integrates crest with bio, places rank before draft copy, and adds season totals/team styling', () => {
+  const V284 = require('../assets/js/home-board-v284');
+  const card=V284.cardMarkup({
+    type:'skater',season:'20262027',
+    player:{id:'8477939',name:'William Nylander',team:'TOR',position:'R',headshot:'headshot.png',teamLogo:'tor-logo.svg',
+      bio:{jerseyNumber:88,heightInInches:72,weightInPounds:204,shootsCatches:'R',birthDate:'1996-05-01',birthCity:'Calgary',birthCountry:'CAN'},
+      nhlDraft:{team:'TOR',teamName:'Toronto Maple Leafs',round:1,pick:8,overallPick:8}},
+    fantasyDraft:{teamName:'Glizzy Disposal',round:1,pick:2},fantasyRank:{rank:4,fieldSize:50,fpts:12,scope:'skaters'},
+    seasonTotals:{goals:2,assists:3,shortHandedGoals:1,gameWinningGoals:1,fpts:17},last5:[],last10:{},last25:{}
+  });
+  assert.ok(card.includes('pool-opc-bio-logo'));
+  assert.ok(card.includes('pool-opc-watermark'));
+  assert.ok(card.includes('--opc-team-primary:#003E7E'));
+  assert.ok(card.includes('CURRENT SEASON TOTALS'));
+  assert.ok(card.includes('<span>FPTS</span><strong>17</strong>'));
+  const heroEnd=card.indexOf('</div><div class="pool-opc-position">');
+  const positionAt=card.indexOf('R · Toronto Maple Leafs · RANKED #4 IN FANTASY PTS');
+  const draftAt=card.indexOf('Drafted in the NHL by the Toronto Maple Leafs');
+  const totalsAt=card.indexOf('CURRENT SEASON TOTALS');
+  const lastFiveAt=card.indexOf('LAST 5 GAMES');
+  assert.ok(heroEnd>=0 && positionAt>heroEnd && draftAt>positionAt && totalsAt>draftAt && lastFiveAt>totalsAt);
+  assert.equal((card.match(/TO BE PLAYED/g)||[]).length,5);
+});

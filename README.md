@@ -87,3 +87,10 @@ Run npm test with modern Node.js. npm run preview:test starts a loopback-only lo
 - Clicking/tapping a team-goalie unit opens a distinct multi-goalie card showing NHL headshots for goalies who have appeared for that club, plus the team unit's recent-game fantasy totals.
 - Recent-game data is loaded on demand from NHL player game logs; live today scoring is layered in when available.
 - No scoring weights, draft ownership, final-draft protection, Redis keys, or season-history behavior changed.
+
+## v284 player-card update
+- Team-colour card trim and a subtle NHL crest watermark.
+- Team crest moved into the upper-right of the player bio panel.
+- Position/team/fantasy rank moved directly beneath the photo/bio panel.
+- Current-season totals added above the Last 5 game log.
+- Existing v283 mobile Tonight matchup and Home control fixes remain unchanged.
