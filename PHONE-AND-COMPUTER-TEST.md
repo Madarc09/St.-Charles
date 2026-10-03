@@ -33,3 +33,10 @@ For any future draft rehearsal use Admin → Open test room on both devices and 
 - [ ] FPTS column is consistently gold across all roster cards.
 - [ ] Two roster cards remain readable side-by-side on typical desktop widths.
 - [ ] Mobile layout/spacing/colors remain identical to v273.
+
+## v275 comparison checks
+- Desktop (>700px): exactly two roster cards are visible at once.
+- Desktop: left and right arrow controls change only their own comparison side; the same manager is not shown on both sides when alternatives exist.
+- Mobile (<=700px): all five rosters remain available one card at a time in the horizontal carousel.
+- Roster tables: horizontally scroll G/A/SHG/GWG/FPTS and confirm Player Name / Team Goalies stays pinned on the left.
+- Standings: horizontally scroll and confirm rank + manager stay pinned on the left.

@@ -65,3 +65,11 @@ Run npm test with modern Node.js. npm run preview:test starts a loopback-only lo
 - Uses a consistent gold FPTS column for every manager.
 - Uses compact G / A / SHG / GWG roster headers on desktop so two-card layouts remain readable.
 - Keeps two roster cards side-by-side on normal desktop widths and falls back to one large card only on narrower tablet/laptop widths.
+
+## v275 home roster comparison
+- Desktop Home now renders exactly two large roster cards in a head-to-head comparison layout.
+- Each side has independent previous/next manager controls, so one manager can stay fixed while the other cycles through opponents.
+- Mobile keeps the one-card-at-a-time roster carousel from v273/v274.
+- Player/team names are frozen on the left while roster stat tables scroll horizontally.
+- Standings rank + manager columns are also frozen during horizontal scrolling.
+- No scoring, NHL, Redis, draft, history, or roster ownership logic changed.
