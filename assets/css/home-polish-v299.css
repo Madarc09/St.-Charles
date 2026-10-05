@@ -1,0 +1,77 @@
+/* Larger roster totals without changing the chart/ice controls or theme colours. */
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-roster-heading-center {
+  min-width:0!important;flex:1;
+}
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-roster-heading .pool-roster-total {
+  flex:none;gap:5px!important;padding-left:12px!important;
+}
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-roster-heading .pool-roster-total b {
+  font-size:clamp(40px,4.5vw,56px)!important;font-weight:900!important;line-height:.95!important;
+  letter-spacing:-.025em!important;font-variant-numeric:tabular-nums;
+}
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-roster-heading .pool-roster-total small {
+  font-size:10px!important;font-weight:800!important;letter-spacing:.06em!important;
+}
+@media(max-width:700px){
+  :is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-mobile-roster-total {
+    display:flex!important;align-items:baseline;justify-content:center;gap:6px!important;
+    margin-top:7px!important;white-space:nowrap;
+  }
+  :is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-mobile-roster-total b {
+    font-size:clamp(28px,8vw,36px)!important;font-weight:900!important;line-height:1!important;
+    letter-spacing:-.025em!important;font-variant-numeric:tabular-nums;
+  }
+  :is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-mobile-roster-total span {
+    font-size:10px!important;font-weight:800!important;letter-spacing:.02em!important;
+  }
+}
+
+/* Move only the standings toggle beneath the two existing Top 5 panels. */
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-v299-standings-controls {
+  grid-column:2 / -1!important;grid-row:2!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;width:100%!important;
+  padding-top:3px!important;
+}
+:is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-v299-standings-controls button {
+  min-height:40px!important;padding:8px 15px!important;font-size:11px!important;
+}
+@media(min-width:701px){
+  :is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-v287-standings-heading {
+    grid-row:1 / span 2!important;
+  }
+}
+@media(max-width:700px){
+  :is(#dashboard #seasonBoard,#enlargedChalkboardContent) .pool-v299-standings-controls {
+    grid-column:1 / -1!important;grid-row:auto!important;
+  }
+}
+
+/* Real NHL crests sit on the existing ice, below the interactive player cards. */
+:is(#seasonBoard,#enlargedChalkboardContent) .rink-centre-logo {
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:30%;max-width:175px;max-height:11%;object-fit:contain;
+  opacity:.8;mix-blend-mode:multiply;pointer-events:none;z-index:0;
+}
+:is(#seasonBoard,#enlargedChalkboardContent) .dream-rink-player {z-index:1}
+:is(#seasonBoard,#enlargedChalkboardContent) .rink-player-availability {
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:#dae7f0!important;font:700 11px/1.25 Arial,sans-serif!important;
+}
+:is(#seasonBoard,#enlargedChalkboardContent) .rink-player-availability.is-playing {color:#b8f3d0!important}
+:is(#seasonBoard,#enlargedChalkboardContent) .rink-player-availability small {
+  color:inherit!important;font:600 10px/1.2 Arial,sans-serif!important;
+}
+/* Daily Dream Team cards have both ownership and game labels. */
+:is(#seasonBoard,#enlargedChalkboardContent) .pool-dream-rink-card.is-daily-ice .dream-rink {min-height:1500px}
+
+/* The mobile room scene pans horizontally. Keep its links centred in the viewport. */
+@media(max-width:760px){
+  #rosters.active .v174-photo-only-stall .v174-stall-stage > nav.v174-stall-nav.v219-bottom-stall-nav {
+    position:fixed!important;left:50%!important;right:auto!important;top:auto!important;
+    bottom:max(10px,env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;
+    width:max-content!important;max-width:calc(100vw - 20px)!important;box-sizing:border-box!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+    justify-content:center!important;align-items:center!important;gap:5px!important;
+    margin:0!important;padding:6px 8px!important;overflow:visible!important;z-index:999!important;
+  }
+}

@@ -341,9 +341,9 @@
     return '<button type="button" class="pool-roster-view-toggle" data-roster-view-toggle="'+esc(row.ownerId)+'" data-roster-view="'+presentation+'" aria-pressed="'+ice+'" aria-label="'+esc(action)+'" title="'+esc(action)+'"><span>'+esc(row.ownerName)+'</span><span class="pool-roster-view-symbol" aria-hidden="true">↻</span></button>';
   }
   function rosterHeading(row,total,pointsLabel,presentation,mode='season',scheduled=null){
-    const daily=mode!=='season',kicker=daily?rosterDayShort(mode).toUpperCase()+' MATCHUP':row.isDream?'CURRENT SEASON LEADERS':row.isBot?'BOT ROSTER · THE SPARE PARTS':'MANAGER ROSTER';
+    const daily=mode!=='season',kicker=daily?rosterDayShort(mode).toUpperCase()+' MATCHUP':row.isDream?'CURRENT SEASON LEADERS':row.isBot?'BOT ROSTER · THE SPARE PARTS':'';
     const count=daily&&scheduled!==null?'<small class="pool-tonight-count">'+scheduled+(row.isBot||row.isDream?' selection':' drafted selection')+(scheduled===1?'':'s')+' scheduled</small>':'';
-    return '<header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center"><span class="pool-roster-kicker">'+esc(kicker)+'</span><h3>'+rosterNameToggle(row,presentation)+'</h3><small class="pool-roster-view-hint">Tap name for '+(presentation==='ice'?'chart':'ice')+' view</small>'+count+'<small class="pool-mobile-roster-total">'+fmt(total)+' '+esc(pointsLabel)+'</small></div><span class="pool-roster-total"><b>'+fmt(total)+'</b><small>'+esc(pointsLabel)+'</small></span>'+mobileCardArrow(1)+'</header>';
+    return '<header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center">'+(kicker?'<span class="pool-roster-kicker">'+esc(kicker)+'</span>':'')+'<h3>'+rosterNameToggle(row,presentation)+'</h3><small class="pool-roster-view-hint">Tap name for '+(presentation==='ice'?'chart':'ice')+' view</small>'+count+'<small class="pool-mobile-roster-total"><b>'+fmt(total)+'</b><span>'+esc(pointsLabel)+'</span></small></div><span class="pool-roster-total"><b>'+fmt(total)+'</b><small>'+esc(pointsLabel)+'</small></span>'+mobileCardArrow(1)+'</header>';
   }
   function goaliePortraits(team,live){
     return (live?.goalies||[]).filter(g=>String(g.teamAbbrevs||g.teamAbbrev||'').split(/[,/\s]+/).includes(team))
@@ -352,17 +352,23 @@
   }
   function rinkPlayers(row,live){
     return (row.players||[]).map(p=>({...p,
-      dreamOwnerLabel:row.isDream?p.dreamOwnerLabel:row.isBot?'Undrafted ('+(row.teamName||'The Spare Parts')+')':'Team: '+row.ownerName,
+      dreamOwnerLabel:row.isDream?p.dreamOwnerLabel:'',
       dreamGoalies:C.bucket(p)==='G'?(p.dreamGoalies||goaliePortraits(p.nhlTeam,live)):[]
     }));
   }
   function dreamRinkPlayer(p,x,y,live,mode){
     if(!p)return '';
     const goalie=C.bucket(p)==='G',daily=mode!=='season',game=daily?gameForTeam(p.nhlTeam,live,mode):null;
+    const scheduleKnown=Array.isArray(dayPayload(live,mode)?.games),offDay=daily&&scheduleKnown&&!game;
+    const opponent=game?(game.away===p.nhlTeam?game.home:game.away):'';
+    const availability=!daily?'':!scheduleKnown?'Schedule unavailable':game?'On the ice':'On the bench';
+    const ownership=p.dreamOwnerLabel?'<span class="dream-player-owner">'+esc(p.dreamOwnerLabel)+'</span>':'';
+    const status=availability?'<span class="rink-player-availability'+(game?' is-playing':offDay?' is-benched':' is-unavailable')+'"><span>'+esc(availability)+'</span>'+(opponent?'<small title="'+esc(C.TEAMS[opponent]||opponent)+'">vs '+esc(opponent)+'</small>':'')+'</span>':'';
     const points=daily?dailyLine(p,live,mode).fpts:C.points(p),label=goalie?(C.TEAMS[p.nhlTeam]||p.nhlTeam)+' Goalies':p.name,displayName=goalie?p.nhlTeam+' Goalies':p.name;
     const logo='https://assets.nhle.com/logos/nhl/svg/'+encodeURIComponent(p.nhlTeam||'')+'_light.svg';
     const portrait=goalie?'<span class="dream-goalie-portraits"><img class="dream-goalie-crest" src="'+logo+'" alt="" onerror="this.style.display=\'none\'">'+(p.dreamGoalies||[]).map(g=>'<img class="dream-goalie-face" src="https://assets.nhle.com/mugs/nhl/latest/'+encodeURIComponent(g.id)+'.png" alt="'+esc(g.name)+'" loading="lazy" onerror="this.style.display=\'none\'">').join('')+'</span>':'<span class="dream-skater-portrait"><span aria-hidden="true">'+esc(initials(p.name))+'</span><img src="https://assets.nhle.com/mugs/nhl/latest/'+encodeURIComponent(p.id)+'.png" alt="" loading="lazy" onerror="this.style.display=\'none\'"><img class="dream-team-crest" src="'+logo+'" alt="" onerror="this.style.display=\'none\'"></span>';
-    return '<button type="button" class="dream-rink-player'+(goalie?' is-goalie':'')+(daily&&!game?' is-off-day':'')+'" style="--dream-x:'+x+'%;--dream-y:'+y+'%" data-dream-position="'+C.bucket(p)+'" data-player-card data-card-kind="'+(goalie?'teamGoalie':'skater')+'" data-player-id="'+esc(p.id)+'" data-team="'+esc(p.nhlTeam)+'" aria-label="'+esc(label+', '+fmt(points)+' fantasy points, '+p.dreamOwnerLabel)+'. Open hockey card">'+portrait+'<span class="dream-player-label"><strong>'+esc(displayName)+'</strong><span class="dream-player-points">'+fmt(points)+' <small>FPTS</small></span><span class="dream-player-owner">'+esc(p.dreamOwnerLabel)+'</span>'+(daily&&!game?'<small class="dream-off-day">No game</small>':'')+'</span></button>';
+    const accessible=[label,fmt(points)+' fantasy points',p.dreamOwnerLabel,availability,opponent?'vs '+(C.TEAMS[opponent]||opponent):''].filter(Boolean).join(', ');
+    return '<button type="button" class="dream-rink-player'+(goalie?' is-goalie':'')+(offDay?' is-off-day':'')+'" style="--dream-x:'+x+'%;--dream-y:'+y+'%" data-dream-position="'+C.bucket(p)+'" data-player-card data-card-kind="'+(goalie?'teamGoalie':'skater')+'" data-player-id="'+esc(p.id)+'" data-team="'+esc(p.nhlTeam)+'" aria-label="'+esc(accessible)+'. Open hockey card">'+portrait+'<span class="dream-player-label"><strong>'+esc(displayName)+'</strong><span class="dream-player-points">'+fmt(points)+' <small>FPTS</small></span>'+ownership+status+'</span></button>';
   }
   function iceRinkCard(row,live,compareRole,mode='season'){
     const players=rinkPlayers(row,live);
@@ -373,7 +379,9 @@
     const pointsLabel=daily?rosterDayShort(mode,live).toUpperCase()+' FPTS':'SEASON FPTS';
     const slots=[[goalies[0],50,9],[defence[0],31,24],[defence[1],69,24],[forwards[0],19,40],[forwards[1],50,40],[forwards[2],81,40],[forwards[3],19,60],[forwards[4],50,60],[forwards[5],81,60],[defence[2],31,76],[defence[3],69,76],[goalies[1],50,91]];
     const champion=row.ownerId==='andrew'?' data-champion="true"':'';
-    return '<article class="pool-roster pool-ice-rink-card'+(row.isDream?' pool-dream-rink-card':'')+'"'+(compareRole?' data-compare-role="'+esc(compareRole)+'"':'')+champion+' data-owner="'+esc(row.ownerId)+'" data-roster-presentation="ice" aria-label="'+esc(row.ownerName)+' rink lineup">'+rosterHeading(row,total,pointsLabel,'ice',mode,daily?scheduled.length:null)+'<p class="dream-rink-caption">'+forwards.length+' forwards · '+defence.length+' defence · '+goalies.length+' goalie groups <span>Tap a player to open their card</span></p>'+dreamRosterCounts(row)+'<div class="dream-rink" aria-label="Goalies at the nets, defence behind each blue line, forwards near centre ice">'+(players.length?slots.map(([p,x,y])=>dreamRinkPlayer(p,x,y,live,mode)).join(''):'<p class="dream-rink-loading">'+(row.isDream?'Loading the Dream Team…':'No selections yet.')+'</p>')+'</div></article>';
+    const rinkTeam=row.ownerId==='andrew'?'PHI':'TOR';
+    const centreLogo='<img class="rink-centre-logo" data-rink-logo="'+rinkTeam+'" src="https://assets.nhle.com/logos/nhl/svg/'+rinkTeam+'_light.svg" alt="" aria-hidden="true" loading="lazy" onerror="this.style.display=\'none\'">';
+    return '<article class="pool-roster pool-ice-rink-card'+(row.isDream?' pool-dream-rink-card':'')+(daily?' is-daily-ice':'')+'"'+(compareRole?' data-compare-role="'+esc(compareRole)+'"':'')+champion+' data-owner="'+esc(row.ownerId)+'" data-roster-presentation="ice" aria-label="'+esc(row.ownerName)+' rink lineup">'+rosterHeading(row,total,pointsLabel,'ice',mode,daily?scheduled.length:null)+dreamRosterCounts(row)+'<div class="dream-rink" aria-label="Goalies at the nets, defence behind each blue line, forwards near centre ice">'+centreLogo+(players.length?slots.map(([p,x,y])=>dreamRinkPlayer(p,x,y,live,mode)).join(''):'<p class="dream-rink-loading">'+(row.isDream?'Loading the Dream Team…':'No selections yet.')+'</p>')+'</div></article>';
   }
   function rosterCard(row,instance,compareRole,presentation,live){
     if(!row)return '';
@@ -577,7 +585,7 @@
       return '<tr><td class="pool-rank-cell"><span class="pool-rank-badge">'+fmt(rank)+'</span></td><th class="pool-name-cell" scope="row"><button type="button" '+(row.isBot?'data-bot-compare aria-label="Compare the BOT roster"':'data-roster-owner="'+esc(row.ownerId)+'"')+' data-board-focus="standing-'+esc(row.ownerId)+'">'+esc(row.ownerName)+'</button></th><td class="pool-fpts-cell pool-fpts-first">'+fmt(total)+'</td>'+skaterColumns.map(([key])=>'<td>'+weighted(totals[key],key)+'</td>').join('')+'<td><strong class="pool-goalie-total">'+fmt(totals.goalieFpts)+'</strong></td></tr>';
     }).join('')+'</tbody></table>';
     const currentLabel=standingsMode==='today'?'TODAY’S SCORES':'SEASON STANDINGS';
-    const header='<header class="pool-v280-standings-header pool-v287-standings-header"><div class="pool-v287-standings-heading"><h2>Standings</h2><div class="pool-v287-current-view"><span>Current View</span><strong>'+currentLabel+'</strong></div><div class="pool-v280-standings-controls">'+standingsSwitch(standingsMode)+'</div></div>'+topFantasyPanel(rows,false,live,draft)+topFantasyPanel(rows,true,live,draft)+'</header>';
+    const header='<header class="pool-v280-standings-header pool-v287-standings-header"><div class="pool-v287-standings-heading"><h2>Standings</h2><div class="pool-v287-current-view"><span>Current View</span><strong>'+currentLabel+'</strong></div></div>'+topFantasyPanel(rows,false,live,draft)+topFantasyPanel(rows,true,live,draft)+'<div class="pool-v280-standings-controls pool-v299-standings-controls">'+standingsSwitch(standingsMode)+'</div></header>';
     return '<section class="pool-standings pool-neon-module pool-v280-standings" aria-label="League standings">'+header+'<div class="pool-stat-scroll" data-scroll-key="standings" role="region" aria-label="Standings statistics" tabindex="0">'+table+'</div><div class="pool-module-foot"><span>'+(standingsMode==='today'?'Showing live fantasy points earned today only.':'Season totals · numbers in parentheses show fantasy points from that stat.')+'</span><span>'+(draft.picks?.length||0)+'/60 draft picks saved</span></div></section>';
   }
   function renderRosters(rows,draft,rosterState,live){

@@ -33,7 +33,7 @@ test('all five managers and BOT start as charts and render their own exact 6F/4D
   for(const [bucket,count] of [['F',6],['D',4],['G',2]])assert.equal((ice.match(new RegExp('data-dream-position="'+bucket+'"','g'))||[]).length,count);
   assert.deepEqual([...ice.matchAll(/data-player-id="([^"]+)"/g)].map(m=>m[1]).sort(),row.players.map(p=>String(p.id)).sort());
   assert.ok(!ice.includes('<table'));assert.equal(total(ice),total(chart));
-  assert.ok(ice.includes(row.isBot?'Undrafted (The Spare Parts)':'Team: '+row.ownerName));
+  assert.ok(!ice.includes('class="dream-player-owner"'),'Named roster ice cards omit redundant ownership');
   assert.equal((ice.match(/class="dream-goalie-face"/g)||[]).length,4);
   if(row.ownerId==='andrew')assert.ok(ice.includes('data-champion="true"'));
  }
