@@ -1,30 +1,17 @@
-# Hockey Pool v296 — Dream Team Rink and Hockey-Card Scores
+# Hockey Pool v297 — Dream Team Spacing
 
-Apply this small update over v295 in the same GitHub repository.
+This small patch updates v296.
 
-1. Extract `Hockey-Pool-v295-to-v296-DREAM-RINK-SCORES-PATCH.zip`.
-2. Upload the files and folders **inside** it to the repository root. Replace matching files and keep every other file. Do not upload the ZIP itself as the website.
-3. Commit and let the existing Vercel integration deploy. Refresh the site after deployment.
+1. Extract `Hockey-Pool-v296-to-v297-DREAM-SPACING-PATCH.zip`.
+2. Upload its files and folders to the root of your existing GitHub repository, replacing matching files and keeping everything else.
+3. Commit, let Vercel deploy, and refresh the page.
 
-## Dream Team
+## Changes
 
-- The existing Dream Team comparison now uses an arena rink background, with 6 forwards near centre, 4 defence behind the blue lines and 2 goalie groups at the nets.
-- Large real NHL headshots show the name, fantasy points and roster owner. Tap a portrait to open its hockey card.
-- Labels read `Team: Nick` (or the actual manager), `Undrafted`, or `Undrafted (The Spare Parts)` for BOT selections.
-- The count of selections belonging to each roster remains beneath the rink.
-- The lineup continues to update from the best current-season FPTS. The existing Season / Yesterday / Today / Tomorrow controls remain available. Daily views show that day's points and mark players without a game.
+- Corrects the shared button-style conflict that shifted every Dream Team player down and right. Players now centre on their rink positions, including the goalies at the nets and the forwards on the right.
+- Moves “Dream Team spots by roster” above the rink image.
+- Refreshes the changed CSS and JavaScript cache versions.
 
-## Hockey cards
+The existing rink artwork, player sizes, homepage layout, themes, game-score cards, scoring and rosters are unchanged. All 60 real draft picks and the fixed BOT roster are preserved.
 
-- Player and team-goalie cards show the NHL game score, live period and clock, or the final result.
-- Results also appear alongside the last five games so the score can be matched to the fantasy points for that game.
-- An open current-game card checks for updates every 15 seconds. It stops after Final or when closed. Feed delays are still possible.
-- Scheduled games show the opponents; missing results are labelled unavailable. A temporary refresh failure keeps the last successful card visible.
-
-The homepage framing, six themes, real roster tables and locked draft are preserved. All 60 draft picks and the fixed BOT roster are unchanged. This update does not alter scoring weights, storage keys or End Season behaviour. The previous v295 points correction is retained.
-
-## Checks
-
-All 58 automated tests pass, including card refresh, failed refresh, closing/switching, game identity and roster integrity. The ZIP is checked against the v295 baseline. See `docs/verification-v296.md`.
-
-A browser preview was unavailable in the build environment, so desktop/mobile appearance has not been visually verified. After deployment, open the Dream Team on your phone and PC, tap a portrait and check the game-score strip. No draft reset or End Season action is needed.
+All 58 existing automated tests pass. The centering rule was checked against the actual shared button reset. A rendered browser preview was unavailable; please refresh and check the placement on your phone and PC after deployment.

@@ -18,7 +18,7 @@ test('Dream Team renders 6F / 4D / 2TG on the rink with truthful ownership and t
  assert.ok(html.includes('Team: Nick'));assert.ok(html.includes('Undrafted (The Spare Parts)'));
  assert.ok(!html.includes('Team: BOT'));assert.ok(html.includes('>Undrafted</span>'));
  assert.ok(html.includes('/31.png'));assert.ok(html.includes('/32.png'));
- assert.ok(html.indexOf('pool-dream-counts')>html.indexOf('dream-rink-player'));
+ assert.ok(html.indexOf('pool-dream-counts')<html.indexOf('class="dream-rink"'));
  assert.equal(dream.ownerCounts.reduce((n,o)=>n+o.count,0),12);
  assert.equal(JSON.stringify({rows,live,draft}),before);
 });
