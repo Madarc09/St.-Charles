@@ -42,3 +42,9 @@ All 69 automated tests pass. Checks cover the 4 a.m. cutoff, both daylight-savin
 All 60 locked draft picks, the fixed BOT roster, scoring formulas, draft storage keys, locking and history/archive code are unchanged. No live reset, draft or End Season action was performed. The ZIP includes the protected draft-history files and was checked as an overlay on v299.
 
 A rendered browser preview is unavailable here. After deployment, please check the new themes and day tabs on your phone and PC. See `docs/verification-v300.md` for details.
+
+
+## v301 — live refresh without view resets
+- Home NHL refreshes preserve the browser viewport instead of jumping away from the roster-comparison ice surface.
+- Roster-room horizontal pan is remembered independently for each manager across live-stat re-renders.
+- The old MutationObserver that repeatedly re-centred mobile roster rooms was removed; a room centres only on its first visit.

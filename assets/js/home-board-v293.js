@@ -1,4 +1,4 @@
-/* v293: full available-pool rankings; original layout and roster controls retained. */
+/* v301: preserve viewport/scroll state across live pulls; v293 board features retained. */
 (function (root, factory) {
   'use strict';
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./pool-core'));
@@ -67,6 +67,14 @@
       host.innerHTML = html;
       restoreScroll(host, scroll);
     }
+    function renderRootsPreservingViewport() {
+      // Live NHL pulls rebuild the board. Keep the user's page position fixed so
+      // an invisible data refresh never yanks the viewport away from the rink.
+      const x = Number(root.scrollX || root.pageXOffset || 0);
+      const y = Number(root.scrollY || root.pageYOffset || 0);
+      boardRoots().forEach(renderRoot);
+      if (typeof root.scrollTo === 'function') root.scrollTo(x, y);
+    }
 
     function ensureCardDialog() {
       let dialog = doc.getElementById('playerStatCardDialog');
@@ -105,7 +113,7 @@
         job.players = payload.players.map(p => ({id:String(p.id),name:p.name,position:p.position,nhlTeam:p.nhlTeam,type:p.type}));
         if (latest && String(latest.draft.comparisonSeason) === season) {
           latest.live = {...latest.live,rankingPool:job.players};
-          boardRoots().forEach(renderRoot);
+          renderRootsPreservingViewport();
         }
       } catch (_) {
         // The full current NHL feed can still rank every scorer while the
@@ -272,7 +280,7 @@
       const displayRows = root.PoolBot ? root.PoolBot.standings(rows, draft, String(live?.season) === String(draft?.seasonId) ? live?.players : []) : rows;
       latest = { rows: displayRows || [], draft: draft || {}, live: {...(live || {}),rankingPool:rankingCatalog.season === String(draft?.comparisonSeason) ? rankingCatalog.players : null} };
       normalizeRosterState();
-      boardRoots().forEach(renderRoot);
+      renderRootsPreservingViewport();
       loadRankingPool(draft);
     };
 
