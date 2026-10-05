@@ -42,7 +42,13 @@ Press Box colors in home-fixes-v293.css intentionally use #dashboard #seasonBoar
 
 The Dream Team is a dynamic, hypothetical comparison roster, separate from the fixed BOT competitor. Recompute the best 6F/4D/2TG from the full pool using current-season fantasy points on each stats refresh. Already-owned players are eligible. Never add this team to Core.OWNERS, standings, weekly/monthly rankings, saved rosters, ownership labels, season archives, draft history or roster rooms. Keep it available through the existing comparison controls on desktop and mobile. Selecting a daily comparison view does not change the season-based selection criteria.
 
-Its displayed players and team goalie groups must show their actual pool roster owner, or “Not drafted” when unowned. The compact roster tally counts all current Dream Team selections, including goalie groups, even in a daily comparison view. Include managers with zero selections, BOT when active, and the unowned count. Recompute labels and counts from actual roster ownership; they must never assign ownership to the Dream Team or be persisted as a new roster/history record.
+Its displayed players and team goalie groups must show “Team: Nick” (or the actual manager), “Undrafted” when unowned, and “Undrafted (The Spare Parts)” for BOT selections. The compact roster tally counts all current Dream Team selections, including goalie groups, even in a daily comparison view. Include managers with zero selections, BOT when active, and the unowned count. Recompute labels and counts from actual roster ownership; they must never assign ownership to the Dream Team or be persisted as a new roster/history record.
+
+The user approved a visual rink for this comparison only in v296. Keep 6 forwards between centre and the blue lines, 4 defence behind the blue lines, and 2 team-goalie groups at the nets. Display real NHL headshots, name, FPTS and ownership, with the roster tally beneath the rink. Headshots open the existing hockey cards. Preserve the surrounding comparison controls, homepage framing, themes and human/BOT roster tables. Daily views retain the season-selected lineup, show daily points and mark off days.
+
+## Hockey-card game results (v296)
+
+Player and team-goalie cards show a separate NHL score strip and game results beside the last five fantasy-point rows. Match scores by game ID, not current player team, so trades do not associate past points with the wrong game. Keep live period/clock, Final, OT/SO and scheduled states distinct; do not invent scores when the feed is unavailable. Opening a current live or scheduled game polls while the card is open. Closing or switching cards must invalidate old responses; stop polling after a final result. Score display must not change fantasy-point formulas, saved rosters or standings.
 
 ## Live and period scoring (v295)
 

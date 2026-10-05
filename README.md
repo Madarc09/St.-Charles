@@ -1,24 +1,30 @@
-# Hockey Pool v295 — Correct Live, Weekly and Monthly Points
+# Hockey Pool v296 — Dream Team Rink and Hockey-Card Scores
 
-Apply this small patch over v294. This is a scoring-data fix; the homepage layout and themes are unchanged.
+Apply this small update over v295 in the same GitHub repository.
 
-1. Extract `Hockey-Pool-v294-to-v295-POINTS-FIX-PATCH.zip`.
-2. Upload the files and folders inside to the root of the same GitHub repository. Replace matching files and keep every other file.
-3. Commit and let the existing Vercel integration deploy. Refresh the page after deployment.
+1. Extract `Hockey-Pool-v295-to-v296-DREAM-RINK-SCORES-PATCH.zip`.
+2. Upload the files and folders **inside** it to the repository root. Replace matching files and keep every other file. Do not upload the ZIP itself as the website.
+3. Commit and let the existing Vercel integration deploy. Refresh the site after deployment.
 
-## What was wrong
+## Dream Team
 
-The NHL score feed and GameCenter sometimes describe the same goal differently. The old event key treated those descriptions as separate goals, doubling daily goals and assists. Weekly and monthly totals include the daily data, so they inherited the error. Season totals use the NHL's cumulative counts and were not doubled in the same way.
+- The existing Dream Team comparison now uses an arena rink background, with 6 forwards near centre, 4 defence behind the blue lines and 2 goalie groups at the nets.
+- Large real NHL headshots show the name, fantasy points and roster owner. Tap a portrait to open its hockey card.
+- Labels read `Team: Nick` (or the actual manager), `Undrafted`, or `Undrafted (The Spare Parts)` for BOT selections.
+- The count of selections belonging to each roster remains beneath the rink.
+- The lineup continues to update from the best current-season FPTS. The existing Season / Yesterday / Today / Tomorrow controls remain available. Daily views show that day's points and mark players without a game.
 
-A separate date bug started both historical lookups at the first of the month, dropping the September portion of a week that continued into October.
+## Hockey cards
 
-## What changed
+- Player and team-goalie cards show the NHL game score, live period and clock, or the final result.
+- Results also appear alongside the last five games so the score can be matched to the fantasy points for that game.
+- An open current-game card checks for updates every 15 seconds. It stops after Final or when closed. Feed delays are still possible.
+- Scheduled games show the opponents; missing results are labelled unavailable. A temporary refresh failure keeps the last successful card visible.
 
-- Match the same scoring event across both feeds using the game's score, event ID, period/time and scorer count, retaining the richer details. Count each real goal and its assists once.
-- Fetch enough history to cover both the Monday-start week and the calendar month, then filter each period independently.
-- Scope game reports to the requested season and dates. Reject incomplete or duplicate game reports rather than publishing partial totals.
-- Use fresh period-data cache keys so earlier cached calculations are not reused after deployment.
+The homepage framing, six themes, real roster tables and locked draft are preserved. All 60 draft picks and the fixed BOT roster are unchanged. This update does not alter scoring weights, storage keys or End Season behaviour. The previous v295 points correction is retained.
 
-The October 4 diagnostic snapshot showed Chris at 46 season / 49 week / 49 month. Checking the relevant NHL game logs gave 46 season / 46 week / 42 month for that snapshot. These are diagnostic values, not hard-coded totals; future games continue to update normally.
+## Checks
 
-All 60 real draft picks, the fixed BOT roster, Dream Team features, scoring weights, room storage keys, season history and archive logic remain unchanged. No draft reset or End Season action is needed. See `docs/verification-v295.md` for verification details.
+All 58 automated tests pass, including card refresh, failed refresh, closing/switching, game identity and roster integrity. The ZIP is checked against the v295 baseline. See `docs/verification-v296.md`.
+
+A browser preview was unavailable in the build environment, so desktop/mobile appearance has not been visually verified. After deployment, open the Dream Team on your phone and PC, tap a portrait and check the game-score strip. No draft reset or End Season action is needed.

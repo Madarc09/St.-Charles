@@ -9,6 +9,7 @@
     let latest = null;
     const standingsState = { mode: 'season' };
     let rankingCatalog = { season:'', players:null, pending:false, retryAfter:0 };
+    let cardSession = 0, cardRefreshTimer = null;
     const rosterState = { left: 'nick', right: 'andrew', mode: 'season' };
 
     function availableIds(rows) {
@@ -76,6 +77,7 @@
       dialog.innerHTML = '<div class="pool-card-dialog-shell"><button type="button" class="pool-card-close" data-close-player-card aria-label="Close player card">×</button><div id="playerStatCardContent"></div></div>';
       doc.body.appendChild(dialog);
       dialog.addEventListener('click', e => { if (e.target === dialog || e.target.closest('[data-close-player-card]')) dialog.close(); });
+      dialog.addEventListener('close', () => { cardSession += 1; clearTimeout(cardRefreshTimer); });
       return dialog;
     }
     function fantasyRankFor(playerKey, kind) {
@@ -111,19 +113,22 @@
       } finally { job.pending = false; }
     }
 
-    async function openPlayerCard(trigger) {
+    async function openPlayerCard(trigger, refresh = false) {
       if (!latest) return;
       const dialog = ensureCardDialog();
       const content = dialog.querySelector('#playerStatCardContent');
-      content.innerHTML = '<div class="pool-card-loading"><span></span><strong>Pulling the last games from the NHL…</strong></div>';
+      if (!refresh) { cardSession += 1; clearTimeout(cardRefreshTimer); content.innerHTML = '<div class="pool-card-loading"><span></span><strong>Pulling the last games from the NHL…</strong></div>'; }
+      const session = cardSession, selection = {dataset:{cardKind:trigger.dataset.cardKind,team:trigger.dataset.team,playerId:trigger.dataset.playerId}};
+      let pollAgain = refresh;
       if (!dialog.open) dialog.showModal();
       const q = new URLSearchParams({ mode: 'card', season: latest.draft.seasonId });
       if (trigger.dataset.cardKind === 'teamGoalie') { q.set('type','teamGoalie'); q.set('team', trigger.dataset.team || ''); }
       else { q.set('type','skater'); q.set('playerId', trigger.dataset.playerId || ''); }
       try {
-        const response = await fetch('/api/nhl?' + q.toString(), { headers: { accept: 'application/json' }, cache: 'no-store' });
+        const response = await fetch('/api/nhl?' + q.toString(), { headers: { accept: 'application/json' }, cache: 'no-store', signal:typeof AbortSignal !== 'undefined' ? AbortSignal.timeout(45000) : undefined });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || payload.error) throw new Error(payload.error || 'Player card could not be loaded.');
+        if (session !== cardSession || !dialog.open) return;
         const playerKey = trigger.dataset.cardKind === 'teamGoalie' ? ('TG-' + String(trigger.dataset.team || '').toUpperCase()) : String(trigger.dataset.playerId || '');
         payload.fantasyRank = fantasyRankFor(playerKey, trigger.dataset.cardKind || 'skater');
         const picks = Array.isArray(latest.draft?.picks) ? latest.draft.picks : [];
@@ -143,9 +148,20 @@
           };
         }
         if (!savedPick) payload.fantasyDraft = latest.rows.some(r => r.isBot && r.players.some(p => String(p.id) === playerKey)) ? {isBot:true} : {undrafted:true};
+        const scrollTop=dialog.scrollTop,tableScroll=content.querySelector('.pool-card-table-scroll')?.scrollLeft||0;
         content.innerHTML = view.cardMarkup(payload);
+        dialog.scrollTop=scrollTop;
+        const table=content.querySelector('.pool-card-table-scroll');if(table)table.scrollLeft=tableScroll;
+        pollAgain=!!payload.currentGame?.isToday && ['LIVE','CRIT','FUT','PRE'].includes(String(payload.currentGame.state).toUpperCase());
       } catch (error) {
-        content.innerHTML = '<div class="pool-card-error"><strong>Card temporarily unavailable</strong><p>' + view.escape(error.message || 'Try again shortly.') + '</p></div>';
+        if(session!==cardSession||!dialog.open)return;
+        if(refresh){const status=content.querySelector('[data-card-refresh-status]');if(status)status.textContent='Showing the last update · reconnecting…';}
+        else content.innerHTML = '<div class="pool-card-error"><strong>Card temporarily unavailable</strong><p>' + view.escape(error.message || 'Try again shortly.') + '</p></div>';
+      } finally {
+        if(session===cardSession&&dialog.open&&pollAgain)cardRefreshTimer=setTimeout(()=>{
+          if(!dialog.open||session!==cardSession)return;
+          openPlayerCard(selection,true);
+        },15000);
       }
     }
 
@@ -298,8 +314,25 @@
     const counts=(row.ownerCounts||[]).map(owner=>'<li data-dream-owner="'+esc(owner.ownerId||'undrafted')+'"><span>'+esc(owner.ownerName)+'</span><b>'+fmt(owner.count)+'</b></li>').join('');
     return '<section class="pool-dream-counts" aria-label="Full Dream Team selections by roster, including team goalie groups"><p>Dream Team spots by roster</p>'+(row.players.length?'<ul>'+counts+'</ul>':'<p>Loading current selections…</p>')+'</section>';
   }
+  function dreamRinkPlayer(p,x,y,live,mode){
+    if(!p)return '';
+    const goalie=C.bucket(p)==='G',daily=mode!=='season',game=daily?gameForTeam(p.nhlTeam,live,mode):null;
+    const points=daily?dailyLine(p,live,mode).fpts:C.points(p),label=goalie?(C.TEAMS[p.nhlTeam]||p.nhlTeam)+' Goalies':p.name,displayName=goalie?p.nhlTeam+' Goalies':p.name;
+    const logo='https://assets.nhle.com/logos/nhl/svg/'+encodeURIComponent(p.nhlTeam||'')+'_light.svg';
+    const portrait=goalie?'<span class="dream-goalie-portraits"><img class="dream-goalie-crest" src="'+logo+'" alt="" onerror="this.style.display=\'none\'">'+(p.dreamGoalies||[]).map(g=>'<img class="dream-goalie-face" src="https://assets.nhle.com/mugs/nhl/latest/'+encodeURIComponent(g.id)+'.png" alt="'+esc(g.name)+'" loading="lazy" onerror="this.style.display=\'none\'">').join('')+'</span>':'<span class="dream-skater-portrait"><span aria-hidden="true">'+esc(initials(p.name))+'</span><img src="https://assets.nhle.com/mugs/nhl/latest/'+encodeURIComponent(p.id)+'.png" alt="" loading="lazy" onerror="this.style.display=\'none\'"><img class="dream-team-crest" src="'+logo+'" alt="" onerror="this.style.display=\'none\'"></span>';
+    return '<button type="button" class="dream-rink-player'+(goalie?' is-goalie':'')+(daily&&!game?' is-off-day':'')+'" style="--dream-x:'+x+'%;--dream-y:'+y+'%" data-dream-position="'+C.bucket(p)+'" data-player-card data-card-kind="'+(goalie?'teamGoalie':'skater')+'" data-player-id="'+esc(p.id)+'" data-team="'+esc(p.nhlTeam)+'" aria-label="'+esc(label+', '+fmt(points)+' fantasy points, '+p.dreamOwnerLabel)+'. Open hockey card">'+portrait+'<span class="dream-player-label"><strong>'+esc(displayName)+'</strong><span class="dream-player-points">'+fmt(points)+' <small>FPTS</small></span><span class="dream-player-owner">'+esc(p.dreamOwnerLabel)+'</span>'+(daily&&!game?'<small class="dream-off-day">No game</small>':'')+'</span></button>';
+  }
+  function dreamRinkCard(row,live,compareRole,mode='season'){
+    const group=bucket=>(row.players||[]).filter(p=>C.bucket(p)===bucket).sort((a,b)=>C.points(b)-C.points(a)||String(a.name).localeCompare(String(b.name)));
+    const forwards=group('F'),defence=group('D'),goalies=group('G'),daily=mode!=='season';
+    const total=daily?row.players.reduce((sum,p)=>sum+dailyLine(p,live,mode).fpts,0):row.total;
+    const pointsLabel=daily?rosterDayShort(mode,live).toUpperCase()+' FPTS':'SEASON FPTS';
+    const slots=[[goalies[0],50,9],[defence[0],31,24],[defence[1],69,24],[forwards[0],19,40],[forwards[1],50,40],[forwards[2],81,40],[forwards[3],19,60],[forwards[4],50,60],[forwards[5],81,60],[defence[2],31,76],[defence[3],69,76],[goalies[1],50,91]];
+    return '<article class="pool-roster pool-dream-rink-card"'+(compareRole?' data-compare-role="'+esc(compareRole)+'"':'')+' data-owner="dream-team" aria-label="The Dream Team rink lineup"><header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center"><span class="pool-roster-kicker">CURRENT SEASON LEADERS</span><h3><span class="pool-bot-name">The Dream Team</span></h3><small class="pool-mobile-roster-total">'+fmt(total)+' '+esc(pointsLabel)+'</small></div><span class="pool-roster-total"><b>'+fmt(total)+'</b><small>'+esc(pointsLabel)+'</small></span>'+mobileCardArrow(1)+'</header><p class="dream-rink-caption">6 forwards · 4 defence · 2 goalie groups <span>Tap a player to open their card</span></p><div class="dream-rink" aria-label="Goalies at the nets, defence behind each blue line, forwards near centre ice">'+(row.players.length?slots.map(([p,x,y])=>dreamRinkPlayer(p,x,y,live,mode)).join(''):'<p class="dream-rink-loading">Loading the Dream Team…</p>')+'</div>'+dreamRosterCounts(row)+'</article>';
+  }
   function rosterCard(row,instance,compareRole){
     if(!row)return '';
+    if(row.isDream)return dreamRinkCard(row,null,compareRole,'season');
     const champion=row.ownerId==='andrew'?' data-champion="true"':'',compareAttr=compareRole?' data-compare-role="'+esc(compareRole)+'"':'';
     const title=(row.isBot||row.isDream)?'<span class="pool-bot-name">'+esc(row.ownerName)+'</span>':'<button type="button" data-roster-owner="'+esc(row.ownerId)+'" data-board-focus="roster-'+esc(row.ownerId)+'" title="Open '+esc(row.ownerName)+' roster room">'+esc(row.ownerName)+' <span class="pool-room-arrow" aria-hidden="true">↗</span></button>';
     return '<article class="pool-roster"'+compareAttr+champion+' data-owner="'+esc(row.ownerId)+'" aria-label="'+esc(row.ownerName)+' roster"><header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center"><span class="pool-roster-kicker">'+(row.isDream?'CURRENT SEASON LEADERS':row.isBot?'BOT ROSTER · THE SPARE PARTS':'MANAGER ROSTER')+'</span><h3>'+title+'</h3><small class="pool-mobile-roster-total">'+fmt(row.total)+' FPTS</small></div><span class="pool-roster-total"><b>'+fmt(row.total)+'</b><small>FPTS</small></span>'+mobileCardArrow(1)+'</header>'+dreamRosterCounts(row)+rosterGroup(row.players,'F','Forwards',row.ownerId,instance)+rosterGroup(row.players,'D','Defence',row.ownerId,instance)+rosterGroup(row.players,'G','Team Goalies',row.ownerId,instance)+'</article>';
@@ -348,6 +381,7 @@
   }
   function matchupCard(row,live,compareRole,mode){
     if(!row)return'';
+    if(row.isDream)return dreamRinkCard(row,live,compareRole,mode);
     const champion=row.ownerId==='andrew'?' data-champion="true"':'',compareAttr=compareRole?' data-compare-role="'+esc(compareRole)+'"':'',all=['F','D','G'].flatMap(bucket=>matchupRows(row,live,bucket,mode)),dayTotal=all.reduce((sum,p)=>sum+dailyLine(p,live,mode).fpts,0),dayLabel=rosterDayShort(mode,live);
     return '<article class="pool-roster pool-matchup-card"'+compareAttr+champion+' data-owner="'+esc(row.ownerId)+'" aria-label="'+esc(row.ownerName)+' '+esc(dayLabel)+'"><header class="pool-roster-heading">'+mobileCardArrow(-1)+'<div class="pool-roster-heading-center"><span class="pool-roster-kicker">'+esc(dayLabel.toUpperCase())+' MATCHUP</span><h3>'+esc(row.ownerName)+'</h3><small class="pool-tonight-count">'+all.length+(row.isBot||row.isDream?' selection':' drafted selection')+(all.length===1?'':'s')+' scheduled</small><small class="pool-mobile-roster-total">'+fmt(dayTotal)+' '+esc(dayLabel.toUpperCase())+' FPTS</small></div><span class="pool-roster-total"><b>'+fmt(dayTotal)+'</b><small>'+esc(dayLabel.toUpperCase())+' FPTS</small></span>'+mobileCardArrow(1)+'</header>'+dreamRosterCounts(row)+matchupGroup(row,live,'F','Forwards',mode,mode)+matchupGroup(row,live,'D','Defence',mode,mode)+matchupGroup(row,live,'G','Team Goalies',mode,mode)+'</article>';
   }
@@ -449,12 +483,17 @@
     const skaters=rankedPoolEntries(rows,false,live,draft),goalies=rankedPoolEntries(rows,true,live,draft);
     const chosen=[...skaters.filter(e=>C.bucket(e.player)==='F').slice(0,C.RULES.F),
       ...skaters.filter(e=>C.bucket(e.player)==='D').slice(0,C.RULES.D),...goalies.slice(0,C.RULES.G)];
-    const players=C.sortRoster(chosen.map(entry=>({...entry.player,dreamOwnerLabel:entry.undrafted?'Not drafted':'Roster: '+entry.ownerName}))),total=players.reduce((sum,p)=>sum+C.points(p),0);
+    const players=C.sortRoster(chosen.map(entry=>{
+      const owner=(rows||[]).find(row=>row.ownerId===entry.ownerId);
+      const label=entry.isBot?'Undrafted ('+(owner?.teamName||'The Spare Parts')+')':entry.undrafted?'Undrafted':'Team: '+entry.ownerName;
+      const goalies=C.bucket(entry.player)==='G'?(live?.goalies||[]).filter(g=>String(g.teamAbbrevs||g.teamAbbrev||'').split(/[,/\s]+/).includes(entry.player.nhlTeam)).sort((a,b)=>C.num(b.gamesPlayed)-C.num(a.gamesPlayed)).slice(0,2).map(g=>({id:String(g.playerId),name:g.goalieFullName||g.playerFullName||'Goalie'})):[];
+      return {...entry.player,dreamOwnerLabel:label,dreamGoalies:goalies};
+    })),total=players.reduce((sum,p)=>sum+C.points(p),0);
     const ownerCounts=orderedRows((rows||[]).filter(row=>!row.isDream&&row.ownerId!=='dream-team')).map(row=>({
       ownerId:row.ownerId,ownerName:row.ownerName||C.OWNERS.find(owner=>owner.id===row.ownerId)?.name||row.ownerId,
       count:chosen.filter(entry=>entry.ownerId===row.ownerId).length
     }));
-    ownerCounts.push({ownerId:null,ownerName:'Not drafted',count:chosen.filter(entry=>entry.undrafted).length});
+    ownerCounts.push({ownerId:null,ownerName:'Undrafted',count:chosen.filter(entry=>entry.undrafted).length});
     return {ownerId:'dream-team',ownerName:'The Dream Team',teamName:'The Dream Team',isDream:true,players,total,pts:total,ownerCounts};
   }
   function comparisonRows(rows,live,draft){
@@ -514,13 +553,32 @@
     return '<div class="pool-v280-dashboard" data-v280-dashboard data-roster-mode="'+mode+'" data-standings-mode="'+standingsMode+'"><div class="pool-v280-standings-host" data-v280-standings-host>'+renderStandings(rows,draft,standingsMode,live)+'</div><div class="pool-v280-rosters-host" data-v280-rosters-host>'+renderRosters(rows,draft,{left:requested.left,right:requested.right,mode},live)+'</div><div class="pool-v273-record">'+(draft.locked?'<button type="button" data-view-final-draft data-board-focus="final-draft">✓ Final draft locked · View complete draft record ↗</button>':'<span>Draft in progress · live rosters update automatically</span>')+'</div></div>';
   }
   function dateLabel(v){const s=String(v||'');if(!/^\d{4}-\d{2}-\d{2}/.test(s))return s||'—';const [y,m,d]=s.slice(0,10).split('-').map(Number);return new Intl.DateTimeFormat('en-CA',{month:'short',day:'numeric'}).format(new Date(y,m-1,d));}
+  function cardGameStatus(game){
+    const state=String(game?.state||'').toUpperCase(),type=String(game?.periodType||'').toUpperCase();
+    if(['OFF','FINAL'].includes(state))return 'Final'+(type==='SO'?' / SO':type==='OT'||C.num(game.period)>3?' / OT':'');
+    if(['LIVE','CRIT'].includes(state))return 'Live · '+(type==='SO'?'Shootout':type==='OT'||C.num(game.period)>3?'OT':'P'+fmt(game.period||1))+(game.inIntermission?' · Intermission':game.timeRemaining?' · '+game.timeRemaining:'');
+    if(['FUT','PRE'].includes(state))return 'Scheduled';
+    return state==='SUSP'?'Suspended':state==='PPD'?'Postponed':'Score unavailable';
+  }
+  function cardGameScoreline(game){
+    if(!game?.away||!game?.home)return '';
+    if(['FUT','PRE','PPD'].includes(String(game.state).toUpperCase()))return esc(game.away)+' <span class="pool-card-score-pending">vs</span> '+esc(game.home);
+    const score=value=>value!==null&&value!==undefined&&Number.isFinite(Number(value))?fmt(value):'—';
+    return esc(game.away)+' <b>'+score(game.awayScore)+'</b> <span aria-hidden="true">–</span> <b>'+score(game.homeScore)+'</b> '+esc(game.home);
+  }
+  function cardGameScore(data){
+    const game=data.currentGame;if(!game?.away||!game?.home)return '';
+    const live=['LIVE','CRIT'].includes(String(game.state).toUpperCase());
+    return '<section class="pool-card-game-score'+(live?' is-live':'')+'" aria-label="NHL game score"><div class="pool-card-score-status"><span>'+esc(cardGameStatus(game))+'</span><span>'+esc(dateLabel(game.date))+'</span></div><div class="pool-card-scoreline">'+cardGameScoreline(game)+'</div><small data-card-refresh-status>'+(live?'Game score refreshes automatically':game.isToday?'Today’s NHL game':'Most recent NHL game')+'</small></section>';
+  }
   function cardStatsTable(data){
     const goalie=data.type==='teamGoalie',cols=goalie?goalieColumns:skaterColumns;
     const games=(data.last5||[]).slice(0,5);
     while(games.length<5)games.push({tbp:true});
     const rows=games.map(g=>{
       if(g.tbp)return '<tr class="is-tbp"><td><strong>TBP</strong></td><td>TO BE PLAYED</td><td>—</td>'+cols.map(()=>'<td>—</td>').join('')+'</tr>';
-      return '<tr'+(g.live?' class="is-live"':'')+'><td>'+esc(dateLabel(g.date))+(g.live?'<small>LIVE</small>':'')+'</td><td>'+esc(g.label||('vs '+(g.opponent||'')))+'</td><td><strong>'+fmt(g.fpts)+'</strong></td>'+cols.map(([key])=>'<td>'+fmt(stat(g,key))+'</td>').join('')+'</tr>';
+      const result=g.result?'<span class="pool-card-game-result'+(g.live?' is-live':'')+'">'+cardGameScoreline(g.result)+'<br>'+esc(cardGameStatus(g.result))+'</span>':'<span class="pool-card-game-result">Score unavailable</span>';
+      return '<tr'+(g.live?' class="is-live"':'')+'><td>'+esc(dateLabel(g.date))+(g.live?'<small>LIVE</small>':'')+'</td><td>'+esc(g.label||('vs '+(g.opponent||'')))+result+'</td><td><strong>'+fmt(g.fpts)+'</strong></td>'+cols.map(([key])=>'<td>'+fmt(stat(g,key))+'</td>').join('')+'</tr>';
     }).join('');
     return '<div class="pool-card-last-five"><h4>LAST 5 GAMES</h4><div class="pool-card-table-scroll"><table><thead><tr><th>DATE</th><th>GAME</th><th>FPTS</th>'+cols.map(([,short])=>'<th>'+esc(short)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   }
@@ -584,7 +642,7 @@
     const positionLine=esc(goalie?'GOALTENDER UNIT · '+teamLabel:((identity?.position||'PLAYER')+' · '+teamLabel))+esc(rankCopy(data,goalie));
     const goalieLogo=goalie?'<div class="pool-opc-logo-block"><img src="'+esc(logo||'')+'" alt="" onerror="this.style.display=\'none\'"></div>':'';
     const watermark=logo?'<img class="pool-opc-watermark" src="'+esc(logo)+'" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">':'';
-    return '<article class="pool-opc-card '+(goalie?'is-goalie-unit':'')+'" data-nhl-team="'+esc(team)+'" style="'+esc(cardStyle)+'">'+watermark+'<header class="pool-opc-brand"><span class="pool-opc-number">#'+esc(cardNumber||'96')+'</span><strong class="pool-opc-top-name">'+esc(name)+'</strong><i class="pool-opc-stripes" aria-hidden="true"></i></header><div class="pool-opc-frame"><div class="pool-opc-hero">'+hero+goalieLogo+'</div><div class="pool-opc-position">'+positionLine+'</div><div class="pool-opc-draft-copy">'+draftCopy+'</div>'+cardSeasonTotals(data)+cardStatsTable(data)+'<div class="pool-card-rolling"><h4>RECENT FORM</h4><div>'+rollingBlock('LAST 10',data.last10,goalie)+rollingBlock('LAST 25',data.last25,goalie)+'</div></div></div><footer><span>'+esc(C.seasonLabel(data.season||''))+'</span><strong>FANTASY GAME LOG</strong><span>'+esc(goalie?team:'#'+(identity?.id||''))+'</span></footer></article>';
+    return '<article class="pool-opc-card '+(goalie?'is-goalie-unit':'')+'" data-nhl-team="'+esc(team)+'" style="'+esc(cardStyle)+'">'+watermark+'<header class="pool-opc-brand"><span class="pool-opc-number">#'+esc(cardNumber||'96')+'</span><strong class="pool-opc-top-name">'+esc(name)+'</strong><i class="pool-opc-stripes" aria-hidden="true"></i></header><div class="pool-opc-frame"><div class="pool-opc-hero">'+hero+goalieLogo+'</div><div class="pool-opc-position">'+positionLine+'</div><div class="pool-opc-draft-copy">'+draftCopy+'</div>'+cardGameScore(data)+cardSeasonTotals(data)+cardStatsTable(data)+'<div class="pool-card-rolling"><h4>RECENT FORM</h4><div>'+rollingBlock('LAST 10',data.last10,goalie)+rollingBlock('LAST 25',data.last25,goalie)+'</div></div></div><footer><span>'+esc(C.seasonLabel(data.season||''))+'</span><strong>FANTASY GAME LOG</strong><span>'+esc(goalie?team:'#'+(identity?.id||''))+'</span></footer></article>';
   }
 
   return {render,renderStandings,renderRosters,rosterCard,rosterGroup,matchupCard,matchupGroup,summary,stat,dayPayload,gameForTeam,dailyLine,todayLine,todaySummary,todayStandingRows,rankedPoolEntries,topFantasyEntries,poolRankFor,dreamTeam,comparisonRows,periodTeamRankings,periodRankPanel,matchupDateLabel,rosterCurrentView,cardMarkup,owners:C.OWNERS,escape:esc};
