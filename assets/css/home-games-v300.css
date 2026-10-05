@@ -1,0 +1,73 @@
+/* Game skins are presentation-only. All existing board geometry stays in place. */
+@font-face{font-family:'Pool Pixel';src:url('../fonts/VT323-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+html[data-home-skin="goldeneye"],[data-preview-theme="goldeneye"]{
+ --skin-art:url('../images/themes/v300/goldeneye.webp');--skin-crop-height:410;
+ --skin-bg:#090e0a;--skin-panel:#141d16;--skin-row:#17231b;--skin-row-alt:#1d2a21;
+ --skin-ink:#fff2cf;--skin-muted:#c0c7ad;--skin-accent:#eac46c;--skin-line:#716d42;
+ --skin-score:#ffe09a;--skin-score-bg:#37321b;--skin-lead:#2a3525;
+ --skin-head:#efcf8a;--skin-button:#1d2a20;--skin-selected:#ebc46c;--skin-selected-ink:#161c12;
+ --skin-font:Consolas,'Courier New',monospace;--skin-heading:Impact,'Arial Narrow',sans-serif;
+ --skin-wash:rgba(10,20,13,.73);--skin-shadow:0 0 0 3px #0c120d,0 0 0 4px #a4874c,0 12px 32px #0009;
+}
+html[data-home-skin="mariokart"],[data-preview-theme="mariokart"]{
+ --skin-art:url('../images/themes/v300/mariokart.webp');--skin-crop-height:450;
+ --skin-bg:#101138;--skin-panel:#171e48;--skin-row:#1b2853;--skin-row-alt:#222f5d;
+ --skin-ink:#f7fbff;--skin-muted:#c0d4ed;--skin-accent:#94f1db;--skin-line:#757dbc;
+ --skin-score:#ffe480;--skin-score-bg:#36364c;--skin-lead:#273e55;
+ --skin-head:#fff0a8;--skin-button:#25335b;--skin-selected:#f6dd74;--skin-selected-ink:#182447;
+ --skin-font:'Trebuchet MS',Arial,sans-serif;--skin-heading:'Pool Pixel','Arial Narrow',sans-serif;
+ --skin-wash:rgba(13,17,49,.69);--skin-shadow:0 0 0 3px #131b4a,0 0 0 4px #e3c563,5px 6px 0 #070b21;
+}
+html[data-home-skin="smash"],[data-preview-theme="smash"]{
+ --skin-art:url('../images/themes/v300/smash.webp');--skin-crop-height:410;
+ --skin-bg:#0d0d25;--skin-panel:#1b1735;--skin-row:#201e42;--skin-row-alt:#29234e;
+ --skin-ink:#faf5ff;--skin-muted:#d1c5e8;--skin-accent:#9edcff;--skin-line:#8c659b;
+ --skin-score:#ffd394;--skin-score-bg:#463049;--skin-lead:#393153;
+ --skin-head:#ffe4c1;--skin-button:#292545;--skin-selected:#f1afbf;--skin-selected-ink:#28122c;
+ --skin-font:'Trebuchet MS',Arial,sans-serif;--skin-heading:Impact,'Arial Narrow',sans-serif;
+ --skin-wash:rgba(18,10,39,.70);--skin-shadow:0 0 0 3px #18122e,0 0 0 4px #cb708d,0 0 25px #6557e944;
+}
+html[data-home-skin="nhl95"],[data-preview-theme="nhl95"]{
+ --skin-art:url('../images/themes/v300/nhl95.webp');--skin-crop-height:380;
+ --skin-bg:#061b2a;--skin-panel:#0b2938;--skin-row:#0d3144;--skin-row-alt:#143c50;
+ --skin-ink:#f0fcff;--skin-muted:#b7d9e5;--skin-accent:#8cfae1;--skin-line:#498997;
+ --skin-score:#ffdf73;--skin-score-bg:#294147;--skin-lead:#244b53;
+ --skin-head:#c4fff1;--skin-button:#14394a;--skin-selected:#89ebd2;--skin-selected-ink:#082832;
+ --skin-font:Consolas,'Courier New',monospace;--skin-heading:'Pool Pixel','Arial Narrow',sans-serif;
+ --skin-wash:rgba(3,21,37,.72);--skin-shadow:0 0 0 3px #082638,0 0 0 4px #78b6c3,5px 6px 0 #02121d;
+}
+html[data-home-skin="streetfighter"],[data-preview-theme="streetfighter"]{
+ --skin-art:url('../images/themes/v300/streetfighter.webp');--skin-crop-height:445;
+ --skin-bg:#190e24;--skin-panel:#2a1735;--skin-row:#311e3e;--skin-row-alt:#3b2447;
+ --skin-ink:#fff5e4;--skin-muted:#dcc3db;--skin-accent:#ffd097;--skin-line:#9e6b8b;
+ --skin-score:#ffe28a;--skin-score-bg:#503641;--skin-lead:#4a2f49;
+ --skin-head:#ffdd9e;--skin-button:#412442;--skin-selected:#f5bd77;--skin-selected-ink:#321727;
+ --skin-font:Verdana,Arial,sans-serif;--skin-heading:'Pool Pixel','Arial Narrow',sans-serif;
+ --skin-wash:rgba(28,10,38,.70);--skin-shadow:0 0 0 3px #24102d,0 0 0 4px #cd905f,5px 6px 0 #100818;
+}
+
+/* Beat the old chalkboard selectors so themed rows and numbers stay readable. */
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table tr>:is(th,td){
+ background:var(--skin-row)!important;color:var(--skin-ink)!important;border-color:var(--skin-line)!important;text-shadow:none!important;
+}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table tbody tr:nth-child(even)>:is(th,td){background:var(--skin-row-alt)!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table thead tr>:is(th,td){background:var(--skin-panel)!important;color:var(--skin-head)!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-standings-table tbody tr:first-child>:is(th,td){background:var(--skin-lead)!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table tr>:is(th,td).pool-fpts-cell{background:var(--skin-score-bg)!important;color:var(--skin-score)!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table :is(button,.pool-player-copy strong,.pool-stat-count,.pool-goalie-total){color:var(--skin-ink)!important;text-shadow:none!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard .pool-stat-table :is(.pool-stat-contribution,.pool-player-copy small,thead th small,.pool-empty){color:var(--skin-muted)!important;text-shadow:none!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard :is(h2,h3,h4,.pool-roster-heading h3 button){color:var(--skin-head)!important;font-family:var(--skin-heading)!important;text-shadow:none!important}
+html[data-home-theme-family="game"] body.v180-home-active #dashboard #seasonBoard :is(.pool-roster-total b,.pool-mobile-roster-total,.pool-v287-top5 li>em,.pool-v289-period-rank li>em){color:var(--skin-score)!important;text-shadow:none!important}
+
+/* Readable HTML sign lettering over the new art, within the original link boxes. */
+html[data-home-skin="goldeneye"] #dashboard .pool-image-link:is(.pool-nav-draft,.pool-nav-trophy,.pool-nav-andrew) .pool-nav-label,
+html:is([data-home-skin="nhl95"],[data-home-skin="streetfighter"]) #dashboard .pool-nav-trophy .pool-nav-label{
+ display:block!important;position:absolute;left:4%;right:4%;bottom:0;padding:4px 2px!important;
+ color:var(--skin-head)!important;background:var(--skin-panel);border:1px solid var(--skin-line);
+ font:700 clamp(7px,1.2vw,18px)/1.1 var(--skin-heading);text-transform:uppercase;text-align:center;
+ letter-spacing:.015em;text-shadow:none;pointer-events:none;border-radius:3px;
+}
+
+/* Keep the All-Star artwork unobstructed on a quiet daily rink. */
+:is(#seasonBoard,#enlargedChalkboardContent) .rink-centre-logo[data-rink-logo="ALL-STAR"]{width:31%;max-width:185px}
+:is(#seasonBoard,#enlargedChalkboardContent) .dream-rink-loading{top:58%;}

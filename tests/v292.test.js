@@ -130,8 +130,8 @@ test('browser board adds BOT once and standings, roster dates and comparison sta
   assert.ok(botStanding?.includes('data-board-focus="standing-bot">BOT</button></th><td class="pool-fpts-cell pool-fpts-first">0</td>'),'Another season cannot supply BOT season points');
 });
 
-test('six device-local themes load real artwork while retaining the legacy layout base',()=>{
-  assert.equal(Themes.themes.length,6);assert.equal(Themes.themes[0].id,'original');
+test('all device-local themes load real artwork while retaining the legacy layout base',()=>{
+  assert.equal(Themes.themes.length,11);assert.equal(Themes.themes[0].id,'original');
   assert.equal(Themes.normalize('chalkboard'),'original');
   const attrs={src:'initial'},header={getAttribute:k=>attrs[k],setAttribute:(k,v)=>{attrs[k]=v;}};
   const values=new Map(),document={readyState:'complete',documentElement:{dataset:{}},addEventListener(){},querySelector:()=>header,querySelectorAll:()=>[],getElementById:()=>null};

@@ -6,7 +6,7 @@
   else { root.PoolThemes = api; api.mount(root); }
 })(typeof window !== 'undefined' ? window : this, function () {
   'use strict';
-  // Add a theme here and its matching selectors in home-skins-v292.css.
+  // Add a theme here and its matching skin variables; art may point to any bundled asset.
   // IDs and the storage key are permanent, independent of website releases.
   const themes = Object.freeze([
     { id: 'original', name: 'Original Home', description: 'Page 1 · Your current room and arena boards.' },
@@ -14,7 +14,12 @@
     { id: 'arena', name: 'Heritage Hall', description: 'Page 3 · Walnut, brass and a warm championship glow.' },
     { id: 'press', name: 'The Press Box', description: 'Page 4 · Vintage newsprint, cream paper and ink.' },
     { id: 'midnight', name: 'Neon Ice', description: 'Page 5 · Luminous displays and midnight-blue glass.' },
-    { id: 'arcade', name: 'Arcade Hockey', description: 'Page 6 · Detailed pixel art and retro scoreboard type.' }
+    { id: 'arcade', name: 'Arcade Hockey', description: 'Page 6 · Detailed pixel art and retro scoreboard type.' },
+    { id: 'goldeneye', name: 'GoldenEye', description: 'Page 7 · Gold, spy dossiers and a midnight mission room.', family: 'game', art: 'assets/images/themes/v300/goldeneye.webp' },
+    { id: 'mariokart', name: 'Mario Kart SNES', description: 'Page 8 · Rainbow racing, pixel stars and the starting grid.', family: 'game', art: 'assets/images/themes/v300/mariokart.webp' },
+    { id: 'smash', name: 'Super Smash Brothers', description: 'Page 9 · Red and blue spotlights over a cosmic battle arena.', family: 'game', art: 'assets/images/themes/v300/smash.webp' },
+    { id: 'nhl95', name: 'NHL 95', description: 'Page 10 · Teal, pixel ice and classic 16-bit hockey.', family: 'game', art: 'assets/images/themes/v300/nhl95.webp' },
+    { id: 'streetfighter', name: 'Street Fighter II', description: 'Page 11 · Sunset stages, arcade gold and indigo shadows.', family: 'game', art: 'assets/images/themes/v300/streetfighter.webp' }
   ].map(Object.freeze));
   const storageKey = 'hockey-pool:home-theme:v1';
   const defaultTheme = 'original';
@@ -41,12 +46,13 @@
     // the independent skin attribute changes artwork, colors and font families only.
     doc.documentElement.dataset.poolTheme = 'chalkboard';
     doc.documentElement.dataset.homeSkin = current;
+    doc.documentElement.dataset.homeThemeFamily = themes.find(t => t.id === current).family || 'classic';
     function sync(saved) {
       const theme = themes.find(t => t.id === current);
       const header = doc.querySelector?.('.pool-header-image');
       if (header) {
         const src = current === 'original' ? 'assets/images/home-leaderboard-basement-board.png?v=269'
-          : 'assets/images/themes/v292/' + current + '.webp';
+          : theme.art || 'assets/images/themes/v292/' + current + '.webp';
         if (header.getAttribute('src') !== src) header.setAttribute('src', src);
       }
       doc.querySelectorAll('[data-current-theme]').forEach(el => { el.textContent = theme.name; });
@@ -63,6 +69,7 @@
       current = normalize(id);
       const result = persist ? write(storage, current) : { saved: undefined };
       doc.documentElement.dataset.homeSkin = current;
+      doc.documentElement.dataset.homeThemeFamily = themes.find(t => t.id === current).family || 'classic';
       sync(result.saved);
     }
     function ready() {

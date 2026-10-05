@@ -80,10 +80,10 @@ test('the catalogue loads once per comparison season and contributes identities,
 test('each theme preview uses current banner markup, and the active page loads the new fixes',()=>{
   const options={};
   Themes.mount({document:{readyState:'complete',documentElement:{dataset:{}},querySelector(){return null;},querySelectorAll(){return [];},getElementById:id=>id==='poolThemeOptions'?options:null,addEventListener(){}},addEventListener(){}});
-  assert.equal((options.innerHTML.match(/pool-theme-preview-header/g)||[]).length,6);
+  assert.equal((options.innerHTML.match(/pool-theme-preview-header/g)||[]).length,Themes.themes.length);
   assert.ok(options.innerHTML.includes('data-preview-theme="original"'));assert.ok(options.innerHTML.includes('data-preview-theme="midnight"'));
   const index=fs.readFileSync(require.resolve('../index.html'),'utf8');
-  assert.ok(index.includes('home-board-v293.js?v=299'));assert.ok(!index.includes('src="assets/js/home-board-v292.js'));
+  assert.ok(index.includes('home-board-v293.js?v=300'));assert.ok(!index.includes('src="assets/js/home-board-v292.js'));
   assert.ok(index.indexOf('home-fixes-v293.css')>index.indexOf('home-skins-v292.css'));
 });
 

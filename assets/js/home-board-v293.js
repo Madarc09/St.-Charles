@@ -10,7 +10,7 @@
     const standingsState = { mode: 'season' };
     let rankingCatalog = { season:'', players:null, pending:false, retryAfter:0 };
     let cardSession = 0, cardRefreshTimer = null;
-    // View choices last for this page visit only; real rosters open as charts.
+    // View choices last for this page visit only; every roster opens on the ice.
     const rosterState = { left: 'nick', right: 'andrew', mode: 'season', views: {} };
 
     function availableIds(rows) {
@@ -334,7 +334,7 @@
     return '<section class="pool-dream-counts" aria-label="Full Dream Team selections by roster, including team goalie groups"><p>Dream Team spots by roster</p>'+(row.players.length?'<ul>'+counts+'</ul>':'<p>Loading current selections…</p>')+'</section>';
   }
   function rosterPresentation(row,requested){
-    return requested==='ice'||requested==='chart'?requested:row.isDream?'ice':'chart';
+    return requested==='ice'||requested==='chart'?requested:'ice';
   }
   function rosterNameToggle(row,presentation){
     const ice=presentation==='ice',action='Switch '+row.ownerName+' to '+(ice?'chart':'ice')+' view';
@@ -378,10 +378,16 @@
     const total=daily?scheduled.reduce((sum,p)=>sum+dailyLine(p,live,mode).fpts,0):row.total;
     const pointsLabel=daily?rosterDayShort(mode,live).toUpperCase()+' FPTS':'SEASON FPTS';
     const slots=[[goalies[0],50,9],[defence[0],31,24],[defence[1],69,24],[forwards[0],19,40],[forwards[1],50,40],[forwards[2],81,40],[forwards[3],19,60],[forwards[4],50,60],[forwards[5],81,60],[defence[2],31,76],[defence[3],69,76],[goalies[1],50,91]];
+    const scheduleKnown=Array.isArray(dayPayload(live,mode)?.games);
+    // Filter after assigning positions so active players stay in their season slots.
+    // An unavailable feed cannot establish that anyone has an off day.
+    const visibleSlots=slots.filter(([p])=>p&&(!daily||!scheduleKnown||gameForTeam(p.nhlTeam,live,mode)));
     const champion=row.ownerId==='andrew'?' data-champion="true"':'';
-    const rinkTeam=row.ownerId==='andrew'?'PHI':'TOR';
-    const centreLogo='<img class="rink-centre-logo" data-rink-logo="'+rinkTeam+'" src="https://assets.nhle.com/logos/nhl/svg/'+rinkTeam+'_light.svg" alt="" aria-hidden="true" loading="lazy" onerror="this.style.display=\'none\'">';
-    return '<article class="pool-roster pool-ice-rink-card'+(row.isDream?' pool-dream-rink-card':'')+(daily?' is-daily-ice':'')+'"'+(compareRole?' data-compare-role="'+esc(compareRole)+'"':'')+champion+' data-owner="'+esc(row.ownerId)+'" data-roster-presentation="ice" aria-label="'+esc(row.ownerName)+' rink lineup">'+rosterHeading(row,total,pointsLabel,'ice',mode,daily?scheduled.length:null)+dreamRosterCounts(row)+'<div class="dream-rink" aria-label="Goalies at the nets, defence behind each blue line, forwards near centre ice">'+centreLogo+(players.length?slots.map(([p,x,y])=>dreamRinkPlayer(p,x,y,live,mode)).join(''):'<p class="dream-rink-loading">'+(row.isDream?'Loading the Dream Team…':'No selections yet.')+'</p>')+'</div></article>';
+    const rinkTeam=row.isDream?'ALL-STAR':row.ownerId==='andrew'?'PHI':'TOR';
+    const logoSrc=row.isDream?'assets/images/nhl-all-star-2024.png':'https://assets.nhle.com/logos/nhl/svg/'+rinkTeam+'_light.svg';
+    const centreLogo='<img class="rink-centre-logo" data-rink-logo="'+rinkTeam+'" src="'+logoSrc+'" alt="" aria-hidden="true" loading="lazy" onerror="this.style.display=\'none\'">';
+    const emptyText=!players.length?(row.isDream?'Loading the Dream Team…':'No selections yet.'):'No players or goalie groups scheduled '+rosterDayShort(mode,live).toLowerCase()+'.';
+    return '<article class="pool-roster pool-ice-rink-card'+(row.isDream?' pool-dream-rink-card':'')+(daily?' is-daily-ice':'')+'"'+(compareRole?' data-compare-role="'+esc(compareRole)+'"':'')+champion+' data-owner="'+esc(row.ownerId)+'" data-roster-presentation="ice" aria-label="'+esc(row.ownerName)+' rink lineup">'+rosterHeading(row,total,pointsLabel,'ice',mode,daily&&scheduleKnown?scheduled.length:null)+dreamRosterCounts(row)+'<div class="dream-rink" aria-label="Goalies at the nets, defence behind each blue line, forwards near centre ice">'+centreLogo+(visibleSlots.length?visibleSlots.map(([p,x,y])=>dreamRinkPlayer(p,x,y,live,mode)).join(''):'<p class="dream-rink-loading">'+esc(emptyText)+'</p>')+'</div></article>';
   }
   function rosterCard(row,instance,compareRole,presentation,live){
     if(!row)return '';

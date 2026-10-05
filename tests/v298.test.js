@@ -22,12 +22,12 @@ function article(html,owner){return [...html.matchAll(/<article\b[^>]*data-owner
 function presentation(html,owner){return article(html,owner).match(/data-roster-presentation="([^"]+)"/)?.[1];}
 function total(html){return html.match(/class="pool-roster-total"><b>([^<]+)/)?.[1];}
 
-test('all five managers and BOT start as charts and render their own exact 6F/4D/2TG on ice',()=>{
+test('all five managers and BOT start on ice and render their own exact 6F/4D/2TG',()=>{
  const {rows,live,draft}=fixture(),before=JSON.stringify({rows,live,draft});
  const html=V.renderRosters(rows,draft,{left:'nick',right:'andrew',mode:'season'},live);
  for(const row of rows){
-  assert.equal(presentation(html,row.ownerId),'chart');
-  const chart=article(html,row.ownerId);
+  assert.equal(presentation(html,row.ownerId),'ice');
+  const chart=V.rosterCard(row,'roster','left','chart',live);
   assert.ok(chart.includes('data-roster-view-toggle="'+row.ownerId+'"'));assert.ok(!chart.includes('data-roster-owner='));
   const ice=V.rosterCard(row,'roster','left','ice',live);
   for(const [bucket,count] of [['F',6],['D',4],['G',2]])assert.equal((ice.match(new RegExp('data-dream-position="'+bucket+'"','g'))||[]).length,count);
@@ -41,14 +41,16 @@ test('all five managers and BOT start as charts and render their own exact 6F/4D
  assert.equal(JSON.stringify({rows,live,draft}),before);
 });
 
-test('ice and chart views agree on daily totals, keep all ice slots and retain tappable hockey cards',()=>{
+test('ice and chart views agree on daily totals, show scheduled selections and retain tappable hockey cards',()=>{
  const {rows,live}=fixture();
  for(const mode of ['yesterday','today','tomorrow'])for(const row of rows){
   const chart=V.matchupCard(row,live,'left',mode,'chart'),ice=V.matchupCard(row,live,'left',mode,'ice');
   assert.equal(total(ice),total(chart),row.ownerName+' '+mode);
-  assert.equal((ice.match(/data-player-card /g)||[]).length,12);
-  assert.equal((ice.match(/data-card-kind="teamGoalie"/g)||[]).length,2);
-  assert.equal((ice.match(/is-off-day/g)||[]).length,row.players.filter(p=>!V.gameForTeam(p.nhlTeam,live,mode)).length);
+  const active=row.players.filter(p=>V.gameForTeam(p.nhlTeam,live,mode));
+  assert.equal((ice.match(/data-player-card /g)||[]).length,active.length);
+  assert.equal((ice.match(/data-card-kind="teamGoalie"/g)||[]).length,active.filter(p=>C.bucket(p)==='G').length);
+  assert.deepEqual([...ice.matchAll(/data-player-id="([^"]+)"/g)].map(m=>m[1]).sort(),active.map(p=>String(p.id)).sort());
+  assert.ok(!ice.includes('is-off-day'));
   assert.ok(ice.includes('data-roster-view="ice" aria-pressed="true"'));
  }
 });
@@ -105,13 +107,13 @@ test('clicking names flips only that roster, keeps both board scroll positions a
  b.enlarged.rosters.querySelector('.pool-roster-track').scrollLeft=1234;
  b.flip('nick');
  for(const board of [b.main,b.enlarged]){
-  assert.equal(presentation(board.rosters.innerHTML,'nick'),'ice');assert.equal(presentation(board.rosters.innerHTML,'andrew'),'chart');
+  assert.equal(presentation(board.rosters.innerHTML,'nick'),'chart');assert.equal(presentation(board.rosters.innerHTML,'andrew'),'ice');
  }
  assert.equal(b.main.rosters.querySelector('.pool-roster-track').scrollLeft,870);
  assert.equal(b.enlarged.rosters.querySelector('.pool-roster-track').scrollLeft,1234);
  assert.equal(b.events.focus,'nick');assert.equal(b.events.animations,1);
  b.flip('bot',b.enlarged);b.flip('nick');
- assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'chart');assert.equal(presentation(b.main.rosters.innerHTML,'bot'),'ice');
+ assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'ice');assert.equal(presentation(b.main.rosters.innerHTML,'bot'),'chart');
  assert.equal(b.main.standings.innerHTML,mainStanding);assert.equal(b.enlarged.standings.innerHTML,largeStanding);
  assert.equal(b.dialog.open,true);assert.equal(JSON.stringify(b.data),before);
 });
@@ -119,14 +121,14 @@ test('clicking names flips only that roster, keeps both board scroll positions a
 test('view choices survive date changes, roster arrows and fresh stats; new visits restore defaults',()=>{
  const b=browser({reduced:true});b.flip('nick');b.flip('dream-team');
  b.click(b.main.rosters,'[data-v291-roster-mode]',x=>x.dataset.v291RosterMode==='today');
- assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'ice');assert.equal(presentation(b.main.rosters.innerHTML,'dream-team'),'chart');
+ assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'chart');assert.equal(presentation(b.main.rosters.innerHTML,'dream-team'),'chart');
  b.click(b.main.rosters,'[data-v280-compare-shift]',x=>x.dataset.compareSide==='left'&&x.dataset.v280CompareShift==='1');
  const selected=b.main.rosters.innerHTML.match(/<article[^>]*data-compare-role="left"[^>]*data-owner="([^"]+)"/)?.[1];
  assert.equal(selected,'scott');
  const live=copy(b.data.live);live.today.players[b.data.rows.find(r=>r.ownerId==='nick').players[0].id]={goals:3};live.matchups.today=live.today;
  b.window.renderSeasonBoard(b.data.rows,b.data.draft,live);
- assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'ice');assert.equal(presentation(b.main.rosters.innerHTML,'dream-team'),'chart');
+ assert.equal(presentation(b.main.rosters.innerHTML,'nick'),'chart');assert.equal(presentation(b.main.rosters.innerHTML,'dream-team'),'chart');
  assert.ok(b.main.rosters.innerHTML.includes('data-v291-roster-mode="today" aria-pressed="true"'));
  assert.equal(b.events.animations,0,'Reduced-motion preference skips the flip animation');
- const fresh=browser();assert.equal(presentation(fresh.main.rosters.innerHTML,'nick'),'chart');assert.equal(presentation(fresh.main.rosters.innerHTML,'dream-team'),'ice');
+ const fresh=browser();assert.equal(presentation(fresh.main.rosters.innerHTML,'nick'),'ice');assert.equal(presentation(fresh.main.rosters.innerHTML,'dream-team'),'ice');
 });

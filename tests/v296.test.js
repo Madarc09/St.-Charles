@@ -22,10 +22,11 @@ test('Dream Team renders 6F / 4D / 2TG on the rink with truthful ownership and t
  assert.equal(dream.ownerCounts.reduce((n,o)=>n+o.count,0),12);
  assert.equal(JSON.stringify({rows,live,draft}),before);
 });
-test('daily Dream Team view retains the rink, shows daily points and marks off days',()=>{
+test('daily Dream Team view retains the rink, shows daily points and hides off days',()=>{
  const {rows,live,draft}=lineup();live.today={date:'2026-10-04',games:[{id:1,away:'TOR',home:'OTT',state:'LIVE'}],players:{F0:{goals:2}},teamGoalies:{}};
  const dream=V.dreamTeam(rows,live,draft),html=V.matchupCard(dream,live,'left','today');
- assert.ok(html.includes('dream-rink'));assert.ok(html.includes('is-off-day'));
+ assert.ok(html.includes('dream-rink'));assert.ok(!html.includes('is-off-day'));
+ assert.ok(!html.includes('data-player-id="TG-MTL"'));
  assert.ok(html.includes('>4 <small>FPTS</small>'));assert.ok(!html.includes('<table'));
  assert.ok(!V.renderStandings([...rows,dream],draft,'season',live).includes('The Dream Team'));
 });

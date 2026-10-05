@@ -19,7 +19,7 @@ test('theme survives new page instances while two different browsers keep indepe
   }
   Themes.write(computer, 'press');
   Themes.write(friendsPhone, 'ice');
-  assert.equal(Themes.read(phone), 'arcade');
+  assert.equal(Themes.read(phone), Themes.themes.at(-1).id);
   assert.equal(Themes.read(computer), 'press');
   assert.equal(Themes.read(friendsPhone), 'ice');
   assert.deepEqual([...phone.values.keys()], [Themes.storageKey], 'Only the local theme preference is saved');
