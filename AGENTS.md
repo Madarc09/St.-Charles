@@ -44,7 +44,7 @@ The Dream Team is a dynamic, hypothetical comparison roster, separate from the f
 
 Its displayed players and team goalie groups must show “Team: Nick” (or the actual manager), “Undrafted” when unowned, and “Undrafted (The Spare Parts)” for BOT selections. The compact roster tally counts all current Dream Team selections, including goalie groups, even in a daily comparison view. Include managers with zero selections, BOT when active, and the unowned count. Recompute labels and counts from actual roster ownership; they must never assign ownership to the Dream Team or be persisted as a new roster/history record.
 
-The user approved a visual rink for this comparison only in v296. Keep 6 forwards between centre and the blue lines, 4 defence behind the blue lines, and 2 team-goalie groups at the nets. Display real NHL headshots, name, FPTS and ownership, with the roster tally above the rink (v297 spacing correction). Headshots open the existing hockey cards. Preserve the surrounding comparison controls, homepage framing, themes and human/BOT roster tables. Daily views retain the season-selected lineup, show daily points and mark off days.
+The user approved the Dream Team rink in v296 and extended it to every comparison roster in v298. Keep 6 forwards between centre and the blue lines, 4 defence behind the blue lines, and 2 team-goalie groups at the nets. Display real NHL headshots, name, FPTS and ownership, with the roster tally above the rink (v297 spacing correction). Headshots open the existing hockey cards. Preserve the surrounding comparison controls, homepage framing, themes and the default human/BOT roster tables. Daily views retain the season-selected lineup, show daily points and mark off days.
 
 ## Hockey-card game results (v296)
 
@@ -58,4 +58,12 @@ Weekly totals start Monday; monthly totals start on the first calendar day. Fetc
 
 ## Dream Team positioning (v297)
 
-The shared `#dashboard button` reset uses `transform:none!important`. The scoped `.dream-rink-player` centering rule must override that reset so each percentage coordinate marks the centre of the whole card. Losing this override pushes the lineup down/right and clips the right-side forwards and bottom goalie. Keep the fix scoped to the Dream Team in both normal and enlarged boards. Keep the roster-count panel above the rink artwork.
+The shared `#dashboard button` reset uses `transform:none!important`. The scoped `.dream-rink-player` centering rule must override that reset so each percentage coordinate marks the centre of the whole card. Losing this override pushes the lineup down/right and clips the right-side forwards and bottom goalie. Keep the fix scoped to ice-view player cards in both normal and enlarged boards. Keep the roster-count panel above the rink artwork.
+
+## Every-roster ice view (v298)
+
+Five human managers and the fixed BOT default to their current charts. The Dream Team retains its approved default ice view. In every comparison card, the roster name is a button that toggles that roster alone between chart and ice; it must not carry `data-roster-owner`, which would invoke the roster-room navigation handler. Header jersey links and standings links still open the real rooms.
+
+Keep each presentation choice per owner in page memory, through live refreshes, date changes, side changes and normal/enlarged-board rendering. A fresh page restores defaults. Preserve horizontal comparison scrolling and keyboard focus. The flip animation respects reduced motion.
+
+Every ice lineup uses that roster's actual selections, with 6F / 4D / 2TG limits, the existing rink artwork and NHL portraits. Day views retain the lineup, show that day's FPTS and mark off days. The chart and ice totals must agree. No player substitutions, automatic redrafts, new storage keys or changes to scoring, draft/archive data are part of this display toggle.
