@@ -41,3 +41,5 @@ Press Box colors in home-fixes-v293.css intentionally use #dashboard #seasonBoar
 ## The Dream Team (comparison only)
 
 The Dream Team is a dynamic, hypothetical comparison roster, separate from the fixed BOT competitor. Recompute the best 6F/4D/2TG from the full pool using current-season fantasy points on each stats refresh. Already-owned players are eligible. Never add this team to Core.OWNERS, standings, weekly/monthly rankings, saved rosters, ownership labels, season archives, draft history or roster rooms. Keep it available through the existing comparison controls on desktop and mobile. Selecting a daily comparison view does not change the season-based selection criteria.
+
+Its displayed players and team goalie groups must show their actual pool roster owner, or “Not drafted” when unowned. The compact roster tally counts all current Dream Team selections, including goalie groups, even in a daily comparison view. Include managers with zero selections, BOT when active, and the unowned count. Recompute labels and counts from actual roster ownership; they must never assign ownership to the Dream Team or be persisted as a new roster/history record.

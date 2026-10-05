@@ -1,23 +1,15 @@
-# Hockey Pool v293 — Small Fix Patch
+# Hockey Pool v294 — Dream Team Ownership
 
-Apply this over your installed v292 / v292 small update.
+Apply this small patch over the v293 update.
 
-1. Extract `Hockey-Pool-v292-to-v293-FIX-PATCH.zip`.
-2. Upload the files and folders **inside** to the root of the same GitHub repository. Replace matching files and keep every other existing file. Do not upload the ZIP itself or delete the repository.
-3. Commit and let the existing Vercel integration deploy. Refresh the page afterwards.
+1. Extract `Hockey-Pool-v293-to-v294-DREAM-OWNERS-PATCH.zip`.
+2. Upload the files and folders inside to the root of the same GitHub repository. Replace matching files and keep every other existing file.
+3. Commit and let Vercel deploy, then refresh your page.
 
-This patch needs no image downloads, migration, draft reset or End Season action.
+The Dream Team now shows `Roster: Nick` (or the appropriate manager/BOT) beneath every player and team goalie group. Unowned selections show **Not drafted**.
 
-## Fixes
+A compact tally beneath the Dream Team heading shows how many spots come from each manager, BOT and the undrafted pool. Zero counts are included. Each team goalie group counts as one spot. The tally covers the full Dream Team, including in Yesterday/Today/Tomorrow views, and updates automatically with the selection.
 
-- The two Top 5 panels now rank the complete available skater/team-goalie pool using current-season fantasy points. Unowned entries show **Undrafted in our pool**. Human selections show their manager; BOT selections show BOT. Team goalie rankings cover all 32 units. Individual goalies are excluded.
-- Player-card fantasy ranks use the same full-pool comparison. Ties share a rank. Manager standings still sum only each manager’s actual roster.
-- The existing draft-board endpoint supplies the full catalogue once per page. Its previous-season values are discarded: only identity fields are retained. Current NHL stats supply every point. No scoring weights or NHL collector behaviour changed.
-- SHG and GWG stay abbreviated in standings, roster tables, day views and scoring rules.
-- Press Box now has dark text, readable stat contributions and dark red FPTS on cream rows. Its banner is unchanged.
-- All six theme previews now use their own actual banners and matching scoreboard colors, including Original Home and Neon Ice.
-- **The Dream Team** is available through the roster comparison arrows and team selector. It automatically selects the highest-scoring 6 forwards, 4 defencemen and 2 team goalie groups using current-season fantasy points, and updates whenever the stats refresh. It can include players from any manager or BOT roster. It is for comparison only: it has no roster room and never enters standings, season archives, the draft or ownership records.
+The Dream Team remains comparison-only. All completed draft records, human and BOT rosters, standings, scoring, season archive logic, theme artwork and existing controls are unchanged. No reset, End Season or data migration is needed.
 
-All 60 human picks, BOT selections, lottery order, protected draft history, backend storage and season archive logic are unchanged. The approved framing, scrolling and controls are retained.
-
-See `docs/verification-v293.md` for checks. Nothing was deployed or changed in the live pool by this patch preparation.
+The board and color stylesheet retain their v293 filenames and use v294 cache versions. See `docs/verification-v294.md` for verification details.
