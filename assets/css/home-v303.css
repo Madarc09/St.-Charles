@@ -1,0 +1,170 @@
+/* v303: restore original two-leader-board masthead, add a third board by horizontal scroll,
+   keep one global roster presentation mode, and correct Tyler's visible jersey number. */
+
+/* Standings masthead: fixed left heading + a right-side window that always fits two full boards. */
+body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+.pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+  display:grid!important;
+  grid-template-columns:minmax(230px,.86fr) minmax(0,2.2fr)!important;
+  align-items:stretch!important;
+  gap:14px!important;
+  padding:14px 16px!important;
+  text-align:left!important;
+  background:linear-gradient(180deg,rgba(4,23,38,.98),rgba(4,16,27,.94))!important;
+  border-bottom:1px solid rgba(68,222,255,.38)!important;
+}
+body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading,
+.pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  padding:4px 12px 4px 2px!important;
+  border-right:1px solid rgba(75,203,232,.23)!important;
+}
+body.v180-home-active #dashboard .pool-v303-standings-header .pool-v299-standings-controls,
+.pool-board-dialog .pool-v303-standings-header .pool-v299-standings-controls{
+  width:auto!important;
+  margin-top:4px!important;
+  justify-content:flex-start!important;
+}
+body.v180-home-active #dashboard .pool-v303-top5-window,
+.pool-board-dialog .pool-v303-top5-window{
+  min-width:0!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  overscroll-behavior-x:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:var(--pool-accent) transparent!important;
+  scroll-snap-type:x mandatory!important;
+}
+body.v180-home-active #dashboard .pool-v303-top5-strip,
+.pool-board-dialog .pool-v303-top5-strip{
+  display:flex!important;
+  gap:12px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+.pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+  flex:0 0 calc((100% - 12px)/2)!important;
+  width:calc((100% - 12px)/2)!important;
+  min-width:0!important;
+  padding:3px 2px!important;
+  border-left:0!important;
+  scroll-snap-align:start!important;
+  scroll-snap-stop:always!important;
+}
+body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5:nth-child(2),
+body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5:nth-child(3),
+.pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5:nth-child(2),
+.pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5:nth-child(3){
+  padding-left:14px!important;
+  border-left:1px solid rgba(75,203,232,.23)!important;
+}
+/* The visible order is intentionally: Team Goalies | Forwards | Defence.
+   Initial view shows Goalies + Forwards; one scroll right shows Forwards + Defence. */
+
+/* Tyler's source artwork says 91. Overlay only that jersey crop so every Home header shows 13
+   without altering or recompressing the original artwork. */
+html[data-pool-theme] #dashboard .pool-nav-tyler .pool-nav-art,
+#dashboard .pool-nav-tyler .pool-nav-art{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  background-image:url('../images/home-leaderboard-basement-board.png')!important;
+  background-repeat:no-repeat!important;
+  background-size:var(--sprite-size) auto!important;
+  background-position:var(--sprite-x) var(--sprite-y)!important;
+  pointer-events:none!important;
+}
+html[data-pool-theme] #dashboard .pool-nav-tyler .pool-nav-art::before,
+#dashboard .pool-nav-tyler .pool-nav-art::before{
+  content:"";
+  position:absolute;
+  left:20%;
+  top:33%;
+  width:60%;
+  height:39%;
+  background:linear-gradient(180deg,#10264c 0%,#0b1e40 58%,#10264c 100%);
+  border-radius:6% 6% 12% 12%;
+  box-shadow:inset 0 0 12px rgba(0,0,0,.18);
+}
+html[data-pool-theme] #dashboard .pool-nav-tyler .pool-nav-art::after,
+#dashboard .pool-nav-tyler .pool-nav-art::after{
+  content:"13";
+  position:absolute;
+  left:50%;
+  top:34%;
+  transform:translateX(-50%);
+  color:#c7aa82;
+  font:900 clamp(38px,6vw,86px)/1 Impact,'Arial Narrow',sans-serif;
+  letter-spacing:-.08em;
+  -webkit-text-stroke:2px #171717;
+  text-shadow:0 2px 0 #5a442f,0 4px 7px #0008;
+  white-space:nowrap;
+}
+
+@media(max-width:1000px){
+ body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+ .pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+   grid-template-columns:minmax(210px,.8fr) minmax(0,2fr)!important;
+   gap:9px!important;
+   padding:12px 10px!important;
+ }
+ body.v180-home-active #dashboard .pool-v303-top5-strip,
+ .pool-board-dialog .pool-v303-top5-strip{gap:9px!important}
+ body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+ .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+   flex-basis:calc((100% - 9px)/2)!important;
+   width:calc((100% - 9px)/2)!important;
+ }
+}
+
+@media(max-width:700px){
+ body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+ .pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+   grid-template-columns:1fr!important;
+   gap:10px!important;
+   padding:11px 9px!important;
+ }
+ body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading,
+ .pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading{
+   align-items:center!important;
+   text-align:center!important;
+   border-right:0!important;
+   border-bottom:1px solid rgba(75,203,232,.23)!important;
+   padding:0 0 10px!important;
+ }
+ body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-current-view,
+ .pool-board-dialog .pool-v303-standings-header .pool-v287-current-view{align-items:center!important}
+ body.v180-home-active #dashboard .pool-v303-standings-header .pool-v299-standings-controls,
+ .pool-board-dialog .pool-v303-standings-header .pool-v299-standings-controls{justify-content:center!important}
+ body.v180-home-active #dashboard .pool-v303-top5-strip,
+ .pool-board-dialog .pool-v303-top5-strip{gap:9px!important}
+ body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+ .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+   flex-basis:calc((100% - 9px)/2)!important;
+   width:calc((100% - 9px)/2)!important;
+ }
+ html[data-pool-theme] #dashboard .pool-nav-tyler .pool-nav-art,
+#dashboard .pool-nav-tyler .pool-nav-art{
+   position:relative!important;
+   inset:auto!important;
+   height:var(--art-height)!important;
+   width:calc(var(--art-height) * var(--cut-width) / var(--cut-height))!important;
+   max-width:100%!important;
+   flex-shrink:0!important;
+ }
+ html[data-pool-theme] #dashboard .pool-nav-tyler .pool-nav-art::after,
+#dashboard .pool-nav-tyler .pool-nav-art::after{
+   font-size:calc(var(--art-height) * .34)!important;
+   -webkit-text-stroke:1.5px #171717;
+ }
+}
