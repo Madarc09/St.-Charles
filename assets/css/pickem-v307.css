@@ -1,0 +1,151 @@
+/* v306: larger centered Just the Tip week display + interactive Your Pick matchup artwork. */
+#weeklyPickem .pool-pickem-week-label{
+  left:19.4%;
+  width:57.2%;
+  bottom:14.2%;
+  height:19.2%;
+  padding:0 2%;
+  font-size:clamp(20px,2.72vw,50px);
+  letter-spacing:.06em;
+  line-height:.96;
+  transform:none;
+}
+
+#weeklyPickem .pool-pickem-matchup-display{
+  position:relative;
+  width:100%;
+  aspect-ratio:1922/818;
+  margin:0 0 14px;
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--pool-line) 72%,transparent);
+  border-radius:9px;
+  background:#02070d;
+  box-shadow:0 10px 28px rgba(0,0,0,.36);
+}
+#weeklyPickem .pool-pickem-matchup-display>img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  pointer-events:none;
+  user-select:none;
+}
+#weeklyPickem .pool-pickem-matchup-team{
+  position:absolute;
+  top:30.5%;
+  width:38.5%;
+  height:37.5%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:24px;
+  transition:filter .16s ease,box-shadow .16s ease,transform .16s ease;
+  pointer-events:none;
+}
+#weeklyPickem .pool-pickem-matchup-team.is-away{left:3.3%}
+#weeklyPickem .pool-pickem-matchup-team.is-home{right:3.3%}
+#weeklyPickem .pool-pickem-matchup-team img{
+  width:min(47%,220px);
+  height:72%;
+  object-fit:contain;
+  filter:drop-shadow(0 7px 10px rgba(0,0,0,.65));
+}
+#weeklyPickem .pool-pickem-matchup-team.is-picked{
+  transform:scale(1.015);
+  box-shadow:inset 0 0 0 3px #74ff7c,0 0 20px rgba(79,255,104,.72),inset 0 0 34px rgba(65,255,88,.12);
+}
+#weeklyPickem .pool-pickem-matchup-team.is-picked::after{
+  content:"✓ YOUR PICK";
+  position:absolute;
+  right:4.2%;
+  top:5.5%;
+  padding:7px 11px;
+  border:2px solid #8fff91;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(16,76,25,.96),rgba(4,31,10,.96));
+  color:#eaffea;
+  font:900 clamp(8px,.8vw,13px)/1 "Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  letter-spacing:.05em;
+  text-shadow:0 1px 2px #000;
+  box-shadow:0 0 13px rgba(76,255,96,.78),inset 0 0 10px rgba(255,255,255,.12);
+}
+#weeklyPickem .pool-pickem-matchup-name{
+  position:absolute;
+  top:59.4%;
+  width:29%;
+  height:6.8%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:0 1%;
+  color:#fff;
+  font:900 clamp(9px,1.05vw,18px)/1 "Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+  text-shadow:0 2px 3px #000,0 0 8px rgba(255,255,255,.2);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  pointer-events:none;
+}
+#weeklyPickem .pool-pickem-matchup-name.is-away{left:8.2%}
+#weeklyPickem .pool-pickem-matchup-name.is-home{right:8.2%}
+#weeklyPickem .pool-pickem-matchup-status{
+  position:absolute;
+  left:20.5%;
+  width:59%;
+  bottom:8.2%;
+  height:14.5%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:0 2%;
+  box-sizing:border-box;
+  color:#f8fbff;
+  text-transform:uppercase;
+  pointer-events:none;
+  text-shadow:0 2px 3px #000,0 0 8px rgba(79,184,255,.35);
+}
+#weeklyPickem .pool-pickem-matchup-status strong{
+  display:block;
+  font:900 clamp(12px,1.55vw,26px)/1 "Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  letter-spacing:.055em;
+}
+#weeklyPickem .pool-pickem-matchup-status span{
+  display:block;
+  margin-top:4px;
+  color:#b8d9ee;
+  font:800 clamp(7px,.72vw,12px)/1.1 system-ui,sans-serif;
+  letter-spacing:.075em;
+}
+#weeklyPickem .pool-pickem-matchup-display.is-win .pool-pickem-matchup-status strong{color:#91ff9a}
+#weeklyPickem .pool-pickem-matchup-display.is-loss .pool-pickem-matchup-status strong{color:#ff8b8b}
+#weeklyPickem .pool-pickem-matchup-display.is-empty .pool-pickem-matchup-status strong{color:#e7f3fb}
+
+@media(max-width:640px){
+  #weeklyPickem .pool-pickem-week-label{
+    left:19.1%;
+    width:57.8%;
+    bottom:13.8%;
+    height:19.8%;
+    padding:0 1%;
+    font-size:clamp(14px,4.45vw,24px);
+    letter-spacing:.025em;
+  }
+  #weeklyPickem .pool-pickem-matchup-display{margin-bottom:10px;border-radius:6px}
+  #weeklyPickem .pool-pickem-matchup-team{top:30%;height:38.5%;border-radius:10px}
+  #weeklyPickem .pool-pickem-matchup-team img{width:48%;height:73%}
+  #weeklyPickem .pool-pickem-matchup-team.is-picked{box-shadow:inset 0 0 0 2px #74ff7c,0 0 11px rgba(79,255,104,.62),inset 0 0 18px rgba(65,255,88,.11)}
+  #weeklyPickem .pool-pickem-matchup-team.is-picked::after{right:3%;top:4%;padding:4px 6px;border-width:1px;font-size:clamp(5px,1.6vw,8px)}
+  #weeklyPickem .pool-pickem-matchup-name{top:59%;font-size:clamp(6px,2.1vw,10px);letter-spacing:.015em}
+  #weeklyPickem .pool-pickem-matchup-status{left:18.5%;width:63%;bottom:7.7%;height:15%}
+  #weeklyPickem .pool-pickem-matchup-status strong{font-size:clamp(8px,3vw,14px);letter-spacing:.025em}
+  #weeklyPickem .pool-pickem-matchup-status span{margin-top:2px;font-size:clamp(5px,1.6vw,8px);letter-spacing:.025em}
+}
+
+#weeklyPickem .pool-pickem-exhibition{margin:7px 0 10px;padding:7px 9px;border:1px solid rgba(255,201,75,.38);border-radius:5px;background:rgba(88,56,8,.24);color:#ffd96a;font:800 10px/1.25 system-ui,sans-serif;letter-spacing:.045em;text-transform:uppercase;text-align:center}
