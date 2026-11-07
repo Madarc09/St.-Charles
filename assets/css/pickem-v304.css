@@ -1,0 +1,22 @@
+/* v304: make a weekly Pick'em selection unmistakable before save. */
+#weeklyPickem .pool-pickem-team{position:relative;isolation:isolate;transition:border-color .14s ease,background .14s ease,box-shadow .14s ease,transform .14s ease,opacity .14s ease,filter .14s ease}
+#weeklyPickem .pool-pickem-game.has-selection{border-color:color-mix(in srgb,var(--pool-accent) 75%,var(--pool-line));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pool-accent) 30%,transparent)}
+#weeklyPickem .pool-pickem-game.has-selection .pool-pickem-team:not(.is-selected){opacity:.42;filter:saturate(.45) brightness(.78)}
+#weeklyPickem .pool-pickem-team.is-selected{
+  opacity:1!important;filter:none!important;transform:translateY(-1px) scale(1.015);
+  border:3px solid var(--pool-accent)!important;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--pool-accent) 30%,var(--pool-panel)),color-mix(in srgb,var(--pool-accent-bg) 82%,var(--pool-panel)))!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--pool-accent) 34%,transparent),0 0 22px color-mix(in srgb,var(--pool-accent) 58%,transparent),inset 0 0 20px color-mix(in srgb,var(--pool-accent) 15%,transparent)!important;
+}
+#weeklyPickem .pool-pickem-team.is-selected::after{
+  content:"✓ PICKED";position:absolute;right:5px;top:5px;z-index:2;padding:3px 6px;border-radius:999px;
+  background:var(--pool-accent);color:#04121a;font:900 8px/1 system-ui,sans-serif;letter-spacing:.06em;
+  box-shadow:0 1px 5px rgba(0,0,0,.4);pointer-events:none
+}
+#weeklyPickem .pool-pickem-team.is-selected strong{color:#fff!important;text-shadow:0 0 10px color-mix(in srgb,var(--pool-accent) 80%,transparent)}
+#weeklyPickem .pool-pickem-team.is-selected img{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--pool-accent) 78%,transparent))}
+#weeklyPickem .pool-pickem-save small{font-weight:750!important}
+@media(max-width:640px){
+ #weeklyPickem .pool-pickem-team.is-selected{transform:none}
+ #weeklyPickem .pool-pickem-team.is-selected::after{font-size:7px;right:4px;top:4px}
+}

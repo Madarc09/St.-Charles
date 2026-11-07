@@ -1,0 +1,163 @@
+/* v304: desktop standings masthead cleanup.
+   - Original header artwork remains untouched (no jersey/image overlays).
+   - Desktop: title/current-view row spans full width; all three Top-5 boards sit below it.
+   - Tablet/mobile retain the two-board scroll behavior from v303. */
+
+/* Shared header surface. */
+body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+.pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+  background:linear-gradient(180deg,rgba(4,23,38,.98),rgba(4,16,27,.94))!important;
+  border-bottom:1px solid rgba(68,222,255,.38)!important;
+}
+
+/* DESKTOP: use the whole width instead of reserving a tall empty left column. */
+@media (min-width:1001px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+  .pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    padding:12px 16px 14px!important;
+    text-align:left!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading{
+    min-width:0!important;
+    display:grid!important;
+    grid-template-columns:auto minmax(190px,auto) 1fr!important;
+    align-items:center!important;
+    column-gap:28px!important;
+    row-gap:4px!important;
+    padding:2px 2px 10px!important;
+    border-right:0!important;
+    border-bottom:1px solid rgba(75,203,232,.23)!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading h2,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading h2{
+    margin:0!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-current-view,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-current-view{
+    margin:0!important;
+    align-self:center!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v299-standings-controls,
+  .pool-board-dialog .pool-v303-standings-header .pool-v299-standings-controls{
+    width:auto!important;
+    margin:0!important;
+    justify-self:end!important;
+    justify-content:flex-end!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-window,
+  .pool-board-dialog .pool-v303-top5-window{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:visible!important;
+    padding:0!important;
+    scrollbar-width:none!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-window::-webkit-scrollbar,
+  .pool-board-dialog .pool-v303-top5-window::-webkit-scrollbar{display:none!important}
+  body.v180-home-active #dashboard .pool-v303-top5-strip,
+  .pool-board-dialog .pool-v303-top5-strip{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:14px!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+    width:auto!important;
+    min-width:0!important;
+    flex:none!important;
+    padding:4px 10px!important;
+    border-left:0!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2),
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2){
+    border-left:1px solid rgba(75,203,232,.23)!important;
+    padding-left:16px!important;
+  }
+  body.v180-home-active #dashboard .pool-v287-top5-title h3,
+  .pool-board-dialog .pool-v287-top5-title h3{font-size:13px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li strong,
+  .pool-board-dialog .pool-v287-top5 li strong{font-size:10.5px!important}
+  body.v180-home-active #dashboard .pool-v287-top5 li span small,
+  .pool-board-dialog .pool-v287-top5 li span small{font-size:7.5px!important}
+}
+
+/* TABLET: keep two large boards visible, with the third a horizontal scroll away. */
+@media (min-width:701px) and (max-width:1000px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+  .pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+    display:grid!important;
+    grid-template-columns:minmax(210px,.8fr) minmax(0,2fr)!important;
+    align-items:stretch!important;
+    gap:9px!important;
+    padding:12px 10px!important;
+    text-align:left!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading{
+    min-width:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:4px 8px 4px 2px!important;
+    border-right:1px solid rgba(75,203,232,.23)!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v299-standings-controls,
+  .pool-board-dialog .pool-v303-standings-header .pool-v299-standings-controls{
+    width:auto!important;margin-top:4px!important;justify-content:flex-start!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-window,
+  .pool-board-dialog .pool-v303-top5-window{
+    min-width:0!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;
+    overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;
+    scrollbar-width:thin!important;scrollbar-color:var(--pool-accent) transparent!important;scroll-snap-type:x mandatory!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip,
+  .pool-board-dialog .pool-v303-top5-strip{display:flex!important;gap:9px!important;width:100%!important;min-width:0!important}
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+    flex:0 0 calc((100% - 9px)/2)!important;width:calc((100% - 9px)/2)!important;min-width:0!important;
+    padding:3px 2px!important;border-left:0!important;scroll-snap-align:start!important;scroll-snap-stop:always!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2),
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2){padding-left:9px!important;border-left:1px solid rgba(75,203,232,.23)!important}
+}
+
+/* MOBILE: preserve the v303 phone layout exactly — centered heading, two boards at once. */
+@media (max-width:700px){
+  body.v180-home-active #dashboard .pool-v280-standings .pool-v303-standings-header,
+  .pool-board-dialog .pool-v280-standings .pool-v303-standings-header{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;padding:11px 9px!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-standings-heading,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-standings-heading{
+    align-items:center!important;text-align:center!important;border-right:0!important;
+    border-bottom:1px solid rgba(75,203,232,.23)!important;padding:0 0 10px!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v287-current-view,
+  .pool-board-dialog .pool-v303-standings-header .pool-v287-current-view{align-items:center!important}
+  body.v180-home-active #dashboard .pool-v303-standings-header .pool-v299-standings-controls,
+  .pool-board-dialog .pool-v303-standings-header .pool-v299-standings-controls{justify-content:center!important}
+  body.v180-home-active #dashboard .pool-v303-top5-window,
+  .pool-board-dialog .pool-v303-top5-window{
+    min-width:0!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;
+    overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;
+    scrollbar-width:thin!important;scrollbar-color:var(--pool-accent) transparent!important;scroll-snap-type:x mandatory!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip,
+  .pool-board-dialog .pool-v303-top5-strip{display:flex!important;gap:9px!important;width:100%!important;min-width:0!important}
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5,
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5{
+    flex:0 0 calc((100% - 9px)/2)!important;width:calc((100% - 9px)/2)!important;min-width:0!important;
+    padding:0!important;border-left:0!important;scroll-snap-align:start!important;scroll-snap-stop:always!important;
+  }
+  body.v180-home-active #dashboard .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2),
+  .pool-board-dialog .pool-v303-top5-strip>.pool-v287-top5:nth-child(n+2){padding-left:8px!important;border-left:1px solid rgba(75,203,232,.23)!important}
+}
