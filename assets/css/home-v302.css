@@ -1,0 +1,21 @@
+/* v302: horizontally scrollable Top-5 masthead + ice-surface view toggle. */
+#dashboard .pool-v302-standings-header,
+.pool-board-dialog .pool-v302-standings-header{display:block!important;min-width:0!important}
+#dashboard .pool-v302-standings-mast-scroll,
+.pool-board-dialog .pool-v302-standings-mast-scroll{display:grid!important;grid-template-columns:minmax(250px,1fr) repeat(3,minmax(300px,1fr));gap:12px;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--pool-accent) transparent;padding:0 0 10px;scroll-snap-type:x proximity}
+#dashboard .pool-v302-standings-mast-scroll>* ,
+.pool-board-dialog .pool-v302-standings-mast-scroll>*{min-width:0;scroll-snap-align:start}
+#dashboard .pool-v302-standings-mast-scroll .pool-v287-standings-heading,
+.pool-board-dialog .pool-v302-standings-mast-scroll .pool-v287-standings-heading{align-self:stretch}
+#dashboard .pool-v302-standings-header .pool-v299-standings-controls,
+.pool-board-dialog .pool-v302-standings-header .pool-v299-standings-controls{margin-top:4px!important}
+#dashboard .dream-rink[data-rink-view-toggle],
+.pool-board-dialog .dream-rink[data-rink-view-toggle]{cursor:pointer}
+#dashboard .dream-rink[data-rink-view-toggle] [data-player-card],
+.pool-board-dialog .dream-rink[data-rink-view-toggle] [data-player-card]{cursor:pointer}
+@media(max-width:760px){
+ #dashboard .pool-v302-standings-mast-scroll,
+ .pool-board-dialog .pool-v302-standings-mast-scroll{grid-template-columns:270px repeat(3,285px);gap:9px}
+ #dashboard .pool-v302-standings-mast-scroll .pool-v287-standings-heading,
+ .pool-board-dialog .pool-v302-standings-mast-scroll .pool-v287-standings-heading{text-align:center}
+}
