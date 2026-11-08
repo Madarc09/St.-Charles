@@ -9,6 +9,7 @@ module.exports=async function(req,res){
     res.setHeader('Cache-Control',season===S.Core.seasonId()?'no-store':'s-maxage=300, stale-while-revalidate=600');
     let data;
     if(req.query?.mode==='board')data=await NHL.board(season);
+    else if(req.query?.mode==='game')data=await NHL.gameDetail(req.query?.gameId);
     else if(req.query?.mode==='card'){
       data=String(req.query?.type||'')==='teamGoalie' ? await NHL.teamGoalieCard(req.query?.team,season) : await NHL.playerCard(req.query?.playerId,season);
     } else data=await NHL.statistics(season);
