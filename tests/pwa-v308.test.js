@@ -8,7 +8,7 @@ const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
 
 test('v308 exposes installable app metadata and iPhone icon', () => {
   const html = read('index.html');
-  assert.match(html, /rel="manifest" href="\/manifest\.webmanifest\?v=309"/);
+  assert.match(html, /rel="manifest" href="\/manifest\.webmanifest\?v=310"/);
   assert.match(html, /apple-mobile-web-app-capable" content="yes"/);
   assert.match(html, /apple-touch-icon/);
   assert.match(html, /pwa-v309\.js\?v=309/);

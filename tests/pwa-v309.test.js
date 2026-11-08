@@ -10,7 +10,7 @@ test('v309 exposes thePool installable app metadata and iPhone icon', () => {
   const html = read('index.html');
   assert.match(html, /<title>thePool<\/title>/);
   assert.match(html, /apple-mobile-web-app-title" content="thePool"/);
-  assert.match(html, /rel="manifest" href="\/manifest\.webmanifest\?v=309"/);
+  assert.match(html, /rel="manifest" href="\/manifest\.webmanifest\?v=310"/);
   assert.match(html, /pwa-v309\.js\?v=309/);
   assert.match(html, /pwa-v309\.css\?v=309/);
   assert.ok(fs.existsSync(path.join(root, 'assets/icons/apple-touch-icon.png')));
@@ -26,7 +26,7 @@ test('v309 manifest launches thePool as a standalone app', () => {
 
 test('v309 service worker uses thePool cache and retires old BBL PWA cache', () => {
   const sw = read('service-worker.js');
-  assert.match(sw, /thepool-pwa-v309/);
+  assert.match(sw, /thepool-pwa-v310/);
   assert.match(sw, /bbl-pwa-/);
   assert.match(sw, /url\.pathname\.startsWith\('\/api\/'\)/);
 });

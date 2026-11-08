@@ -1,11 +1,11 @@
-const CACHE_NAME = 'thepool-pwa-v309';
+const CACHE_NAME = 'thepool-pwa-v310';
 const OFFLINE_URL = '/offline.html';
 const CORE = [
   OFFLINE_URL,
-  '/manifest.webmanifest',
-  '/assets/icons/icon-192.png',
-  '/assets/icons/icon-512.png',
-  '/assets/icons/apple-touch-icon.png'
+  '/manifest.webmanifest?v=310',
+  '/assets/icons/icon-192.png?v=310',
+  '/assets/icons/icon-512.png?v=310',
+  '/assets/icons/apple-touch-icon.png?v=310'
 ];
 
 self.addEventListener('install', event => {
