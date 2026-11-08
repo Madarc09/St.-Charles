@@ -1,8 +1,8 @@
 {
-  "name": "basement-bar-league",
-  "version": "303.0.0",
+  "name": "thepool",
+  "version": "309.0.0",
   "private": true,
-  "description": "Shared NHL pool draft, lottery, chat and season history",
+  "description": "thePool shared NHL fantasy pool, live scoring, rosters, Pick\u2019em and season history",
   "scripts": {
     "start": "vercel dev",
     "test": "node --test tests/*.test.js",

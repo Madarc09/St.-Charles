@@ -1,0 +1,23 @@
+/* v308: installable iPhone/PWA support. Keep normal browser layout unchanged. */
+html.thepool-standalone-app {
+  background: #02070d;
+  overscroll-behavior-y: none;
+}
+
+@media (display-mode: standalone) {
+  html, body {
+    min-height: 100%;
+    background: #02070d;
+  }
+
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
