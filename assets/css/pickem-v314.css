@@ -1,0 +1,149 @@
+/* v311: started Pick'em games become live expandable NHL scoreboards. */
+#weeklyPickem .pool-pickem-scoreboard{padding:0;overflow:hidden;opacity:1!important;border-color:color-mix(in srgb,var(--pool-line) 72%,var(--pool-accent));background:linear-gradient(180deg,color-mix(in srgb,var(--pool-panel) 94%,#09121d),var(--pool-bg));}
+#weeklyPickem .pool-pickem-scoreboard.is-live{box-shadow:inset 3px 0 0 #e14a4a,0 5px 18px rgba(0,0,0,.18)}
+#weeklyPickem .pool-pickem-scoreboard.is-final{box-shadow:inset 3px 0 0 var(--pool-muted)}
+#weeklyPickem .pool-pickem-scoreboard-toggle{appearance:none;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:0;border:0;background:transparent;color:var(--pool-ink);padding:0;cursor:pointer;text-align:left}
+#weeklyPickem .pool-pickem-scoreboard-status{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--pool-line);background:rgba(0,0,0,.14);font:800 9px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+#weeklyPickem .pool-pickem-scoreboard-status>span{color:#ff8c8c}
+#weeklyPickem .pool-pickem-scoreboard.is-final .pool-pickem-scoreboard-status>span{color:var(--pool-muted)}
+#weeklyPickem .pool-pickem-scoreboard-status>b{justify-self:center;color:#fff16f;padding:3px 7px;border:1px solid rgba(255,231,72,.42);border-radius:999px;background:rgba(116,91,0,.3);box-shadow:0 0 9px rgba(255,230,57,.18);font-size:8px}
+#weeklyPickem .pool-pickem-scoreboard-status>small{justify-self:end;color:var(--pool-muted);font-size:8px}
+#weeklyPickem .pool-pickem-scoreboard-team{position:relative;display:grid;grid-template-columns:38px minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:7px;min-width:0;padding:10px 10px 9px}
+#weeklyPickem .pool-pickem-scoreboard-team+ .pool-pickem-scoreboard-team{border-left:1px solid var(--pool-line)}
+#weeklyPickem .pool-pickem-scoreboard-team>img{grid-row:1/3;width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
+#weeklyPickem .pool-pickem-scoreboard-team>span{min-width:0;align-self:end}
+#weeklyPickem .pool-pickem-scoreboard-team>span strong,#weeklyPickem .pool-pickem-scoreboard-team>span small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#weeklyPickem .pool-pickem-scoreboard-team>span strong{font:900 15px/1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-scoreboard-team>span small{margin-top:2px;color:var(--pool-muted);font:8px/1.1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-scoreboard-team>em{grid-row:1/3;grid-column:3;font:900 30px/.9 var(--pool-heading-font),Impact,sans-serif;font-style:normal;color:var(--pool-ink);text-shadow:0 2px 4px rgba(0,0,0,.35)}
+#weeklyPickem .pool-pickem-scoreboard-team>i{grid-column:2;align-self:start;margin-top:3px;color:var(--pool-muted);font:800 8px/1 system-ui,sans-serif;font-style:normal;text-transform:uppercase}
+#weeklyPickem .pool-pickem-scoreboard-toggle:focus-visible{outline:2px solid var(--pool-accent);outline-offset:-2px}
+#weeklyPickem .pool-pickem-game-detail{border-top:1px solid color-mix(in srgb,var(--pool-line) 80%,transparent);padding:10px;background:color-mix(in srgb,var(--pool-bg) 88%,#050b12);animation:poolPickemDetailIn .16s ease-out}
+#weeklyPickem .pool-pickem-game-detail.is-loading{min-height:80px;display:grid;place-items:center;color:var(--pool-muted);font:800 10px/1.3 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+@keyframes poolPickemDetailIn{from{opacity:.4;transform:translateY(-3px)}to{opacity:1;transform:none}}
+#weeklyPickem .pool-pickem-live-pp{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 9px;padding:7px 10px;border:1px solid rgba(255,226,57,.48);border-radius:6px;background:linear-gradient(90deg,rgba(89,65,0,.25),rgba(171,127,0,.22),rgba(89,65,0,.25));color:#fff6a8;text-align:center;text-transform:uppercase;box-shadow:inset 0 0 14px rgba(255,226,57,.08)}
+#weeklyPickem .pool-pickem-live-pp span{font:900 9px/1 system-ui,sans-serif;letter-spacing:.08em}
+#weeklyPickem .pool-pickem-live-pp strong{font:900 11px/1 system-ui,sans-serif;color:#fff}
+#weeklyPickem .pool-pickem-goalies{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr);align-items:center;gap:6px;margin-bottom:9px}
+#weeklyPickem .pool-pickem-goalie{display:grid;grid-template-columns:54px minmax(0,1fr);align-items:center;gap:7px;min-width:0;padding:6px;border:1px solid var(--pool-line);border-radius:7px;background:var(--pool-panel)}
+#weeklyPickem .pool-pickem-goalie>img{width:54px;height:54px;object-fit:cover;object-position:top center;border-radius:5px;background:var(--pool-stripe)}
+#weeklyPickem .pool-pickem-goalie div{min-width:0}
+#weeklyPickem .pool-pickem-goalie small,#weeklyPickem .pool-pickem-goalie strong,#weeklyPickem .pool-pickem-goalie span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#weeklyPickem .pool-pickem-goalie small{color:var(--pool-accent);font:900 7px/1.1 system-ui,sans-serif;letter-spacing:.05em}
+#weeklyPickem .pool-pickem-goalie strong{margin-top:3px;font:900 10px/1.1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-goalie span{margin-top:3px;color:var(--pool-muted);font:8px/1.15 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-goalie.is-missing>img{object-fit:contain;padding:7px;box-sizing:border-box}
+#weeklyPickem .pool-pickem-goalie-vs{text-align:center;color:var(--pool-muted);font:900 10px/1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+#weeklyPickem .pool-pickem-detail-stats>div{display:grid;grid-template-columns:26px 1fr auto auto;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--pool-line);border-radius:6px;background:var(--pool-stripe);font:800 9px/1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-detail-stats img{width:25px;height:25px;object-fit:contain}
+#weeklyPickem .pool-pickem-detail-stats span{color:var(--pool-muted);white-space:nowrap}
+#weeklyPickem .pool-pickem-scoring{border-top:1px solid var(--pool-line);padding-top:8px}
+#weeklyPickem .pool-pickem-scoring h4{margin:0 0 6px;font:900 11px/1 var(--pool-heading-font),Impact,sans-serif;text-transform:uppercase;letter-spacing:.05em}
+#weeklyPickem .pool-pickem-scoring-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+#weeklyPickem .pool-pickem-scoring-list li{display:grid;grid-template-columns:26px 44px minmax(0,1fr) auto;align-items:center;gap:6px;padding:5px 6px;border-radius:5px;background:color-mix(in srgb,var(--pool-stripe) 82%,transparent)}
+#weeklyPickem .pool-pickem-scoring-list img{width:25px;height:25px;object-fit:contain}
+#weeklyPickem .pool-pickem-goal-time{color:var(--pool-muted);font:800 8px/1 system-ui,sans-serif;text-transform:uppercase}
+#weeklyPickem .pool-pickem-goal-copy{min-width:0}
+#weeklyPickem .pool-pickem-goal-copy strong,#weeklyPickem .pool-pickem-goal-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#weeklyPickem .pool-pickem-goal-copy strong{font:900 9px/1.15 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-goal-copy small{margin-top:2px;color:var(--pool-muted);font:8px/1.15 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-scoring-list li>b{padding:3px 5px;border-radius:4px;background:var(--pool-accent-bg);color:var(--pool-accent);font:900 7px/1 system-ui,sans-serif}
+#weeklyPickem .pool-pickem-no-scoring{margin:0;padding:9px;text-align:center;color:var(--pool-muted);font:9px/1.2 system-ui,sans-serif}
+@media(max-width:640px){
+ #weeklyPickem .pool-pickem-scoreboard-toggle{grid-template-columns:1fr 1fr}
+ #weeklyPickem .pool-pickem-scoreboard-status{grid-template-columns:auto 1fr auto;padding:7px 8px;gap:5px}
+ #weeklyPickem .pool-pickem-scoreboard-status>b{font-size:6.5px;padding:3px 5px}
+ #weeklyPickem .pool-pickem-scoreboard-status>small{font-size:7px}
+ #weeklyPickem .pool-pickem-scoreboard-team{grid-template-columns:31px minmax(0,1fr) auto;column-gap:5px;padding:8px 7px}
+ #weeklyPickem .pool-pickem-scoreboard-team>img{width:29px;height:29px}
+ #weeklyPickem .pool-pickem-scoreboard-team>span strong{font-size:12px}
+ #weeklyPickem .pool-pickem-scoreboard-team>span small{font-size:6.7px}
+ #weeklyPickem .pool-pickem-scoreboard-team>em{font-size:25px}
+ #weeklyPickem .pool-pickem-scoreboard-team>i{font-size:7px}
+ #weeklyPickem .pool-pickem-game-detail{padding:8px}
+ #weeklyPickem .pool-pickem-goalies{grid-template-columns:1fr;gap:5px}
+ #weeklyPickem .pool-pickem-goalie-vs{display:none}
+ #weeklyPickem .pool-pickem-goalie{grid-template-columns:48px minmax(0,1fr)}
+ #weeklyPickem .pool-pickem-goalie>img{width:48px;height:48px}
+ #weeklyPickem .pool-pickem-detail-stats{grid-template-columns:1fr}
+ #weeklyPickem .pool-pickem-scoring-list li{grid-template-columns:23px 38px minmax(0,1fr) auto;gap:5px}
+ #weeklyPickem .pool-pickem-scoring-list img{width:22px;height:22px}
+}
+@media(display-mode:standalone){
+ #weeklyPickem .pool-pickem-scoreboard-toggle{min-height:78px}
+ #weeklyPickem .pool-pickem-scoreboard-status>small{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){#weeklyPickem .pool-pickem-game-detail{animation:none}}
+
+
+/* v312: make the logged-in manager's Pick'em game unmistakable; distinguish pick vs leader vs pool consensus. */
+#weeklyPickem .pool-pickem-game{position:relative}
+#weeklyPickem .pool-pickem-game.is-my-game{border-color:#58c8ff!important;box-shadow:0 0 0 2px rgba(88,200,255,.35),0 8px 24px rgba(16,111,168,.22)!important;background:linear-gradient(180deg,rgba(21,69,98,.24),var(--pool-panel))}
+#weeklyPickem .pool-pickem-my-game-ribbon{position:absolute;z-index:4;top:-1px;left:50%;transform:translateX(-50%);padding:4px 12px 5px;border:1px solid rgba(130,220,255,.72);border-top:0;border-radius:0 0 8px 8px;background:linear-gradient(180deg,#1679ac,#075277);color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.3),0 0 16px rgba(68,194,255,.22);font:900 8px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
+#weeklyPickem .pool-pickem-scoreboard.is-my-game .pool-pickem-scoreboard-status{padding-top:13px;background:linear-gradient(180deg,rgba(20,93,130,.32),rgba(0,0,0,.12))}
+#weeklyPickem .pool-pickem-team.is-my-pick{border-color:#58c8ff!important;background:linear-gradient(180deg,rgba(44,153,210,.22),rgba(18,72,101,.15))!important;box-shadow:inset 0 0 0 2px rgba(88,200,255,.28),0 0 15px rgba(48,180,241,.16)}
+#weeklyPickem .pool-pickem-team.is-my-pick>em{display:block;margin-top:5px;color:#8fe0ff;font:900 7px/1 system-ui,sans-serif;font-style:normal;letter-spacing:.05em;text-transform:uppercase}
+#weeklyPickem .pool-pickem-scoreboard-team{overflow:hidden}
+#weeklyPickem .pool-pickem-scoreboard-team.is-my-pick{background:linear-gradient(90deg,rgba(32,132,184,.28),rgba(32,132,184,.06));box-shadow:inset 0 0 0 2px rgba(89,202,255,.24)}
+#weeklyPickem .pool-pickem-scoreboard-team.is-leading{background-color:rgba(57,166,96,.16)}
+#weeklyPickem .pool-pickem-scoreboard-team.is-leading:not(.is-my-pick){background:linear-gradient(90deg,rgba(64,164,92,.22),rgba(64,164,92,.05))}
+#weeklyPickem .pool-pickem-scoreboard-team.is-my-pick.is-leading{background:linear-gradient(90deg,rgba(32,132,184,.30),rgba(54,166,91,.20))}
+#weeklyPickem .pool-pickem-scoreboard-markers{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:5px;min-height:14px}
+#weeklyPickem .pool-pickem-your-pick-badge,#weeklyPickem .pool-pickem-leading-badge{display:inline-flex;align-items:center;min-height:15px;padding:3px 5px;border-radius:999px;font:900 6.5px/1 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+#weeklyPickem .pool-pickem-your-pick-badge{border:1px solid rgba(109,215,255,.55);background:rgba(13,111,158,.46);color:#b9edff}
+#weeklyPickem .pool-pickem-leading-badge{border:1px solid rgba(114,229,145,.48);background:rgba(28,123,58,.45);color:#bcffd0}
+#weeklyPickem .pool-pickem-pool-picks{display:inline-flex;align-items:center;gap:2px;max-width:100%;padding:2px 4px 2px 5px;border:1px solid rgba(202,165,255,.35);border-radius:999px;background:rgba(93,53,128,.28);color:#eadbff;vertical-align:middle}
+#weeklyPickem .pool-pickem-pool-picks-label{margin-right:1px;font:900 5.8px/1 system-ui,sans-serif;letter-spacing:.06em}
+#weeklyPickem .pool-pickem-pool-picks>b{display:grid;place-items:center;width:14px;height:14px;border-radius:50%;background:rgba(223,202,255,.16);border:1px solid rgba(226,208,255,.38);font:900 6.5px/1 system-ui,sans-serif;color:#f4ebff}
+#weeklyPickem .pool-pickem-pool-picks>b.is-you{border-color:#75d8ff;background:rgba(33,152,205,.42);color:#fff}
+#weeklyPickem .pool-pickem-team .pool-pickem-pool-picks{margin-top:5px}
+#weeklyPickem .pool-pickem-scoreboard-team>em{align-self:center}
+@media(max-width:640px){
+ #weeklyPickem .pool-pickem-my-game-ribbon{padding:4px 9px;font-size:6.8px}
+ #weeklyPickem .pool-pickem-scoreboard.is-my-game .pool-pickem-scoreboard-status{padding-top:12px}
+ #weeklyPickem .pool-pickem-scoreboard-markers{gap:3px;margin-top:4px}
+ #weeklyPickem .pool-pickem-your-pick-badge,#weeklyPickem .pool-pickem-leading-badge{font-size:5.7px;padding:3px 4px}
+ #weeklyPickem .pool-pickem-pool-picks-label{font-size:5px}
+ #weeklyPickem .pool-pickem-pool-picks>b{width:13px;height:13px;font-size:5.8px}
+}
+@media(display-mode:standalone){
+ #weeklyPickem .pool-pickem-game.is-my-game{box-shadow:0 0 0 2px rgba(88,200,255,.42),0 9px 25px rgba(12,103,155,.28)!important}
+}
+#weeklyPickem .pool-pickem-team.is-my-pick>em{grid-column:2;justify-self:start}
+#weeklyPickem .pool-pickem-team>.pool-pickem-pool-picks{grid-column:1/-1;justify-self:start}
+
+/* v314: fantasy ownership is shown only when a drafted player actually earns FPTS in this game. */
+#weeklyPickem .pool-pickem-fantasy-owner{display:inline-flex!important;align-items:center;gap:4px;width:max-content;max-width:100%;margin:2px 3px 0 4px;padding:3px 5px;border:1px solid rgba(202,165,255,.42);border-radius:999px;background:rgba(93,53,128,.30);color:#eadbff;font:900 6px/1 system-ui,sans-serif;text-transform:uppercase;vertical-align:middle}
+#weeklyPickem .pool-pickem-fantasy-owner.is-you{border-color:rgba(91,208,255,.68);background:rgba(17,121,168,.42);color:#d7f6ff}
+#weeklyPickem .pool-pickem-fantasy-owner em{color:#adffc4;font:inherit;font-style:normal;white-space:nowrap}
+#weeklyPickem .pool-pickem-fantasy-owner b{font:inherit;white-space:nowrap}
+#weeklyPickem .pool-pickem-player-link,#weeklyPickem .pool-pickem-assist-link{appearance:none;border:0;padding:0;background:transparent;color:inherit;font:inherit;text-decoration:underline;text-decoration-color:rgba(122,208,255,.45);text-underline-offset:2px;cursor:pointer}
+#weeklyPickem .pool-pickem-assist-link{color:var(--pool-muted)}
+#weeklyPickem .pool-pickem-goalie{appearance:none;width:100%;color:var(--pool-ink);text-align:left;cursor:pointer}
+#weeklyPickem .pool-pickem-goalie.has-fantasy-points{border-color:rgba(191,153,255,.52);box-shadow:inset 3px 0 0 #50d37c}
+#weeklyPickem .pool-pickem-goalie.is-yours{border-color:#58c8ff;box-shadow:inset 3px 0 0 #58c8ff;background:linear-gradient(90deg,rgba(29,128,177,.20),var(--pool-panel))}
+#weeklyPickem [data-pickem-player-card]:focus-visible{outline:2px solid #58c8ff;outline-offset:2px}
+#weeklyPickem .pool-pickem-team:disabled{cursor:not-allowed}
+#weeklyPickem .pool-pickem-team:disabled:not(.is-my-pick){opacity:.52;filter:saturate(.55) brightness(.82)}
+
+/* Installed iPhone app: keep player cards clear of the status/Dynamic Island area and compact enough to close in portrait. */
+@media (display-mode:standalone) and (max-width:640px){
+  .pool-player-card-dialog{width:92vw!important;max-width:92vw!important;max-height:calc(100vh - 112px)!important;max-height:calc(100dvh - 112px)!important;margin:max(62px,calc(env(safe-area-inset-top) + 28px)) auto max(18px,env(safe-area-inset-bottom))!important;overflow:auto!important}
+  .pool-card-dialog-shell{padding:10px!important;padding-top:14px!important}
+  .pool-card-close{position:sticky!important;float:right!important;top:6px!important;right:6px!important;width:38px!important;height:38px!important;margin:0 0 -38px auto!important;transform:none!important;z-index:50!important}
+  .pool-opc-card{border-width:6px!important}
+  .pool-opc-brand{padding:6px 9px 5px!important}
+  .pool-opc-brand span{font-size:11px!important}.pool-opc-brand em{font-size:15px!important}
+  .pool-opc-frame{padding:6px!important;border-left-width:2px!important;border-right-width:2px!important}
+  .pool-opc-photo{height:145px!important}
+  .pool-opc-goalie-collage{min-height:140px!important;grid-template-columns:repeat(auto-fit,minmax(76px,1fr))!important}
+  .pool-opc-goalie-collage figure{min-height:136px!important}
+  .pool-opc-id{margin:6px 0!important;padding:5px 7px!important}
+  .pool-opc-id strong{font-size:19px!important}.pool-opc-id span{font-size:9px!important}
+  .pool-opc-id img{width:36px!important;height:36px!important;flex-basis:36px!important}
+  .pool-card-season-grid strong{font-size:14px!important}
+  .pool-card-last-five h4,.pool-card-rolling h4{font-size:9px!important;padding:4px 6px!important}
+  .pool-card-roll{padding:7px 8px!important}.pool-card-roll strong{font-size:17px!important}
+  .pool-opc-card>footer{font-size:6px!important;padding:5px 6px!important}
+}

@@ -1,6 +1,6 @@
 {
   "name": "thepool",
-  "version": "313.0.0",
+  "version": "314.0.0",
   "private": true,
   "description": "thePool shared NHL fantasy pool, live scoring, rosters, Pick’em and season history",
   "scripts": {

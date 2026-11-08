@@ -1,4 +1,4 @@
-const CACHE_NAME = 'thepool-pwa-v313';
+const CACHE_NAME = 'thepool-pwa-v314';
 const OFFLINE_URL = '/offline.html';
 const CORE = [
   OFFLINE_URL,
