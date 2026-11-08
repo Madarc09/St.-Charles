@@ -1,8 +1,8 @@
 {
   "name": "thepool",
-  "version": "311.0.0",
+  "version": "313.0.0",
   "private": true,
-  "description": "thePool shared NHL fantasy pool, live scoring, rosters, Pick\u2019em and season history",
+  "description": "thePool shared NHL fantasy pool, live scoring, rosters, Pick’em and season history",
   "scripts": {
     "start": "vercel dev",
     "test": "node --test tests/*.test.js",

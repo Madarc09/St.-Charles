@@ -175,6 +175,15 @@
       }
     }
 
+    root.PoolPlayerCards = root.PoolPlayerCards || {};
+    root.PoolPlayerCards.open = function(options){
+      if (!latest) return false;
+      const opts=options||{};
+      const dataset={cardKind:opts.kind==='teamGoalie'?'teamGoalie':'skater',team:String(opts.team||''),playerId:String(opts.playerId||'')};
+      openPlayerCard({dataset});
+      return true;
+    };
+
     function cycleSide(side, delta) {
       if (!latest) return;
       const ids = availableIds(latest.rows);
